@@ -10,7 +10,7 @@ from functools import lru_cache
 from urllib.parse import quote
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
 from dotenv import load_dotenv
 # 新增：导入重试相关模块
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, retry_if_result
@@ -1034,7 +1034,9 @@ def optimize_image_prompt_with_llm(
     scene_description: str,
     global_state: Dict,
     image_style: Dict = None,
-    protagonist_reference_images: List[str] = None
+    protagonist_reference_images: List[str] = None,
+    supporting_role_references: List[Dict] = None,
+    available_supporting_roles_for_tagging: List[Dict] = None
 ) -> str:
     """
     使用LLM（deepseek-v3.2）优化图片生成提示词
@@ -1042,6 +1044,8 @@ def optimize_image_prompt_with_llm(
     :param global_state: 全局状态（包含主角属性、游戏主题、游戏基调等）
     :param image_style: 图片风格选择
     :param protagonist_reference_images: 主角三视图路径列表 [正面, 侧面, 背面]，可选
+    :param supporting_role_references: 配角参考图列表 [{"role_name","image_index","core_features","first_appear_scene"}, ...]，可选；为 None 时由代码后续拼接「参考 Image N」
+    :param available_supporting_roles_for_tagging: 本局配角列表 [{"role_key","shallow_background"}, ...]，用于 LLM 在描述中使用「名称-配角N」格式
     :return: 优化后的视觉描述提示词
     """
     try:
@@ -1175,6 +1179,46 @@ def optimize_image_prompt_with_llm(
             lines.append("")
             lines.append("请在最终视觉描述中明确说明主角使用哪张参考图，确保主角形象与参考图一致。")
             protagonist_reference_section = "\n".join(lines) + "\n"
+
+        # 构建配角参考图说明（有参考图时说明 Image N；无参考图时仅说明「名称-配角N」标注格式）
+        supporting_role_reference_section = ""
+        if supporting_role_references and len(supporting_role_references) >= 1:
+            lines_sr = ["【配角参考图说明（重要）】", "生图API将接收以下配角参考图（编号续接主角之后）："]
+            for sr in supporting_role_references:
+                role_name = _safe_str(sr.get("role_name", "")).strip()
+                img_idx = sr.get("image_index", 0)
+                core_feat = _safe_str(sr.get("core_features", "")).strip()
+                first_scene = _safe_str(sr.get("first_appear_scene", "")).strip()
+                if not role_name:
+                    continue
+                desc = f"- Image {img_idx}：{role_name}"
+                if first_scene:
+                    desc += f"，首次出场于「{first_scene}」"
+                if core_feat:
+                    desc += "，核心特征（不可修改）：" + (core_feat[:120] + "…" if len(core_feat) > 120 else core_feat)
+                else:
+                    desc += "，保持五官核心特征不变"
+                lines_sr.append(desc)
+            lines_sr.append("")
+            lines_sr.append("在生成场景图片时：")
+            lines_sr.append("1. 根据剧情明确每个配角使用哪张参考图（仅使用已提供的编号）")
+            lines_sr.append("2. 必须在描述中写明「XXX 参考 Image N，保持核心特征不变」")
+            lines_sr.append("3. 可变化：服饰细节、动作、表情、所处位置")
+            lines_sr.append("4. 不可变化：五官、发型、肤色、体型等核心特征")
+            supporting_role_reference_section = "\n".join(lines_sr) + "\n"
+        elif available_supporting_roles_for_tagging and len(available_supporting_roles_for_tagging) >= 1:
+            # 无配角参考图时：仅要求 LLM 用「名称-配角N」标注出场配角；「参考 Image N」由代码后续拼接
+            lines_tag = ["【配角标注要求（重要）】", "本局配角及身份/姓名（用于与剧情对应）："]
+            for item in available_supporting_roles_for_tagging:
+                role_key = _safe_str(item.get("role_key", "")).strip()
+                shallow = _safe_str(item.get("shallow_background", "")).strip()
+                if not role_key:
+                    continue
+                lines_tag.append(f"- {role_key}：{shallow[:80] + '…' if len(shallow) > 80 else shallow}")
+            lines_tag.append("")
+            lines_tag.append("在视觉描述中，对剧情里**实际出场**的配角必须使用「角色名-配角N」格式标注，例如：凌川-配角1、李云-配角2。")
+            lines_tag.append("只对剧情中出现的配角使用该格式；未出场者不要写。不要写「参考 Image N」，由系统后续自动添加。")
+            supporting_role_reference_section = "\n".join(lines_tag) + "\n"
         
         # 构建发送给LLM的提示词
         llm_prompt = f"""假设你是一个专业的剧情分析师和视觉设计师，现在需要你将剧情转化为具体的视觉描述，告诉生图AI如何生成图片。
@@ -1196,6 +1240,7 @@ def optimize_image_prompt_with_llm(
 {style_description if style_description else '默认风格'}
 
 {protagonist_reference_section if protagonist_reference_section else ''}
+{supporting_role_reference_section if supporting_role_reference_section else ''}
 
 {continuity_requirements if continuity_requirements else ''}
 
@@ -1208,6 +1253,8 @@ def optimize_image_prompt_with_llm(
 6. 不要包含任何文字、符号、乱码（重要：必须在提示词中明确告诉生图AI不要生成任何文字、符号、乱码）
 7. 描述要具体、生动，包含场景、人物、光线、氛围等细节
 {('8. 如果提供了主角参考图说明，必须在提示词中明确说明主角使用 Image 0/1/2 中的哪张（根据主角在场景中的视角）' if protagonist_reference_section else '')}
+{('9. 如果提供了配角参考图说明，必须在提示词中明确说明每个配角参考 Image N，并强调保持其核心特征不变' if (supporting_role_references and len(supporting_role_references) >= 1) else '')}
+{('9. 如果提供了配角标注要求，必须在视觉描述中对出场的配角使用「角色名-配角N」格式（如凌川-配角1），便于系统识别' if (available_supporting_roles_for_tagging and len(available_supporting_roles_for_tagging) >= 1 and not (supporting_role_references and len(supporting_role_references) >= 1)) else '')}
 
 只输出视觉描述，不要输出其他内容。"""
 
@@ -1319,6 +1366,298 @@ def ensure_main_character_dir(game_id: str) -> Path:
     main_character_dir = Path("initial") / "main_character" / game_id
     main_character_dir.mkdir(parents=True, exist_ok=True)
     return main_character_dir
+
+# ------------------------------
+# 配角档案与图片依赖生成
+# ------------------------------
+SUPPORTING_ROLE_ARCHIVES_FILE = "role_archives.json"
+
+def ensure_character_references_dir(game_id: str) -> Path:
+    """确保配角参考图目录存在"""
+    ref_dir = Path("initial") / "character_references" / game_id
+    ref_dir.mkdir(parents=True, exist_ok=True)
+    return ref_dir
+
+def _load_role_archives(game_id: str) -> Dict:
+    """加载配角档案"""
+    ref_dir = ensure_character_references_dir(game_id)
+    archive_path = ref_dir / SUPPORTING_ROLE_ARCHIVES_FILE
+    if archive_path.exists():
+        try:
+            with open(archive_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️ 加载配角档案失败：{e}")
+    return {}
+
+def _save_role_archives(game_id: str, archives: Dict) -> None:
+    """保存配角档案"""
+    ref_dir = ensure_character_references_dir(game_id)
+    archive_path = ref_dir / SUPPORTING_ROLE_ARCHIVES_FILE
+    try:
+        with open(archive_path, "w", encoding="utf-8") as f:
+            json.dump(archives, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"⚠️ 保存配角档案失败：{e}")
+
+def _next_role_id(archives: Dict, role_name: str) -> str:
+    """生成下一个角色ID：角色名_sc001, sc002..."""
+    prefix = f"{role_name}_sc"
+    max_num = 0
+    for key, data in archives.items():
+        rid = _safe_str(data.get("role_id", "")).strip()
+        if rid.startswith(prefix):
+            try:
+                n = int(rid[len(prefix):])
+                max_num = max(max_num, n)
+            except ValueError:
+                pass
+    return f"{prefix}{max_num + 1:03d}"
+
+def _next_img_id(ref_dir: Path) -> str:
+    """生成首次出场图片ID：img_{YYYYMMDD}_{序号}"""
+    date_str = datetime.now().strftime("%Y%m%d")
+    prefix = f"img_{date_str}_"
+    max_num = 0
+    for p in ref_dir.glob(f"{prefix}*.png"):
+        name = p.stem
+        try:
+            n = int(name[len(prefix):])
+            max_num = max(max_num, n)
+        except (ValueError, IndexError):
+            pass
+    return f"{prefix}{max_num + 1:03d}"
+
+def extract_supporting_characters_in_scene(optimized_prompt: str) -> List[str]:
+    """
+    从优化后的视觉描述提示词中提取出场的配角列表（仅依据 prompt 中是否出现「配角N」）
+    不依赖世界观，只做正则匹配。
+    :param optimized_prompt: 优化后的视觉描述提示词
+    :return: 出场配角名称列表，按配角编号排序，如 ["配角1", "配角2"]
+    """
+    text = _safe_str(optimized_prompt).strip()
+    if not text:
+        return []
+    matches = re.findall(r"配角\d+", text)
+    seen = set()
+    result = []
+    for m in matches:
+        if m not in seen:
+            seen.add(m)
+            result.append(m)
+    # 按编号排序：配角1, 配角2, ...
+    def sort_key(s):
+        n = re.search(r"\d+", s)
+        return int(n.group()) if n else 0
+    result.sort(key=sort_key)
+    return result
+
+def get_or_create_supporting_role_archive(
+    game_id: str,
+    role_name: str,
+    role_info: Dict,
+    scene_description: str,
+    first_appear_scene: str,
+    global_state: Dict
+) -> Optional[Dict]:
+    """
+    获取或创建配角档案。若首次出场则生成图片并建立档案；否则返回已有档案。
+    :return: 配角档案 dict，含 first_img_path, core_features 等；失败返回 None
+    """
+    archives = _load_role_archives(game_id)
+    if role_name in archives:
+        arch = archives[role_name]
+        first_path = _safe_str(arch.get("first_img_path", "")).strip()
+        if first_path:
+            from pathlib import Path
+            p = Path(first_path)
+            if not p.is_absolute():
+                p = Path("initial") / "character_references" / game_id / p.name
+            if p.exists():
+                arch["_resolved_first_img_path"] = str(p.resolve())
+                return arch
+        print(f"⚠️ 配角 {role_name} 档案存在但首图路径无效，将重新生成")
+    # 首次出场：生成图片并建立档案
+    return _generate_and_archive_supporting_role_first_image(
+        game_id, role_name, role_info, scene_description, first_appear_scene, archives, global_state
+    )
+
+def _generate_and_archive_supporting_role_first_image(
+    game_id: str,
+    role_name: str,
+    role_info: Dict,
+    scene_description: str,
+    first_appear_scene: str,
+    archives: Dict,
+    global_state: Dict
+) -> Optional[Dict]:
+    """生成配角首次出场图并写入档案"""
+    ref_dir = ensure_character_references_dir(game_id)
+    role_id = _next_role_id(archives, role_name)
+    first_img_id = _next_img_id(ref_dir)
+    first_img_path = ref_dir / f"{first_img_id}.png"
+
+    # 使用 LLM 生成首次出场提示词（含核心特征强化）
+    prompt = _build_supporting_role_first_prompt(role_name, role_info, scene_description, global_state)
+    if not prompt:
+        print(f"⚠️ 配角 {role_name} 首次出场提示词生成失败")
+        return None
+
+    # 文生图（与主角相同 provider，yunwu 时用 call_yunwu_image_api）
+    provider = IMAGE_GENERATION_CONFIG.get("provider", "yunwu")
+    image_style = global_state.get("image_style", {})
+    style_desc = _get_style_description(image_style)
+    full_prompt = f"{prompt}, {style_desc}, no text, no symbols, no garbled characters, no words"
+
+    try:
+        if provider == "yunwu":
+            image_url = call_yunwu_image_api(full_prompt, "default")
+        elif provider == "replicate":
+            image_url = call_replicate_api(full_prompt, "default")
+        elif provider == "openai":
+            image_url = call_dalle_api_with_size(full_prompt, "1024x1024")
+        elif provider == "stable_diffusion":
+            image_url = call_stable_diffusion_api_with_size(full_prompt, 1024, 1024, "default", reference_image_url="")
+        else:
+            image_url = call_yunwu_image_api(full_prompt, "default")
+    except Exception as e:
+        print(f"⚠️ 配角 {role_name} 首次出场图生成失败：{e}")
+        return None
+
+    if not image_url:
+        return None
+
+    # 下载并保存到 ref_dir
+    try:
+        raw = None
+        if image_url.startswith("data:image"):
+            import base64
+            b64 = image_url.split("base64,", 1)[-1] if "base64," in image_url else image_url
+            raw = base64.b64decode(b64)
+        elif image_url.startswith("/image_cache/") or image_url.startswith("image_cache/"):
+            rel = image_url[1:] if image_url.startswith("/") else image_url
+            src = Path("image_cache") / Path(rel).name
+            if src.exists():
+                import shutil
+                shutil.copy2(src, first_img_path)
+            else:
+                print(f"⚠️ 找不到缓存图片：{src}")
+                return None
+        elif image_url.startswith("http://") or image_url.startswith("https://"):
+            resp = requests.get(image_url, timeout=30)
+            resp.raise_for_status()
+            raw = resp.content
+        else:
+            print(f"⚠️ 无法保存配角首图，未知 URL 格式")
+            return None
+
+        if raw is not None:
+            first_img_path.write_bytes(raw)
+    except Exception as e:
+        print(f"⚠️ 保存配角首图失败：{e}")
+        return None
+
+    # 提取核心特征（用于后续图生图强调）
+    core_features = _extract_core_features_from_prompt(prompt)
+
+    archive = {
+        "role_id": role_id,
+        "role_name": role_name,
+        "story_background": _safe_str(role_info.get("shallow_background", "")),
+        "first_appear_scene": first_appear_scene,
+        "first_img_id": first_img_id,
+        "first_img_path": str(first_img_path.resolve()),
+        "first_prompt": prompt,
+        "img_model": IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-2.5-flash-image"),
+        "update_log": [],
+        "core_features": core_features,
+    }
+    archives[role_name] = archive
+    _save_role_archives(game_id, archives)
+    archive["_resolved_first_img_path"] = str(first_img_path.resolve())
+    print(f"✅ 配角 {role_name} 首次出场图已保存：{first_img_path}")
+    return archive
+
+def _get_style_description(image_style: Dict) -> str:
+    """从 image_style 提取风格描述"""
+    if not image_style or not isinstance(image_style, dict):
+        return "写实风格，8K，细节丰富"
+    t = image_style.get("type", "")
+    if t == "realistic":
+        return "写实风格，真实细腻，8K"
+    if t == "anime":
+        return "动漫风格，日式动画，色彩鲜明"
+    if t == "ink_painting":
+        return "水墨画风格，中国传统水墨"
+    if t == "oil_painting":
+        return "油画风格，光影丰富，8K"
+    if t == "cyberpunk":
+        return "赛博朋克风格，未来科技感"
+    if t == "custom":
+        return image_style.get("value", "写实风格，8K") or "写实风格，8K"
+    return "写实风格，8K，细节丰富"
+
+def _build_supporting_role_first_prompt(
+    role_name: str,
+    role_info: Dict,
+    scene_description: str,
+    global_state: Dict
+) -> str:
+    """使用 LLM 生成配角首次出场提示词，强化核心特征"""
+    core_worldview = global_state.get("core_worldview", {}) or {}
+    game_theme = core_worldview.get("game_style", "")
+    personality = _safe_str(role_info.get("core_personality", "")).strip()
+    appearance = _safe_str(role_info.get("shallow_background", "")).strip()
+    story_bg = _safe_str(role_info.get("deep_background", "")).strip()[:300]
+
+    api_key = AI_API_CONFIG.get("api_key", "")
+    base_url = AI_API_CONFIG.get("base_url", "")
+    if not api_key or not base_url:
+        return f"{role_name}，{appearance}，全身肖像，正面站立，纯白背景，古风写实风格，8K。五官、发型、肤色、体型等核心特征在后续图生图中不可修改。"
+
+    llm_prompt = f"""根据以下信息，生成一个用于「文生图」的配角首次出场形象提示词。
+
+角色名称：{role_name}
+核心性格：{personality}
+外貌/浅层背景：{appearance}
+深层背景（可选）：{story_bg}
+游戏主题：{game_theme}
+当前剧情片段：{scene_description[:400]}
+
+要求：
+1. 输出纯中文提示词，描述该角色的全身肖像（正面站立，可半身）
+2. 必须包含：发型、发色、眼型、肤色、脸型、体型、标志性特征（如痣、疤、配饰）
+3. 对可识别的五官特征要具体化，例如「右眉尾有一颗明显的淡褐色小圆痣」而不是笼统的「有颗痣」
+4. 结尾加上：五官核心特征不可修改
+5. 不要包含 URL、路径、任何文字符号
+6. 长度 150-300 字
+
+只输出提示词本身，不要解释。"""
+
+    try:
+        resp = requests.post(
+            f"{base_url}/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json; charset=utf-8"},
+            json={"model": "deepseek-v3.2", "messages": [{"role": "user", "content": llm_prompt}], "temperature": 0.5, "max_tokens": 500},
+            timeout=60
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        content = (data.get("choices", [{}])[0].get("message", {}).get("content", "") or "").strip()
+        if content:
+            if "五官核心特征不可修改" not in content:
+                content = content.rstrip("，。") + "，五官核心特征不可修改。"
+            return content
+    except Exception as e:
+        print(f"⚠️ 配角首次出场提示词 LLM 调用失败：{e}")
+    return f"{role_name}，{appearance}，全身肖像，正面站立，纯白背景，古风写实风格，8K。五官核心特征不可修改。"
+
+def _extract_core_features_from_prompt(prompt: str) -> str:
+    """从首次出场提示词中提取核心特征（简化版：取关键句或截取）"""
+    s = _safe_str(prompt).strip()
+    if "五官核心特征不可修改" in s:
+        s = s.split("五官核心特征不可修改")[0].strip().rstrip("，。")
+    return _clip_text(s, 200)
 
 def optimize_main_character_prompt_with_llm(
     protagonist_attr: Dict,
@@ -2730,15 +3069,78 @@ def generate_scene_image(
         else:
             print(f"⚠️ 主角正面图尚未就绪，将不使用主角参考图")
     
-    # 2. 使用LLM优化图片生成提示词（传递主角三视图路径）
+    # 1.7 先由提示词优化 LLM 生成带「名称-配角N」的视觉描述，再仅根据优化后的 prompt 识别出场配角并拼接「参考 Image N」（不依赖世界观是否有配角信息）
+    core_worldview = global_state.get("core_worldview", {}) or {}
+    chars = (core_worldview.get("characters", {}) or {}) if isinstance(core_worldview, dict) else {}
+    # 通用配角标注说明：不依赖世界观，始终要求 LLM 对出场配角使用「角色名-配角1」「角色名-配角2」等格式
+    available_supporting_roles_for_tagging = [
+        {"role_key": "配角1", "shallow_background": "（根据剧情描述）"},
+        {"role_key": "配角2", "shallow_background": "（根据剧情描述）"},
+    ]
+    
+    # 2. 第一次调用 LLM：只负责「名称-配角N」和场景描述，不传配角参考图
     prompt = optimize_image_prompt_with_llm(
-        scene_description, 
-        global_state, 
+        scene_description,
+        global_state,
         image_style,
-        protagonist_reference_images=protagonist_reference_images if protagonist_reference_images else None
+        protagonist_reference_images=protagonist_reference_images if protagonist_reference_images else None,
+        supporting_role_references=None,
+        available_supporting_roles_for_tagging=available_supporting_roles_for_tagging
     )
     
-    # 3. 调用AI图片生成API（传递尺寸参数和主角参考图）
+    # 3. 仅从优化后的提示词中识别出场配角（正则匹配「配角N」，不检查世界观）
+    supporting_role_references = []
+    supporting_role_images = []
+    if game_id:
+        supporting_chars = extract_supporting_characters_in_scene(prompt)
+        image_index = 3  # Image 0,1,2 为主角；从 3 起为配角
+        for role_name in supporting_chars:
+            role_info = chars.get(role_name, {}) if isinstance(chars, dict) else {}
+            if not isinstance(role_info, dict):
+                role_info = {}
+            arch = get_or_create_supporting_role_archive(
+                game_id,
+                role_name,
+                role_info,
+                scene_description,
+                first_appear_scene=_clip_text(scene_description, 60),
+                global_state=global_state
+            )
+            if arch:
+                img_path = arch.get("_resolved_first_img_path") or arch.get("first_img_path", "")
+                if img_path:
+                    supporting_role_images.append(img_path)
+                    supporting_role_references.append({
+                        "role_name": role_name,
+                        "image_index": image_index,
+                        "core_features": arch.get("core_features", ""),
+                        "first_appear_scene": arch.get("first_appear_scene", ""),
+                    })
+                    image_index += 1
+                    print(f"✅ 配角 {role_name} 将作为参考图 Image {image_index - 1} 传递")
+    
+    # 4. 由代码将「参考 Image N」拼接到提示词末尾
+    if supporting_role_references:
+        append_parts = []
+        for sr in supporting_role_references:
+            role_name = _safe_str(sr.get("role_name", "")).strip()
+            img_idx = sr.get("image_index", 3)
+            # 从提示词中匹配「XXX-配角N」以得到显示名
+            display_name = None
+            try:
+                m = re.search(r"([^\s\-]+)-" + re.escape(role_name) + r"(?:\s|$|，|。)", prompt)
+                if m:
+                    display_name = m.group(1).strip()
+            except Exception:
+                pass
+            if display_name:
+                append_parts.append(f"{display_name}-{role_name} 参考 Image {img_idx}，保持核心特征不变")
+            else:
+                append_parts.append(f"{role_name} 参考 Image {img_idx}，保持核心特征不变")
+        if append_parts:
+            prompt = (prompt.rstrip() + "。" + "。".join(append_parts))
+    
+    # 5. 调用AI图片生成API（传递尺寸参数和参考图）
     try:
         if provider == "yunwu":
             # yunwu.ai 易受 429 / 返回格式波动影响：失败时可选用本地 SD 兜底
@@ -2747,25 +3149,35 @@ def generate_scene_image(
                 # yunwu.ai可能不支持自定义尺寸，在提示词中添加尺寸要求
                 size_prompt = f"{prompt}, aspect ratio {image_width}:{image_height}"
                 
-                # 只要有主角参考图（1张正面 / 2张 / 3张），就用 gemini 图生图（第一次场景图时可能只有正面）
+                # 只要有主角或配角参考图，就用 gemini 图生图
                 model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-2.5-flash-image")
-                if protagonist_reference_images and len(protagonist_reference_images) >= 1:
+                all_reference_images = list(protagonist_reference_images) if protagonist_reference_images else []
+                all_reference_images.extend(supporting_role_images if supporting_role_images else [])
+                if all_reference_images and len(all_reference_images) >= 1:
                     if "gemini" in model.lower() and "image" in model.lower():
-                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(protagonist_reference_images)}张主角参考图")
-                        # 按实际张数构建参考图说明（1张=正面，2张=正+侧，3张=正+侧+背）
-                        prefix_lines = ["Image 0: Front view portrait of the protagonist"]
-                        if len(protagonist_reference_images) >= 2:
+                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(all_reference_images)}张参考图（主角{len(protagonist_reference_images or [])}张+配角{len(supporting_role_images or [])}张）")
+                        # 构建参考图说明：主角 Image 0/1/2 + 配角 Image 3/4/...
+                        prefix_lines = []
+                        n_prot = len(protagonist_reference_images or [])
+                        if n_prot >= 1:
+                            prefix_lines.append("Image 0: Front view portrait of the protagonist")
+                        if n_prot >= 2:
                             prefix_lines.append("Image 1: Side view portrait of the protagonist")
-                        if len(protagonist_reference_images) >= 3:
+                        if n_prot >= 3:
                             prefix_lines.append("Image 2: Back view portrait of the protagonist")
+                        for sr in (supporting_role_references or []):
+                            idx = sr.get("image_index", len(prefix_lines))
+                            rn = sr.get("role_name", "")
+                            cf = _clip_text(sr.get("core_features", ""), 80)
+                            prefix_lines.append(f"Image {idx}: {rn} first appearance reference. Core features (DO NOT MODIFY): {cf}")
                         prefix_prompt = "\n".join(prefix_lines) + "\n\n"
                         full_prompt = prefix_prompt + prompt + f", aspect ratio {image_width}:{image_height}"
-                        image_url = call_gemini_img2img(full_prompt, protagonist_reference_images)
+                        image_url = call_gemini_img2img(full_prompt, all_reference_images)
                     else:
                         print(f"⚠️ 当前模型 {model} 不支持多张参考图，使用文生图")
                         image_url = call_yunwu_image_api(size_prompt, style)
                 else:
-                    # 没有主角参考图，使用普通文生图
+                    # 没有参考图，使用普通文生图
                     image_url = call_yunwu_image_api(size_prompt, style)
             except Exception as e:
                 print(f"⚠️ yunwu.ai 生图失败，将尝试兜底（如已配置）：{str(e)}")
@@ -6029,6 +6441,24 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
             scene_image = None
             if scene:
                 try:
+                    # 若是初始场景且主角正面图尚未就绪：等待主角正面图生成后再生成场景图（保证场景中主角形象一致）
+                    if is_initial_scene:
+                        game_id = global_state.get("game_id") if isinstance(global_state, dict) else None
+                        if game_id:
+                            from pathlib import Path
+                            import time
+                            main_character_dir = Path("initial") / "main_character" / game_id
+                            front_path = main_character_dir / "main_character.png"
+                            wait_timeout = 120  # 最多等待 120 秒
+                            poll_interval = 2
+                            waited = 0
+                            while not front_path.exists() and waited < wait_timeout:
+                                time.sleep(poll_interval)
+                                waited += poll_interval
+                            if front_path.exists():
+                                print(f"✅ 主角正面图已就绪，开始生成初始场景图片（等待 {waited} 秒）")
+                            else:
+                                print(f"⚠️ 等待主角正面图超时（{wait_timeout} 秒），将不使用主角参考图生成场景")
                     print(f"🎨 正在为选项 {i+1} 生成场景图片（启用本地缓存）...")
                     scene_image = generate_scene_image(scene, global_state, "default", use_cache=True)
                     if scene_image and scene_image.get('url'):
@@ -6051,7 +6481,8 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                                 image_url = '/' + image_url
                                 scene_image['url'] = image_url
                             
-                            # 确保返回的数据格式正确
+                            # 确保返回的数据格式正确（含 scene_text_hash，避免 /generate-option 误判文本变化而重复生成）
+                            scene_text_hash = hashlib.md5(scene.encode("utf-8")).hexdigest() if (scene and scene.strip()) else None
                             option_data["scene_image"] = {
                                 "url": image_url,
                                 "prompt": scene_image.get("prompt", ""),
@@ -6059,7 +6490,8 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                                 "width": scene_image.get("width", 1024),
                                 "height": scene_image.get("height", 1024),
                                 # 本地路径表示已缓存；远程URL默认视为未缓存（除非上游明确标记）
-                                "cached": True if is_local_path else scene_image.get("cached", False)
+                                "cached": True if is_local_path else scene_image.get("cached", False),
+                                "scene_text_hash": scene_text_hash,
                             }
                             if is_local_path:
                                 print(f"✅ 选项 {i+1} 场景图片生成成功并已保存到本地")
@@ -6072,13 +6504,15 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                             if not is_local_path:
                                 fixed_url = fix_incomplete_url(image_url)
                                 if fixed_url and validate_image_url(fixed_url):
+                                    scene_text_hash = hashlib.md5(scene.encode("utf-8")).hexdigest() if (scene and scene.strip()) else None
                                     option_data["scene_image"] = {
                                         "url": fixed_url,
                                         "prompt": scene_image.get("prompt", ""),
                                         "style": scene_image.get("style", "default"),
                                         "width": scene_image.get("width", 1024),
                                         "height": scene_image.get("height", 1024),
-                                        "cached": scene_image.get("cached", False)
+                                        "cached": scene_image.get("cached", False),
+                                        "scene_text_hash": scene_text_hash,
                                     }
                                     print(f"✅ 选项 {i+1} 场景图片URL修复成功: {fixed_url[:80]}...")
                                 else:

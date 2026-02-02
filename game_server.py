@@ -388,9 +388,12 @@ def generate_worldview():
                     if not initial_scene or initial_scene.strip() == '':
                         print(f"⚠️ 初始场景为空，使用默认场景")
                         initial_scene = "你开始了你的冒险之旅."
-                    # 修复：提取并保存初始场景的图片数据
+                    # 修复：提取并保存初始场景的图片数据（含 scene_text_hash，避免 /generate-option 误判文本变化而重复生成）
                     initial_scene_image = initial_option_data.get('scene_image', None)
                     if initial_scene_image:
+                        if not initial_scene_image.get('scene_text_hash') and initial_scene and initial_scene.strip():
+                            initial_scene_image = dict(initial_scene_image)
+                            initial_scene_image['scene_text_hash'] = hashlib.md5(initial_scene.encode('utf-8')).hexdigest()
                         print(f"✅ 初始场景图片数据已提取: {initial_scene_image.get('url', 'N/A')[:80]}...")
                     else:
                         print(f"⚠️ 初始场景没有图片数据")
