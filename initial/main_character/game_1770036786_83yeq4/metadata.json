@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1770036786_83yeq4",
+  "generated_at": "2026-02-02T20:54:15.323415",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: 动漫风格，日式动画风格，色彩鲜明，全身角色设计（full-body），纯白背景，人物居中站立，no text, no symbols, no words。\n\n一位充满年轻活力的女性角色，名为齐小天 (Qi Xiaotian)。她颜值极高，面容精致，有着健康的肤色。她有一头时尚的棕色短发，发型干练而富有动感。五官立体，眼睛大而明亮，闪烁着机灵聪慧的光芒，眼神中充满自信与活力。嘴角常挂着一抹阳光而极具魅力的笑容，表情生动有趣。\n\n她身材高挑，体格匀称而充满力量感，体现出极高的体力。身着现代休闲装，风格时尚潮流，符合轻松诙谐的游戏基调。上衣是一件剪裁得体的短款休闲夹克，内搭简约T恤，下身穿着舒适又便于活动的休闲裤或短裙。脚上是一双设计新潮的运动鞋。\n\n她自信地站立着，姿态放松而充满动感。最引人注目的是，她背着一根极具科技感或带有幽默装饰的“智能金箍棒”，这根棒子是她“美猴王传承系统”的具象化体现，与她的现代装扮形成有趣对比。整体形象融合了神话传承与现代潮流，完美契合《美猴亡》世界中荒诞喜剧、幽默轻松的神话恶搞氛围。, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "动漫风格，日式动画风格，色彩鲜明，全身角色设计（full-body），纯白背景，人物居中站立，no text, no symbols, no words。\n\n一位充满年轻活力的女性角色，名为齐小天 (Qi Xiaotian)。她颜值极高，面容精致，有着健康的肤色。她有一头时尚的棕色短发，发型干练而富有动感。五官立体，眼睛大而明亮，闪烁着机灵聪慧的光芒，眼神中充满自信与活力。嘴角常挂着一抹阳光而极具魅力的笑容，表情生动有趣。\n\n她身材高挑，体格匀称而充满力量感，体现出极高的体力。身着现代休闲装，风格时尚潮流，符合轻松诙谐的游戏基调。上衣是一件剪裁得体的短款休闲夹克，内搭简约T恤，下身穿着舒适又便于活动的休闲裤或短裙。脚上是一双设计新潮的运动鞋。\n\n她自信地站立着，姿态放松而充满动感。最引人注目的是，她背着一根极具科技感或带有幽默装饰的“智能金箍棒”，这根棒子是她“美猴王传承系统”的具象化体现，与她的现代装扮形成有趣对比。整体形象融合了神话传承与现代潮流，完美契合《美猴亡》世界中荒诞喜剧、幽默轻松的神话恶搞氛围。, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1770036786_83yeq4/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: 动漫风格，日式动画风格，色彩鲜明，全身角色设计（full-body），纯白背景，人物居中站立，no text, no symbols, no words。\n\n一位充满年轻活力的女性角色，名为齐小天 (Qi Xiaotian)。她颜值极高，面容精致，有着健康的肤色。她有一头时尚的棕色短发，发型干练而富有动感。五官立体，眼睛大而明亮，闪烁着机灵聪慧的光芒，眼神中充满自信与活力。嘴角常挂着一抹阳光而极具魅力的笑容，表情生动有趣。\n\n她身材高挑，体格匀称而充满力量感，体现出极高的体力。身着现代休闲装，风格时尚潮流，符合轻松诙谐的游戏基调。上衣是一件剪裁得体的短款休闲夹克，内搭简约T恤，下身穿着舒适又便于活动的休闲裤或短裙。脚上是一双设计新潮的运动鞋。\n\n她自信地站立着，姿态放松而充满动感。最引人注目的是，她背着一根极具科技感或带有幽默装饰的“智能金箍棒”，这根棒子是她“美猴王传承系统”的具象化体现，与她的现代装扮形成有趣对比。整体形象融合了神话传承与现代潮流，完美契合《美猴亡》世界中荒诞喜剧、幽默轻松的神话恶搞氛围。, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-02T20:54:15.323415"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1770036786_83yeq4/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770036786_83yeq4\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-02T20:54:38.311856"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1770036786_83yeq4/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770036786_83yeq4\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-02T20:54:39.097721"
+    }
+  }
+}

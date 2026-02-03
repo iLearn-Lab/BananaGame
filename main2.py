@@ -252,6 +252,22 @@ def _infer_gender_from_text(text: str) -> str:
     return ""
 
 
+def _format_protagonist_canonical_for_prompt(canonical: Dict) -> str:
+    """将主角规范信息格式化为可放入 prompt 的文本块（性别、年龄感、外观关键词等）。"""
+    if not canonical or not isinstance(canonical, dict):
+        return "（无）"
+    lines = []
+    if canonical.get("gender"):
+        lines.append(f"性别：{canonical['gender']}")
+    if canonical.get("age_range"):
+        lines.append(f"年龄感：{canonical['age_range']}")
+    if canonical.get("signature_look_keywords"):
+        lines.append(f"标志性外观关键词：{canonical['signature_look_keywords']}")
+    if canonical.get("name_zh") or canonical.get("name_en"):
+        lines.append(f"主角姓名(中/英)：{canonical.get('name_zh') or '—'} / {canonical.get('name_en') or '—'}")
+    return "\n".join(lines) if lines else "（无）"
+
+
 def _looks_like_real_ip_or_person(text: str) -> bool:
     """
     粗判断：Wikipedia 摘要是否像“现实存在的作品/IP/人物/故事”，用于决定是否启用“还原已有形象”强约束。
@@ -752,7 +768,6 @@ def _regex_fill_worldview(raw_text: str, core_worldview: Dict, chapters: Dict):
             content = ' '.join(content.split())
             if content:
                 core_worldview["game_style"] = content
-                print(f"🔍 [正则回填] ✅ 已回填 game_style: {content[:60]}...")
     if not core_worldview.get("world_basic_setting"):
         m = _REGEX_WORLD_BASIC.search(raw_text)
         if m:
@@ -761,7 +776,6 @@ def _regex_fill_worldview(raw_text: str, core_worldview: Dict, chapters: Dict):
             content = ' '.join(content.split())
             if content:
                 core_worldview["world_basic_setting"] = content
-                print(f"🔍 [正则回填] ✅ 已回填 world_basic_setting: {content[:60]}...")
     if not core_worldview.get("protagonist_ability"):
         m = _REGEX_PROTAGONIST_ABILITY.search(raw_text)
         if m:
@@ -770,7 +784,6 @@ def _regex_fill_worldview(raw_text: str, core_worldview: Dict, chapters: Dict):
             content = ' '.join(content.split())
             if content:
                 core_worldview["protagonist_ability"] = content
-                print(f"🔍 [正则回填] ✅ 已回填 protagonist_ability: {content[:60]}...")
     if not core_worldview.get("main_quest"):
         m = _REGEX_MAIN_QUEST.search(raw_text)
         if m:
@@ -779,7 +792,6 @@ def _regex_fill_worldview(raw_text: str, core_worldview: Dict, chapters: Dict):
             content = ' '.join(content.split())
             if content:
                 core_worldview["main_quest"] = content
-                print(f"🔍 [正则回填] ✅ 已回填 main_quest: {content[:60]}...")
     if not core_worldview.get("end_trigger_condition"):
         m = _REGEX_END_TRIGGER.search(raw_text)
         if m:
@@ -788,47 +800,36 @@ def _regex_fill_worldview(raw_text: str, core_worldview: Dict, chapters: Dict):
             content = ' '.join(content.split())
             if content:
                 core_worldview["end_trigger_condition"] = content
-                print(f"🔍 [正则回填] ✅ 已回填 end_trigger_condition: {content[:60]}...")
 
     # 回填章节（即使chapters为空字典也要执行，用于创建章节结构）
     if chapters is None:
         chapters = {}
-    print(f"🔍 [正则回填] 开始回填，chapters状态: {chapters}")
     # 逐章匹配
     chapter_matches = list(_REGEX_CHAPTER.finditer(raw_text))
-    print(f"🔍 [正则回填] 找到 {len(chapter_matches)} 个章节匹配")
     if not chapter_matches:
         # 如果没有找到章节，尝试创建默认章节结构
-        print(f"🔍 [正则回填] 未找到章节匹配，返回")
         return
     for idx, match in enumerate(chapter_matches):
         chap_num = match.group(1)
         chap_key = f"chapter{chap_num}"
-        print(f"🔍 [正则回填] 处理章节 {chap_key}")
         start = match.end()
         end = chapter_matches[idx + 1].start() if idx + 1 < len(chapter_matches) else None
         segment = raw_text[start:end]
-        print(f"🔍 [正则回填] 章节 {chap_key} 文本段长度: {len(segment)} 字符")
-        if len(segment) > 0:
-            print(f"🔍 [正则回填] 章节 {chap_key} 文本段预览: {segment[:200]}...")
         # 使用多行模式匹配，支持跨行内容（注意：已编译的正则对象search方法不接受flags参数）
         # 需要在编译时就设置MULTILINE和DOTALL标志
         conflict_match = _REGEX_CHAPTER_CONFLICT.search(segment or "")
         end_cond_match = _REGEX_CHAPTER_END.search(segment or "")
-        print(f"🔍 [正则回填] 章节 {chap_key} - 核心矛盾匹配: {conflict_match is not None}, 结束条件匹配: {end_cond_match is not None}")
         chap = chapters.setdefault(chap_key, {})
         if conflict_match and not chap.get("main_conflict"):
             conflict_text = conflict_match.group(1).strip()
             # 清理可能的换行和多余空格
             conflict_text = ' '.join(conflict_text.split())
             chap["main_conflict"] = conflict_text
-            print(f"🔍 [正则回填] 已回填章节 {chap_key} 的核心矛盾: {conflict_text[:60]}...")
         if end_cond_match and not chap.get("conflict_end_condition"):
             end_cond_text = end_cond_match.group(1).strip()
             # 清理可能的换行和多余空格
             end_cond_text = ' '.join(end_cond_text.split())
             chap["conflict_end_condition"] = end_cond_text
-            print(f"🔍 [正则回填] 已回填章节 {chap_key} 的矛盾结束条件: {end_cond_text[:60]}...")
 
 # ------------------------------
 # 新增：通用API请求函数（带自动重试）
@@ -1183,7 +1184,7 @@ def optimize_image_prompt_with_llm(
         # 构建配角参考图说明（有参考图时说明 Image N；无参考图时仅说明「名称-配角N」标注格式）
         supporting_role_reference_section = ""
         if supporting_role_references and len(supporting_role_references) >= 1:
-            lines_sr = ["【配角参考图说明（重要）】", "生图API将接收以下配角参考图（编号续接主角之后）："]
+            lines_sr = ["【配角参考图说明（重要）】", "生图API将接收以下配角参考图（编号续接主角之后，均为初登场场景图，可能含多人）："]
             for sr in supporting_role_references:
                 role_name = _safe_str(sr.get("role_name", "")).strip()
                 img_idx = sr.get("image_index", 0)
@@ -1202,23 +1203,38 @@ def optimize_image_prompt_with_llm(
             lines_sr.append("")
             lines_sr.append("在生成场景图片时：")
             lines_sr.append("1. 根据剧情明确每个配角使用哪张参考图（仅使用已提供的编号）")
-            lines_sr.append("2. 必须在描述中写明「XXX 参考 Image N，保持核心特征不变」")
-            lines_sr.append("3. 可变化：服饰细节、动作、表情、所处位置")
-            lines_sr.append("4. 不可变化：五官、发型、肤色、体型等核心特征")
+            lines_sr.append("2. 参考图为场景图（含多人）时，**必须明确写出该配角对应图中哪个人物**，例如：以图中从左到右第二个人物的形象为准、以图中右侧持剑的少年为准")
+            lines_sr.append("3. 必须在描述中写明「XXX 参考 Image N，以图中XX位置/特征的人物为准，保持核心特征不变」")
+            lines_sr.append("4. 可变化：服饰细节、动作、表情、所处位置")
+            lines_sr.append("5. 不可变化：五官、发型、肤色、体型等核心特征")
             supporting_role_reference_section = "\n".join(lines_sr) + "\n"
         elif available_supporting_roles_for_tagging and len(available_supporting_roles_for_tagging) >= 1:
-            # 无配角参考图时：仅要求 LLM 用「名称-配角N」标注出场配角；「参考 Image N」由代码后续拼接
-            lines_tag = ["【配角标注要求（重要）】", "本局配角及身份/姓名（用于与剧情对应）："]
-            for item in available_supporting_roles_for_tagging:
-                role_key = _safe_str(item.get("role_key", "")).strip()
-                shallow = _safe_str(item.get("shallow_background", "")).strip()
-                if not role_key:
-                    continue
-                lines_tag.append(f"- {role_key}：{shallow[:80] + '…' if len(shallow) > 80 else shallow}")
-            lines_tag.append("")
-            lines_tag.append("在视觉描述中，对剧情里**实际出场**的配角必须使用「角色名-配角N」格式标注，例如：凌川-配角1、李云-配角2。")
-            lines_tag.append("只对剧情中出现的配角使用该格式；未出场者不要写。不要写「参考 Image N」，由系统后续自动添加。")
+            # 无配角参考图时：要求 LLM 用「名称-配角N」标注；名称从剧情文本得出；「参考 Image N」由代码后续拼接
+            lines_tag = ["【配角标注要求（重要）】"]
+            has_existing = any(
+                _safe_str(item.get("role_key", "")).strip() == "已有角色"
+                for item in available_supporting_roles_for_tagging
+            )
+            if has_existing:
+                lines_tag.append("已建档的配角（再次出场时请使用相同名称或别号）：")
+                for item in available_supporting_roles_for_tagging:
+                    if _safe_str(item.get("role_key", "")).strip() == "已有角色":
+                        names = _safe_str(item.get("names_or_aliases", "")).strip()
+                        rn = _safe_str(item.get("role_name", "")).strip()
+                        if names or rn:
+                            lines_tag.append(f"  - {names or rn}（请使用其名或别号+配角N格式，如 凌川-配角1）")
+                lines_tag.append("")
+            lines_tag.append("新出场的配角：分析【当前剧情】中是否有**新登场**的非主角人物，若有则用「角色名-配角N」格式标注，角色名必须从剧情文本中得出（如黑衣人-配角1、老者-配角2）。")
+            lines_tag.append("只对剧情中实际出场且非主角的配角使用该格式；未出场者不要写。不要写「参考 Image N」，由系统后续自动添加。")
             supporting_role_reference_section = "\n".join(lines_tag) + "\n"
+        
+        # 主角规范信息（性别/年龄/外貌，与主角形象生成一致）
+        protagonist_canonical_block = _format_protagonist_canonical_for_prompt(
+            global_state.get("protagonist_canonical") or {}
+        )
+        canonical = global_state.get("protagonist_canonical") or {}
+        protagonist_name = _safe_str(canonical.get("name_zh") or canonical.get("name_en") or "").strip()
+        protagonist_identity_warning = f"\n【重要】主角身份：{protagonist_name or '玩家视角主角'}（上述主角规范信息描述的人）。**切勿将主角标注为配角**，只对剧情中出场的**非主角**人物使用「名称-配角N」格式。\n"
         
         # 构建发送给LLM的提示词
         llm_prompt = f"""假设你是一个专业的剧情分析师和视觉设计师，现在需要你将剧情转化为具体的视觉描述，告诉生图AI如何生成图片。
@@ -1233,7 +1249,10 @@ def optimize_image_prompt_with_llm(
 - 主角性格：{protagonist_info.get('personality', '')}
 - 主角外貌特征：{protagonist_info.get('appearance', '')}
 
-【当前剧情】
+【主角规范信息】（描写主角性别/年龄/外貌时必须严格遵循，与主角立绘一致）
+{protagonist_canonical_block}
+{protagonist_identity_warning}
+【当前剧情】（请据此分析是否有新登场配角，并用「名称-配角N」标注）
 {scene_description}
 
 【图片风格要求】
@@ -1246,7 +1265,7 @@ def optimize_image_prompt_with_llm(
 
 请根据以上信息，生成一个详细的视觉描述提示词，要求：
 1. 准确反映当前剧情场景
-2. 体现主角的外貌特征和能力特点
+2. 体现主角的外貌特征和能力特点；若有【主角规范信息】，描写主角时必须严格遵循其性别、年龄感与标志性外观关键词
 3. 符合游戏主题和世界观设定
 4. 匹配游戏基调（如悲剧基调应体现沉重氛围）
 5. 符合指定的图片风格
@@ -1379,15 +1398,28 @@ def ensure_character_references_dir(game_id: str) -> Path:
     return ref_dir
 
 def _load_role_archives(game_id: str) -> Dict:
-    """加载配角档案"""
+    """加载配角档案。兼容旧格式（key=配角1）与新格式（key=role_001）"""
     ref_dir = ensure_character_references_dir(game_id)
     archive_path = ref_dir / SUPPORTING_ROLE_ARCHIVES_FILE
     if archive_path.exists():
         try:
             with open(archive_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+                raw = json.load(f)
         except Exception as e:
             print(f"⚠️ 加载配角档案失败：{e}")
+            return {}
+        result = {}
+        for i, (k, v) in enumerate(raw.items()):
+            if not isinstance(v, dict):
+                continue
+            role_id = v.get("role_id") or (f"role_{i+1:03d}" if not re.match(r"^role_\d+$", str(k)) else str(k))
+            v = dict(v)
+            v["role_id"] = role_id
+            if "aliases" not in v:
+                rn = _safe_str(v.get("role_name", "")).strip()
+                v["aliases"] = [rn] if rn else []
+            result[role_id] = v
+        return result
     return {}
 
 def _save_role_archives(game_id: str, archives: Dict) -> None:
@@ -1400,19 +1432,41 @@ def _save_role_archives(game_id: str, archives: Dict) -> None:
     except Exception as e:
         print(f"⚠️ 保存配角档案失败：{e}")
 
-def _next_role_id(archives: Dict, role_name: str) -> str:
-    """生成下一个角色ID：角色名_sc001, sc002..."""
-    prefix = f"{role_name}_sc"
+def _next_role_id(archives: Dict) -> str:
+    """生成下一个角色ID：role_001, role_002... 唯一标识，避免重名"""
     max_num = 0
-    for key, data in archives.items():
+    for _key, data in archives.items():
         rid = _safe_str(data.get("role_id", "")).strip()
-        if rid.startswith(prefix):
-            try:
-                n = int(rid[len(prefix):])
-                max_num = max(max_num, n)
-            except ValueError:
-                pass
-    return f"{prefix}{max_num + 1:03d}"
+        m = re.match(r"role_(\d+)", rid)
+        if m:
+            max_num = max(max_num, int(m.group(1)))
+    return f"role_{max_num + 1:03d}"
+
+
+def _find_archive_by_name_or_alias(archives: Dict, display_name: str) -> Optional[Tuple[str, Dict]]:
+    """
+    根据角色名或别号在档案中查找。
+    :return: (role_id, archive) 或 None
+    """
+    dn = _safe_str(display_name).strip()
+    if not dn:
+        return None
+    for role_id, arch in archives.items():
+        if not isinstance(arch, dict):
+            continue
+        rn = _safe_str(arch.get("role_name", "")).strip()
+        if rn == dn:
+            return (role_id, arch)
+        aliases = arch.get("aliases", [])
+        if isinstance(aliases, list) and dn in aliases:
+            return (role_id, arch)
+    return None
+
+def _sanitize_filename_for_role(s: str) -> str:
+    """将角色名转为可安全用于文件名的前缀（去掉 / \\ : * ? \" < > | 等非法字符）"""
+    s = _safe_str(s).strip()
+    s = re.sub(r'[\s/\\:*?"<>|]+', '_', s)
+    return s.strip('_') or "role"
 
 def _next_img_id(ref_dir: Path) -> str:
     """生成首次出场图片ID：img_{YYYYMMDD}_{序号}"""
@@ -1426,14 +1480,22 @@ def _next_img_id(ref_dir: Path) -> str:
             max_num = max(max_num, n)
         except (ValueError, IndexError):
             pass
+    # 同时考虑「角色名_img_日期_序号」格式的已有文件，避免同日多角色序号冲突
+    for p in ref_dir.glob("*_" + prefix + "*.png"):
+        stem = p.stem
+        idx = stem.rfind("_" + prefix)
+        if idx != -1:
+            try:
+                n = int(stem[idx + len(prefix) + 1:])
+                max_num = max(max_num, n)
+            except (ValueError, IndexError):
+                pass
     return f"{prefix}{max_num + 1:03d}"
 
 def extract_supporting_characters_in_scene(optimized_prompt: str) -> List[str]:
     """
-    从优化后的视觉描述提示词中提取出场的配角列表（仅依据 prompt 中是否出现「配角N」）
-    不依赖世界观，只做正则匹配。
-    :param optimized_prompt: 优化后的视觉描述提示词
-    :return: 出场配角名称列表，按配角编号排序，如 ["配角1", "配角2"]
+    从优化后的视觉描述提示词中提取出场的配角槽位列表（仅依据 prompt 中是否出现「配角N」）
+    :return: 出场配角槽位列表，按编号排序，如 ["配角1", "配角2"]
     """
     text = _safe_str(optimized_prompt).strip()
     if not text:
@@ -1445,138 +1507,224 @@ def extract_supporting_characters_in_scene(optimized_prompt: str) -> List[str]:
         if m not in seen:
             seen.add(m)
             result.append(m)
-    # 按编号排序：配角1, 配角2, ...
     def sort_key(s):
         n = re.search(r"\d+", s)
         return int(n.group()) if n else 0
     result.sort(key=sort_key)
     return result
 
+
+def extract_supporting_characters_with_names(optimized_prompt: str) -> List[Tuple[str, str]]:
+    """
+    从优化后的视觉描述提示词中提取出场的配角及角色名。
+    :param optimized_prompt: 优化后的视觉描述提示词
+    :return: [(display_name, slot), ...]，如 [("凌川", "配角1"), ("李云", "配角2")]
+             display_name 从「名称-配角N」解析，无则用 slot 作为 display_name
+    """
+    text = _safe_str(optimized_prompt).strip()
+    if not text:
+        return []
+    result = []
+    seen_slots = set()
+    for m in re.finditer(r"([^\s\-]+)\s*[-－]?\s*(配角\d+)(?:\s|$|，|。|、|参考|以|保持)", text):
+        name, slot = m.group(1).strip(), m.group(2)
+        if slot in seen_slots:
+            continue
+        seen_slots.add(slot)
+        display_name = name if name and not re.match(r"^配角\d+$", name) else slot
+        result.append((display_name, slot))
+    if not result:
+        for slot in extract_supporting_characters_in_scene(text):
+            result.append((slot, slot))
+    def sort_key(item):
+        n = re.search(r"\d+", item[1])
+        return int(n.group()) if n else 0
+    result.sort(key=sort_key)
+    return result
+
 def get_or_create_supporting_role_archive(
     game_id: str,
-    role_name: str,
+    display_name: str,
+    slot: str,
     role_info: Dict,
-    scene_description: str,
     first_appear_scene: str,
-    global_state: Dict
-) -> Optional[Dict]:
+) -> Dict:
     """
-    获取或创建配角档案。若首次出场则生成图片并建立档案；否则返回已有档案。
-    :return: 配角档案 dict，含 first_img_path, core_features 等；失败返回 None
+    获取或返回配角档案。若已有档案（按 role_name / aliases 匹配）则返回；否则返回待建档标记。
+    初登场图 = 当前剧情图，在剧情图生成成功后由外部调用 archive_supporting_role_first_appearance 保存。
+    :return: 若已有档案：含 first_img_path, core_features 等；若首次出场：含 _pending_first_appearance=True, display_name, slot
     """
     archives = _load_role_archives(game_id)
-    if role_name in archives:
-        arch = archives[role_name]
+    found = _find_archive_by_name_or_alias(archives, display_name)
+    if found:
+        role_id, arch = found
         first_path = _safe_str(arch.get("first_img_path", "")).strip()
         if first_path:
-            from pathlib import Path
             p = Path(first_path)
             if not p.is_absolute():
-                p = Path("initial") / "character_references" / game_id / p.name
+                p = Path("initial") / "character_references" / game_id / Path(first_path).name
             if p.exists():
+                arch = dict(arch)
                 arch["_resolved_first_img_path"] = str(p.resolve())
+                arch["_role_id"] = role_id
                 return arch
-        print(f"⚠️ 配角 {role_name} 档案存在但首图路径无效，将重新生成")
-    # 首次出场：生成图片并建立档案
-    return _generate_and_archive_supporting_role_first_image(
-        game_id, role_name, role_info, scene_description, first_appear_scene, archives, global_state
-    )
+        print(f"⚠️ 配角 {display_name} 档案存在但首图路径无效")
+    return {
+        "_pending_first_appearance": True,
+        "display_name": display_name,
+        "slot": slot,
+        "role_info": role_info,
+        "first_appear_scene": first_appear_scene,
+    }
 
-def _generate_and_archive_supporting_role_first_image(
+
+def archive_supporting_role_first_appearance(
     game_id: str,
-    role_name: str,
-    role_info: Dict,
-    scene_description: str,
-    first_appear_scene: str,
-    archives: Dict,
-    global_state: Dict
+    pending_item: Dict,
+    scene_image_path: str,
+    prompt: str,
 ) -> Optional[Dict]:
-    """生成配角首次出场图并写入档案"""
+    """
+    剧情图生成成功后：将当前剧情图保存为配角的初登场图，并建立档案。
+    :param pending_item: get_or_create 返回的待建档对象
+    :param scene_image_path: 刚生成的剧情图本地路径（如 image_cache/xxx.png）
+    :param prompt: 本次生成使用的提示词（用于 first_prompt）
+    :return: 新建的 archive，或 None
+    """
+    if not pending_item.get("_pending_first_appearance"):
+        return None
+    display_name = _safe_str(pending_item.get("display_name", "")).strip()
+    slot = _safe_str(pending_item.get("slot", "")).strip()
+    role_info = pending_item.get("role_info") or {}
+    first_appear_scene = _safe_str(pending_item.get("first_appear_scene", "")).strip()
+
+    src = Path(scene_image_path)
+    if not src.exists():
+        print(f"⚠️ 初登场图源文件不存在：{scene_image_path}")
+        return None
+
     ref_dir = ensure_character_references_dir(game_id)
-    role_id = _next_role_id(archives, role_name)
+    archives = _load_role_archives(game_id)
+    role_id = _next_role_id(archives)
     first_img_id = _next_img_id(ref_dir)
-    first_img_path = ref_dir / f"{first_img_id}.png"
-
-    # 使用 LLM 生成首次出场提示词（含核心特征强化）
-    prompt = _build_supporting_role_first_prompt(role_name, role_info, scene_description, global_state)
-    if not prompt:
-        print(f"⚠️ 配角 {role_name} 首次出场提示词生成失败")
-        return None
-
-    # 文生图（与主角相同 provider，yunwu 时用 call_yunwu_image_api）
-    provider = IMAGE_GENERATION_CONFIG.get("provider", "yunwu")
-    image_style = global_state.get("image_style", {})
-    style_desc = _get_style_description(image_style)
-    full_prompt = f"{prompt}, {style_desc}, no text, no symbols, no garbled characters, no words"
+    role_prefix = _sanitize_filename_for_role(display_name)
+    first_img_path = ref_dir / f"{role_prefix}_{first_img_id}.png"
 
     try:
-        if provider == "yunwu":
-            image_url = call_yunwu_image_api(full_prompt, "default")
-        elif provider == "replicate":
-            image_url = call_replicate_api(full_prompt, "default")
-        elif provider == "openai":
-            image_url = call_dalle_api_with_size(full_prompt, "1024x1024")
-        elif provider == "stable_diffusion":
-            image_url = call_stable_diffusion_api_with_size(full_prompt, 1024, 1024, "default", reference_image_url="")
-        else:
-            image_url = call_yunwu_image_api(full_prompt, "default")
+        import shutil
+        shutil.copy2(src, first_img_path)
     except Exception as e:
-        print(f"⚠️ 配角 {role_name} 首次出场图生成失败：{e}")
+        print(f"⚠️ 保存配角初登场图失败：{e}")
         return None
 
-    if not image_url:
-        return None
-
-    # 下载并保存到 ref_dir
-    try:
-        raw = None
-        if image_url.startswith("data:image"):
-            import base64
-            b64 = image_url.split("base64,", 1)[-1] if "base64," in image_url else image_url
-            raw = base64.b64decode(b64)
-        elif image_url.startswith("/image_cache/") or image_url.startswith("image_cache/"):
-            rel = image_url[1:] if image_url.startswith("/") else image_url
-            src = Path("image_cache") / Path(rel).name
-            if src.exists():
-                import shutil
-                shutil.copy2(src, first_img_path)
-            else:
-                print(f"⚠️ 找不到缓存图片：{src}")
-                return None
-        elif image_url.startswith("http://") or image_url.startswith("https://"):
-            resp = requests.get(image_url, timeout=30)
-            resp.raise_for_status()
-            raw = resp.content
-        else:
-            print(f"⚠️ 无法保存配角首图，未知 URL 格式")
-            return None
-
-        if raw is not None:
-            first_img_path.write_bytes(raw)
-    except Exception as e:
-        print(f"⚠️ 保存配角首图失败：{e}")
-        return None
-
-    # 提取核心特征（用于后续图生图强调）
-    core_features = _extract_core_features_from_prompt(prompt)
+    first_prompt = _extract_character_core_from_prompt(prompt, display_name) or _clip_text(prompt, 300)
+    core_features = _extract_core_features_from_prompt(first_prompt)
 
     archive = {
         "role_id": role_id,
-        "role_name": role_name,
+        "role_name": display_name,
+        "aliases": [display_name],
         "story_background": _safe_str(role_info.get("shallow_background", "")),
         "first_appear_scene": first_appear_scene,
         "first_img_id": first_img_id,
         "first_img_path": str(first_img_path.resolve()),
-        "first_prompt": prompt,
+        "first_prompt": first_prompt,
         "img_model": IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-2.5-flash-image"),
         "update_log": [],
         "core_features": core_features,
     }
-    archives[role_name] = archive
+    archives[role_id] = archive
     _save_role_archives(game_id, archives)
     archive["_resolved_first_img_path"] = str(first_img_path.resolve())
-    print(f"✅ 配角 {role_name} 首次出场图已保存：{first_img_path}")
+    print(f"✅ 配角 {display_name} 初登场图已保存（来自当前剧情图）：{first_img_path}")
+    print(f"   📋 新建配角信息：role_id={role_id}, role_name={display_name}, aliases={archive.get('aliases',[])}, first_img={first_img_path.name}")
     return archive
+
+
+def _extract_character_core_from_prompt(prompt: str, display_name: str) -> str:
+    """从提示词中提取与某角色相关的核心描述（简化：取含该名的句子或附近上下文）"""
+    text = _safe_str(prompt).strip()
+    name = _safe_str(display_name).strip()
+    if not name or name not in text:
+        return ""
+    sentences = re.split(r'[。！？\n]', text)
+    for s in sentences:
+        if name in s:
+            return _clip_text(s.strip(), 200)
+    idx = text.find(name)
+    if idx >= 0:
+        start = max(0, idx - 50)
+        end = min(len(text), idx + 150)
+        return _clip_text(text[start:end], 200)
+    return ""
+
+
+def update_supporting_role_aliases_from_plot(game_id: str, scene_description: str) -> None:
+    """
+    每次剧情更新时：从剧情文本中识别身份揭示（如「黑衣人就是艾玛」「A正是B的妹妹」），
+    更新对应配角的 aliases。
+    """
+    if not game_id or not scene_description or len(scene_description.strip()) < 10:
+        return
+    archives = _load_role_archives(game_id)
+    if not archives:
+        return
+    api_key = AI_API_CONFIG.get("api_key", "")
+    base_url = AI_API_CONFIG.get("base_url", "")
+    if not api_key or not base_url:
+        return
+    existing_aliases = []
+    for _rid, arch in archives.items():
+        if isinstance(arch, dict):
+            for a in (arch.get("aliases") or []):
+                if a and a not in existing_aliases:
+                    existing_aliases.append(a)
+    llm_prompt = f"""从以下剧情中提取「身份揭示」：当剧情明确说明某角色A与另一身份B是同一人时（如「黑衣人就是艾玛」「A原来是B」「A正是B的妹妹」「黑衣人摘下兜帽，竟是灵川」），提取出对应关系。
+已知配角称呼：{existing_aliases[:20] if existing_aliases else '（暂无）'}
+剧情：
+{scene_description[:1500]}
+
+要求：每行输出一条，格式为「原名|新身份」，例如：
+黑衣人|艾玛
+黑衣人|灵川的妹妹
+只输出提取到的身份揭示，无则输出「无」。"""
+    try:
+        resp = requests.post(
+            f"{base_url}/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json; charset=utf-8"},
+            json={"model": "deepseek-v3.2", "messages": [{"role": "user", "content": llm_prompt}], "temperature": 0.2, "max_tokens": 300},
+            timeout=30
+        )
+        resp.raise_for_status()
+        content = (resp.json().get("choices", [{}])[0].get("message", {}).get("content", "") or "").strip()
+        if not content or "无" in content[:10]:
+            return
+        updated_any = False
+        for line in content.split("\n"):
+            line = line.strip()
+            if "|" not in line or len(line) < 3:
+                continue
+            parts = line.split("|", 1)
+            orig, new_id = parts[0].strip(), parts[1].strip()
+            if not orig or not new_id:
+                continue
+            for role_id, arch in archives.items():
+                if not isinstance(arch, dict):
+                    continue
+                aliases = list(arch.get("aliases") or [])
+                if orig in aliases or orig == arch.get("role_name"):
+                    if new_id not in aliases:
+                        aliases.append(new_id)
+                        arch["aliases"] = aliases
+                        _save_role_archives(game_id, archives)
+                        updated_any = True
+                        print(f"📋 配角身份更新：{role_id} ({arch.get('role_name')}) 新增别名「{new_id}」")
+                        break
+        if updated_any:
+            print(f"📋 配角档案已更新（身份揭示）")
+    except Exception as e:
+        print(f"⚠️ 配角身份更新检查失败：{e}")
+
 
 def _get_style_description(image_style: Dict) -> str:
     """从 image_style 提取风格描述"""
@@ -1596,61 +1744,6 @@ def _get_style_description(image_style: Dict) -> str:
     if t == "custom":
         return image_style.get("value", "写实风格，8K") or "写实风格，8K"
     return "写实风格，8K，细节丰富"
-
-def _build_supporting_role_first_prompt(
-    role_name: str,
-    role_info: Dict,
-    scene_description: str,
-    global_state: Dict
-) -> str:
-    """使用 LLM 生成配角首次出场提示词，强化核心特征"""
-    core_worldview = global_state.get("core_worldview", {}) or {}
-    game_theme = core_worldview.get("game_style", "")
-    personality = _safe_str(role_info.get("core_personality", "")).strip()
-    appearance = _safe_str(role_info.get("shallow_background", "")).strip()
-    story_bg = _safe_str(role_info.get("deep_background", "")).strip()[:300]
-
-    api_key = AI_API_CONFIG.get("api_key", "")
-    base_url = AI_API_CONFIG.get("base_url", "")
-    if not api_key or not base_url:
-        return f"{role_name}，{appearance}，全身肖像，正面站立，纯白背景，古风写实风格，8K。五官、发型、肤色、体型等核心特征在后续图生图中不可修改。"
-
-    llm_prompt = f"""根据以下信息，生成一个用于「文生图」的配角首次出场形象提示词。
-
-角色名称：{role_name}
-核心性格：{personality}
-外貌/浅层背景：{appearance}
-深层背景（可选）：{story_bg}
-游戏主题：{game_theme}
-当前剧情片段：{scene_description[:400]}
-
-要求：
-1. 输出纯中文提示词，描述该角色的全身肖像（正面站立，可半身）
-2. 必须包含：发型、发色、眼型、肤色、脸型、体型、标志性特征（如痣、疤、配饰）
-3. 对可识别的五官特征要具体化，例如「右眉尾有一颗明显的淡褐色小圆痣」而不是笼统的「有颗痣」
-4. 结尾加上：五官核心特征不可修改
-5. 不要包含 URL、路径、任何文字符号
-6. 长度 150-300 字
-
-只输出提示词本身，不要解释。"""
-
-    try:
-        resp = requests.post(
-            f"{base_url}/chat/completions",
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json; charset=utf-8"},
-            json={"model": "deepseek-v3.2", "messages": [{"role": "user", "content": llm_prompt}], "temperature": 0.5, "max_tokens": 500},
-            timeout=60
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        content = (data.get("choices", [{}])[0].get("message", {}).get("content", "") or "").strip()
-        if content:
-            if "五官核心特征不可修改" not in content:
-                content = content.rstrip("，。") + "，五官核心特征不可修改。"
-            return content
-    except Exception as e:
-        print(f"⚠️ 配角首次出场提示词 LLM 调用失败：{e}")
-    return f"{role_name}，{appearance}，全身肖像，正面站立，纯白背景，古风写实风格，8K。五官核心特征不可修改。"
 
 def _extract_core_features_from_prompt(prompt: str) -> str:
     """从首次出场提示词中提取核心特征（简化版：取关键句或截取）"""
@@ -1772,70 +1865,94 @@ def optimize_main_character_prompt_with_llm(
 
         worldview_context_text = _build_worldview_context_text()
 
-        # 现实IP/人物检索：让“提示词LLM”能基于资料生成对应人物形象（而不是随机脸）
+        # 主角规范信息（来自世界观 LLM，不展示给用户）：姓名、性别、作品、外观关键词
+        canonical = (global_state.get("protagonist_canonical") or {}) if isinstance(global_state.get("protagonist_canonical"), dict) else {}
+        name_zh = _safe_str(canonical.get("name_zh")).strip()
+        name_en = _safe_str(canonical.get("name_en")).strip()
+        work_zh = _safe_str(canonical.get("work_zh")).strip()
+        work_en = _safe_str(canonical.get("work_en")).strip()
+        canonical_gender = _safe_str(canonical.get("gender")).strip()
+        canonical_signature = _safe_str(canonical.get("signature_look_keywords")).strip()
+
+        # Wikipedia/现实IP 检索：补充证据文本与参考图（不用于“决定主角是谁”，仅用于验证/补充/拿参考图）
         wiki_ctx = {}
         wiki_evidence_text = ""
-        required_name_tokens: List[str] = []
         reference_image_url = ""
-        identity_hint = ""
         try:
             wiki_query = user_theme or game_theme
             wiki_ctx = wiki_lookup_theme_and_character(wiki_query)
             if isinstance(wiki_ctx, dict) and wiki_ctx.get("is_real_world"):
                 wiki_evidence_text = _safe_str((wiki_ctx or {}).get("evidence_text")).strip()
                 reference_image_url = _safe_str((wiki_ctx or {}).get("reference_image_url")).strip()
-
-                # 名称：尽量保留中英文“角色名 + 作品名”
-                theme_names = (wiki_ctx.get("theme_names") or {}) if isinstance(wiki_ctx.get("theme_names"), dict) else {}
-                char_names = (wiki_ctx.get("character_names") or {}) if isinstance(wiki_ctx.get("character_names"), dict) else {}
-
-                # 作品名（中/英）
-                work_zh = _safe_str(theme_names.get("zh")).strip()
-                work_en = _safe_str(theme_names.get("en")).strip()
-
-                # 角色名（中/英）——若未找到角色页，就退回把“主题页”当做人物/作品名
-                char_zh = _safe_str(char_names.get("zh")).strip()
-                char_en = _safe_str(char_names.get("en")).strip()
-                if not (char_zh or char_en):
-                    char_zh = work_zh
-                    char_en = work_en
-
-                # 给LLM一个“固定格式”的身份提示，提升名字保留与可控性
-                if (char_zh or char_en) and (work_zh or work_en):
-                    identity_hint = f"{char_zh}/{char_en} from {work_zh}/{work_en}".strip().strip("/")
-                else:
-                    identity_hint = "/".join([x for x in [char_zh, char_en, work_zh, work_en] if _safe_str(x).strip()])
-
-                # 必须保留的字面 token（用于让生图模型“认得”是谁）
-                for t in [char_zh, char_en, work_zh, work_en]:
-                    t = _safe_str(t).strip()
-                    if t and t not in required_name_tokens:
-                        required_name_tokens.append(t)
-            else:
-                wiki_evidence_text = ""
-                reference_image_url = ""
         except Exception:
             wiki_ctx = {}
             wiki_evidence_text = ""
             reference_image_url = ""
-            identity_hint = ""
 
-        # 将参考图写入 global_state，供主角生图阶段使用（尤其是 SD img2img）
+        # 身份与名称：优先使用世界观规范信息，缺失时再退回到维基检索结果
+        if not (name_zh or name_en) and isinstance(wiki_ctx, dict):
+            theme_names = (wiki_ctx.get("theme_names") or {}) if isinstance(wiki_ctx.get("theme_names"), dict) else {}
+            char_names = (wiki_ctx.get("character_names") or {}) if isinstance(wiki_ctx.get("character_names"), dict) else {}
+            work_zh = work_zh or _safe_str(theme_names.get("zh")).strip()
+            work_en = work_en or _safe_str(theme_names.get("en")).strip()
+            name_zh = name_zh or _safe_str(char_names.get("zh")).strip()
+            name_en = name_en or _safe_str(char_names.get("en")).strip()
+            if not (name_zh or name_en):
+                name_zh = work_zh
+                name_en = work_en
+
+        required_name_tokens: List[str] = []
+        for t in [name_zh, name_en, work_zh, work_en]:
+            t = _safe_str(t).strip()
+            if t and t not in required_name_tokens:
+                required_name_tokens.append(t)
+
+        _name_part = "/".join([x for x in [name_zh, name_en] if _safe_str(x).strip()]).strip()
+        _work_part = "/".join([x for x in [work_zh, work_en] if _safe_str(x).strip()]).strip()
+        if _name_part and _work_part:
+            identity_hint = f"{_name_part} from {_work_part}"
+        else:
+            identity_hint = _name_part or _work_part or ""
+
+        # 将参考图写入 global_state，供主角生图阶段使用（有参考图时优先传给生图模型）
         if isinstance(global_state, dict) and reference_image_url:
             global_state["_main_character_ref_image_url"] = reference_image_url
+        if isinstance(global_state, dict):
             global_state["_main_character_required_name_tokens"] = required_name_tokens
 
-        # 主角性别：优先从资料中推断，否则随机
+        # 主角性别：优先世界观规范信息，其次主角角色描述推断，再次维基摘要推断，最后随机
         protagonist_gender = ""
-        try:
-            if wiki_evidence_text:
-                protagonist_gender = _infer_gender_from_text(wiki_evidence_text)
-        except Exception:
-            protagonist_gender = ""
+        if canonical_gender and ("男" in canonical_gender or "女" in canonical_gender):
+            protagonist_gender = "男性" if "男" in canonical_gender else "女性"
+        if not protagonist_gender:
+            char_text = " ".join([
+                protagonist_info.get("personality", ""),
+                protagonist_info.get("appearance", ""),
+                _safe_str(core_worldview.get("characters", {}).get("主角", {}).get("deep_background", ""))
+            ])
+            if char_text.strip():
+                protagonist_gender = _infer_gender_from_text(char_text)
+        if not protagonist_gender:
+            try:
+                if wiki_evidence_text:
+                    protagonist_gender = _infer_gender_from_text(wiki_evidence_text)
+            except Exception:
+                pass
         if not protagonist_gender:
             import random
             protagonist_gender = random.choice(['男性', '女性'])
-        print(f"🎲 主角性别：{protagonist_gender}（资料优先，其次随机）")
+
+        # 主角规范信息块（给提示词 LLM）
+        canonical_block_lines = []
+        if name_zh or name_en:
+            canonical_block_lines.append(f"主角姓名(中/英)：{name_zh or '—'} / {name_en or '—'}")
+        if work_zh or work_en:
+            canonical_block_lines.append(f"所属作品(中/英)：{work_zh or '—'} / {work_en or '—'}")
+        if protagonist_gender:
+            canonical_block_lines.append(f"性别：{protagonist_gender}")
+        if canonical_signature:
+            canonical_block_lines.append(f"标志性外观关键词：{canonical_signature}")
+        canonical_block = "\n".join(canonical_block_lines) if canonical_block_lines else "（无）"
         
         # 构建发送给LLM的提示词
         llm_prompt = f"""你现在是一个专业的角色设计师，要将具体角色描述给生图ai，让生图ai能够生成准确的主角形象。
@@ -1845,17 +1962,20 @@ def optimize_main_character_prompt_with_llm(
 - 世界观设定（结构化/节选）：{worldview_context_text}
 - 游戏基调：{tone_description}
 
-【现实题材/IP/人物检索资料（如存在）】
+【主角规范信息】（来自世界观，必须优先使用；姓名、性别、外观关键词须在最终提示词中体现）
+{canonical_block}
+
+【Wikipedia 检索补充】（如存在，可补充细节与参考图；有参考图时会传给生图模型）
 {wiki_evidence_text if wiki_evidence_text else "（无）"}
 
-【必须保留的名称标识（如存在，必须在最终提示词中原样保留）】
+【必须保留的名称标识】（必须在最终提示词中原样保留）
 {(" / ".join(required_name_tokens)) if required_name_tokens else "（无）"}
 
-【身份提示（如存在，请在最终提示词中显式出现，且保持原样）】
+【身份提示】（请在最终提示词中显式出现，保持原样）
 {identity_hint if identity_hint else "（无）"}
 
 【主角信息】
-- 主角性别：{protagonist_gender}（资料优先，其次随机）
+- 主角性别：{protagonist_gender}
 - 主角属性：{attr_description}
 - 主角能力：{protagonist_ability}
 - 主角性格：{protagonist_info.get('personality', '')}
@@ -1865,20 +1985,12 @@ def optimize_main_character_prompt_with_llm(
 {style_description if style_description else '默认风格'}
 
 请根据以上信息，生成一个详细的主角形象描述提示词，要求：
-1. 主角性别为{protagonist_gender}，请根据性别特征进行描述
-2. 详细描述主角的外貌特征（面部特征、五官、肤色、表情等，重点突出脸部容貌）
-3. 如果【现实题材/IP/人物检索资料】存在，必须优先“还原资料所指向的具体人物/主角形象”，不要随意原创一张无关的路人脸；只有在资料缺失/歧义无法消除时，才允许在不违背世界观的前提下进行合理补全
-4. 如果资料指向的是现实人物，请按该人物的真实外貌特征与典型形象描述；如果指向的是动漫/影视/游戏角色，请按该角色在作品中的典型外观设定描述（发色、发型、服装、气质、标志物等）
-5. 若【必须保留的名称标识】不为“（无）”，最终提示词中必须包含这些名称标识（区分大小写，原样保留；不要用同义词替换，不要翻译成别的写法）
-6. 请先从【现实题材/IP/人物检索资料】中提炼出6-12条“标志性外观特征清单”（仅外观/服装/配饰/标志物/气质），并把它们融合进最终提示词（建议用逗号分隔的短语列表）
-7. 在不违反第3/4/5条的前提下，尽量让主角更好看（符合高颜值的要求，五官精致，面容姣好）
-6. 详细描述主角的穿着（服装风格、颜色、材质等）
-7. 详细描述主角的发型（长度、颜色、样式等）
-8. 体现主角的属性特点（如高颜值、高智商等应在形象中有所体现）
-9. 符合游戏主题和世界观设定
-10. 匹配游戏基调（如悲剧基调应体现沉重氛围）
-11. 符合指定的图片风格
-12. 强调这是全身角色设计（full-body），背景为纯白（pure white background），人物居中站立；并明确禁止生成任何文字/符号/乱码（no text / no symbols / no garbled characters / no words）
+1. 必须优先使用【主角规范信息】中的姓名、性别与标志性外观关键词；若【Wikipedia 检索补充】存在，可补充细节；若有参考图，生图阶段会使用参考图以提高还原度。
+2. 主角性别为{protagonist_gender}，请根据性别特征进行描述。
+3. 详细描述主角的外貌特征（面部特征、五官、肤色、表情等），并融入【主角规范信息】中的标志性外观关键词（若有）。
+4. 若【必须保留的名称标识】不为“（无）”，最终提示词中必须包含这些名称（原样保留，不要用同义词替换）。
+5. 详细描述主角的穿着与发型；体现主角属性特点；符合游戏主题、世界观与基调；符合指定图片风格。
+6. 强调全身角色设计（full-body），纯白背景，人物居中站立；禁止生成任何文字/符号/乱码（no text, no symbols, no words）。
 
 只输出视觉描述，不要输出其他内容。"""
 
@@ -3069,15 +3181,36 @@ def generate_scene_image(
         else:
             print(f"⚠️ 主角正面图尚未就绪，将不使用主角参考图")
     
-    # 1.7 先由提示词优化 LLM 生成带「名称-配角N」的视觉描述，再仅根据优化后的 prompt 识别出场配角并拼接「参考 Image N」（不依赖世界观是否有配角信息）
+    # 1.6b 每次剧情更新时检查身份揭示，更新配角 aliases
+    if game_id and scene_description:
+        update_supporting_role_aliases_from_plot(game_id, scene_description)
+
+    # 1.7 先由提示词优化 LLM 生成带「名称-配角N」的视觉描述，再根据优化后的 prompt 识别出场配角
     core_worldview = global_state.get("core_worldview", {}) or {}
     chars = (core_worldview.get("characters", {}) or {}) if isinstance(core_worldview, dict) else {}
-    # 通用配角标注说明：不依赖世界观，始终要求 LLM 对出场配角使用「角色名-配角1」「角色名-配角2」等格式
-    available_supporting_roles_for_tagging = [
-        {"role_key": "配角1", "shallow_background": "（根据剧情描述）"},
-        {"role_key": "配角2", "shallow_background": "（根据剧情描述）"},
-    ]
-    
+    # 已有档案的配角（供 LLM 复用同一角色名/别号）；+ 占位供新角色
+    available_supporting_roles_for_tagging = []
+    if game_id:
+        archives = _load_role_archives(game_id)
+        for _rid, arch in archives.items():
+            if isinstance(arch, dict):
+                rn = _safe_str(arch.get("role_name", "")).strip()
+                aliases = arch.get("aliases", [])
+                if isinstance(aliases, list) and aliases:
+                    names_str = "、".join(aliases[:5])
+                else:
+                    names_str = rn or ""
+                available_supporting_roles_for_tagging.append({
+                    "role_key": "已有角色",
+                    "role_name": rn,
+                    "names_or_aliases": names_str,
+                    "shallow_background": _safe_str(arch.get("story_background", ""))[:80] or "（根据剧情）",
+                })
+    available_supporting_roles_for_tagging.extend([
+        {"role_key": "配角1", "shallow_background": "（根据剧情描述，名称从文本中得出）"},
+        {"role_key": "配角2", "shallow_background": "（根据剧情描述，名称从文本中得出）"},
+    ])
+
     # 2. 第一次调用 LLM：只负责「名称-配角N」和场景描述，不传配角参考图
     prompt = optimize_image_prompt_with_llm(
         scene_description,
@@ -3087,60 +3220,90 @@ def generate_scene_image(
         supporting_role_references=None,
         available_supporting_roles_for_tagging=available_supporting_roles_for_tagging
     )
+    # 打印剧情图提示词 LLM 生成内容（便于确认主角/配角与 Image 编号是否写对）
+    if prompt and isinstance(prompt, str):
+        _preview_len = 800
+        _preview = prompt.strip()[: _preview_len]
+        if len(prompt.strip()) > _preview_len:
+            _preview += "..."
+        print(f"📝 [剧情图提示词] LLM 生成内容（前{min(_preview_len, len(prompt))}字）：\n{_preview}")
     
-    # 3. 仅从优化后的提示词中识别出场配角（正则匹配「配角N」，不检查世界观）
+    # 3. 从优化后的提示词中识别出场配角（名称-配角N），区分已有档案（有参考图）与首次出场（待建档）
     supporting_role_references = []
     supporting_role_images = []
+    first_appearance_pending = []
     if game_id:
-        supporting_chars = extract_supporting_characters_in_scene(prompt)
+        char_tuples = extract_supporting_characters_with_names(prompt)
         image_index = 3  # Image 0,1,2 为主角；从 3 起为配角
-        for role_name in supporting_chars:
-            role_info = chars.get(role_name, {}) if isinstance(chars, dict) else {}
+        for display_name, slot in char_tuples:
+            role_info = chars.get(slot, {}) or chars.get(display_name, {}) or {}
             if not isinstance(role_info, dict):
                 role_info = {}
             arch = get_or_create_supporting_role_archive(
                 game_id,
-                role_name,
-                role_info,
-                scene_description,
+                display_name=display_name,
+                slot=slot,
+                role_info=role_info,
                 first_appear_scene=_clip_text(scene_description, 60),
-                global_state=global_state
             )
-            if arch:
+            if arch.get("_pending_first_appearance"):
+                first_appearance_pending.append(arch)
+                print(f"📌 配角 {display_name}-{slot} 首次出场，将在剧情图生成后建档")
+                print(f"   📋 待建档信息：display_name={display_name}, slot={slot}, first_appear_scene={_clip_text(arch.get('first_appear_scene',''),40)}…")
+            else:
                 img_path = arch.get("_resolved_first_img_path") or arch.get("first_img_path", "")
                 if img_path:
                     supporting_role_images.append(img_path)
                     supporting_role_references.append({
-                        "role_name": role_name,
+                        "role_name": slot,
+                        "display_name": display_name,
                         "image_index": image_index,
                         "core_features": arch.get("core_features", ""),
                         "first_appear_scene": arch.get("first_appear_scene", ""),
                     })
                     image_index += 1
-                    print(f"✅ 配角 {role_name} 将作为参考图 Image {image_index - 1} 传递")
+                    print(f"✅ 配角 {display_name}-{slot} 将作为参考图 Image {image_index - 1} 传递")
+                    print(f"   📋 配角信息：role_id={arch.get('_role_id','')}, role_name={arch.get('role_name','')}, aliases={arch.get('aliases',[])}, first_img={Path(img_path).name if img_path else ''}")
     
-    # 4. 由代码将「参考 Image N」拼接到提示词末尾
+    # 打印当前游戏所有配角档案摘要
+    if game_id:
+        _archives = _load_role_archives(game_id)
+        if _archives:
+            print(f"📋 当前配角档案（共{len(_archives)}个）：")
+            for _rid, _a in _archives.items():
+                if isinstance(_a, dict):
+                    _aliases = _a.get("aliases", [])
+                    _rn = _a.get("role_name", "")
+                    print(f"   - {_rid}: role_name={_rn}, aliases={_aliases}")
+    
+    # 4. 由代码将「参考 Image N」拼接到提示词末尾（若 LLM 已写位置指引则保留）
     if supporting_role_references:
         append_parts = []
         for sr in supporting_role_references:
-            role_name = _safe_str(sr.get("role_name", "")).strip()
+            slot = _safe_str(sr.get("role_name", "")).strip()
+            display_name = _safe_str(sr.get("display_name", "")).strip()
             img_idx = sr.get("image_index", 3)
-            # 从提示词中匹配「XXX-配角N」以得到显示名
-            display_name = None
-            try:
-                m = re.search(r"([^\s\-]+)-" + re.escape(role_name) + r"(?:\s|$|，|。)", prompt)
-                if m:
-                    display_name = m.group(1).strip()
-            except Exception:
-                pass
-            if display_name:
-                append_parts.append(f"{display_name}-{role_name} 参考 Image {img_idx}，保持核心特征不变")
-            else:
-                append_parts.append(f"{role_name} 参考 Image {img_idx}，保持核心特征不变")
+            dn = display_name or slot
+            append_parts.append(f"{dn}-{slot} 参考 Image {img_idx}，以图中对应人物的形象为准，保持核心特征不变")
         if append_parts:
             prompt = (prompt.rstrip() + "。" + "。".join(append_parts))
+        # 打印拼接「参考 Image N」后的提示词尾部
+        _tail_len = 350
+        if prompt and len(prompt) > _tail_len:
+            print(f"📝 [剧情图提示词] 拼接配角参考后，末尾{_tail_len}字：...{prompt[-_tail_len:]}")
     
     # 5. 调用AI图片生成API（传递尺寸参数和参考图）
+    # 若有上一张剧情图，解析为可加载路径并作为最后一张参考图（用于视觉延续）
+    previous_scene_image_path = None
+    if reference_image_url and isinstance(reference_image_url, str):
+        ref_url = reference_image_url.strip()
+        if ref_url.startswith("/image_cache/") or ref_url.startswith("image_cache/"):
+            prev_local = Path(__file__).resolve().parent / "image_cache" / Path(ref_url).name
+            if prev_local.exists():
+                previous_scene_image_path = str(prev_local)
+        elif ref_url.startswith("http://") or ref_url.startswith("https://") or os.path.exists(ref_url):
+            previous_scene_image_path = ref_url
+
     try:
         if provider == "yunwu":
             # yunwu.ai 易受 429 / 返回格式波动影响：失败时可选用本地 SD 兜底
@@ -3149,14 +3312,18 @@ def generate_scene_image(
                 # yunwu.ai可能不支持自定义尺寸，在提示词中添加尺寸要求
                 size_prompt = f"{prompt}, aspect ratio {image_width}:{image_height}"
                 
-                # 只要有主角或配角参考图，就用 gemini 图生图
+                # 参考图：主角 + 配角 + 上一张剧情图（若有）
                 model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-2.5-flash-image")
                 all_reference_images = list(protagonist_reference_images) if protagonist_reference_images else []
                 all_reference_images.extend(supporting_role_images if supporting_role_images else [])
+                if previous_scene_image_path:
+                    all_reference_images.append(previous_scene_image_path)
+                    print(f"🖼️ 已将上一张剧情图加入参考图（共{len(all_reference_images)}张）")
                 if all_reference_images and len(all_reference_images) >= 1:
                     if "gemini" in model.lower() and "image" in model.lower():
-                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(all_reference_images)}张参考图（主角{len(protagonist_reference_images or [])}张+配角{len(supporting_role_images or [])}张）")
-                        # 构建参考图说明：主角 Image 0/1/2 + 配角 Image 3/4/...
+                        n_prev = 1 if previous_scene_image_path else 0
+                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(all_reference_images)}张参考图（主角{len(protagonist_reference_images or [])}张+配角{len(supporting_role_images or [])}张+上一张剧情图{n_prev}张）")
+                        # 构建参考图说明：主角 Image 0/1/2 + 配角 Image 3/4/... + 上一张剧情图 Image N
                         prefix_lines = []
                         n_prot = len(protagonist_reference_images or [])
                         if n_prot >= 1:
@@ -3167,9 +3334,12 @@ def generate_scene_image(
                             prefix_lines.append("Image 2: Back view portrait of the protagonist")
                         for sr in (supporting_role_references or []):
                             idx = sr.get("image_index", len(prefix_lines))
-                            rn = sr.get("role_name", "")
+                            rn = sr.get("display_name", "") or sr.get("role_name", "")
                             cf = _clip_text(sr.get("core_features", ""), 80)
-                            prefix_lines.append(f"Image {idx}: {rn} first appearance reference. Core features (DO NOT MODIFY): {cf}")
+                            prefix_lines.append(f"Image {idx}: {rn} first appearance scene (may contain multiple characters). Identify this character by position in image. Core features (DO NOT MODIFY): {cf}")
+                        if previous_scene_image_path:
+                            prev_idx = len(prefix_lines)
+                            prefix_lines.append(f"Image {prev_idx}: Previous scene image (for visual continuity - maintain consistent style, lighting, and character appearance).")
                         prefix_prompt = "\n".join(prefix_lines) + "\n\n"
                         full_prompt = prefix_prompt + prompt + f", aspect ratio {image_width}:{image_height}"
                         image_url = call_gemini_img2img(full_prompt, all_reference_images)
@@ -3235,6 +3405,12 @@ def generate_scene_image(
                 # 检查是否已缓存
                 if cache_path.exists():
                     print(f"✅ 使用本地缓存的图片：{cache_path}")
+                    if first_appearance_pending and game_id:
+                        try:
+                            for p in first_appearance_pending:
+                                archive_supporting_role_first_appearance(game_id, p, str(cache_path), prompt)
+                        except Exception as ar_err:
+                            print(f"⚠️ 配角初登场建档失败：{ar_err}")
                     return {
                         "url": f"/image_cache/{prompt_hash}.png",
                         "prompt": prompt,
@@ -3257,6 +3433,12 @@ def generate_scene_image(
                             # 如果文件存在，使用现有的hash，或者复制到新的hash
                             if existing_hash == prompt_hash:
                                 print(f"✅ 使用现有的本地缓存图片：{existing_path}")
+                                if first_appearance_pending and game_id:
+                                    try:
+                                        for p in first_appearance_pending:
+                                            archive_supporting_role_first_appearance(game_id, p, str(existing_path), prompt)
+                                    except Exception as ar_err:
+                                        print(f"⚠️ 配角初登场建档失败：{ar_err}")
                                 return {
                                     "url": f"/image_cache/{prompt_hash}.png",
                                     "prompt": prompt,
@@ -3278,7 +3460,12 @@ def generate_scene_image(
                                         raise FileNotFoundError(f"复制后的文件不存在：{cache_path}")
                                     
                                     print(f"✅ 图片复制完成，文件大小：{cache_path.stat().st_size} 字节")
-                                    
+                                    if first_appearance_pending and game_id:
+                                        try:
+                                            for p in first_appearance_pending:
+                                                archive_supporting_role_first_appearance(game_id, p, str(cache_path), prompt)
+                                        except Exception as ar_err:
+                                            print(f"⚠️ 配角初登场建档失败：{ar_err}")
                                     return {
                                         "url": f"/image_cache/{prompt_hash}.png",
                                         "prompt": prompt,
@@ -3291,8 +3478,13 @@ def generate_scene_image(
                                     print(f"❌ 复制图片时发生错误：{copy_err}")
                                     import traceback
                                     traceback.print_exc()
-                                    # 如果复制失败，尝试使用原始路径
                                     print(f"⚠️ 复制失败，尝试使用原始缓存路径")
+                                    if first_appearance_pending and game_id:
+                                        try:
+                                            for p in first_appearance_pending:
+                                                archive_supporting_role_first_appearance(game_id, p, str(existing_path), prompt)
+                                        except Exception as ar_err:
+                                            print(f"⚠️ 配角初登场建档失败：{ar_err}")
                                     return {
                                         "url": f"/image_cache/{existing_hash}.png",
                                         "prompt": prompt,
@@ -3382,6 +3574,12 @@ def generate_scene_image(
                         f.write(chunk)
                 
                 print(f"✅ 图片已缓存到本地：{cache_path}")
+                if first_appearance_pending and game_id:
+                    try:
+                        for p in first_appearance_pending:
+                            archive_supporting_role_first_appearance(game_id, p, str(cache_path), prompt)
+                    except Exception as ar_err:
+                        print(f"⚠️ 配角初登场建档失败：{ar_err}")
                 return {
                     "url": f"/image_cache/{prompt_hash}.png",
                     "prompt": prompt,
@@ -4079,25 +4277,6 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                 result = response.json()
                 # 打印响应状态码和基本信息
                 print(f"✅ yunwu.ai API响应成功（状态码: {response.status_code}）")
-                print(f"🔍 响应结构预览: {str(result)[:200]}...")
-                
-                # 🔍 详细调试：打印完整的响应结构（用于排查解析问题）
-                import json
-                print(f"🔍 ========== 完整API响应（用于调试） ==========")
-                try:
-                    full_response_str = json.dumps(result, ensure_ascii=False, indent=2)
-                    # 如果响应太长，只打印前3000字符和后500字符
-                    if len(full_response_str) > 3500:
-                        print(f"📄 完整响应（前3000字符）:\n{full_response_str[:3000]}")
-                        print(f"\n📄 完整响应（后500字符）:\n{full_response_str[-500:]}")
-                        print(f"📊 总长度: {len(full_response_str)} 字符")
-                    else:
-                        print(f"📄 完整响应:\n{full_response_str}")
-                except Exception as e:
-                    print(f"⚠️ 无法序列化完整响应: {str(e)}")
-                    print(f"📄 响应类型: {type(result)}")
-                    print(f"📄 响应内容: {str(result)[:2000]}")
-                print(f"🔍 ==========================================")
             except Exception as e:
                 text_preview = (response.text or "")[:500]
                 print(f"⚠️ yunwu.ai 返回非JSON内容，无法解析：{text_preview}")
@@ -4681,7 +4860,7 @@ def call_comfyui_api(prompt: str, style: str) -> str:
 def call_replicate_api(prompt: str, style: str) -> str:
     """调用Replicate API生成图片"""
     try:
-        import replicate
+        # import replicate
         replicate_client = replicate.Client(api_token=IMAGE_GENERATION_CONFIG.get("replicate_api_token"))
         
         # 使用Stable Diffusion模型
@@ -5230,6 +5409,15 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
         - 核心矛盾：≥80字
         - 矛盾结束条件：≥60字
 
+        ### 【主角规范信息】（仅内部使用，不展示给玩家；必填，用于后续主角形象生成）
+        主角姓名(中)：（如碇真嗣）
+        主角姓名(英)：（如Shinji Ikari）
+        性别：男性或女性
+        年龄感：少年/青年/中年/其他
+        所属作品(中)：（如新世纪福音战士）
+        所属作品(英)：（如Neon Genesis Evangelion）
+        标志性外观关键词：（6–12条逗号分隔，如黑色短发、校服、瘦削、忧郁气质）
+
         ## 【初始世界线】
         当前章节：chapter1
         主线进度：初始主线进度
@@ -5274,7 +5462,16 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
         
         ### 【游戏结束触发条件】
         游戏结束触发条件：≥90字
-        
+
+        ### 【主角规范信息】（仅内部使用，不展示给玩家；必填，用于后续主角形象生成）
+        主角姓名(中)：（如碇真嗣）
+        主角姓名(英)：（如Shinji Ikari）
+        性别：男性或女性
+        年龄感：少年/青年/中年/其他
+        所属作品(中)：（如新世纪福音战士）
+        所属作品(英)：（如Neon Genesis Evangelion）
+        标志性外观关键词：（6–12条逗号分隔，如黑色短发、校服、瘦削、忧郁气质）
+
         ## 【初始世界线】
         当前章节：chapter1
         角色初始状态：主角/配角1的想法、身体状态、深层背景解锁、深度
@@ -5356,14 +5553,21 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
             current_field_content = []  # 当前字段的内容（支持多行）
             current_conflict_content = []  # 当前章节核心矛盾的内容（支持多行）
             current_end_condition_content = []  # 当前章节矛盾结束条件的内容（支持多行）
+            # 主角规范信息（仅内部使用，不展示给玩家）
+            in_canonical_section = False
+            protagonist_canonical = {}
+            _canonical_key_map = [
+                ("主角姓名(中)", "name_zh"), ("主角姓名(英)", "name_en"), ("性别", "gender"),
+                ("年龄感", "age_range"), ("所属作品(中)", "work_zh"), ("所属作品(英)", "work_en"),
+                ("标志性外观关键词", "signature_look_keywords")
+            ]
+            current_canonical_key = None
+            current_canonical_content = []
             
-            print(f"🔍 [调试] 开始解析AI返回文本，总行数: {len(lines)}")
+            # print(f"🔍 [调试] 开始解析AI返回文本，总行数: {len(lines)}")
             for line_idx, line in enumerate(lines):
                 original_line = line
                 line = line.strip()
-                # 只在关键行显示调试信息（避免输出过多）
-                if line.startswith('第') or line.startswith('### 【章节') or ('核心矛盾' in line and current_chapter) or ('矛盾结束条件' in line and current_chapter):
-                    print(f"🔍 [调试] 行{line_idx+1}: {line[:100]}")
                 if not line:
                     # 空行：如果正在收集字段内容，继续收集（可能是多行内容的一部分）
                     if current_field and current_field_content:
@@ -5374,10 +5578,11 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                 # 检测章节
                 if line.startswith('## 【核心世界观】'):
                     core_section = True
-                    print(f"🔍 [调试] 进入核心世界观章节")
                     continue
                 elif line.startswith('## 【初始世界线】'):
-                    print(f"🔍 [调试] 进入初始世界线章节，退出核心世界观解析")
+                    # 退出主角规范信息前先保存未刷新的字段
+                    if in_canonical_section and current_canonical_key and current_canonical_content:
+                        protagonist_canonical[current_canonical_key] = ' '.join(current_canonical_content).strip().replace('**', '').replace('*', '')
                     # 保存最后一个字段的内容
                     if current_field and current_field_content:
                         content = ' '.join(current_field_content).strip()
@@ -5386,11 +5591,43 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                             core_worldview[current_field] = content
                     core_section = False
                     break
+                # 主角规范信息区块（仅内部使用）
+                if core_section and line.startswith('### 【主角规范信息】'):
+                    in_canonical_section = True
+                    current_canonical_key = None
+                    current_canonical_content = []
+                    continue
+                if in_canonical_section:
+                    if line.startswith('### 【') and '主角规范信息' not in line:
+                        in_canonical_section = False
+                        if current_canonical_key and current_canonical_content:
+                            protagonist_canonical[current_canonical_key] = ' '.join(current_canonical_content).strip().replace('**', '').replace('*', '')
+                        current_canonical_key = None
+                        current_canonical_content = []
+                    else:
+                        matched = False
+                        for cn_key, en_key in _canonical_key_map:
+                            if line.startswith(cn_key + "："):
+                                if current_canonical_key and current_canonical_content:
+                                    protagonist_canonical[current_canonical_key] = ' '.join(current_canonical_content).strip().replace('**', '').replace('*', '')
+                                val = line[len(cn_key) + 1:].strip()
+                                if val:
+                                    protagonist_canonical[en_key] = val.replace('**', '').replace('*', '')
+                                    current_canonical_key = None
+                                    current_canonical_content = []
+                                else:
+                                    current_canonical_key = en_key
+                                    current_canonical_content = []
+                                matched = True
+                                break
+                        if not matched and current_canonical_key and line and not line.startswith('##'):
+                            current_canonical_content.append(line)
+                    if in_canonical_section:
+                        continue
                 
                 if core_section:
                     # 检测子章节
                     if line.startswith('### 【'):
-                        print(f"🔍 [调试] 检测到子章节: {line}")
                         # 保存上一个字段的内容
                         if current_field and current_field_content:
                             content = ' '.join(current_field_content).strip()
@@ -5414,31 +5651,23 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                         part = line.split("游戏风格：")[1].strip()
                         current_field_content = [part] if part else []
                     elif "世界观基础设定：" in line:
-                        print(f"🔍 [调试] 检测到世界观基础设定行: {line[:100]}")
                         if current_field and current_field_content:
                             content = ' '.join(current_field_content).strip()
-                            print(f"🔍 [调试] 保存上一个字段 {current_field}，内容长度: {len(content)}")
                             content = content.replace('**', '').replace('*', '')
                             if content:
                                 core_worldview[current_field] = content
-                                print(f"🔍 [调试] 已保存字段 {current_field}: {content[:60]}...")
                         current_field = 'world_basic_setting'
                         part = line.split("世界观基础设定：")[1].strip()
                         current_field_content = [part] if part else []
-                        print(f"🔍 [调试] 开始收集世界观基础设定，初始内容: {current_field_content}")
                     elif "主角核心能力：" in line:
-                        print(f"🔍 [调试] 检测到主角核心能力行: {line[:100]}")
                         if current_field and current_field_content:
                             content = ' '.join(current_field_content).strip()
-                            print(f"🔍 [调试] 保存上一个字段 {current_field}，内容长度: {len(content)}")
                             content = content.replace('**', '').replace('*', '')
                             if content:
                                 core_worldview[current_field] = content
-                                print(f"🔍 [调试] 已保存字段 {current_field}: {content[:60]}...")
                         current_field = 'protagonist_ability'
                         part = line.split("主角核心能力：")[1].strip()
                         current_field_content = [part] if part else []
-                        print(f"🔍 [调试] 开始收集主角核心能力，初始内容: {current_field_content}")
                     # 先检查是否是其他字段的开始（需要先保存当前字段）
                     elif "游戏主线任务：" in line:
                         # 保存当前字段
@@ -5506,38 +5735,26 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                         characters[current_character]['deep_background'] = line.split('- 深层背景：')[1].strip()
                     # 章节设定（优先检查，避免被其他条件拦截）
                     if line.startswith('第') and ('章：' in line or '章' in line):
-                        print(f"🔍 [调试] 检测到章节行: {line[:100]}")
-                        print(f"🔍 [调试] 当前状态: current_field={current_field}, current_chapter={current_chapter}, core_section={core_section}")
-                        print(f"🔍 [调试] 当前字段内容: {current_field_content[:3] if current_field_content else '[]'} (共{len(current_field_content)}行)")
                         # 保存当前字段和章节矛盾内容
                         if current_field and current_field_content:
                             content = ' '.join(current_field_content).strip()
-                            print(f"🔍 [调试] 章节行触发：保存字段 {current_field}，原始内容长度: {len(content)}")
-                            print(f"🔍 [调试] 原始内容预览: {content[:100]}")
                             content = content.replace('**', '').replace('*', '')
-                            print(f"🔍 [调试] 移除Markdown后内容长度: {len(content)}")
                             if content:
                                 core_worldview[current_field] = content
-                                print(f"🔍 [调试] ✅ 已保存字段 {current_field}: {content[:60]}...")
-                            else:
-                                print(f"🔍 [调试] ⚠️ 字段 {current_field} 内容为空，未保存")
                             current_field = None
                             current_field_content = []
                         # 保存上一个章节的矛盾信息
                         if current_chapter:
-                            print(f"🔍 [调试] 保存上一章节 {current_chapter} 的矛盾信息")
                             if current_conflict_content:
                                 conflict_text = ' '.join(current_conflict_content).strip()
                                 conflict_text = conflict_text.replace('**', '').replace('*', '').strip()
                                 if conflict_text:
                                     chapters[current_chapter]['main_conflict'] = conflict_text
-                                    print(f"🔍 [调试] 已保存章节 {current_chapter} 的核心矛盾: {conflict_text[:60]}...")
                             if current_end_condition_content:
                                 end_condition_text = ' '.join(current_end_condition_content).strip()
                                 end_condition_text = end_condition_text.replace('**', '').replace('*', '').strip()
                                 if end_condition_text:
                                     chapters[current_chapter]['conflict_end_condition'] = end_condition_text
-                                    print(f"🔍 [调试] 已保存章节 {current_chapter} 的矛盾结束条件: {end_condition_text[:60]}...")
                         # 提取章节号（支持"第1章："或"第1章"格式）
                         if '章：' in line:
                             chapter_num = line.split('章：')[0].replace('第', '').strip()
@@ -5549,7 +5766,6 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                         chapters[current_chapter] = {}
                         current_conflict_content = []
                         current_end_condition_content = []
-                        print(f"🔍 [调试] 创建新章节: {current_chapter}")
                         
                         # 检查同一行是否包含矛盾信息（容错处理）
                         remaining_line = line.split('章：', 1)[1] if '章：' in line else ''
@@ -5572,102 +5788,75 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                                 if end_part:
                                     current_end_condition_content.append(end_part)
                     elif current_chapter and ('核心矛盾' in line or '矛盾：' in line):
-                        print(f"🔍 [调试] 检测到核心矛盾行 (章节: {current_chapter}): {line[:100]}")
                         # 支持多种格式：- 核心矛盾： 或 核心矛盾： 或 核心矛盾
                         conflict_text = None
                         if '- 核心矛盾：' in line:
                             conflict_text = line.split('- 核心矛盾：', 1)[1].strip()
-                            print(f"🔍 [调试] 匹配格式: - 核心矛盾：")
                         elif '核心矛盾：' in line:
                             conflict_text = line.split('核心矛盾：', 1)[1].strip()
-                            print(f"🔍 [调试] 匹配格式: 核心矛盾：")
                         elif line.strip().startswith('核心矛盾') and '：' not in line:
                             # 如果没有冒号，整行作为内容
                             conflict_text = line.replace('核心矛盾', '').strip()
-                            print(f"🔍 [调试] 匹配格式: 核心矛盾 (无冒号)")
                         
                         if conflict_text:
                             # 移除Markdown格式标记
                             conflict_text = conflict_text.replace('**', '').replace('*', '').strip()
                             if conflict_text:
                                 current_conflict_content.append(conflict_text)
-                                print(f"🔍 [调试] 已添加核心矛盾内容: {conflict_text[:60]}...")
                         elif current_conflict_content:
                             # 如果当前行没有冒号分隔，可能是多行内容的延续
                             stripped_line = line.strip()
                             if stripped_line and not stripped_line.startswith('-') and not stripped_line.startswith('第') and '：' not in stripped_line:
                                 current_conflict_content.append(stripped_line)
-                                print(f"🔍 [调试] 添加多行内容延续: {stripped_line[:60]}...")
                     elif current_chapter and ('矛盾结束条件' in line or '结束条件' in line):
-                        print(f"🔍 [调试] 检测到矛盾结束条件行 (章节: {current_chapter}): {line[:100]}")
                         # 支持多种格式
                         end_condition_text = None
                         if '- 矛盾结束条件：' in line:
                             end_condition_text = line.split('- 矛盾结束条件：', 1)[1].strip()
-                            print(f"🔍 [调试] 匹配格式: - 矛盾结束条件：")
                         elif '矛盾结束条件：' in line:
                             end_condition_text = line.split('矛盾结束条件：', 1)[1].strip()
-                            print(f"🔍 [调试] 匹配格式: 矛盾结束条件：")
                         elif '- 结束条件：' in line:
                             end_condition_text = line.split('- 结束条件：', 1)[1].strip()
-                            print(f"🔍 [调试] 匹配格式: - 结束条件：")
                         elif '结束条件：' in line:
                             end_condition_text = line.split('结束条件：', 1)[1].strip()
-                            print(f"🔍 [调试] 匹配格式: 结束条件：")
                         elif line.strip().startswith('矛盾结束条件') or line.strip().startswith('结束条件'):
                             end_condition_text = line.replace('矛盾结束条件', '').replace('结束条件', '').strip()
-                            print(f"🔍 [调试] 匹配格式: 矛盾结束条件/结束条件 (无冒号)")
                         
                         if end_condition_text:
                             # 移除Markdown格式标记
                             end_condition_text = end_condition_text.replace('**', '').replace('*', '').strip()
                             if end_condition_text:
                                 current_end_condition_content.append(end_condition_text)
-                                print(f"🔍 [调试] 已添加矛盾结束条件内容: {end_condition_text[:60]}...")
                         elif current_end_condition_content:
                             # 如果当前行没有冒号分隔，可能是多行内容的延续
                             stripped_line = line.strip()
                             if stripped_line and not stripped_line.startswith('-') and not stripped_line.startswith('第') and '：' not in stripped_line:
                                 current_end_condition_content.append(stripped_line)
-                                print(f"🔍 [调试] 添加多行内容延续: {stripped_line[:60]}...")
                     elif current_field and not line.startswith('-') and not line.startswith('第') and '：' not in line:
                         # 如果当前正在收集字段内容，且这行不是新字段的开始，则追加到当前字段
                         # 但排除以"-"开头的列表项、章节标题、和其他带冒号的字段
                         if line and not line.startswith('###'):
                             current_field_content.append(line)
-                            # 只在关键字段时输出调试信息
-                            if current_field in ['world_basic_setting', 'protagonist_ability']:
-                                print(f"🔍 [调试] 添加多行内容到 {current_field}: {line[:60]}...")
             
             # 保存最后一个字段（如果还在收集）
             if current_field and current_field_content:
-                print(f"🔍 [调试] 循环结束：保存最后一个字段 {current_field}")
                 content = ' '.join(current_field_content).strip()
-                print(f"🔍 [调试] 字段 {current_field} 原始内容长度: {len(content)}")
-                print(f"🔍 [调试] 原始内容预览: {content[:100]}")
                 content = content.replace('**', '').replace('*', '')
-                print(f"🔍 [调试] 移除Markdown后内容长度: {len(content)}")
                 if content:
                     core_worldview[current_field] = content
-                    print(f"🔍 [调试] ✅ 已保存字段 {current_field}: {content[:60]}...")
-                else:
-                    print(f"🔍 [调试] ⚠️ 字段 {current_field} 内容为空，未保存")
             
             # 保存最后一个章节的矛盾信息（如果还在收集）
             if current_chapter:
-                print(f"🔍 [调试] 循环结束，保存最后一个章节 {current_chapter} 的矛盾信息")
                 if current_conflict_content:
                     conflict_text = ' '.join(current_conflict_content).strip()
                     conflict_text = conflict_text.replace('**', '').replace('*', '').strip()
                     if conflict_text:
                         chapters[current_chapter]['main_conflict'] = conflict_text
-                        print(f"🔍 [调试] 已保存章节 {current_chapter} 的核心矛盾: {conflict_text[:60]}...")
                 if current_end_condition_content:
                     end_condition_text = ' '.join(current_end_condition_content).strip()
                     end_condition_text = end_condition_text.replace('**', '').replace('*', '').strip()
                     if end_condition_text:
                         chapters[current_chapter]['conflict_end_condition'] = end_condition_text
-                        print(f"🔍 [调试] 已保存章节 {current_chapter} 的矛盾结束条件: {end_condition_text[:60]}...")
             
             # 填充核心世界观
             core_worldview['characters'] = characters
@@ -5675,17 +5864,7 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
             core_worldview['chapters'] = chapters
             
             # 使用正则表达式回填缺失的章节矛盾信息（作为备用方案）
-            print(f"🔍 [调试] 开始正则回填，当前chapters数量: {len(chapters)}")
-            print(f"🔍 [调试] 回填前字段状态:")
-            print(f"   - game_style: {'存在' if core_worldview.get('game_style') else '缺失'}")
-            print(f"   - world_basic_setting: {'存在' if core_worldview.get('world_basic_setting') else '缺失'}")
-            print(f"   - protagonist_ability: {'存在' if core_worldview.get('protagonist_ability') else '缺失'}")
             _regex_fill_worldview(raw_content, core_worldview, chapters)
-            print(f"🔍 [调试] 正则回填完成，chapters数量: {len(chapters)}")
-            print(f"🔍 [调试] 回填后字段状态:")
-            print(f"   - game_style: {'存在' if core_worldview.get('game_style') else '缺失'}")
-            print(f"   - world_basic_setting: {'存在' if core_worldview.get('world_basic_setting') else '缺失'}")
-            print(f"   - protagonist_ability: {'存在' if core_worldview.get('protagonist_ability') else '缺失'}")
             
             # 如果字段仍然缺失，设置默认值（避免完全为空）
             if not core_worldview.get('game_style'):
@@ -5697,32 +5876,6 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
             if not core_worldview.get('protagonist_ability'):
                 core_worldview['protagonist_ability'] = "主角能力待定义"
                 print(f"⚠️ [警告] protagonist_ability缺失，已设置默认值")
-            
-            # 调试：打印解析结果
-            print(f"📊 最终解析结果:")
-            print(f"   - game_style: {core_worldview.get('game_style', '未找到')[:50] if core_worldview.get('game_style') else '未找到'}")
-            print(f"   - world_basic_setting: {core_worldview.get('world_basic_setting', '未找到')[:50] if core_worldview.get('world_basic_setting') else '未找到'}")
-            print(f"   - protagonist_ability: {core_worldview.get('protagonist_ability', '未找到')[:50] if core_worldview.get('protagonist_ability') else '未找到'}")
-            print(f"   - chapters: {list(chapters.keys())} (共{len(chapters)}个章节)")
-            if len(chapters) == 0:
-                print(f"   ⚠️ [警告] chapters为空！")
-                print(f"   🔍 [调试] 检查原始文本中是否包含章节信息...")
-                # 检查原始文本中是否包含章节关键词
-                if '第' in raw_content and '章' in raw_content:
-                    print(f"   🔍 [调试] 原始文本中包含'第'和'章'，但未解析成功")
-                    # 查找所有包含"第"和"章"的行
-                    chapter_lines = [line for line in raw_content.split('\n') if '第' in line and '章' in line]
-                    print(f"   🔍 [调试] 找到 {len(chapter_lines)} 行包含章节关键词:")
-                    for i, cl in enumerate(chapter_lines[:5]):  # 只显示前5行
-                        print(f"      {i+1}. {cl[:100]}")
-            for chap_key, chap_data in chapters.items():
-                main_conflict = chap_data.get('main_conflict', '')
-                end_condition = chap_data.get('conflict_end_condition', '')
-                print(f"     - {chap_key}: main_conflict={bool(main_conflict)} ({len(main_conflict)}字), conflict_end_condition={bool(end_condition)} ({len(end_condition)}字)")
-                if main_conflict:
-                    print(f"       矛盾内容: {main_conflict[:60]}...")
-                if end_condition:
-                    print(f"       结束条件: {end_condition[:60]}...")
             
             # 确保chapters结构完整，如果缺失则填充默认值
             if not chapters or len(chapters) == 0:
@@ -5739,6 +5892,10 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
             
             core_worldview['chapters'] = chapters
             global_state['core_worldview'] = core_worldview
+            global_state['protagonist_canonical'] = protagonist_canonical
+            # 后端仅打印「主角规范信息」解析结果
+            if protagonist_canonical:
+                print("✅ 主角规范信息解析结果：", json.dumps(protagonist_canonical, ensure_ascii=False, indent=2))
             
             # 提取初始世界线
             flow_section = False
@@ -6097,6 +6254,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
     # 确保core_worldview和flow_worldline存在
     core_worldview = global_state.get('core_worldview', {})
     flow_worldline = global_state.get('flow_worldline', {})
+    protagonist_canonical_block = _format_protagonist_canonical_for_prompt(global_state.get("protagonist_canonical") or {})
     
     # 判断是否是第一次生成（"开始游戏"选项）
     is_initial_scene = (option == "开始游戏" or option == "开始游戏")
@@ -6185,6 +6343,10 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
     4. 必须**体现**用户选择对剧情的影响
     5. 必须**确保主线任务不断推进**，不能让剧情停滞不前
     6. 必须**严格遵循选定的故事基调**，所有生成内容都必须符合基调要求
+    7. **描写主角时**必须严格遵循【主角规范信息】中的性别、年龄感与外观，使用一致的人称（他/她）与外貌描述
+    
+    ## 【主角规范信息】（描写主角性别/年龄/外貌时必须严格遵循，与主角立绘一致）
+    {protagonist_canonical_block}
     
     ## 【输入数据】：
     - 【核心世界观】：{json.dumps(core_worldview, ensure_ascii=False)}
@@ -6198,6 +6360,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
     3. 深层背景关联的选项应自然融入剧情，不要显得突兀
     4. 所有生成内容必须严格贴合选定的故事基调！
     5. 如果有已解锁的深层背景，后续剧情必须围绕这些深层背景展开，将深层背景信息自然融入主线剧情中，不要直接向玩家显示深层背景内容！
+    6. 描写主角时必须与【主角规范信息】一致（性别、年龄、外貌、人称）。
     """
     
     # 添加调试信息：打印生成的Prompt前500字符
@@ -6268,9 +6431,6 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
             if not raw_content:
                 print(f"❌ 错误：选项 {i+1} 的AI返回内容为空，将重试...")
                 continue
-            
-            # 新增：打印AI返回的原始内容，用于调试
-            print(f"🔍 选项 {i+1} AI返回的原始内容：\n{raw_content[:1000]}...")
             
             # 直接从文本中提取信息，不依赖JSON解析
             # 提取场景描述
@@ -6629,6 +6789,7 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
     # 确保core_worldview和flow_worldline存在
     core_worldview = global_state.get('core_worldview', {})
     flow_worldline = global_state.get('flow_worldline', {})
+    protagonist_canonical_block = _format_protagonist_canonical_for_prompt(global_state.get("protagonist_canonical") or {})
     
     # 判断是否是第一次生成（"开始游戏"选项）
     is_initial_scene = (option == "开始游戏" or option == "开始游戏")
@@ -6717,6 +6878,10 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
     4. 必须**体现**用户选择对剧情的影响
     5. 必须**确保主线任务不断推进**，不能让剧情停滞不前
     6. 必须**严格遵循选定的故事基调**，所有生成内容都必须符合基调要求
+    7. **描写主角时**必须严格遵循【主角规范信息】中的性别、年龄感与外观，使用一致的人称（他/她）与外貌描述
+    
+    ## 【主角规范信息】（描写主角性别/年龄/外貌时必须严格遵循，与主角立绘一致）
+    {protagonist_canonical_block}
     
     ## 【输入数据】：
     - 【核心世界观】：{json.dumps(core_worldview, ensure_ascii=False)}
@@ -6730,6 +6895,7 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
     3. 深层背景关联的选项应自然融入剧情，不要显得突兀
     4. 所有生成内容必须严格贴合选定的故事基调！
     5. 如果有已解锁的深层背景，后续剧情必须围绕这些深层背景展开，将深层背景信息自然融入主线剧情中，不要直接向玩家显示深层背景内容！
+    6. 描写主角时必须与【主角规范信息】一致（性别、年龄、外貌、人称）。
     """
     
     # 构建请求体，如果是第一次生成，增加max_tokens以确保生成足够长的内容
@@ -7288,6 +7454,7 @@ def llm_generate_local(global_state: Dict, user_interaction: str, last_options: 
     # 获取当前基调（从global_state或默认normal_ending）
     tone_key = global_state.get('tone', 'normal_ending')
     tone = TONE_CONFIGS.get(tone_key, TONE_CONFIGS['normal_ending'])
+    protagonist_canonical_block = _format_protagonist_canonical_for_prompt(global_state.get("protagonist_canonical") or {})
     
     prompt = f"""
     请基于以下设定生成后续1层剧情，**严格遵守以下要求，违反任何一条都将导致任务失败**（优先级：执行用户选择 > 主线推进 > 剧情连贯 > 格式完整）：
@@ -7355,6 +7522,10 @@ def llm_generate_local(global_state: Dict, user_interaction: str, last_options: 
     3. 必须**考虑**主角属性和游戏难度
     4. 必须**体现**用户选择对剧情的影响
     5. 必须**严格遵循选定的故事基调**，所有生成内容都必须符合基调要求
+    6. **描写主角时**必须严格遵循【主角规范信息】中的性别、年龄感与外观，使用一致的人称（他/她）与外貌描述
+    
+    ## 【主角规范信息】（描写主角性别/年龄/外貌时必须严格遵循，与主角立绘一致）
+    {protagonist_canonical_block}
     
     ## 【输入数据】：
     - 【核心世界观】：{json.dumps(global_state['core_worldview'], ensure_ascii=False)}
@@ -7368,6 +7539,7 @@ def llm_generate_local(global_state: Dict, user_interaction: str, last_options: 
     2. 必须生成部分关联角色深层背景的选项，并在【深层背景关联】中明确标记
     3. 深层背景关联的选项应自然融入剧情，不要显得突兀
     4. 所有生成内容必须严格贴合选定的故事基调！
+    5. 描写主角时必须与【主角规范信息】一致（性别、年龄、外貌、人称）。
     """
     
     # 构建请求体，不强制要求JSON格式

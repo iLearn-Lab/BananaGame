@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1770106534_3yfqew",
+  "generated_at": "2026-02-03T16:16:37.662259",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body portrait of Tsukimi Haruka, a young female character with ethereal beauty, standing centered on pure white background, no text, no symbols, no words. Traditional Chinese ink wash painting style, monochrome black, white, and gray tones, conveying a profound and poetic意境. She has an extremely high颜值, intelligent and charming aura, and a slender yet physically resilient build. Her face is delicate with refined features: deep blue eyes that hold moonlight, pale flawless skin, and a serene,清澈的笑容. A distinct crescent moon印记 graces her forehead. Her long, silver-white hair flows freely, some strands drifting as if in a gentle breeze. She wears a simple white连衣裙 with飘逸的衣摆, appearing both pure and空灵. She is barefoot (赤足). Around her neck hangs a delicate crescent moon necklace. A slender silver bracelet adorns her wrist. Her overall气质 is one of tranquil grace,融合科幻与诗意, embodying the唯美 and细腻 tone of the world. The image should emphasize her connection to the moon and her role as a \"月之子\" with月华共鸣 ability., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: ink_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "full-body portrait of Tsukimi Haruka, a young female character with ethereal beauty, standing centered on pure white background, no text, no symbols, no words. Traditional Chinese ink wash painting style, monochrome black, white, and gray tones, conveying a profound and poetic意境. She has an extremely high颜值, intelligent and charming aura, and a slender yet physically resilient build. Her face is delicate with refined features: deep blue eyes that hold moonlight, pale flawless skin, and a serene,清澈的笑容. A distinct crescent moon印记 graces her forehead. Her long, silver-white hair flows freely, some strands drifting as if in a gentle breeze. She wears a simple white连衣裙 with飘逸的衣摆, appearing both pure and空灵. She is barefoot (赤足). Around her neck hangs a delicate crescent moon necklace. A slender silver bracelet adorns her wrist. Her overall气质 is one of tranquil grace,融合科幻与诗意, embodying the唯美 and细腻 tone of the world. The image should emphasize her connection to the moon and her role as a \"月之子\" with月华共鸣 ability., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "ink_painting"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1770106534_3yfqew/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body portrait of Tsukimi Haruka, a young female character with ethereal beauty, standing centered on pure white background, no text, no symbols, no words. Traditional Chinese ink wash painting style, monochrome black, white, and gray tones, conveying a profound and poetic意境. She has an extremely high颜值, intelligent and charming aura, and a slender yet physically resilient build. Her face is delicate with refined features: deep blue eyes that hold moonlight, pale flawless skin, and a serene,清澈的笑容. A distinct crescent moon印记 graces her forehead. Her long, silver-white hair flows freely, some strands drifting as if in a gentle breeze. She wears a simple white连衣裙 with飘逸的衣摆, appearing both pure and空灵. She is barefoot (赤足). Around her neck hangs a delicate crescent moon necklace. A slender silver bracelet adorns her wrist. Her overall气质 is one of tranquil grace,融合科幻与诗意, embodying the唯美 and细腻 tone of the world. The image should emphasize her connection to the moon and her role as a \"月之子\" with月华共鸣 ability., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: ink_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-03T16:16:37.662259"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1770106534_3yfqew/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770106534_3yfqew\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-03T16:16:52.965942"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1770106534_3yfqew/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770106534_3yfqew\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-03T16:16:56.443626"
+    }
+  }
+}

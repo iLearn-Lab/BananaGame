@@ -1488,11 +1488,13 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                         with cache_lock:
                             if scene_id in pregeneration_cache:
                                 cache_entry = pregeneration_cache[scene_id]
+                                status = cache_entry.get('generation_status', {}).get(opt_idx, 'unknown')
                                 if opt_idx in cache_entry.get('layer1', {}):
                                     print(f"   ✅ 选项 {opt_idx} 的数据已在缓存中")
+                                elif status == 'cancelled':
+                                    print(f"   ℹ️ 选项 {opt_idx} 已被取消（用户已选择其他选项），数据已清理，属正常情况")
                                 else:
                                     print(f"   ⚠️ 选项 {opt_idx} 的数据不在缓存中！")
-                                status = cache_entry.get('generation_status', {}).get(opt_idx, 'unknown')
                                 print(f"   - 选项 {opt_idx} 的状态: {status}")
                     except Exception as e:
                         print(f"❌ 选项 {opt_idx} 的任务执行异常：{str(e)}")

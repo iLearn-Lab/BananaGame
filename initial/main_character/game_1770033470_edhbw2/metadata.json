@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1770033470_edhbw2",
+  "generated_at": "2026-02-02T19:59:01.501419",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot of a teenage boy standing centered on a pure white background, anime style, Japanese animation style, vibrant colors. The character is Shinji Ikari, a male adolescent with an extremely handsome face, high intelligence, and a slender, athletic build. He has deep blue short hair, pale skin, and a deeply melancholic aura. His facial features are delicate: large, expressive eyes with a profound, sorrowful depth, a straight nose, and thin lips often pressed tightly together in a nervous or pained expression. His overall demeanor is fragile and lonely, with a sense of inner turmoil. He is wearing his iconic dark blue and white high school uniform — a gakuran-style jacket with standing collar and gold buttons over a white dress shirt, paired with matching dark blue trousers. His posture is slightly hunched, shoulders tense, hands trembling slightly at his sides, embodying isolation and psychological strain. The design reflects the post-apocalyptic, psychologically oppressive tone of Neon Genesis Evangelion, with a tragic and heavy sadness underlying his appearance. No text, no symbols, no words., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "full-body shot of a teenage boy standing centered on a pure white background, anime style, Japanese animation style, vibrant colors. The character is Shinji Ikari, a male adolescent with an extremely handsome face, high intelligence, and a slender, athletic build. He has deep blue short hair, pale skin, and a deeply melancholic aura. His facial features are delicate: large, expressive eyes with a profound, sorrowful depth, a straight nose, and thin lips often pressed tightly together in a nervous or pained expression. His overall demeanor is fragile and lonely, with a sense of inner turmoil. He is wearing his iconic dark blue and white high school uniform — a gakuran-style jacket with standing collar and gold buttons over a white dress shirt, paired with matching dark blue trousers. His posture is slightly hunched, shoulders tense, hands trembling slightly at his sides, embodying isolation and psychological strain. The design reflects the post-apocalyptic, psychologically oppressive tone of Neon Genesis Evangelion, with a tragic and heavy sadness underlying his appearance. No text, no symbols, no words., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1770033470_edhbw2/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot of a teenage boy standing centered on a pure white background, anime style, Japanese animation style, vibrant colors. The character is Shinji Ikari, a male adolescent with an extremely handsome face, high intelligence, and a slender, athletic build. He has deep blue short hair, pale skin, and a deeply melancholic aura. His facial features are delicate: large, expressive eyes with a profound, sorrowful depth, a straight nose, and thin lips often pressed tightly together in a nervous or pained expression. His overall demeanor is fragile and lonely, with a sense of inner turmoil. He is wearing his iconic dark blue and white high school uniform — a gakuran-style jacket with standing collar and gold buttons over a white dress shirt, paired with matching dark blue trousers. His posture is slightly hunched, shoulders tense, hands trembling slightly at his sides, embodying isolation and psychological strain. The design reflects the post-apocalyptic, psychologically oppressive tone of Neon Genesis Evangelion, with a tragic and heavy sadness underlying his appearance. No text, no symbols, no words., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-02T19:59:01.501419"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1770033470_edhbw2/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770033470_edhbw2\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-02T19:59:19.435893"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1770033470_edhbw2/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770033470_edhbw2\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-02T19:59:22.260040"
+    }
+  }
+}
