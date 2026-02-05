@@ -746,11 +746,12 @@ def _background_fill_worldview_details(cache_key: str, user_idea: str, protagoni
 # ------------------------------
 # 修改正则表达式以支持多行内容，匹配到下一个字段标签之前
 # 使用非贪婪匹配，遇到下一个字段标签或章节标题时停止
-_REGEX_GAME_STYLE = re.compile(r"游戏风格[：:]\s*(.+?)(?=\n\s*(?:世界观基础设定|主角核心能力|游戏主线任务|游戏结束触发条件|第\d+章|##\s*【|$))", re.UNICODE | re.DOTALL | re.MULTILINE)
-_REGEX_WORLD_BASIC = re.compile(r"世界观基础设定[：:]\s*(.+?)(?=\n\s*(?:主角核心能力|游戏主线任务|游戏结束触发条件|游戏风格|第\d+章|##\s*【|$))", re.UNICODE | re.DOTALL | re.MULTILINE)
-_REGEX_PROTAGONIST_ABILITY = re.compile(r"主角核心能力[：:]\s*(.+?)(?=\n\s*(?:游戏主线任务|游戏结束触发条件|世界观基础设定|游戏风格|第\d+章|##\s*【|$))", re.UNICODE | re.DOTALL | re.MULTILINE)
-_REGEX_MAIN_QUEST = re.compile(r"游戏主线任务[：:]\s*(.+?)(?=\n\s*(?:游戏结束触发条件|世界观基础设定|主角核心能力|游戏风格|第\d+章|##\s*【|$))", re.UNICODE | re.DOTALL | re.MULTILINE)
-_REGEX_END_TRIGGER = re.compile(r"游戏结束触发条件[：:]\s*(.+?)(?=\n\s*(?:游戏主线任务|世界观基础设定|主角核心能力|游戏风格|第\d+章|##\s*【|$))", re.UNICODE | re.DOTALL | re.MULTILINE)
+_LA = r"(?:世界观基础设定|主角核心能力|游戏主线任务|游戏结束触发条件|总章节数|预计主线步数|第\d+章|##\s*【|$)"
+_REGEX_GAME_STYLE = re.compile(r"游戏风格[：:]\s*(.+?)(?=\n\s*" + _LA + r")", re.UNICODE | re.DOTALL | re.MULTILINE)
+_REGEX_WORLD_BASIC = re.compile(r"世界观基础设定[：:]\s*(.+?)(?=\n\s*" + _LA + r")", re.UNICODE | re.DOTALL | re.MULTILINE)
+_REGEX_PROTAGONIST_ABILITY = re.compile(r"主角核心能力[：:]\s*(.+?)(?=\n\s*" + _LA + r")", re.UNICODE | re.DOTALL | re.MULTILINE)
+_REGEX_MAIN_QUEST = re.compile(r"游戏主线任务[：:]\s*(.+?)(?=\n\s*" + _LA + r")", re.UNICODE | re.DOTALL | re.MULTILINE)
+_REGEX_END_TRIGGER = re.compile(r"游戏结束触发条件[：:]\s*(.+?)(?=\n\s*" + _LA + r")", re.UNICODE | re.DOTALL | re.MULTILINE)
 _REGEX_CHAPTER = re.compile(r"第(\d+)章[：:]?", re.UNICODE)
 _REGEX_CHAPTER_CONFLICT = re.compile(r"(?:- )?核心矛盾[：:]\s*(.+)", re.UNICODE | re.MULTILINE | re.DOTALL)
 _REGEX_CHAPTER_END = re.compile(r"(?:- )?矛盾结束条件[：:]\s*(.+)", re.UNICODE | re.MULTILINE | re.DOTALL)
@@ -5563,7 +5564,15 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
             ]
             current_canonical_key = None
             current_canonical_content = []
-            
+
+            def _extract_after_key(text: str, key: str) -> str:
+                """兼容全角/半角冒号提取键后内容"""
+                for sep in ("：", ":"):
+                    full = key + sep
+                    if full in text:
+                        return text.split(full, 1)[1].strip()
+                return ""
+
             # print(f"🔍 [调试] 开始解析AI返回文本，总行数: {len(lines)}")
             for line_idx, line in enumerate(lines):
                 original_line = line
@@ -5638,8 +5647,8 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                         current_field = None
                         continue
                     
-                    # 提取基本信息（支持多行内容）
-                    if "游戏风格：" in line:
+                    # 提取基本信息（支持多行内容，兼容全角/半角冒号）
+                    if "游戏风格" in line and ("：" in line or ":" in line):
                         # 保存上一个字段
                         if current_field and current_field_content:
                             content = ' '.join(current_field_content).strip()
@@ -5648,25 +5657,25 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                                 core_worldview[current_field] = content
                         # 开始新字段
                         current_field = 'game_style'
-                        part = line.split("游戏风格：")[1].strip()
+                        part = _extract_after_key(line, "游戏风格")
                         current_field_content = [part] if part else []
-                    elif "世界观基础设定：" in line:
+                    elif "世界观基础设定" in line and ("：" in line or ":" in line):
                         if current_field and current_field_content:
                             content = ' '.join(current_field_content).strip()
                             content = content.replace('**', '').replace('*', '')
                             if content:
                                 core_worldview[current_field] = content
                         current_field = 'world_basic_setting'
-                        part = line.split("世界观基础设定：")[1].strip()
+                        part = _extract_after_key(line, "世界观基础设定")
                         current_field_content = [part] if part else []
-                    elif "主角核心能力：" in line:
+                    elif "主角核心能力" in line and ("：" in line or ":" in line):
                         if current_field and current_field_content:
                             content = ' '.join(current_field_content).strip()
                             content = content.replace('**', '').replace('*', '')
                             if content:
                                 core_worldview[current_field] = content
                         current_field = 'protagonist_ability'
-                        part = line.split("主角核心能力：")[1].strip()
+                        part = _extract_after_key(line, "主角核心能力")
                         current_field_content = [part] if part else []
                     # 先检查是否是其他字段的开始（需要先保存当前字段）
                     elif "游戏主线任务：" in line:

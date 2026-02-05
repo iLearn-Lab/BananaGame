@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1770215558_739hgf",
+  "generated_at": "2026-02-04T22:35:39.383091",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot, a handsome young man standing in the center on a pure white background, no text, no symbols, no words. He has an exceptionally handsome face with sharp, intelligent features: a defined jawline, high cheekbones, and a straight nose. His eyes are bright and expressive, sparkling with wit and a hint of playful mischief, reflecting his high intelligence and charm. His lips have a subtle, confident smirk, suggesting a readiness for sharp, humorous commentary. His skin is flawless and healthy. He has a tall, athletic, and well-proportioned physique with broad shoulders and a lean build, indicating his peak physical condition and high stamina. His hair is stylishly tousled, dark in color, with a modern cut that adds to his charismatic and slightly rebellious aura. He wears a unique fusion of traditional xuanhuan (fantasy) cultivation robes with contemporary, relaxed elements. The outer robe is of high-quality, dark fabric with subtle, elegant embroidery hinting at cultivation motifs, but it is worn open casually over a simpler, well-fitted inner garment and practical trousers. The overall attire is functional yet stylish, allowing for freedom of movement, perfectly suited for his adventures in a humorous, lighthearted xuanhuan world. The style is photorealistic, with intricate details in the fabric textures, hair strands, and facial features., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: realistic\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "full-body shot, a handsome young man standing in the center on a pure white background, no text, no symbols, no words. He has an exceptionally handsome face with sharp, intelligent features: a defined jawline, high cheekbones, and a straight nose. His eyes are bright and expressive, sparkling with wit and a hint of playful mischief, reflecting his high intelligence and charm. His lips have a subtle, confident smirk, suggesting a readiness for sharp, humorous commentary. His skin is flawless and healthy. He has a tall, athletic, and well-proportioned physique with broad shoulders and a lean build, indicating his peak physical condition and high stamina. His hair is stylishly tousled, dark in color, with a modern cut that adds to his charismatic and slightly rebellious aura. He wears a unique fusion of traditional xuanhuan (fantasy) cultivation robes with contemporary, relaxed elements. The outer robe is of high-quality, dark fabric with subtle, elegant embroidery hinting at cultivation motifs, but it is worn open casually over a simpler, well-fitted inner garment and practical trousers. The overall attire is functional yet stylish, allowing for freedom of movement, perfectly suited for his adventures in a humorous, lighthearted xuanhuan world. The style is photorealistic, with intricate details in the fabric textures, hair strands, and facial features., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "realistic"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1770215558_739hgf/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot, a handsome young man standing in the center on a pure white background, no text, no symbols, no words. He has an exceptionally handsome face with sharp, intelligent features: a defined jawline, high cheekbones, and a straight nose. His eyes are bright and expressive, sparkling with wit and a hint of playful mischief, reflecting his high intelligence and charm. His lips have a subtle, confident smirk, suggesting a readiness for sharp, humorous commentary. His skin is flawless and healthy. He has a tall, athletic, and well-proportioned physique with broad shoulders and a lean build, indicating his peak physical condition and high stamina. His hair is stylishly tousled, dark in color, with a modern cut that adds to his charismatic and slightly rebellious aura. He wears a unique fusion of traditional xuanhuan (fantasy) cultivation robes with contemporary, relaxed elements. The outer robe is of high-quality, dark fabric with subtle, elegant embroidery hinting at cultivation motifs, but it is worn open casually over a simpler, well-fitted inner garment and practical trousers. The overall attire is functional yet stylish, allowing for freedom of movement, perfectly suited for his adventures in a humorous, lighthearted xuanhuan world. The style is photorealistic, with intricate details in the fabric textures, hair strands, and facial features., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: realistic\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-04T22:35:39.383091"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1770215558_739hgf/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770215558_739hgf\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-04T22:35:55.971553"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1770215558_739hgf/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770215558_739hgf\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-04T22:35:59.075153"
+    }
+  }
+}
