@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1770524181_by52hr",
+  "generated_at": "2026-02-08T12:17:33.280699",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot, a female character standing in the center on a pure white background, no text, no symbols, no words, anime style, Japanese animation style, vibrant colors, character design sheet.\n\nCharacter is Chen Quantum, a young woman with an extremely high intellect, athletic physique, and captivating charm. She has a tall, slender, and well-proportioned figure. Her face is exquisitely beautiful with delicate, refined features. Her eyes are deep and dark, almost obsidian, reflecting a sharp, analytical, and utterly calm rationality. Her expression is one of focused composure. Her skin is fair. Her hair is a striking, sleek silver-white, styled in a modern, elegant short cut that frames her face.\n\nShe wears a form-fitting, futuristic scientific research uniform in a dark, sleek material like matte black or deep blue, tailored to her athletic build. The uniform has clean lines, subtle tech detailing, and possibly glowing accents along seams or panels. On her wrist is a prominent, sophisticated quantum sensor bracelet with holographic interfaces or subtle light emissions. Her overall demeanor is one of cool, collected authority and intense mental focus, fitting for a hard sci-fi logic-based adventure., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "full-body shot, a female character standing in the center on a pure white background, no text, no symbols, no words, anime style, Japanese animation style, vibrant colors, character design sheet.\n\nCharacter is Chen Quantum, a young woman with an extremely high intellect, athletic physique, and captivating charm. She has a tall, slender, and well-proportioned figure. Her face is exquisitely beautiful with delicate, refined features. Her eyes are deep and dark, almost obsidian, reflecting a sharp, analytical, and utterly calm rationality. Her expression is one of focused composure. Her skin is fair. Her hair is a striking, sleek silver-white, styled in a modern, elegant short cut that frames her face.\n\nShe wears a form-fitting, futuristic scientific research uniform in a dark, sleek material like matte black or deep blue, tailored to her athletic build. The uniform has clean lines, subtle tech detailing, and possibly glowing accents along seams or panels. On her wrist is a prominent, sophisticated quantum sensor bracelet with holographic interfaces or subtle light emissions. Her overall demeanor is one of cool, collected authority and intense mental focus, fitting for a hard sci-fi logic-based adventure., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1770524181_by52hr/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot, a female character standing in the center on a pure white background, no text, no symbols, no words, anime style, Japanese animation style, vibrant colors, character design sheet.\n\nCharacter is Chen Quantum, a young woman with an extremely high intellect, athletic physique, and captivating charm. She has a tall, slender, and well-proportioned figure. Her face is exquisitely beautiful with delicate, refined features. Her eyes are deep and dark, almost obsidian, reflecting a sharp, analytical, and utterly calm rationality. Her expression is one of focused composure. Her skin is fair. Her hair is a striking, sleek silver-white, styled in a modern, elegant short cut that frames her face.\n\nShe wears a form-fitting, futuristic scientific research uniform in a dark, sleek material like matte black or deep blue, tailored to her athletic build. The uniform has clean lines, subtle tech detailing, and possibly glowing accents along seams or panels. On her wrist is a prominent, sophisticated quantum sensor bracelet with holographic interfaces or subtle light emissions. Her overall demeanor is one of cool, collected authority and intense mental focus, fitting for a hard sci-fi logic-based adventure., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-08T12:17:33.280699"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1770524181_by52hr/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770524181_by52hr\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-08T12:17:46.964616"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1770524181_by52hr/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770524181_by52hr\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-08T12:17:47.236933"
+    }
+  }
+}

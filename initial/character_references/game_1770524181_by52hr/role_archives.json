@@ -1,0 +1,47 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "公元2157年3月15日，凌晨3点47分。时序调查局总部大楼第47层，量子信息监控中心内警报声刺耳地响彻整个楼层。陈量子…",
+    "first_img_id": "img_20260208_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770524181_by52hr\\配角1_img_20260208_001.png",
+    "first_prompt": "「张博士-配角1」站在主控台另一侧的操作面板前，是一位穿着科研制服的技术员，表情紧张，手指在面板上飞快移动",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "「张博士-配角1」站在主控台另一侧的操作面板前，是一位穿着科研制服的技术员，表情紧张，手指在面板上飞快移动"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "配角2",
+    "aliases": [
+      "配角2"
+    ],
+    "story_background": "",
+    "first_appear_scene": "陈量子回到自己的量子实验室，银白短发在全息显示屏的蓝光下泛着冷光。他深邃的黑眸专注地扫视着面前的三维通讯界面，修身的科研…",
+    "first_img_id": "img_20260208_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770524181_by52hr\\配角2_img_20260208_002.png",
+    "first_prompt": "「张教授-配角2」出现在中间全息屏中，是一位表情急切、语气坚定的女性教授，同样穿着科研服装",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "「张教授-配角2」出现在中间全息屏中，是一位表情急切、语气坚定的女性教授，同样穿着科研服装"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "配角3",
+    "aliases": [
+      "配角3"
+    ],
+    "story_background": "",
+    "first_appear_scene": "陈量子回到自己的量子实验室，银白短发在全息显示屏的蓝光下泛着冷光。他深邃的黑眸专注地扫视着面前的三维通讯界面，修身的科研…",
+    "first_img_id": "img_20260208_003",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770524181_by52hr\\配角3_img_20260208_003.png",
+    "first_prompt": "「王研究员-配角3」出现在右侧全息屏中，是一位表情谨慎、陷入深思的男性研究员",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "「王研究员-配角3」出现在右侧全息屏中，是一位表情谨慎、陷入深思的男性研究员"
+  }
+}

@@ -2399,7 +2399,9 @@ def frontend_files(filename):
 # 启动服务
 if __name__ == "__main__":
     print("=== 文本冒险游戏API服务器 ===")
-    print("前端访问地址：http://127.0.0.1:5001")
+    print("请在浏览器地址栏输入（务必包含 http://）：")
+    print("  http://127.0.0.1:5001")
+    print("不要只输入 127.0.0.1:5001，否则会被当成搜索，无法打开游戏页面。")
     print("API端点：")
     print("  POST /generate-worldview - 生成游戏世界观")
     print("  POST /generate-option - 生成单个选项对应的剧情（支持缓存）")

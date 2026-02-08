@@ -1,0 +1,47 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "年3月15日，凌晨3点42分。新东京时空管理局总部大楼第47层，量子意识监测中心的警报声刺破了夜空的宁静。陈逸轩从冥想状…",
+    "first_img_id": "img_20260208_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770522804_w97nbb\\配角1_img_20260208_001.png",
+    "first_prompt": "为首的女性特工（女性特工-配角1）站在最前方，目光冷峻",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "为首的女性特工（女性特工-配角1）站在最前方，目光冷峻"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "配角2",
+    "aliases": [
+      "配角2"
+    ],
+    "story_background": "",
+    "first_appear_scene": "陈逸轩深吸一口气，决定完全配合调查。他的深邃黑眸中闪烁着坚定的光芒，银白短发在实验室昏暗的光线下显得格外醒目。\"我愿意配…",
+    "first_img_id": "img_20260208_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770522804_w97nbb\\配角2_img_20260208_002.png",
+    "first_prompt": "另外两名男性特工（**特工A-配角2**、**特工B-配角3**）分立两侧，同样装备精良，正操作着便携式扫描仪，仪器发出的光束扫描着陈逸轩周围的异常能量场",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "另外两名男性特工（**特工A-配角2**、**特工B-配角3**）分立两侧，同样装备精良，正操作着便携式扫描仪，仪器发出的光束扫描着陈逸轩周围的异常能量场"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "配角3",
+    "aliases": [
+      "配角3"
+    ],
+    "story_background": "",
+    "first_appear_scene": "陈逸轩深吸一口气，决定完全配合调查。他的深邃黑眸中闪烁着坚定的光芒，银白短发在实验室昏暗的光线下显得格外醒目。\"我愿意配…",
+    "first_img_id": "img_20260208_003",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770522804_w97nbb\\配角3_img_20260208_003.png",
+    "first_prompt": "另外两名男性特工（**特工A-配角2**、**特工B-配角3**）分立两侧，同样装备精良，正操作着便携式扫描仪，仪器发出的光束扫描着陈逸轩周围的异常能量场",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "另外两名男性特工（**特工A-配角2**、**特工B-配角3**）分立两侧，同样装备精良，正操作着便携式扫描仪，仪器发出的光束扫描着陈逸轩周围的异常能量场"
+  }
+}

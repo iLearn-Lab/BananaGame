@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1770520611_mqrnwo",
+  "generated_at": "2026-02-08T11:18:11.501409",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot, a beautiful Japanese woman standing in the center on a pure white background, anime style, Japanese animation style, vibrant colors, no text, no symbols, no words.\n\nShe is a young woman in her mid-twenties with an exceptionally beautiful face, high intelligence, and a powerful, athletic physique. Her skin is fair and flawless. Her most striking feature is her eyes: large, sharp, and observant, with a unique ability – the \"Eyes of Truth.\" When activated, her irises shimmer with a faint, ethereal golden light, capable of perceiving micro-expressions and emotional auras. Her expression is typically calm, analytical, and intensely focused, reflecting her logical and deductive mind. A faint, determined sharpness lingers in her gaze.\n\nHer hair is sleek, dark blue-black, styled in a sharp, chin-length bob with precise, straight-cut ends. A few strands may fall strategically near her face, emphasizing her sharp cheekbones and jawline.\n\nShe wears a modern, stylish yet practical outfit suited for investigation in Tokyo. A form-fitting, high-collared black turtleneck top made of a sleek, slightly stretchy material. Over this, she wears a tailored, knee-length grey trench coat with subtle epaulettes and a cinched waist, left open. Her lower half is clad in dark grey, slim-fit tactical pants with discreet pockets, tucked into sleek, black ankle-high combat boots with low heels for mobility. On her hands are thin, black leather gloves. The overall look is chic, professional, and conveys an aura of formidable competence, intelligence, and readiness for action, fitting for a detective navigating a world of supernatural justice and moral ambiguity., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "full-body shot, a beautiful Japanese woman standing in the center on a pure white background, anime style, Japanese animation style, vibrant colors, no text, no symbols, no words.\n\nShe is a young woman in her mid-twenties with an exceptionally beautiful face, high intelligence, and a powerful, athletic physique. Her skin is fair and flawless. Her most striking feature is her eyes: large, sharp, and observant, with a unique ability – the \"Eyes of Truth.\" When activated, her irises shimmer with a faint, ethereal golden light, capable of perceiving micro-expressions and emotional auras. Her expression is typically calm, analytical, and intensely focused, reflecting her logical and deductive mind. A faint, determined sharpness lingers in her gaze.\n\nHer hair is sleek, dark blue-black, styled in a sharp, chin-length bob with precise, straight-cut ends. A few strands may fall strategically near her face, emphasizing her sharp cheekbones and jawline.\n\nShe wears a modern, stylish yet practical outfit suited for investigation in Tokyo. A form-fitting, high-collared black turtleneck top made of a sleek, slightly stretchy material. Over this, she wears a tailored, knee-length grey trench coat with subtle epaulettes and a cinched waist, left open. Her lower half is clad in dark grey, slim-fit tactical pants with discreet pockets, tucked into sleek, black ankle-high combat boots with low heels for mobility. On her hands are thin, black leather gloves. The overall look is chic, professional, and conveys an aura of formidable competence, intelligence, and readiness for action, fitting for a detective navigating a world of supernatural justice and moral ambiguity., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1770520611_mqrnwo/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot, a beautiful Japanese woman standing in the center on a pure white background, anime style, Japanese animation style, vibrant colors, no text, no symbols, no words.\n\nShe is a young woman in her mid-twenties with an exceptionally beautiful face, high intelligence, and a powerful, athletic physique. Her skin is fair and flawless. Her most striking feature is her eyes: large, sharp, and observant, with a unique ability – the \"Eyes of Truth.\" When activated, her irises shimmer with a faint, ethereal golden light, capable of perceiving micro-expressions and emotional auras. Her expression is typically calm, analytical, and intensely focused, reflecting her logical and deductive mind. A faint, determined sharpness lingers in her gaze.\n\nHer hair is sleek, dark blue-black, styled in a sharp, chin-length bob with precise, straight-cut ends. A few strands may fall strategically near her face, emphasizing her sharp cheekbones and jawline.\n\nShe wears a modern, stylish yet practical outfit suited for investigation in Tokyo. A form-fitting, high-collared black turtleneck top made of a sleek, slightly stretchy material. Over this, she wears a tailored, knee-length grey trench coat with subtle epaulettes and a cinched waist, left open. Her lower half is clad in dark grey, slim-fit tactical pants with discreet pockets, tucked into sleek, black ankle-high combat boots with low heels for mobility. On her hands are thin, black leather gloves. The overall look is chic, professional, and conveys an aura of formidable competence, intelligence, and readiness for action, fitting for a detective navigating a world of supernatural justice and moral ambiguity., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-08T11:18:11.501409"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1770520611_mqrnwo/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770520611_mqrnwo\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-08T11:18:21.855719"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1770520611_mqrnwo/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770520611_mqrnwo\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-08T11:18:27.435229"
+    }
+  }
+}

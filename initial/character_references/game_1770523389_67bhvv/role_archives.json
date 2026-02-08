@@ -1,0 +1,47 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "春日的午后，樱花花瓣如雪花般轻柔地飘洒在圣和音乐学园的石径上。高山抚优子怀着忐忑不安的心情，踏过这条通往梦想的小路。她的…",
+    "first_img_id": "img_20260208_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770523389_67bhvv\\配角1_img_20260208_001.png",
+    "first_prompt": "「田中老师-配角1」站在主角侧后方，是一位戴着金丝眼镜、笑容和煦的中年女教师，穿着得体的教师制服",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "「田中老师-配角1」站在主角侧后方，是一位戴着金丝眼镜、笑容和煦的中年女教师，穿着得体的教师制服"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "配角2",
+    "aliases": [
+      "配角2"
+    ],
+    "story_background": "",
+    "first_appear_scene": "抚优子轻抚着胸前的音乐徽章，清澈的双眸如水般温柔地凝视着那些失去音感的学生们。她缓缓走近，栗色长发在午后的阳光下闪烁着温…",
+    "first_img_id": "img_20260208_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770523389_67bhvv\\配角2_img_20260208_002.png",
+    "first_prompt": "这是「短发女孩-配角2」",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "这是「短发女孩-配角2」"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "配角3",
+    "aliases": [
+      "配角3"
+    ],
+    "story_background": "",
+    "first_appear_scene": "抚优子轻抚着胸前的音乐徽章，清澈的双眸如水般温柔地凝视着那些失去音感的学生们。她缓缓走近，栗色长发在午后的阳光下闪烁着温…",
+    "first_img_id": "img_20260208_003",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770523389_67bhvv\\配角3_img_20260208_003.png",
+    "first_prompt": "这是「男同学-配角3」",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "这是「男同学-配角3」"
+  }
+}

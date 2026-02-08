@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1770522804_w97nbb",
+  "generated_at": "2026-02-08T11:54:37.904530",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot, a young woman standing centered on a pure white background, anime style, Japanese animation style, vibrant colors, no text, no symbols, no words. The character is Chen Yixuan, a female protagonist with an extremely high level of beauty, intelligence, physical fitness, and charisma. She has a slender and athletic build, with a tall and graceful posture. Her face features delicate, refined facial features, fair skin, and deep, penetrating black eyes that convey a sharp, analytical, and calm demeanor. Her hair is short and silvery-white, styled in a sleek, modern cut. She wears a form-fitting black uniform with a high-tech aesthetic, featuring clean lines and subtle geometric patterns. On her wrist is a sophisticated quantum computing bracelet with glowing interfaces. A pair of sleek, translucent tech goggles rest on her forehead or are worn over her eyes. Her expression is composed and focused, embodying a logical and rigorous aura fitting for a hard sci-fi setting. The overall design emphasizes a sense of advanced technology, intellectual prowess, and cool elegance., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "full-body shot, a young woman standing centered on a pure white background, anime style, Japanese animation style, vibrant colors, no text, no symbols, no words. The character is Chen Yixuan, a female protagonist with an extremely high level of beauty, intelligence, physical fitness, and charisma. She has a slender and athletic build, with a tall and graceful posture. Her face features delicate, refined facial features, fair skin, and deep, penetrating black eyes that convey a sharp, analytical, and calm demeanor. Her hair is short and silvery-white, styled in a sleek, modern cut. She wears a form-fitting black uniform with a high-tech aesthetic, featuring clean lines and subtle geometric patterns. On her wrist is a sophisticated quantum computing bracelet with glowing interfaces. A pair of sleek, translucent tech goggles rest on her forehead or are worn over her eyes. Her expression is composed and focused, embodying a logical and rigorous aura fitting for a hard sci-fi setting. The overall design emphasizes a sense of advanced technology, intellectual prowess, and cool elegance., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1770522804_w97nbb/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: full-body shot, a young woman standing centered on a pure white background, anime style, Japanese animation style, vibrant colors, no text, no symbols, no words. The character is Chen Yixuan, a female protagonist with an extremely high level of beauty, intelligence, physical fitness, and charisma. She has a slender and athletic build, with a tall and graceful posture. Her face features delicate, refined facial features, fair skin, and deep, penetrating black eyes that convey a sharp, analytical, and calm demeanor. Her hair is short and silvery-white, styled in a sleek, modern cut. She wears a form-fitting black uniform with a high-tech aesthetic, featuring clean lines and subtle geometric patterns. On her wrist is a sophisticated quantum computing bracelet with glowing interfaces. A pair of sleek, translucent tech goggles rest on her forehead or are worn over her eyes. Her expression is composed and focused, embodying a logical and rigorous aura fitting for a hard sci-fi setting. The overall design emphasizes a sense of advanced technology, intellectual prowess, and cool elegance., full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-08T11:54:37.904530"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1770522804_w97nbb/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770522804_w97nbb\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-08T11:54:51.372602"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1770522804_w97nbb/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1770522804_w97nbb\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-08T11:54:54.271097"
+    }
+  }
+}

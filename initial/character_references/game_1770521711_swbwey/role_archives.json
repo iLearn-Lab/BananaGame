@@ -1,0 +1,17 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "年10月的东京，秋雨绵绵。东应大学法学部的教学楼里，夜神月正从刑法课堂中走出，手中紧握着刚刚完成的期中考试卷。走廊里弥漫…",
+    "first_img_id": "img_20260208_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1770521711_swbwey\\配角1_img_20260208_001.png",
+    "first_prompt": "同班的「田中-配角1」走过来搭话，脸上带着紧张表情，是典型的日本男大学生形象",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "同班的「田中-配角1」走过来搭话，脸上带着紧张表情，是典型的日本男大学生形象"
+  }
+}
