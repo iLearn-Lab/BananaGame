@@ -5,7 +5,7 @@ import re
 from typing import Dict, List
 
 from src.config import AI_API_CONFIG
-from src.constants import TONE_CONFIGS
+from src.constants import TONE_CONFIGS, get_tone_prompt_block
 from src.llm.api import call_ai_api
 from src.wiki.lookup import _format_protagonist_canonical_for_prompt
 
@@ -48,11 +48,7 @@ def llm_generate_local(global_state: Dict, user_interaction: str, last_options: 
 
     ## 【故事基调要求】：
     1. **必须严格遵循以下故事基调要求**：
-       - 基调名称：{tone['name']}
-       - 基调描述：{tone['description']}
-       - 语言特征：{tone['language_features']}
-       - 结局导向：{tone['ending_orientation']}
-       - 禁忌内容：{tone['taboo_content']}
+       {get_tone_prompt_block(tone)}
        - 所有生成内容必须严格贴合上述基调要求！
 
     ## 【最高优先级要求】：绝对执行用户选择，100%服从用户指令
