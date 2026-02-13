@@ -22,7 +22,7 @@ def optimize_image_prompt_with_llm(
     available_supporting_roles_for_tagging: List[Dict] = None
 ) -> str:
     """
-    使用LLM（deepseek-v3.2）优化图片生成提示词
+    使用 LLM（由 AI_API_CONFIG.model 配置，默认 claude-opus-4-6）优化图片生成提示词
     """
     try:
         visual_context = global_state.get('_visual_context') if isinstance(global_state, dict) else None
@@ -244,7 +244,7 @@ def optimize_image_prompt_with_llm(
         }
 
         request_body = {
-            "model": "deepseek-v3.2",
+            "model": AI_API_CONFIG.get("model", "claude-opus-4-6"),
             "messages": [{"role": "user", "content": llm_prompt}],
             "temperature": 0.7,
             "max_tokens": 2000
@@ -539,7 +539,7 @@ def optimize_main_character_prompt_with_llm(
         }
 
         request_body = {
-            "model": "deepseek-v3.2",
+            "model": AI_API_CONFIG.get("model", "claude-opus-4-6"),
             "messages": [{"role": "user", "content": llm_prompt}],
             "temperature": 0.7,
             "max_tokens": 2000
