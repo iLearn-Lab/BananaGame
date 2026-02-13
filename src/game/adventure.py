@@ -81,44 +81,25 @@ class TextAdventureGame:
     
     def _select_tone(self):
         """
-        基调选择环节：可选AI随机/玩家手动选择
+        基调选择环节：玩家手动选择故事基调（CLI 用，前端有独立界面）
         """
-        print("\n🎨 请选择故事基调：")
-        print("1. AI随机选择")
-        print("2. 手动选择")
-        
+        print("\n🎨 可选基调：")
+        tone_list = list(TONE_CONFIGS.items())
+        for idx, (key, tone) in enumerate(tone_list, 1):
+            print(f"   {idx}. {tone['name']} - {tone['description'][:30]}...")
+
         while True:
-            choice = safe_input("请选择操作（输入序号1-2，默认1随机）：", default="1")
-            if choice == "1":
-                # AI随机选择基调
-                import random
-                tone_key = random.choice(list(TONE_CONFIGS.keys()))
-                tone = TONE_CONFIGS[tone_key]
-                print(f"\n🎲 AI随机选择了基调：{tone['name']}")
-                print(f"📝 基调描述：{tone['description']}")
-                return tone_key
-            elif choice == "2":
-                # 手动选择基调
-                print("\n🎨 可选基调：")
-                tone_list = list(TONE_CONFIGS.items())
-                for idx, (key, tone) in enumerate(tone_list, 1):
-                    print(f"   {idx}. {tone['name']} - {tone['description'][:30]}...")
-                
-                while True:
-                    try:
-                        tone_choice_str = safe_input(f"请选择基调（输入序号1-{len(tone_list)}，默认1）：", default="1")
-                        tone_choice = int(tone_choice_str)
-                        if 1 <= tone_choice <= len(tone_list):
-                            tone_key, tone = tone_list[tone_choice-1]
-                            print(f"\n✅ 你选择了基调：{tone['name']}")
-                            print(f"📝 基调描述：{tone['description']}")
-                            return tone_key
-                        else:
-                            print(f"请输入1-{len(tone_list)}之间的数字！")
-                    except ValueError:
-                        print("请输入有效的数字序号！")
-            else:
-                print("请输入1-2之间的数字！")
+            try:
+                tone_choice_str = safe_input(f"请选择基调（输入序号1-{len(tone_list)}，默认1）：", default="1")
+                tone_choice = int(tone_choice_str)
+                if 1 <= tone_choice <= len(tone_list):
+                    tone_key, tone = tone_list[tone_choice - 1]
+                    print(f"\n✅ 你选择了基调：{tone['name']}")
+                    print(f"📝 基调描述：{tone['description']}")
+                    return tone_key
+                print(f"请输入1-{len(tone_list)}之间的数字！")
+            except ValueError:
+                print("请输入有效的数字序号！")
 
     def _show_game_settings(self):
         if not self.global_state:

@@ -20,43 +20,79 @@
 
 ## 二、入口与运行方式
 
-### main.py（CLI 精简入口）
+可以这样理解：项目里有三种「启动方式」，分别对应不同的使用场景。
 
-- **用途**：在项目根目录执行 `python main.py` 时，启动**命令行版**文本冒险游戏。
-- **具体行为**：
-  - `_ROOT = os.path.dirname(os.path.abspath(__file__))`：取当前文件所在目录的绝对路径，即**项目根目录**（即包含 `src/`、`main.py` 的那一层）。
-  - `if _ROOT not in sys.path: sys.path.insert(0, _ROOT)`：把项目根插入到 **sys.path** 的最前面。  
-    **sys.path** 是 Python 解析 `import` 时查找模块的搜索路径列表；只有把项目根加进去，后面的 `from src.game.adventure import ...` 才能正确找到 `src` 包（否则会报 `ModuleNotFoundError: No module named 'src'`）。  
-    用 `insert(0, _ROOT)` 是为了优先从本项目根目录解析，避免同名 `src` 包来自其它环境。
-  - 然后 `from src.game.adventure import TextAdventureGame`，在 `if __name__ == "__main__"` 里实例化并调用 `game.start()`，进入主菜单与交互循环。
+---
 
-### main2.py（聚合入口，供 CLI 与 Web 复用）
+### main.py：命令行版游戏入口
 
-- **用途**：一是可直接运行 `python main2.py` 玩 CLI 版（与 main.py 效果等价）；二是被 **game_server.py** 通过 `from main2 import ...` 引用，把世界观生成、选项生成、结局、场景图、主角图等逻辑复用到 Web 后端。
-- **具体行为**：
-  - **编码**：`if sys.platform == 'win32': os.environ['PYTHONIOENCODING'] = 'utf-8'`。在 Windows 下把标准输入输出的编码设为 UTF-8，避免在终端里出现 GBK 乱码或 `input()` 报错。
-  - **依赖**：文件中大量使用 `from src.xxx import ...`。因此运行或导入 main2 时，**当前工作目录**必须是项目根，或者项目根已在 **sys.path** 里（例如先执行过 main.py、或在项目根执行 `python main2.py`），这样 `src` 才能被找到。
-  - **入口**：文件末尾 `if __name__ == "__main__": game = TextAdventureGame(); game.start()`，与 main.py 一样启动同一套游戏主循环。
+**一句话**：双击或执行 `python main.py`，就会在终端里打开一个文字版的冒险游戏。
 
-### game_server.py（Web 后端）
+**它具体做了啥**：
 
-- **用途**：用 `python game_server.py` 启动 **Flask** 服务后，浏览器访问前端页面，通过 REST API 完成世界观生成、选项/预生成、存档、结局、场景图与主角图等，实现 **Web 版**游戏。
-- **具体行为**：
-  - 同样在 Windows 下设置 `os.environ['PYTHONIOENCODING'] = 'utf-8'`，保证子进程或控制台 I/O 的编码一致。
-  - **from main2 import** 一系列函数（如 `llm_generate_global`、`_generate_single_option`、`generate_all_options`、`modify_ending_content`、`generate_scene_image`、`generate_game_id`、`generate_main_character_image` 等）。  
-    因此 **game_server 不直接 import src**，而是通过 main2 这一层拿到所有生成能力；启动时必须在**项目根目录**执行 `python game_server.py`，这样 Python 解释器会把当前目录（项目根）加入 sys.path，导入 main2 时 main2 里的 `from src...` 才能成功。
-  - 提供路由：`/generate-worldview`、`/generate-option`、`/pregenerate-next-layers`、`/get-pregenerated-layer2`、`/save-game`、`/load-game`、`/list-saves`、`/delete-save`、`/generate-ending`、`/generate-scene-image`、主角图与静态资源等；内部用预生成缓存和线程锁保证并发安全。
+1. **找到项目根目录**  
+   用 `os.path.dirname(os.path.abspath(__file__))` 算出 main.py 所在的文件夹（也就是项目根，里面有 `src/`、`main.py` 等）。
+
+2. **告诉 Python 去那儿找代码**  
+   Python 在执行 `from src.game.adventure import ...` 时，会在一个叫 `sys.path` 的「搜索列表」里找 `src` 这个包。  
+   如果项目根不在这个列表里，就会报错「找不到 src」。所以代码里会把项目根**插到列表最前面**，保证优先用本项目的 `src`，而不是别的项目里的同名文件夹。
+
+3. **启动游戏**  
+   导入 `TextAdventureGame` 后，创建游戏对象并调用 `game.start()`，进入主菜单和剧情循环。
+
+---
+
+### main2.py：游戏逻辑的「大本营」
+
+**一句话**：main2.py 把世界观生成、选项生成、结局、图片等所有核心逻辑都集中在一起，既可以自己直接跑游戏，也可以被 Web 服务器拿去用。
+
+**它具体做了啥**：
+
+1. **解决 Windows 乱码**  
+   在 Windows 上，终端默认用 GBK，容易乱码。代码里会设置成用 UTF-8，这样中文能正常显示。
+
+2. **依赖 src 里的代码**  
+   main2 里大量使用了 `from src.xxx import ...`，所以必须从**项目根目录**运行（或者项目根已经在 Python 的搜索路径里），否则找不到 `src`。
+
+3. **两种用法**  
+   - 直接运行 `python main2.py`：效果和 main.py 一样，启动命令行版游戏。  
+   - 被 game_server 导入：Web 服务器通过 `from main2 import ...` 拿到各种生成函数，用来处理浏览器发来的请求。
+
+---
+
+### game_server.py：网页版游戏的后台
+
+**一句话**：执行 `python game_server.py` 会启动一个网站服务器，你在浏览器里打开页面就能玩网页版的冒险游戏。
+
+**它具体做了啥**：
+
+1. **同样处理 Windows 乱码**  
+   和 main2 一样，在 Windows 下设置 UTF-8，避免中文出问题。
+
+2. **从 main2 借功能，不直接碰 src**  
+   game_server 不直接导入 `src`，而是 `from main2 import` 一大堆函数（生成世界观、生成选项、生成图片、存档读档等）。  
+   所以**必须**在项目根目录执行 `python game_server.py`，这样 Python 才能正确找到 main2，main2 再去找 src，一环扣一环。
+
+3. **提供各种接口**  
+   浏览器发请求（比如「生成一个选项」「保存游戏」「加载存档」），game_server 就调用从 main2 导入的函数，把结果返回给前端。同时还负责把 HTML、JS、CSS 等静态文件发给浏览器。
+
+---
 
 ### 启动脚本
 
-- **启动游戏.bat**（Windows）、**启动游戏.sh**（Linux/macOS）：在项目根目录一键执行启动命令（通常是启动 Web 服务或 CLI），具体以脚本内容为准。
+- **启动游戏.bat**（Windows）、**启动游戏.sh**（Linux/macOS）  
+  双击或在终端执行，就会自动帮你启动游戏（一般是 Web 版或命令行版，看脚本里写的是啥）。
 
-| 文件 | 作用 | 使用场景 |
-|------|------|----------|
-| **main.py** | 设置 `sys.path` 保证能 `import src`，然后启动 `TextAdventureGame`。 | `python main.py` → **CLI 游戏**。 |
-| **main2.py** | 设置 Windows 下 UTF-8 编码；聚合所有 `src` 能力；可直接启动游戏，或被 game_server 导入。 | 直接运行 → CLI；被 **game_server.py** 引用 → Web 后端逻辑。 |
-| **game_server.py** | Flask 服务，从 main2 导入生成与存档等函数，提供 REST API 与静态资源。 | `python game_server.py` → **Web 版**（浏览器访问）。 |
-| **启动游戏.bat** / **.sh** | 一键启动（服务或 CLI）。 | 本地快速启动。 |
+---
+
+### 简单对照表
+
+| 文件 | 一句话概括 | 怎么用 |
+|------|------------|--------|
+| **main.py** | 帮 Python 找到 `src`，然后启动命令行游戏。 | `python main.py` → 终端里玩游戏 |
+| **main2.py** | 游戏逻辑的大本营，自己也能跑，也能被 Web 服务器拿去用。 | 直接运行 → 命令行版；被 game_server 导入 → Web 版逻辑 |
+| **game_server.py** | 网站服务器，处理浏览器的请求，把游戏搬到网页上。 | `python game_server.py` → 浏览器里玩游戏 |
+| **启动游戏.bat / .sh** | 一键启动。 | 双击或执行脚本即可 |
 
 ---
 
