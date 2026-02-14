@@ -8,6 +8,7 @@ from typing import Dict
 from src.config import AI_API_CONFIG
 from src.constants import PERFORMANCE_OPTIMIZATION, TONE_CONFIGS
 from src.llm.api import call_ai_api
+from src.llm.council_core import run_full_council_sync
 from src.worldview.parser import _regex_fill_worldview
 from src.worldview.template import _background_fill_worldview_details
 
@@ -173,20 +174,20 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
     for attempt in range(max_retries):
         try:
             print(f"📝 尝试生成世界观（第{attempt+1}/{max_retries}次）...")
-            # 调用带重试的API函数
-            response_data = call_ai_api(request_body)
-            # 安全访问嵌套键
-            choices = response_data.get("choices", [])
-            if not choices or len(choices) == 0:
-                print("❌ 错误：AI返回内容格式异常，缺少choices字段，将重试...")
-                continue
-
-            message = choices[0].get("message", {})
-            if not message:
-                print("❌ 错误：AI返回内容格式异常，缺少message字段，将重试...")
-                continue
-
-            raw_content = message.get("content", "").strip()
+            # 完整版用 council 群体智能；核心速写仍用单模型
+            if staged_mode:
+                response_data = call_ai_api(request_body)
+                choices = response_data.get("choices", [])
+                if not choices or len(choices) == 0:
+                    print("❌ 错误：AI返回内容格式异常，缺少choices字段，将重试...")
+                    continue
+                message = choices[0].get("message", {})
+                if not message:
+                    print("❌ 错误：AI返回内容格式异常，缺少message字段，将重试...")
+                    continue
+                raw_content = message.get("content", "").strip()
+            else:
+                raw_content = run_full_council_sync(prompt)
             if not raw_content:
                 print("❌ 错误：AI返回内容为空，将重试...")
                 continue

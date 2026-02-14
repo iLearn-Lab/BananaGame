@@ -60,7 +60,7 @@ from src.worldview.template import (
 )
 from src.worldview.parser import _regex_fill_worldview
 from src.llm.global_gen import llm_generate_global, _get_default_worldview
-from src.llm.local_gen import llm_generate_local, _get_default_scene
+from src.llm.local_gen import llm_generate_local, llm_generate_local_council, _get_default_scene
 from src.characters.paths import generate_game_id, ensure_main_character_dir, ensure_character_references_dir
 from src.characters.archives import (
     _load_role_archives,

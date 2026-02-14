@@ -15,6 +15,19 @@ AI_API_CONFIG = {
 }
 
 # ------------------------------
+# Council 群体智能（多模型讨论）
+# 用于世界观完整版、剧情每 2 轮整合
+# ------------------------------
+_council_env = os.getenv("COUNCIL_MODELS")
+if _council_env:
+    COUNCIL_MODELS = [m.strip() for m in _council_env.split(",") if m.strip()]
+else:
+    COUNCIL_MODELS = [
+        os.getenv("Camera_Analyst_MODEL", "gpt-4o"),
+    ]
+CHAIRMAN_MODEL = os.getenv("CHAIRMAN_MODEL") or os.getenv("Camera_Analyst_MODEL", "gpt-4o")
+
+# ------------------------------
 # 视觉内容生成API配置
 # ------------------------------
 IMAGE_GENERATION_CONFIG = {

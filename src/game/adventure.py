@@ -9,7 +9,7 @@ from typing import Dict, List, Tuple, Optional
 from src.constants import DIFFICULTY_SETTINGS, TONE_CONFIGS, PROTAGONIST_ATTR_OPTIONS
 from src.utils.io_utils import safe_input
 from src.llm.global_gen import llm_generate_global
-from src.llm.local_gen import llm_generate_local
+from src.llm.local_gen import llm_generate_local, llm_generate_local_council
 from src.story.ending import (
     get_video_task_status,
     modify_ending_tone,
@@ -36,7 +36,10 @@ class TextAdventureGame:
         self.generation_cancelled = False  # 生成取消标志
         self.skip_images: bool = False  # 是否跳过图片生成以加速
         self.max_autosaves: int = 5  # 自动存档最多保留数量
-        
+        # 每2轮 council 整合：上一轮用单模型时的场景与选择，下一轮用 council 整合
+        self.last_single_model_scene: Optional[str] = None
+        self.last_single_model_choice: Optional[str] = None
+
         # 确保存档目录存在
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
@@ -776,7 +779,7 @@ class TextAdventureGame:
                     self._check_info_gap_threshold()
                 else:
                     print("❌ 错误：缓存中未找到对应的选项数据")
-                    # 使用原始方式生成剧情
+                    # 使用原始方式生成剧情（每2轮用 council 整合）
                     print("✅ AI正在生成后续剧情...")
                     
                     # 删除当前场景的旧缓存，释放内存
@@ -784,8 +787,23 @@ class TextAdventureGame:
                         del self.scene_cache[self.current_scene_id]
                         print(f"✅ 已删除旧场景缓存：{self.current_scene_id}")
                     
-                    local_scenes = llm_generate_local(self.global_state, user_input, self.last_options)
-                    
+                    selected_option = self.last_options[selected_option_idx] if 0 <= selected_option_idx < len(self.last_options) else user_input
+                    if self.last_single_model_scene and self.last_single_model_choice:
+                        local_scenes = llm_generate_local_council(
+                            self.global_state,
+                            self.last_single_model_scene,
+                            self.last_single_model_choice,
+                            selected_option,
+                            self.last_options,
+                        )
+                        self.last_single_model_scene = None
+                        self.last_single_model_choice = None
+                    else:
+                        local_scenes = llm_generate_local(self.global_state, user_input, self.last_options)
+                        if local_scenes:
+                            self.last_single_model_scene = local_scenes[0].get("scene", "")
+                            self.last_single_model_choice = selected_option
+
                     if local_scenes:
                         # 展示剧情
                         for i, scene in enumerate(local_scenes, 1):
@@ -884,7 +902,7 @@ class TextAdventureGame:
                                         deep_bg = char_data.get('deep_background', '')
                                         print(f"\n🔓 解锁角色深层背景：{char_name} → {deep_bg}")
             else:
-                # 使用原始方式生成剧情
+                # 使用原始方式生成剧情（每2轮用 council 整合）
                 print("✅ AI正在生成后续剧情...")
                 
                 # 删除当前场景的旧缓存，释放内存
@@ -892,8 +910,23 @@ class TextAdventureGame:
                     del self.scene_cache[self.current_scene_id]
                     print(f"✅ 已删除旧场景缓存：{self.current_scene_id}")
                 
-                local_scenes = llm_generate_local(self.global_state, user_input, self.last_options)
-                
+                selected_option = self.last_options[selected_option_idx] if 0 <= selected_option_idx < len(self.last_options) else user_input
+                if self.last_single_model_scene and self.last_single_model_choice:
+                    local_scenes = llm_generate_local_council(
+                        self.global_state,
+                        self.last_single_model_scene,
+                        self.last_single_model_choice,
+                        selected_option,
+                        self.last_options,
+                    )
+                    self.last_single_model_scene = None
+                    self.last_single_model_choice = None
+                else:
+                    local_scenes = llm_generate_local(self.global_state, user_input, self.last_options)
+                    if local_scenes:
+                        self.last_single_model_scene = local_scenes[0].get("scene", "")
+                        self.last_single_model_choice = selected_option
+
                 if local_scenes:
                     # 展示剧情
                     for i, scene in enumerate(local_scenes, 1):

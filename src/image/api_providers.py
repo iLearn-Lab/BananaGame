@@ -953,7 +953,8 @@ def generate_scene_image(
     style: str = "default",
     use_cache: bool = True,
     viewport_width: int = None,
-    viewport_height: int = None
+    viewport_height: int = None,
+    cache_key_suffix: str = None,
 ) -> Dict:
     """
     生成场景图片（支持本地缓存）
@@ -963,6 +964,7 @@ def generate_scene_image(
     :param use_cache: 是否使用本地缓存（默认True，下载图片到本地避免OSS URL失效）
     :param viewport_width: 视口宽度（可选，用于按视口宽高比生成图片）
     :param viewport_height: 视口高度（可选，用于按视口宽高比生成图片）
+    :param cache_key_suffix: 可选，参与缓存键（如 scene_id_optionIdx），避免不同选项复用同一缓存导致两张图相同
     :return: 包含图片URL和元数据的字典
     """
     # 检查是否配置了图片生成API
@@ -1196,7 +1198,8 @@ def generate_scene_image(
                             prefix_lines.append(f"Image {prev_idx}: Previous scene image (for visual continuity - maintain consistent style, lighting, and character appearance).")
                         prefix_prompt = "\n".join(prefix_lines) + "\n\n"
                         full_prompt = prefix_prompt + prompt + f", aspect ratio {image_width}:{image_height}"
-                        image_url = call_gemini_img2img(full_prompt, all_reference_images)
+                        # 传入 cache_key_suffix，使里层 save_base64_image 也按选项区分，避免“上一次的图当成本次的”
+                        image_url = call_gemini_img2img(full_prompt, all_reference_images, cache_key_suffix=cache_key_suffix)
                     else:
                         print(f"⚠️ 当前模型 {model} 不支持多张参考图，使用文生图")
                         image_url = call_yunwu_image_api(size_prompt, style)
@@ -1253,6 +1256,9 @@ def generate_scene_image(
                     cache_key_seed = f"{provider}_{style}_{scene_description}_{ref_hash}_{image_width}x{image_height}"
                 else:
                     cache_key_seed = f"{provider}_{style}_{scene_description}_{image_width}x{image_height}"
+                # 选项级唯一标识，避免多选项并行时共用同一缓存键导致“前后两张图相同”
+                if cache_key_suffix:
+                    cache_key_seed = f"{cache_key_seed}_{cache_key_suffix}"
                 prompt_hash = hashlib.md5(cache_key_seed.encode()).hexdigest()
                 cache_path = Path(IMAGE_CACHE_DIR) / f"{prompt_hash}.png"
                 
@@ -1302,51 +1308,23 @@ def generate_scene_image(
                                     "cached": True
                                 }
                             else:
-                                # 复制到新的hash名称
-                                import shutil
-                                try:
-                                    print(f"🔄 开始复制图片：{existing_path} -> {cache_path}")
-                                    shutil.copy2(existing_path, cache_path)
-                                    print(f"✅ 从现有缓存复制图片到新hash：{cache_path}")
-                                    
-                                    # 验证文件是否成功复制
-                                    if not cache_path.exists():
-                                        raise FileNotFoundError(f"复制后的文件不存在：{cache_path}")
-                                    
-                                    print(f"✅ 图片复制完成，文件大小：{cache_path.stat().st_size} 字节")
-                                    if first_appearance_pending and game_id:
-                                        try:
-                                            for p in first_appearance_pending:
-                                                archive_supporting_role_first_appearance(game_id, p, str(cache_path), prompt)
-                                        except Exception as ar_err:
-                                            print(f"⚠️ 配角初登场建档失败：{ar_err}")
-                                    return {
-                                        "url": f"/image_cache/{prompt_hash}.png",
-                                        "prompt": prompt,
-                                        "style": style,
-                                        "width": image_width,
-                                        "height": image_height,
-                                        "cached": True
-                                    }
-                                except Exception as copy_err:
-                                    print(f"❌ 复制图片时发生错误：{copy_err}")
-                                    import traceback
-                                    traceback.print_exc()
-                                    print(f"⚠️ 复制失败，尝试使用原始缓存路径")
-                                    if first_appearance_pending and game_id:
-                                        try:
-                                            for p in first_appearance_pending:
-                                                archive_supporting_role_first_appearance(game_id, p, str(existing_path), prompt)
-                                        except Exception as ar_err:
-                                            print(f"⚠️ 配角初登场建档失败：{ar_err}")
-                                    return {
-                                        "url": f"/image_cache/{existing_hash}.png",
-                                        "prompt": prompt,
-                                        "style": style,
-                                        "width": image_width,
-                                        "height": image_height,
-                                        "cached": True
-                                    }
+                                # API 返回的本地路径与当前请求的缓存键不一致（例如本请求用了 cache_key_suffix）。
+                                # 不复制到 prompt_hash，避免覆盖其他选项的图片导致“两张图相同”；直接返回本次生成结果的路径。
+                                print(f"✅ 使用本次生成结果（与缓存键不同，不复制避免覆盖）：{existing_path}")
+                                if first_appearance_pending and game_id:
+                                    try:
+                                        for p in first_appearance_pending:
+                                            archive_supporting_role_first_appearance(game_id, p, str(existing_path), prompt)
+                                    except Exception as ar_err:
+                                        print(f"⚠️ 配角初登场建档失败：{ar_err}")
+                                return {
+                                    "url": f"/image_cache/{existing_hash}.png",
+                                    "prompt": prompt,
+                                    "style": style,
+                                    "width": image_width,
+                                    "height": image_height,
+                                    "cached": True
+                                }
                     # 如果相对路径对应的文件不存在，抛出错误
                     raise ValueError(f"本地缓存路径对应的文件不存在：{image_url}")
                 

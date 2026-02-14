@@ -1,13 +1,81 @@
 # -*- coding: utf-8 -*-
-"""LLM 本地剧情生成：llm_generate_local、_get_default_scene。"""
+"""LLM 本地剧情生成：llm_generate_local、llm_generate_local_council（每2轮群体智能整合）、_get_default_scene。"""
 import json
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from src.config import AI_API_CONFIG
 from src.constants import TONE_CONFIGS
 from src.llm.api import call_ai_api
+from src.llm.council_core import run_full_council_sync
 from src.wiki.lookup import _format_protagonist_canonical_for_prompt
+
+
+def _parse_scene_from_raw(raw_content: str) -> Optional[Dict]:
+    """从单段剧情生成的原始文本中解析出 scene、options、flow_update、deep_background_links。"""
+    if not raw_content or not raw_content.strip():
+        return None
+    scene = ""
+    options = []
+    flow_update = {
+        "characters": {},
+        "environment": {},
+        "quest_progress": "",
+        "chapter_conflict_solved": False
+    }
+    deep_background_links = {}
+    lines = raw_content.split("\n")
+
+    for line in lines:
+        if "【场景】：" in line:
+            scene = line.split("【场景】：")[1].strip()
+            break
+
+    options_start = False
+    for line in lines:
+        if "【选项】：" in line:
+            options_start = True
+            continue
+        if options_start and line.startswith("【世界线更新】"):
+            break
+        if options_start and line.strip():
+            option = re.sub(r"^\s*\d+\.?\s*", "", line.strip())
+            if option:
+                options.append(option)
+
+    update_start = False
+    for line in lines:
+        if "【世界线更新】：" in line:
+            update_start = True
+            continue
+        if update_start and line.startswith("【深层背景关联】"):
+            break
+        if update_start:
+            if "主线进度：" in line:
+                flow_update["quest_progress"] = line.split("主线进度：")[1].strip()
+            elif "章节矛盾：" in line:
+                flow_update["chapter_conflict_solved"] = line.split("章节矛盾：")[1].strip() == "已解决"
+
+    links_start = False
+    for line in lines:
+        if "【深层背景关联】：" in line:
+            links_start = True
+            continue
+        if links_start and line.strip() and "：" in line:
+            parts = line.split("：", 1)
+            if len(parts) >= 2:
+                option_part, char_name = parts[0].strip(), parts[1].strip()
+                match = re.search(r"选项(\d+)", option_part)
+                if match:
+                    option_idx = int(match.group(1)) - 1
+                    deep_background_links[option_idx] = char_name
+
+    return {
+        "scene": scene,
+        "options": options,
+        "flow_update": flow_update,
+        "deep_background_links": deep_background_links,
+    }
 
 
 def llm_generate_local(global_state: Dict, user_interaction: str, last_options: List[str]) -> List[Dict]:
@@ -159,79 +227,13 @@ def llm_generate_local(global_state: Dict, user_interaction: str, last_options: 
                 print("❌ 错误：AI返回内容为空，将重试...")
                 continue
 
-            scene = ""
-            options = []
-            flow_update = {
-                "characters": {},
-                "environment": {},
-                "quest_progress": "",
-                "chapter_conflict_solved": False
-            }
-            deep_background_links = {}
-
-            lines = raw_content.split('\n')
-
-            for line in lines:
-                if "【场景】：" in line:
-                    scene = line.split("【场景】：")[1].strip()
-                    break
-
-            options_start = False
-            for line in lines:
-                if "【选项】：" in line:
-                    options_start = True
+            scene_data = _parse_scene_from_raw(raw_content)
+            if not scene_data:
+                print("❌ 错误：无法从AI返回内容中解析出剧情结构，将重试...")
+                if attempt < 2:
                     continue
-                if options_start and line.startswith("【世界线更新】"):
-                    break
-                if options_start and line.strip():
-                    if line.strip():
-                        option = re.sub(r'^\s*\d+\.?\s*', '', line.strip())
-                        options.append(option)
-
-            update_start = False
-            for line in lines:
-                if "【世界线更新】：" in line:
-                    update_start = True
-                    continue
-                if update_start and line.startswith("【深层背景关联】"):
-                    break
-                if update_start:
-                    if "角色变化：" in line:
-                        pass
-                    elif "环境变化：" in line:
-                        pass
-                    elif "主线进度：" in line:
-                        quest_progress = line.split("主线进度：")[1].strip()
-                        flow_update["quest_progress"] = quest_progress
-                    elif "章节矛盾：" in line:
-                        chapter_status = line.split("章节矛盾：")[1].strip()
-                        if chapter_status == "已解决":
-                            flow_update["chapter_conflict_solved"] = True
-
-            links_start = False
-            for line in lines:
-                if "【深层背景关联】：" in line:
-                    links_start = True
-                    continue
-                if links_start and line.strip():
-                    if "：" in line:
-                        parts = line.split("：")
-                        if len(parts) >= 2:
-                            option_part = parts[0].strip()
-                            char_name = parts[1].strip()
-                            match = re.search(r'选项(\d+)', option_part)
-                            if match:
-                                option_idx = int(match.group(1)) - 1
-                                deep_background_links[option_idx] = char_name
-
-            scene_data = {
-                "scene": scene,
-                "options": options,
-                "flow_update": flow_update,
-                "deep_background_links": deep_background_links
-            }
-
-            if scene and options:
+                break
+            if scene_data.get("scene") and scene_data.get("options"):
                 return [scene_data]
             else:
                 print("❌ 错误：无法从AI返回内容中提取有效剧情信息，将重试...")
@@ -246,6 +248,73 @@ def llm_generate_local(global_state: Dict, user_interaction: str, last_options: 
 
     print("💡 提示：所有尝试均失败，将使用默认剧情继续游戏")
     return _get_default_scene(user_interaction, global_state)
+
+
+def llm_generate_local_council(
+    global_state: Dict,
+    round1_scene: str,
+    round1_choice: str,
+    round2_choice: str,
+    last_options: List[str],
+) -> List[Dict]:
+    """
+    每2轮做一次 council 整合：用群体智能把「上一轮剧情+上一轮选择+本轮选择」综合成一段叙述，
+    输出格式与 llm_generate_local 一致（【场景】、【选项】、【世界线更新】、【深层背景关联】），
+    后续流程（选项展示、generate_all_options、图片提示词等）不变。
+    """
+    if not global_state or not round1_scene or not round2_choice.strip():
+        return []
+    tone_key = global_state.get("tone", "normal_ending")
+    tone = TONE_CONFIGS.get(tone_key, TONE_CONFIGS["normal_ending"])
+    protagonist_canonical_block = _format_protagonist_canonical_for_prompt(
+        global_state.get("protagonist_canonical") or {}
+    )
+
+    prompt = f"""你是故事编剧。请将「两轮剧情」整合成一段连贯叙述，并输出**当前节点**的后续选项与世界线更新。
+
+## 要求
+1. **第一轮**已发生：场景如下，玩家选择了「{round1_choice}」。
+2. **第二轮**玩家在本轮选择了「{round2_choice}」（上一轮选项为：{json.dumps(last_options, ensure_ascii=False)}）。
+3. 请将两轮合并为一段【场景】叙述（逻辑连贯、更有深度、更有趣），再给出执行第二轮选择后的【选项】与【世界线更新】。
+4. 严格遵循故事基调：{tone['name']}（{tone['description']}），禁忌：{tone['taboo_content']}。
+5. 必须符合核心世界观与当前世界线状态。
+
+## 主角规范（描写时严格遵循）
+{protagonist_canonical_block}
+
+## 第一轮已发生的场景（供整合参考）
+{round1_scene}
+
+## 输入数据
+- 【核心世界观】：{json.dumps(global_state.get('core_worldview', {}), ensure_ascii=False)}
+- 【当前状态】：{json.dumps(global_state.get('flow_worldline', {}), ensure_ascii=False)}
+- 【上一轮选项】：{json.dumps(last_options, ensure_ascii=False)}
+
+## 输出格式（必须严格按此分隔符，不要遗漏）
+【场景】：（两轮整合后的场景描述，至少200字，对话用引号，句末有标点）
+【选项】：
+1. 选项1（10-20字）
+2. 选项2（10-20字）
+【世界线更新】：
+角色变化：简要描述
+环境变化：简要描述
+主线进度：简要描述（至少80字）
+章节矛盾：已解决/未解决
+【深层背景关联】：
+- 选项X：角色名称（若无则留空或写「无」）
+
+只输出上述格式内容，不要代码块或多余说明。"""
+
+    print("📝 正在用 Council 群体智能整合两轮剧情...")
+    raw_content = run_full_council_sync(prompt)
+    if not raw_content:
+        print("⚠️ Council 未返回内容，降级为默认剧情")
+        return _get_default_scene(round2_choice, global_state)
+    scene_data = _parse_scene_from_raw(raw_content)
+    if not scene_data or not scene_data.get("scene") or not scene_data.get("options"):
+        print("⚠️ Council 返回内容解析失败，降级为默认剧情")
+        return _get_default_scene(round2_choice, global_state)
+    return [scene_data]
 
 
 def _get_default_scene(user_interaction: str, global_state: Dict) -> List[Dict]:

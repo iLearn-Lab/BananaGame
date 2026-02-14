@@ -1307,7 +1307,11 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                     if scene_for_image and option_data:
                         try:
                             print(f"🎨 [第一层预生成] 开始为选项 {opt_idx + 1} 生成图片...")
-                            img = generate_scene_image(scene_for_image, global_state, "default", use_cache=True)
+                            # 传入选项级缓存后缀，避免多选项共用同一缓存键导致两张图相同
+                            img = generate_scene_image(
+                                scene_for_image, global_state, "default", use_cache=True,
+                                cache_key_suffix=f"{scene_id}_opt{opt_idx}"
+                            )
                             print(f"🎨 [第一层预生成] generate_scene_image 返回：img={img is not None}, type={type(img)}")
                             
                             if img and isinstance(img, dict) and img.get('url'):
