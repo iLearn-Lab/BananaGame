@@ -4,6 +4,7 @@ import sys
 import json
 import hashlib
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
@@ -197,7 +198,17 @@ def generate_worldview():
                             initial_scene_image['scene_text_hash'] = hashlib.md5(initial_scene.encode('utf-8')).hexdigest()
                         print(f"✅ 初始场景图片数据已提取: {initial_scene_image.get('url', 'N/A')[:80]}...")
                     else:
-                        print(f"⚠️ 初始场景没有图片数据")
+                        print(f"⚠️ 初始场景没有图片数据（因使用默认剧情，AI 未返回【场景】格式）")
+                        # 默认剧情时补生成一张场景图，保证首次进入也有图
+                        if initial_scene and initial_scene.strip():
+                            try:
+                                img = generate_scene_image(initial_scene, global_state, "default", use_cache=True)
+                                if img and img.get("url"):
+                                    initial_scene_image = dict(img)
+                                    initial_scene_image["scene_text_hash"] = hashlib.md5(initial_scene.encode("utf-8")).hexdigest()
+                                    print(f"✅ 已为默认剧情补生成初始场景图: {initial_scene_image.get('url', '')[:80]}...")
+                            except Exception as img_e:
+                                print(f"⚠️ 默认剧情补生成场景图失败，继续无图: {img_e}")
                     initial_cache['initial_scene'] = initial_scene
                     initial_cache['initial_scene_image'] = initial_scene_image  # 保存图片数据
                     initial_cache['initial_options'] = initial_options

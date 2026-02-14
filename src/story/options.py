@@ -216,6 +216,20 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
     4. 所有生成内容必须严格贴合选定的故事基调！
     5. 如果有已解锁的深层背景，后续剧情必须围绕这些深层背景展开，将深层背景信息自然融入主线剧情中，不要直接向玩家显示深层背景内容！
     6. 描写主角时必须与【主角规范信息】一致（性别、年龄、外貌、人称）。
+    
+    ## 【硬性输出格式】必须严格遵守，否则无法解析
+    你的回复必须且仅包含以下四块，**不要有任何前缀、解释或代码块**（如「好的，以下是…」或 ```），**第一行就必须是【场景】：**：
+    【场景】：（此处写场景正文，可多段）
+    【选项】：
+    1. 选项一文字
+    2. 选项二文字
+    【世界线更新】：
+    角色变化：…
+    环境变化：…
+    主线进度：…
+    章节矛盾：已解决/未解决
+    【深层背景关联】：
+    选项1：角色名 或 选项2：角色名
     """
     
     # 添加调试信息：打印生成的Prompt前500字符
@@ -231,9 +245,13 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
         normal_tokens = 2500
     max_tokens = initial_tokens if is_initial_scene else normal_tokens
     
+    system_msg = "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：。不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
     request_body = {
         "model": AI_API_CONFIG.get("model", ""),
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": prompt},
+        ],
         "temperature": 0.4,  # 适度提高温度，改善标点符号和数字生成
         "max_tokens": max_tokens,  # 根据是否是第一次生成调整token数
         "top_p": 0.7,  # 适度提高多样性，改善对话自然度
@@ -287,6 +305,18 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 print(f"❌ 错误：选项 {i+1} 的AI返回内容为空，将重试...")
                 continue
             
+            # 若被 markdown 代码块包裹，去掉外层 ```...``` 再解析
+            if raw_content.startswith("```"):
+                for prefix in ("```text", "```txt", "```json", "```\n"):
+                    if raw_content.startswith(prefix):
+                        raw_content = raw_content[len(prefix):].lstrip()
+                        break
+                if raw_content.startswith("```"):
+                    raw_content = raw_content.split("\n", 1)[-1] if "\n" in raw_content else raw_content[3:]
+                if raw_content.endswith("```"):
+                    raw_content = raw_content.rsplit("```", 1)[0].rstrip()
+                raw_content = raw_content.strip()
+            
             # 直接从文本中提取信息，不依赖JSON解析
             # 提取场景描述
             scene = ""
@@ -312,10 +342,11 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 # 修复：移除re.DOTALL标志，避免跨行匹配导致的问题
                 cleaned_content = re.sub(pattern, '', cleaned_content, flags=re.IGNORECASE)
             
-            # 1. 提取场景描述 - 尝试多种匹配方式，使用清理后的内容
+            # 1. 提取场景描述 - 优先【场景】：，兼容 场景：、场景:
             scene_match1 = re.search(r'【场景】：([\s\S]*?)【选项】：', cleaned_content, re.DOTALL)
             scene_match2 = re.search(r'【场景】：([\s\S]*?)$', cleaned_content, re.DOTALL)
             scene_match3 = re.search(r'【场景】：([^\n]*)', cleaned_content)
+            scene_match4 = re.search(r'场景[：:]\s*([\s\S]*?)(?=【选项】|选项[：:]|$)', cleaned_content, re.DOTALL)
             
             if scene_match1:
                 scene = scene_match1.group(1).strip()
@@ -326,8 +357,14 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
             elif scene_match3:
                 scene = scene_match3.group(1).strip()
                 print(f"✅ 选项 {i+1} 场景提取成功（方式3）：{scene[:50]}...")
+            elif scene_match4:
+                scene = scene_match4.group(1).strip()
+                print(f"✅ 选项 {i+1} 场景提取成功（方式4-兼容无方括号）：{scene[:50]}...")
             else:
                 print(f"❌ 选项 {i+1} 场景提取失败，原始内容中未找到【场景】标签")
+                # 调试：打印 AI 实际返回内容的前 800 字符，便于排查格式问题
+                preview = (cleaned_content or raw_content or "")[:800]
+                print(f"📋 选项 {i+1} AI 返回内容预览（前800字）：\n{preview}\n---")
             
             # 2. 进一步清理提取到的场景描述
             if scene:
@@ -358,10 +395,11 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                     # 修复：如果场景描述过短，使用默认描述，避免显示错误信息
                     scene = "你仔细观察周围的环境，准备采取行动。"
             
-            # 2. 提取选项 - 尝试多种匹配方式，使用清理后的内容
+            # 2. 提取选项 - 优先【选项】：，兼容 选项：、选项:
             options_match1 = re.search(r'【选项】：([\s\S]*?)【世界线更新】：', cleaned_content, re.DOTALL)
             options_match2 = re.search(r'【选项】：([\s\S]*?)【深层背景关联】：', cleaned_content, re.DOTALL)
             options_match3 = re.search(r'【选项】：([\s\S]*?)$', cleaned_content, re.DOTALL)
+            options_match4 = re.search(r'选项[：:]\s*([\s\S]*?)(?=【世界线更新】|【深层背景关联】|世界线更新|深层背景关联|$)', cleaned_content, re.DOTALL)
             
             if options_match1:
                 options_text = options_match1.group(1).strip()
@@ -369,6 +407,8 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 options_text = options_match2.group(1).strip()
             elif options_match3:
                 options_text = options_match3.group(1).strip()
+            elif options_match4:
+                options_text = options_match4.group(1).strip()
             else:
                 options_text = ""
             
@@ -752,6 +792,15 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
     4. 所有生成内容必须严格贴合选定的故事基调！
     5. 如果有已解锁的深层背景，后续剧情必须围绕这些深层背景展开，将深层背景信息自然融入主线剧情中，不要直接向玩家显示深层背景内容！
     6. 描写主角时必须与【主角规范信息】一致（性别、年龄、外貌、人称）。
+    
+    ## 【硬性输出格式】必须严格遵守，否则无法解析
+    你的回复必须且仅包含以下四块，**不要有任何前缀、解释或代码块**，**第一行就必须是【场景】：**：
+    【场景】：（此处写场景正文）
+    【选项】：
+    1. 选项一文字
+    2. 选项二文字
+    【世界线更新】：…
+    【深层背景关联】：…
     """
     
     # 构建请求体，如果是第一次生成，增加max_tokens以确保生成足够长的内容
@@ -763,9 +812,13 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
         normal_tokens = 2500
     max_tokens = initial_tokens if is_initial_scene else normal_tokens
     
+    system_msg = "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：。不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
     request_body = {
         "model": AI_API_CONFIG.get("model", ""),
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": prompt},
+        ],
         "temperature": 0.4,
         "max_tokens": max_tokens,
         "top_p": 0.7,
@@ -818,6 +871,18 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 print(f"❌ 错误：选项 {i+1} 的AI返回内容为空，将重试...")
                 continue
             
+            # 若被 markdown 代码块包裹，去掉外层 ```...``` 再解析
+            if raw_content.startswith("```"):
+                for prefix in ("```text", "```txt", "```json", "```\n"):
+                    if raw_content.startswith(prefix):
+                        raw_content = raw_content[len(prefix):].lstrip()
+                        break
+                if raw_content.startswith("```"):
+                    raw_content = raw_content.split("\n", 1)[-1] if "\n" in raw_content else raw_content[3:]
+                if raw_content.endswith("```"):
+                    raw_content = raw_content.rsplit("```", 1)[0].rstrip()
+                raw_content = raw_content.strip()
+            
             # 直接从文本中提取信息，不依赖JSON解析
             next_options = []
             flow_update = {
@@ -836,10 +901,11 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
             for pattern in error_patterns:
                 cleaned_content = re.sub(pattern, '', cleaned_content, flags=re.IGNORECASE)
             
-            # 提取场景描述
+            # 提取场景描述（与 _generate_single_option 一致，含兼容格式）
             scene_match1 = re.search(r'【场景】：([\s\S]*?)【选项】：', cleaned_content, re.DOTALL)
             scene_match2 = re.search(r'【场景】：([\s\S]*?)$', cleaned_content, re.DOTALL)
             scene_match3 = re.search(r'【场景】：([^\n]*)', cleaned_content)
+            scene_match4 = re.search(r'场景[：:]\s*([\s\S]*?)(?=【选项】|选项[：:]|$)', cleaned_content, re.DOTALL)
             
             if scene_match1:
                 scene = scene_match1.group(1).strip()
@@ -847,6 +913,8 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 scene = scene_match2.group(1).strip()
             elif scene_match3:
                 scene = scene_match3.group(1).strip()
+            elif scene_match4:
+                scene = scene_match4.group(1).strip()
             
             # 清理场景描述
             if scene:
@@ -866,10 +934,11 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 if len(scene) < 10:
                     scene = "你仔细观察周围的环境，准备采取行动。"
             
-            # 提取选项
+            # 提取选项（含兼容 选项：）
             options_match1 = re.search(r'【选项】：([\s\S]*?)【世界线更新】：', cleaned_content, re.DOTALL)
             options_match2 = re.search(r'【选项】：([\s\S]*?)【深层背景关联】：', cleaned_content, re.DOTALL)
             options_match3 = re.search(r'【选项】：([\s\S]*?)$', cleaned_content, re.DOTALL)
+            options_match4 = re.search(r'选项[：:]\s*([\s\S]*?)(?=【世界线更新】|【深层背景关联】|世界线更新|深层背景关联|$)', cleaned_content, re.DOTALL)
             
             if options_match1:
                 options_text = options_match1.group(1).strip()
@@ -877,6 +946,8 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 options_text = options_match2.group(1).strip()
             elif options_match3:
                 options_text = options_match3.group(1).strip()
+            elif options_match4:
+                options_text = options_match4.group(1).strip()
             else:
                 options_text = ""
             

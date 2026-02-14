@@ -36,7 +36,9 @@ def call_ai_api(request_body: Dict) -> Dict:
     }
 
     try:
-        timeout = 180
+        connect_timeout = 30   # 连接阶段超时（秒）
+        read_timeout = 180     # 读取响应超时（秒）
+        timeout = (connect_timeout, read_timeout)
         stream_flag = False
         if request_body.get("stream"):
             stream_flag = True
@@ -44,7 +46,7 @@ def call_ai_api(request_body: Dict) -> Dict:
             request_body.pop("stream", None)
             print("ℹ️ Stream模式暂不直接支持，已自动降级为普通请求")
 
-        print(f"📡 发送API请求... (超时时间: {timeout}秒)")
+        print(f"📡 发送API请求... (连接超时{connect_timeout}秒，读取超时{read_timeout}秒)")
         response = requests.post(
             url=f"{base_url}/chat/completions",
             headers=headers,
@@ -72,6 +74,7 @@ def call_ai_api(request_body: Dict) -> Dict:
         raise
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
         print(f"⚠️ API请求失败（网络/超时），将自动重试：{str(e)[:100]}")
+        print(f"   提示：请检查 1) 本机能否访问 {base_url}  2) 是否需要代理(HTTP_PROXY/HTTPS_PROXY)  3) 防火墙是否放行 443")
         raise
     except Exception as e:
         print(f"⚠️ API请求失败（未知错误）：{str(e)[:100]}")

@@ -1,0 +1,17 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "苏琳娜·沃克",
+    "aliases": [
+      "苏琳娜·沃克"
+    ],
+    "story_background": "",
+    "first_appear_scene": "我睁开眼的瞬间，意识到有什么不对劲。\n\n不是光线头顶的LED灯管发出稳定的白光，亮度符合医疗标准。不是温度恒温系统将室温…",
+    "first_img_id": "img_20260214_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771067173_0lvbf0\\苏琳娜·沃克_img_20260214_001.png",
+    "first_prompt": "苏琳娜·沃克-配角1 stands near the doorway in a white lab coat, deep brown hair tied in a neat ponytail, frameless glasses reflecting the cold LED light. Her professional smile appears trained and distant, ho…",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "苏琳娜·沃克-配角1 stands near the doorway in a white lab coat, deep brown hair tied in a neat ponytail, frameless glasses reflecting the cold LED light. Her professional smile appears trained and distant, ho…"
+  }
+}

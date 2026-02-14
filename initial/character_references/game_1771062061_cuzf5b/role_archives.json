@@ -1,0 +1,47 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "魏朔",
+    "aliases": [
+      "魏朔"
+    ],
+    "story_background": "",
+    "first_appear_scene": "苏黎沿着走廊继续前进，脚步声在空旷的金属地面上回荡。她的时序感知始终保持着高度警觉，扫描着周围每一处可能存在的量子签名异…",
+    "first_img_id": "img_20260214_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771062061_cuzf5b\\魏朔_img_20260214_001.png",
+    "first_prompt": "A semi-transparent holographic residue floats in the air before the protagonist - a ghostly afterimage showing 魏朔-配角1 (a male researcher figure in quantum facility uniform) from twelve years ago. This…",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "A semi-transparent holographic residue floats in the air before the protagonist - a ghostly afterimage showing 魏朔-配角1 (a male researcher figure in quantum facility uniform) from twelve years ago. This…"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "维修工男人",
+    "aliases": [
+      "维修工男人"
+    ],
+    "story_background": "",
+    "first_appear_scene": "苏黎沿着走廊继续前进，应急照明在头顶投下断续的光斑。她的时序感知在这片空间里持续波动墙体上的量子签名呈现出异常的叠加态，…",
+    "first_img_id": "img_20260214_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771062061_cuzf5b\\维修工男人_img_20260214_002.png",
+    "first_prompt": "At the doorway stands 维修工男人-配角1 (maintenance worker man - supporting character 1), a middle-aged man wearing a worn maintenance uniform. His neural interface glows with offline red light - the mark of…",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "At the doorway stands 维修工男人-配角1 (maintenance worker man - supporting character 1), a middle-aged man wearing a worn maintenance uniform. His neural interface glows with offline red light - the mark of…"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "陈墨轩",
+    "aliases": [
+      "陈墨轩"
+    ],
+    "story_background": "",
+    "first_appear_scene": "苏黎的手指在全息键盘上停顿了不到零点三秒，便果断启动了数据提取程序。她很清楚这个决定意味着什么图灵环的量子备份系统采用\"…",
+    "first_img_id": "img_20260214_003",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771062061_cuzf5b\\陈墨轩_img_20260214_003.png",
+    "first_prompt": "In the holographic display space above the terminal, a semi-transparent playback of surveillance footage materializes - showing two male figures in the scene: 魏朔-配角1 (a security supervisor in work uni…",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "In the holographic display space above the terminal, a semi-transparent playback of surveillance footage materializes - showing two male figures in the scene: 魏朔-配角1 (a security supervisor in work uni…"
+  }
+}
