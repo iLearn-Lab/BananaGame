@@ -1,0 +1,122 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "手指尖传来的触感冰凉而陌生。\n\n不是冬天该有的那种冷是金属扶手上凝结的海雾水珠，在指腹下碎成一片湿滑。你下意识缩回手，却…",
+    "first_img_id": "img_20260214_001",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771068719_6l8nex\\配角1_img_20260214_001.png",
+    "first_prompt": "一个穿着灰色背心的中年男人（**杂货铺男人-配角1**）正弯腰码放啤酒箱，他的身体朝向货物但目光从门缝方向斜扫出来，带着一种冷淡的评估式打量，面无表情",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "一个穿着灰色背心的中年男人（**杂货铺男人-配角1**）正弯腰码放啤酒箱，他的身体朝向货物但目光从门缝方向斜扫出来，带着一种冷淡的评估式打量，面无表情"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "配角2",
+    "aliases": [
+      "配角2"
+    ],
+    "story_background": "",
+    "first_appear_scene": "手指尖传来的触感冰凉而陌生。\n\n不是冬天该有的那种冷是金属扶手上凝结的海雾水珠，在指腹下碎成一片湿滑。你下意识缩回手，却…",
+    "first_img_id": "img_20260214_002",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771068719_6l8nex\\配角2_img_20260214_002.png",
+    "first_prompt": "画面左侧二楼一扇半开的窗户后，一个约六七岁的小男孩（**窗台小孩-配角2**）趴在窗台上，手里举着一根融化了一半的冰棍，嘴巴微张，毫不掩饰地向下注视着巷道中的少年，表情是孩童特有的直白好奇，没有笑容",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "画面左侧二楼一扇半开的窗户后，一个约六七岁的小男孩（**窗台小孩-配角2**）趴在窗台上，手里举着一根融化了一半的冰棍，嘴巴微张，毫不掩饰地向下注视着巷道中的少年，表情是孩童特有的直白好奇，没有笑容"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "**周以宁",
+    "aliases": [
+      "**周以宁"
+    ],
+    "story_background": "",
+    "first_appear_scene": "走廊尽头的筹备室里，日光灯管发出细微的电流声，像一根绷紧的弦。沈屿白推开门时，看见的是一片狼藉海潮祭的策划书被撕成碎片散…",
+    "first_img_id": "img_20260214_003",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771068719_6l8nex\\周以宁_img_20260214_003.png",
+    "first_prompt": "**周以宁-配角1 — standing in the background-right, leaning against the corridor-side doorframe, three-quarter view:**",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**周以宁-配角1 — standing in the background-right, leaning against the corridor-side doorframe, three-quarter view:**"
+  },
+  "role_004": {
+    "role_id": "role_004",
+    "role_name": "陆念笙",
+    "aliases": [
+      "陆念笙"
+    ],
+    "story_background": "",
+    "first_appear_scene": "沈屿白推开天台的铁门时，傍晚的海风裹着咸腥味扑面而来。澄海高中主楼顶层的天台是少数几个不被监控覆盖的角落，生锈的栏杆上挂…",
+    "first_img_id": "img_20260214_004",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771068719_6l8nex\\陆念笙_img_20260214_004.png",
+    "first_prompt": "**The protagonist — positioned in the mid-ground, three-quarter front view facing slightly toward the camera and slightly toward 陆念笙-配角1 (主角主要参考 Image 0 和 Image 1, blending front and side view for the…",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**The protagonist — positioned in the mid-ground, three-quarter front view facing slightly toward the camera and slightly toward 陆念笙-配角1 (主角主要参考 Image 0 和 Image 1, blending front and side view for the…"
+  },
+  "role_005": {
+    "role_id": "role_005",
+    "role_name": "林远舟",
+    "aliases": [
+      "林远舟"
+    ],
+    "story_background": "",
+    "first_appear_scene": "傍晚的教学楼东侧走廊光线昏沉，日光灯管有一盏坏了，明灭不定地闪烁着，像某种不安的心跳。沈屿白沿着楼梯拐角往下走时，听见了…",
+    "first_img_id": "img_20260214_005",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771068719_6l8nex\\林远舟_img_20260214_005.png",
+    "first_prompt": "**林远舟-配角5** stands in the center-left of the frame, captured in the act of rising to his feet or having just stood up. He is a high school boy with a lean, slightly angular build suggesting wiry athle…",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**林远舟-配角5** stands in the center-left of the frame, captured in the act of rising to his feet or having just stood up. He is a high school boy with a lean, slightly angular build suggesting wiry athle…"
+  },
+  "role_006": {
+    "role_id": "role_006",
+    "role_name": "配角5",
+    "aliases": [
+      "配角5"
+    ],
+    "story_background": "",
+    "first_appear_scene": "傍晚的教学楼东侧走廊弥漫着一股潮湿的海风气息，窗外远处的渔港码头在暮色中模糊成一条灰蓝色的线。沈屿白沿着楼梯拐角向下走，…",
+    "first_img_id": "img_20260214_006",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771068719_6l8nex\\配角5_img_20260214_006.png",
+    "first_prompt": "**Character 2 — 林远舟-配角5, seated on the far side of the desk directly facing the protagonist, positioned so the camera captures him from a front-facing angle past the protagonist's shoulder.** He is a …",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**Character 2 — 林远舟-配角5, seated on the far side of the desk directly facing the protagonist, positioned so the camera captures him from a front-facing angle past the protagonist's shoulder.** He is a …"
+  },
+  "role_007": {
+    "role_id": "role_007",
+    "role_name": "配角4",
+    "aliases": [
+      "配角4"
+    ],
+    "story_background": "",
+    "first_appear_scene": "傍晚的教学楼走廊被夕阳染成一片沉郁的橘红色，窗外海风裹挟着咸涩的潮气涌入，将走廊尽头那间半开门的旧档案室里的纸页吹得轻轻…",
+    "first_img_id": "img_20260214_007",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771068719_6l8nex\\配角4_img_20260214_007.png",
+    "first_prompt": "**Character 2 — 陆念笙-配角4, positioned in the foreground right, standing at the window with her back turned three-quarters toward the protagonist and toward the camera, her face visible only in sharp pro…",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**Character 2 — 陆念笙-配角4, positioned in the foreground right, standing at the window with her back turned three-quarters toward the protagonist and toward the camera, her face visible only in sharp pro…"
+  },
+  "role_008": {
+    "role_id": "role_008",
+    "role_name": "**周砚",
+    "aliases": [
+      "**周砚"
+    ],
+    "story_background": "",
+    "first_appear_scene": "学生会办公区位于行政楼3楼走廊尽头，午休时段的走廊空无一人，只有窗外梧桐树影在米白色地砖上缓慢移动。沈屿白站在标着\"档案…",
+    "first_img_id": "img_20260214_008",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771068719_6l8nex\\周砚_img_20260214_008.png",
+    "first_prompt": "**周砚-配角6 (Zhou Yan) — newly introduced character, student council secretary-general, positioned in the doorway on the right side of the frame, backlit by warm corridor light:**",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**周砚-配角6 (Zhou Yan) — newly introduced character, student council secretary-general, positioned in the doorway on the right side of the frame, backlit by warm corridor light:**"
+  }
+}

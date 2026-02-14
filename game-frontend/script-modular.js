@@ -884,7 +884,8 @@ const Game = (() => {
                 });
                 
                 // 隐藏子菜单
-                document.getElementById('oil-painting-submenu').classList.add('hidden');
+                const styleSubmenu = document.getElementById('style-submenu');
+                if (styleSubmenu) styleSubmenu.classList.add('hidden');
                 document.getElementById('custom-style-input').classList.add('hidden');
                 
                 // 重置显示和按钮
@@ -4286,6 +4287,16 @@ const Game = (() => {
             });
         });
         
+        // 风格子菜单配置（需要选择子类型的风格）
+        const STYLES_WITH_SUBTYPES = ['realistic', 'anime', 'ink_painting', 'oil_painting', 'cyberpunk'];
+        const STYLE_SUBMENU_TITLES = {
+            realistic: '选择写实风格类型',
+            anime: '选择动漫风格类型',
+            ink_painting: '选择水墨画风格类型',
+            oil_painting: '选择油画风格类型',
+            cyberpunk: '选择赛博朋克风格类型'
+        };
+        
         // 图片风格选择逻辑
         // 风格按钮点击事件
         document.querySelectorAll('.style-btn').forEach(btn => {
@@ -4302,14 +4313,20 @@ const Game = (() => {
                 customStyleText = ''; // 重置自定义文本
                 
                 // 隐藏所有子菜单
-                document.getElementById('oil-painting-submenu').classList.add('hidden');
+                document.getElementById('style-submenu').classList.add('hidden');
                 document.getElementById('custom-style-input').classList.add('hidden');
                 
-                // 根据选择的风格显示相应的子菜单
-                if (selectedStyle === 'oil_painting') {
-                    // 显示油画风格子选项
-                    document.getElementById('oil-painting-submenu').classList.remove('hidden');
-                    document.getElementById('selected-style-display').textContent = '已选择：油画风格（请选择具体类型）';
+                if (STYLES_WITH_SUBTYPES.includes(selectedStyle)) {
+                    // 需要选择子类型：从模板填充子菜单
+                    const tmpl = document.getElementById(`tmpl-${selectedStyle}`);
+                    const container = document.getElementById('style-submenu-buttons');
+                    container.innerHTML = '';
+                    if (tmpl && tmpl.content) {
+                        container.appendChild(tmpl.content.cloneNode(true));
+                    }
+                    document.getElementById('style-submenu-title').textContent = STYLE_SUBMENU_TITLES[selectedStyle] || '选择风格类型';
+                    document.getElementById('style-submenu').classList.remove('hidden');
+                    document.getElementById('selected-style-display').textContent = `已选择：${btn.dataset.styleName}（请选择具体类型）`;
                     elements.buttons.confirmStyle.disabled = true;
                     elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
                 } else if (selectedStyle === 'custom') {
@@ -4319,7 +4336,7 @@ const Game = (() => {
                     elements.buttons.confirmStyle.disabled = true;
                     elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
                 } else {
-                    // 其他风格直接显示选择
+                    // 其他风格直接可用（当前仅有 custom 可能走这里，custom 已单独处理）
                     const styleName = btn.dataset.styleName;
                     document.getElementById('selected-style-display').textContent = `已选择：${styleName}`;
                     elements.buttons.confirmStyle.disabled = false;
@@ -4331,25 +4348,24 @@ const Game = (() => {
             });
         });
         
-        // 油画风格子选项点击事件
-        document.querySelectorAll('.submenu-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                // 重置所有子选项按钮状态
-                document.querySelectorAll('.submenu-btn').forEach(b => {
-                    b.classList.remove('ring-4', 'ring-white');
-                });
-                
-                // 选中当前子选项
-                btn.classList.add('ring-4', 'ring-white');
-                selectedSubStyle = btn.dataset.substyle;
-                const subStyleName = btn.dataset.substyleName;
-                document.getElementById('selected-style-display').textContent = `已选择：油画风格 - ${subStyleName}`;
-                elements.buttons.confirmStyle.disabled = false;
-                elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
-                elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
-                
-                playSound('click');
+        // 风格子选项点击事件（使用事件委托，因为按钮是动态生成的）
+        document.getElementById('style-submenu-buttons').addEventListener('click', (e) => {
+            const btn = e.target.closest('.submenu-btn');
+            if (!btn) return;
+            e.stopPropagation();
+            // 重置所有子选项按钮状态
+            document.querySelectorAll('#style-submenu-buttons .submenu-btn').forEach(b => {
+                b.classList.remove('ring-4', 'ring-white');
             });
+            btn.classList.add('ring-4', 'ring-white');
+            selectedSubStyle = btn.dataset.substyle;
+            const subStyleName = btn.dataset.substyleName;
+            const styleNames = { realistic: '写实风格', anime: '动漫风格', ink_painting: '水墨画风格', oil_painting: '油画风格', cyberpunk: '赛博朋克风' };
+            document.getElementById('selected-style-display').textContent = `已选择：${styleNames[selectedStyle] || selectedStyle} - ${subStyleName}`;
+            elements.buttons.confirmStyle.disabled = false;
+            elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
+            elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+            playSound('click');
         });
         
         // 自定义输入框输入事件
@@ -4376,10 +4392,10 @@ const Game = (() => {
             }
             
             // 根据选择的风格保存到gameState
-            if (selectedStyle === 'oil_painting' && selectedSubStyle) {
-                // 油画风格需要保存子风格
+            if (STYLES_WITH_SUBTYPES.includes(selectedStyle) && selectedSubStyle) {
+                // 有子类型的风格：写实/动漫/水墨/油画/赛博朋克
                 gameState.imageStyle = {
-                    type: 'oil_painting',
+                    type: selectedStyle,
                     subtype: selectedSubStyle
                 };
             } else if (selectedStyle === 'custom' && customStyleText) {
@@ -4389,10 +4405,17 @@ const Game = (() => {
                     value: customStyleText
                 };
             } else if (selectedStyle) {
-                // 其他风格
-                gameState.imageStyle = {
-                    type: selectedStyle
+                // 无子类型或未选子类型时，使用默认 subtype
+                const defaultSubtypes = {
+                    realistic: 'game_realistic',
+                    anime: 'genshin',
+                    ink_painting: 'shanshui',
+                    oil_painting: 'classic_oil',
+                    cyberpunk: 'night_city'
                 };
+                gameState.imageStyle = defaultSubtypes[selectedStyle]
+                    ? { type: selectedStyle, subtype: defaultSubtypes[selectedStyle] }
+                    : { type: selectedStyle };
             } else {
                 showModal('提示', '请先选择一个图片风格', () => {});
                 return;
