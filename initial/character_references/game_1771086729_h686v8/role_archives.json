@@ -1,0 +1,92 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "四月的风裹着潮湿的盐味，从半敞的教室窗户灌进来，吹得课程表的边角翘起又落下，发出细碎的、像谁在叹气的声响。\n\n陆屿安盯着…",
+    "first_img_id": "img_20260215_001",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771086729_h686v8\\配角1_img_20260215_001.png",
+    "first_prompt": "**中景人物——苏晚宁-配角1：** 一位高中女生，坐在楼梯转角消防栓旁边的窗台上，位于画面左侧偏后方",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**中景人物——苏晚宁-配角1：** 一位高中女生，坐在楼梯转角消防栓旁边的窗台上，位于画面左侧偏后方"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "配角2",
+    "aliases": [
+      "配角2"
+    ],
+    "story_background": "",
+    "first_appear_scene": "午后的阳光透过教室窗户斜斜洒落，将课桌上散乱的纸张镀上一层暖黄色的光晕。陆屿安推开2年3班的后门时，教室里已经零零散散坐…",
+    "first_img_id": "img_20260215_002",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771086729_h686v8\\配角2_img_20260215_002.png",
+    "first_prompt": "**中景人物——林佑诚-配角2：** 一名高中男生，坐在前排靠近讲台的位置，身体随意地靠在椅背上，一只手搭在桌面上，另一只手拿着一张复印纸，姿态松弛随性",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**中景人物——林佑诚-配角2：** 一名高中男生，坐在前排靠近讲台的位置，身体随意地靠在椅背上，一只手搭在桌面上，另一只手拿着一张复印纸，姿态松弛随性"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "配角3",
+    "aliases": [
+      "配角3"
+    ],
+    "story_background": "",
+    "first_appear_scene": "午后的阳光透过教室窗户斜斜洒落，将课桌上散乱的纸张镀上一层暖黄色的光晕。陆屿安推开2年3班的后门时，教室里已经零零散散坐…",
+    "first_img_id": "img_20260215_003",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771086729_h686v8\\配角3_img_20260215_003.png",
+    "first_prompt": "**中景人物——赵敏-配角3：** 一名高中女生，坐在靠窗位置，身体微微前倾朝向讲台方向，一只手撑在桌面上，姿态带有一种急切感",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**中景人物——赵敏-配角3：** 一名高中女生，坐在靠窗位置，身体微微前倾朝向讲台方向，一只手撑在桌面上，姿态带有一种急切感"
+  },
+  "role_004": {
+    "role_id": "role_004",
+    "role_name": "配角4",
+    "aliases": [
+      "配角4"
+    ],
+    "story_background": "",
+    "first_appear_scene": "午后的阳光透过教室窗户斜斜洒落，将课桌上散乱的纸张镀上一层暖黄色的光晕。陆屿安推开2年3班的后门时，教室里已经零零散散坐…",
+    "first_img_id": "img_20260215_004",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771086729_h686v8\\配角4_img_20260215_004.png",
+    "first_prompt": "**中景人物——周子轩-配角4：** 一名高中男生，坐在后排偏中间的位置，身体往后仰靠在椅子上，双臂交叉抱在胸前，姿态带有一种不太情愿的懒散感",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**中景人物——周子轩-配角4：** 一名高中男生，坐在后排偏中间的位置，身体往后仰靠在椅子上，双臂交叉抱在胸前，姿态带有一种不太情愿的懒散感"
+  },
+  "role_005": {
+    "role_id": "role_005",
+    "role_name": "配角5",
+    "aliases": [
+      "配角5"
+    ],
+    "story_background": "",
+    "first_appear_scene": "午后的阳光透过走廊的玻璃窗斜斜地铺在地面上，将陆屿安拉长的影子投在米白色的瓷砖上。他推开2年3班的教室门时，里面空无一人…",
+    "first_img_id": "img_20260215_005",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771086729_h686v8\\配角5_img_20260215_005.png",
+    "first_prompt": "**画面右侧门口区域——赵一帆-配角5：** 一位高中男生，位于画面右侧偏后方教室门口的位置，身体随意地斜靠在木质门框上，右肩抵着门框，双脚交叉站立，姿态松弛懒散带着一种旁观者式的自在感",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**画面右侧门口区域——赵一帆-配角5：** 一位高中男生，位于画面右侧偏后方教室门口的位置，身体随意地斜靠在木质门框上，右肩抵着门框，双脚交叉站立，姿态松弛懒散带着一种旁观者式的自在感"
+  },
+  "role_006": {
+    "role_id": "role_006",
+    "role_name": "配角5",
+    "aliases": [
+      "配角5"
+    ],
+    "story_background": "",
+    "first_appear_scene": "午后的阳光透过走廊的玻璃窗斜斜洒落，将地面切割成明暗交替的光带。陆屿安沿着连廊走向美术教室，脚步不自觉地放慢了些。他告诉…",
+    "first_img_id": "img_20260215_006",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771086729_h686v8\\配角5_img_20260215_006.png",
+    "first_prompt": "**画面中心偏左人物——林知夏-配角5：** 一位高中女生，美术部副部长，坐在长桌旁的木椅上，身体微微朝向画面右侧主角的方向，呈四分之三正面朝向镜头",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**画面中心偏左人物——林知夏-配角5：** 一位高中女生，美术部副部长，坐在长桌旁的木椅上，身体微微朝向画面右侧主角的方向，呈四分之三正面朝向镜头"
+  }
+}
