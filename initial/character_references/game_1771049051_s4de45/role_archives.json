@@ -1,0 +1,92 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "画面前景偏右，从雾气中走出的年轻女子——素衣祭司",
+    "aliases": [
+      "画面前景偏右，从雾气中走出的年轻女子——素衣祭司"
+    ],
+    "story_background": "",
+    "first_appear_scene": "血从耳朵里淌下来的时候，你以为自己是在做梦。\n\n不是疼醒的是被一个声音吵醒的。那声音不属于任何活人，像是有人把一句话揉碎…",
+    "first_img_id": "img_20260214_001",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771049051_s4de45\\画面前景偏右，从雾气中走出的年轻女子——素衣祭司_img_20260214_001.png",
+    "first_prompt": "画面前景偏右，从雾气中走出的年轻女子——素衣祭司-配角1，身穿一袭素白的葬花司祭服，衣袍宽大飘逸，衣摆沾染着河床的灰烬",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "画面前景偏右，从雾气中走出的年轻女子——素衣祭司-配角1，身穿一袭素白的葬花司祭服，衣袍宽大飘逸，衣摆沾染着河床的灰烬"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "配角2",
+    "aliases": [
+      "配角2"
+    ],
+    "story_background": "",
+    "first_appear_scene": "血从耳朵里淌下来的时候，沈夜吟以为自己在做梦。\n\n不是温热的、缓慢的渗出，而是冰凉的，像有人将融化的雪水灌进了他的颅腔，…",
+    "first_img_id": "img_20260214_002",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771049051_s4de45\\配角2_img_20260214_002.png",
+    "first_prompt": "**配角——断碑老人-配角2：**",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**配角——断碑老人-配角2：**"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "你选择了：开始游戏。在你的努力下，你取得了一些进展。",
+    "first_img_id": "img_20260214_003",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771049051_s4de45\\配角1_img_20260214_003.png",
+    "first_prompt": "**素衣祭司-配角1：** 画面前景偏右，从浓重的雾气中缓步走出的年轻女子，身着素白祭司长袍，衣袂被雾气浸润显得沉重而飘逸，发丝半挽半散，额间佩有葬花司的标志——一朵倒悬的枯花纹饰",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**素衣祭司-配角1：** 画面前景偏右，从浓重的雾气中缓步走出的年轻女子，身着素白祭司长袍，衣袂被雾气浸润显得沉重而飘逸，发丝半挽半散，额间佩有葬花司的标志——一朵倒悬的枯花纹饰"
+  },
+  "role_004": {
+    "role_id": "role_004",
+    "role_name": "配角4",
+    "aliases": [
+      "配角4"
+    ],
+    "story_background": "",
+    "first_appear_scene": "白骨园的深处远比外围更为寂静，连风声都像是被什么吞噬了。沈夜吟沿着亡魂残响汇聚的方向继续前行，脚下的石板逐渐被一层薄薄的…",
+    "first_img_id": "img_20260214_004",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771049051_s4de45\\配角4_img_20260214_004.png",
+    "first_prompt": "**净檀-配角4：** 画面右侧偏中位置，一位年轻女子刚从跪坐的蒲团上站起身，身着素白色祭袍，祭袍质地轻薄如纱，层层叠叠垂至脚踝，边缘绣有极淡的灰色暗纹",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**净檀-配角4：** 画面右侧偏中位置，一位年轻女子刚从跪坐的蒲团上站起身，身着素白色祭袍，祭袍质地轻薄如纱，层层叠叠垂至脚踝，边缘绣有极淡的灰色暗纹"
+  },
+  "role_005": {
+    "role_id": "role_005",
+    "role_name": "净檀",
+    "aliases": [
+      "净檀"
+    ],
+    "story_background": "",
+    "first_appear_scene": "沈夜吟咬破舌尖，一口腥甜的血沫从齿缝间溢出，他以这点鲜明的痛觉为锚，将意识从四面八方涌来的遗言洪流中硬生生撕扯出来。\n\n…",
+    "first_img_id": "img_20260214_005",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771049051_s4de45\\净檀_img_20260214_005.png",
+    "first_prompt": "**Behind the protagonist, slightly further back in the bone-white corridor:** 净檀-配角3 (Jingtan) stands in the dim passageway, her white ceremonial priestess robe glowing faintly in the darkness like a …",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**Behind the protagonist, slightly further back in the bone-white corridor:** 净檀-配角3 (Jingtan) stands in the dim passageway, her white ceremonial priestess robe glowing faintly in the darkness like a …"
+  },
+  "role_006": {
+    "role_id": "role_006",
+    "role_name": "配角5",
+    "aliases": [
+      "配角5"
+    ],
+    "story_background": "",
+    "first_appear_scene": "安魂台上的风忽然静了。\n\n沈夜吟站在根系前，那团幽蓝的光脉就嵌在祭台深处，触手可及。他的右手已经抬起，指尖距离根系不过三…",
+    "first_img_id": "img_20260214_006",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771049051_s4de45\\配角5_img_20260214_006.png",
+    "first_prompt": "**Background-center, at the far end of the bone-white stone steps leading up to the altar, 净檀-配角5** stands at the bottom of the stairway, facing toward the camera and toward Shen Yeyin. She wears a lo…",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**Background-center, at the far end of the bone-white stone steps leading up to the altar, 净檀-配角5** stands at the bottom of the stairway, facing toward the camera and toward Shen Yeyin. She wears a lo…"
+  }
+}

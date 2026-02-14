@@ -2,13 +2,10 @@
 import os
 import sys
 import json
-import requests
-import threading
 import hashlib
-from concurrent.futures import ThreadPoolExecutor
+import threading
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Optional
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_file, send_from_directory
 
@@ -17,228 +14,32 @@ if sys.platform == 'win32':
     os.environ['PYTHONIOENCODING'] = 'utf-8'
 
 from main2 import (
-    llm_generate_global, 
-    _generate_single_option, 
+    llm_generate_global,
+    _generate_single_option,
     _generate_single_option_text_only,
-    generate_all_options, 
-    modify_ending_content, 
+    generate_all_options,
+    modify_ending_content,
     generate_ending_prediction,
     generate_scene_image,
-    # ==================== 视频生成功能已禁用（性能优化） ====================
-    # generate_scene_video,
-    # get_video_task_status
-    get_video_task_status,  # 保留占位函数，避免导入错误
-    # ==================== 主角形象生成功能 ====================
+    get_video_task_status,
     generate_game_id,
-    generate_main_character_image
+    generate_main_character_image,
 )
 
-# 初始化Flask应用
+from server.config import SAVE_DIR, IMAGE_CACHE_DIR, ensure_dirs
+from server.cache import (
+    pregeneration_cache,
+    cache_lock,
+    cleanup_old_cache,
+    cleanup_used_options,
+)
+from server.utils import clean_error_message, generate_scene_id
+from server.pregeneration import _pregenerate_next_layers_logic
+
+# 初始化 Flask 应用
 app = Flask(__name__)
-
-# 加载环境变量
 load_dotenv()
-
-# 存档目录配置
-SAVE_DIR = "saves"
-
-# 确保存档目录存在
-if not os.path.exists(SAVE_DIR):
-    os.makedirs(SAVE_DIR)
-
-# 图片和视频缓存目录配置
-IMAGE_CACHE_DIR = "image_cache"
-VIDEO_CACHE_DIR = "video_cache"
-
-# 确保缓存目录存在
-if not os.path.exists(IMAGE_CACHE_DIR):
-    os.makedirs(IMAGE_CACHE_DIR)
-if not os.path.exists(VIDEO_CACHE_DIR):
-    os.makedirs(VIDEO_CACHE_DIR)
-
-# 全局缓存：存储预生成的两层内容
-# 结构：{scene_id: {
-#   'layer1': {option_index: option_data},
-#   'layer2': {option_index: {option_index: option_data}},
-#   'generation_status': {option_index: 'pending'|'generating'|'completed'},
-#   'generation_events': {option_index: threading.Event()},
-#   'should_cancel': False,
-#   'current_generating_index': None,
-#   'layer2_generating': False,  # 第二层是否正在生成
-#   'layer2_cancel': False,  # 第二层生成取消标志
-#   'layer2_selected_option': None,  # 用户选择的选项索引（用于第二层生成控制）
-#   'layer2_thread': None  # 第二层生成线程对象
-# }}
-pregeneration_cache = {}
-# 线程锁，保证缓存操作的线程安全（带追踪：定位谁持有锁）
-_cache_lock_holder = None  # 🔧 调试：追踪当前持有锁的线程（threading.Thread）
-_cache_lock_acquire_time = None  # 🔧 调试：追踪锁的获取时间（time.time）
-
-
-class TrackedLock:
-    """
-    为 threading.Lock 增加“谁持有锁/持有多久/当前堆栈”的追踪能力。
-    目的：定位 cache_lock 被长时间持有导致的“图片生成后无法写入缓存”问题。
-    """
-
-    def __init__(self, name: str = "cache_lock"):
-        self._lock = threading.Lock()
-        self.name = name
-        self.holder_ident = None
-        self.holder_name = None
-        self.holder_since = None
-        self._last_stack_dump_ts = 0.0
-
-    def acquire(self, blocking: bool = True, timeout: float = -1):
-        import time
-        # 兼容 threading.Lock.acquire(blocking=True, timeout=-1)
-        if timeout is None or timeout == -1:
-            got = self._lock.acquire(blocking)
-        else:
-            got = self._lock.acquire(blocking, timeout)
-
-        if got:
-            global _cache_lock_holder, _cache_lock_acquire_time
-            self.holder_ident = threading.get_ident()
-            self.holder_name = threading.current_thread().name
-            self.holder_since = time.time()
-            _cache_lock_holder = threading.current_thread()
-            _cache_lock_acquire_time = self.holder_since
-
-        return got
-
-    def release(self):
-        global _cache_lock_holder, _cache_lock_acquire_time
-        self.holder_ident = None
-        self.holder_name = None
-        self.holder_since = None
-        _cache_lock_holder = None
-        _cache_lock_acquire_time = None
-        return self._lock.release()
-
-    def __enter__(self):
-        self.acquire()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.release()
-        return False
-
-    def dump_holder_stack(self, limit: int = 40, min_interval_seconds: float = 2.0):
-        """
-        返回当前持锁线程的“实时堆栈”（不是获取锁时的堆栈）。
-        为避免刷屏，默认 2 秒最多输出一次（由调用方 print）。
-        """
-        import sys
-        import time
-        import traceback
-
-        if not self.holder_ident:
-            return None
-
-        now = time.time()
-        if now - self._last_stack_dump_ts < min_interval_seconds:
-            return None
-
-        frames = sys._current_frames()
-        frame = frames.get(self.holder_ident)
-        if frame is None:
-            self._last_stack_dump_ts = now
-            return f"[{self.name}] 无法获取持锁线程堆栈（holder_ident={self.holder_ident})"
-
-        stack = "".join(traceback.format_stack(frame, limit=limit))
-        self._last_stack_dump_ts = now
-        return stack
-
-
-cache_lock = TrackedLock("cache_lock")
-MAX_CACHE_SIZE = 3  # 最大缓存场景数量，超过此数量将清理最旧的缓存（降低内存占用）
-
-# 辅助函数：清理错误消息中的特殊字符（避免编码问题）
-def clean_error_message(error_msg):
-    """清理错误消息，移除可能导致编码问题的字符"""
-    try:
-        # 先尝试编码为 UTF-8
-        msg = str(error_msg)
-        # 移除 emoji 和特殊 Unicode 字符（保留基本 ASCII 和中文字符）
-        import re
-        # 保留 ASCII、中文字符、常见标点符号
-        msg = re.sub(r'[^\x00-\x7F\u4e00-\u9fff\s\.,;:!?()\[\]{}\-+=]', '', msg)
-        return msg
-    except:
-        # 如果清理失败，返回安全的默认消息
-        return "发生错误，请稍后重试"
-
-# 生成场景ID的辅助函数
-def generate_scene_id(global_state_hash, current_options_hash):
-    """根据全局状态和当前选项生成唯一的场景ID"""
-    return f"{hash(str(global_state_hash))}_{hash(str(current_options_hash))}"
-
-# 缓存清理函数：清理旧的、无用的缓存
-def cleanup_old_cache(current_scene_id=None):
-    """清理旧的缓存，保留最近使用的场景"""
-    with cache_lock:
-        cache_size = len(pregeneration_cache)
-        if cache_size <= MAX_CACHE_SIZE:
-            return
-        
-        # 如果提供了当前场景ID，确保它不被清理
-        scenes_to_keep = set()
-        if current_scene_id:
-            scenes_to_keep.add(current_scene_id)
-        if 'initial' in pregeneration_cache:
-            scenes_to_keep.add('initial')
-        
-        # 计算需要清理的数量
-        to_remove = cache_size - MAX_CACHE_SIZE
-        
-        # 找出最旧的缓存（除了要保留的）
-        scenes_to_remove = []
-        for scene_id in pregeneration_cache:
-            if scene_id not in scenes_to_keep:
-                scenes_to_remove.append(scene_id)
-        
-        # 如果场景太多，清理最旧的（这里简化处理，清理除了当前和initial之外的所有）
-        if len(scenes_to_remove) > to_remove:
-            # 只清理超出限制的部分
-            scenes_to_remove = scenes_to_remove[:to_remove]
-        
-        # 清理选中的场景
-        for scene_id in scenes_to_remove:
-            cache_entry = pregeneration_cache.get(scene_id)
-            if cache_entry:
-                # 停止正在进行的生成
-                if cache_entry.get('layer2_generating', False):
-                    cache_entry['layer2_cancel'] = True
-                    layer2_thread = cache_entry.get('layer2_thread')
-                    if layer2_thread and layer2_thread.is_alive():
-                        layer2_thread.join(timeout=0.5)
-            
-            del pregeneration_cache[scene_id]
-            print(f"🗑️ 已清理旧缓存场景 {scene_id}（内存优化）")
-        
-        print(f"📊 当前缓存大小：{len(pregeneration_cache)}/{MAX_CACHE_SIZE}")
-
-# 清理已使用选项的缓存数据
-def cleanup_used_options(scene_id, used_option_index):
-    """清理已使用的选项数据，释放内存"""
-    with cache_lock:
-        if scene_id not in pregeneration_cache:
-            return
-        
-        cache_entry = pregeneration_cache[scene_id]
-        
-        # 清理第一层已使用的选项（保留当前使用的，但清理其他未使用的）
-        if 'layer1' in cache_entry:
-            layer1 = cache_entry['layer1']
-            # 只保留当前使用的选项，清理其他未使用的选项
-            if used_option_index in layer1:
-                # 保留当前使用的选项数据，但可以清理其第二层数据
-                if 'layer2' in cache_entry and used_option_index in cache_entry['layer2']:
-                    # 清理第二层中未使用的选项
-                    layer2_data = cache_entry['layer2'][used_option_index]
-                    # 这里可以进一步优化，但为了安全，暂时保留
-                    pass
+ensure_dirs()
 
 # 允许前端跨域访问
 @app.after_request
@@ -2160,119 +1961,7 @@ def generate_ending():
         error_msg = clean_error_message(str(e))
         return jsonify({"status": "error", "message": f"生成游戏结局失败：{error_msg}"})
 
-# ------------------------------
-# 图片缓存管理函数
-# ------------------------------
-import hashlib
-
-def get_cached_image(prompt_hash: str) -> str:
-    """从缓存获取图片路径"""
-    cache_path = Path(IMAGE_CACHE_DIR) / f"{prompt_hash}.png"
-    if cache_path.exists():
-        return str(cache_path)
-    return None
-
-def cache_image(prompt_hash: str, image_url: str) -> str:
-    """缓存图片到本地"""
-    try:
-        # 检查是否是相对路径（本地缓存路径）
-        if image_url.startswith('/image_cache/') or image_url.startswith('image_cache/'):
-            # 已经是本地缓存路径，不需要下载
-            cache_path = Path(IMAGE_CACHE_DIR) / f"{prompt_hash}.png"
-            if cache_path.exists():
-                print(f"✅ 图片已在本地缓存：{cache_path}")
-                return str(cache_path)
-            else:
-                # 如果文件不存在，尝试从相对路径提取hash
-                import re
-                hash_match = re.search(r'([a-f0-9]{32})\.png', image_url)
-                if hash_match:
-                    existing_hash = hash_match.group(1)
-                    existing_path = Path(IMAGE_CACHE_DIR) / f"{existing_hash}.png"
-                    if existing_path.exists():
-                        # 复制文件到新的hash名称
-                        import shutil
-                        shutil.copy2(existing_path, cache_path)
-                        print(f"✅ 从现有缓存复制图片：{cache_path}")
-                        return str(cache_path)
-                raise ValueError(f"本地缓存文件不存在：{image_url}")
-        
-        # 检查是否是完整的URL
-        if not (image_url.startswith('http://') or image_url.startswith('https://')):
-            raise ValueError(f"无效的图片URL格式：{image_url}（需要完整的HTTP/HTTPS URL或本地缓存路径）")
-        
-        # 下载图片
-        response = requests.get(image_url, timeout=30)
-        response.raise_for_status()
-        
-        cache_path = Path(IMAGE_CACHE_DIR) / f"{prompt_hash}.png"
-        
-        with open(cache_path, 'wb') as f:
-            f.write(response.content)
-        
-        print(f"✅ 图片已缓存：{cache_path}")
-        return str(cache_path)
-    except Exception as e:
-        print(f"❌ 图片缓存失败：{str(e)}")
-        raise
-
-def generate_image_with_cache(scene_description: str, style: str, global_state: Dict) -> Dict:
-    """带缓存的图片生成"""
-    # 生成缓存键
-    prompt_hash = hashlib.md5(f"{scene_description}_{style}".encode()).hexdigest()
-    
-    # 检查缓存
-    cached_path = get_cached_image(prompt_hash)
-    if cached_path:
-        print(f"✅ 使用缓存的图片：{prompt_hash}")
-        return {
-            "url": f"/image_cache/{prompt_hash}.png",
-            "prompt": scene_description,
-            "style": style,
-            "width": 1024,
-            "height": 1024,
-            "cached": True
-        }
-    
-    # 生成新图片
-    image_data = generate_scene_image(scene_description, global_state, style)
-    if not image_data or not image_data.get('url'):
-        return None
-    
-    image_url = image_data['url']
-    
-    # 检查图片URL是否是本地缓存路径（说明已经在main2.py中缓存过了）
-    if image_url.startswith('/image_cache/') or image_url.startswith('image_cache/'):
-        # 已经是本地缓存路径，直接返回，不需要再次缓存
-        print(f"✅ 图片已在main2.py中缓存，使用现有路径：{image_url}")
-        return {
-            "url": image_url,
-            "prompt": scene_description,
-            "style": style,
-            "width": 1024,
-            "height": 1024,
-            "cached": True
-        }
-    
-    # 缓存图片（只有当image_url是完整的HTTP/HTTPS URL时才需要下载）
-    try:
-        local_path = cache_image(prompt_hash, image_url)
-        return {
-            "url": f"/image_cache/{prompt_hash}.png",
-            "prompt": scene_description,
-            "style": style,
-            "width": 1024,
-            "height": 1024,
-            "cached": False
-        }
-    except Exception as e:
-        print(f"⚠️ 图片缓存失败，使用原始URL：{str(e)}")
-        return image_data
-
-# ------------------------------
-# 视觉内容生成API接口
-# ------------------------------
-
+# ------------------------------ 视觉内容生成API接口 ------------------------------
 @app.route('/generate-scene-image', methods=['POST'])
 def generate_scene_image_api():
     """单独生成场景图片的接口"""

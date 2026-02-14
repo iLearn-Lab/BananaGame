@@ -6,7 +6,7 @@ import threading
 from typing import Dict
 
 from src.config import AI_API_CONFIG
-from src.constants import PERFORMANCE_OPTIMIZATION, TONE_CONFIGS
+from src.constants import PERFORMANCE_OPTIMIZATION, TONE_CONFIGS, get_tone_brief_for_worldview
 from src.llm.api import call_ai_api
 from src.llm.council_core import run_full_council_sync
 from src.worldview.parser import _regex_fill_worldview
@@ -51,7 +51,7 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
     if staged_mode:
         prompt = f"""
         你是资深游戏编剧，请生成【核心世界观速写】，简洁但覆盖关键要素。
-        要求：中文输出，无代码块，无多余解释；严格贴合基调：{tone['name']}（{tone['description']}），语言特征：{tone['language_features']}，禁忌：{tone['taboo_content']}
+        要求：中文输出，无代码块，无多余解释；严格贴合基调：{get_tone_brief_for_worldview(tone)}
 
         ## 【核心世界观】
         游戏风格：至少60字
@@ -95,7 +95,7 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
     else:
         prompt = f"""
         你是资深游戏编剧，请生成完整的文本冒险游戏世界观。
-        规则：中文输出；无代码块/解释；按分隔符输出且字段齐全；必须贴合基调：{tone['name']}（{tone['description']}），语言特征：{tone['language_features']}，禁忌：{tone['taboo_content']}
+        规则：中文输出；无代码块/解释；按分隔符输出且字段齐全；必须贴合基调：{get_tone_brief_for_worldview(tone)}
 
         ## 【核心世界观】
         游戏风格：≥80字

@@ -174,7 +174,7 @@ def archive_supporting_role_first_appearance(
         "first_img_id": first_img_id,
         "first_img_path": str(first_img_path.resolve()),
         "first_prompt": first_prompt,
-        "img_model": IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-2.5-flash-image"),
+        "img_model": IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview"),
         "update_log": [],
         "core_features": core_features,
     }
@@ -217,7 +217,7 @@ def update_supporting_role_aliases_from_plot(game_id: str, scene_description: st
 只输出提取到的身份揭示，无则输出「无」。"""
     try:
         resp = call_ai_api({
-            "model": AI_API_CONFIG.get("model", "deepseek-v3.2"),
+            "model": AI_API_CONFIG.get("model", "claude-opus-4-6"),
             "messages": [{"role": "user", "content": llm_prompt}],
             "temperature": 0.2,
             "max_tokens": 300,

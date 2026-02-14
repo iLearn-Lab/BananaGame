@@ -713,7 +713,7 @@ def generate_main_character_image(
                 # 优先使用 gemini-2.5-flash-image 图生图
                 img = None
                 use_img2img = False
-                model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-2.5-flash-image")
+                model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview")
                 if "gemini" in model.lower() and "image" in model.lower():
                     print(f"🔄 尝试使用 gemini-2.5-flash-image 图生图生成{view_name}视图...")
                     img = call_gemini_img2img(prompt_text, reference_front_path, cache_key_suffix=reference_front_path)
@@ -1169,7 +1169,7 @@ def generate_scene_image(
                 size_prompt = f"{prompt}, aspect ratio {image_width}:{image_height}"
                 
                 # 参考图：主角 + 配角 + 上一张剧情图（若有）
-                model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-2.5-flash-image")
+                model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview")
                 all_reference_images = list(protagonist_reference_images) if protagonist_reference_images else []
                 all_reference_images.extend(supporting_role_images if supporting_role_images else [])
                 if previous_scene_image_path:
@@ -1466,7 +1466,7 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
     
     api_key = IMAGE_GENERATION_CONFIG.get("yunwu_api_key")
     base_url = IMAGE_GENERATION_CONFIG.get("yunwu_base_url", "https://yunwu.ai/v1")
-    model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-2.5-flash-image")
+    model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview")
     
     if not api_key:
         print("⚠️ gemini-2.5-flash-image 图生图：API Key未配置")

@@ -5,6 +5,7 @@ import requests
 from typing import Dict, List
 
 from src.config import AI_API_CONFIG
+from src.constants import TONE_CONFIGS
 from src.utils.text_utils import _safe_str, _clip_text
 from src.wiki.lookup import (
     wiki_lookup_theme_and_character,
@@ -22,7 +23,7 @@ def optimize_image_prompt_with_llm(
     available_supporting_roles_for_tagging: List[Dict] = None
 ) -> str:
     """
-    使用LLM（deepseek-v3.2）优化图片生成提示词
+    使用 LLM（由 AI_API_CONFIG.model 配置，默认 claude-opus-4-6）优化图片生成提示词
     """
     try:
         visual_context = global_state.get('_visual_context') if isinstance(global_state, dict) else None
@@ -55,9 +56,10 @@ def optimize_image_prompt_with_llm(
         continuity_requirements = ""
         if previous_image_prompt or previous_scene_text or previous_image_url or scene_id_for_lock:
             continuity_requirements = f"""【连续性/一致性要求（重要）】
-1) 同一场景保持统一画风与物件：角色外观（发型、脸部特征、服装配色/材质）、关键道具/武器/饰品、环境主色调与光线风格要前后一致。
-2) 下一剧情的图片需要延续上一剧情的"画面设定"：尽量沿用上一张图的镜头语言、色彩、角色造型与关键物件，不要无故更换造型/服装/装备。
-3) 最终提示词中不要包含URL/文件路径/任何可被当作文字的字符串（例如 http://...），避免图片里出现文字。
+- **画风与角色一致**：同一场景内角色外观（发型、脸型、服装配色与材质）、关键道具/武器/饰品、环境主色调与光线风格须与上一张图保持一致，不得无故更换造型、服装或装备。
+- **延续画面设定**：沿用上一张图的镜头语言、构图风格、色彩基调与角色造型；仅当【当前剧情】明确要求变化（如转身、换装、换场景）时才在描述中体现变化。
+- **优先级**：当前剧情与当前镜头的描述（朝向、动作、站位）优先级最高；若与上一张图或参考图冲突，以当前剧情为准。例如剧情明确为「背对观众」时，必须使用背面参考图并写明背对镜头。
+- **禁止文字入图**：最终提示词中不得包含 URL、文件路径或任何可被生图模型渲染成文字的字符串（如 http://、data:image/、本地路径），避免画面中出现乱码或网址。
 
 上一剧情文本（可选）：
 {previous_scene_text[:800] if previous_scene_text else '（无）'}
@@ -81,19 +83,8 @@ def optimize_image_prompt_with_llm(
             }
 
         game_tone = global_state.get('tone', 'normal_ending')
-        tone_map = {
-            'happy_ending': '圆满结局，积极乐观',
-            'bad_ending': '悲剧结局，沉重悲伤',
-            'normal_ending': '普通结局，真实平淡',
-            'dark_depressing': '黑深残，黑暗压抑',
-            'humorous': '幽默，轻松诙谐',
-            'abstract': '抽象，象征隐喻',
-            'aesthetic': '唯美，优美细腻',
-            'logical': '逻辑推理严谨',
-            'mysterious': '神秘，悬念丛生',
-            'stream_of_consciousness': '意识流，内心描写'
-        }
-        tone_description = tone_map.get(game_tone, '普通结局')
+        tone = TONE_CONFIGS.get(game_tone, TONE_CONFIGS['normal_ending'])
+        tone_description = tone.get('name', '普通结局')
 
         style_description = ''
         if image_style:
@@ -244,7 +235,7 @@ def optimize_image_prompt_with_llm(
         }
 
         request_body = {
-            "model": "deepseek-v3.2",
+            "model": AI_API_CONFIG.get("model", "claude-opus-4-6"),
             "messages": [{"role": "user", "content": llm_prompt}],
             "temperature": 0.7,
             "max_tokens": 2000
@@ -328,19 +319,8 @@ def optimize_main_character_prompt_with_llm(
             }
 
         game_tone = global_state.get('tone', 'normal_ending')
-        tone_map = {
-            'happy_ending': '圆满结局，积极乐观',
-            'bad_ending': '悲剧结局，沉重悲伤',
-            'normal_ending': '普通结局，真实平淡',
-            'dark_depressing': '黑深残，黑暗压抑',
-            'humorous': '幽默，轻松诙谐',
-            'abstract': '抽象，象征隐喻',
-            'aesthetic': '唯美，优美细腻',
-            'logical': '逻辑推理严谨',
-            'mysterious': '神秘，悬念丛生',
-            'stream_of_consciousness': '意识流，内心描写'
-        }
-        tone_description = tone_map.get(game_tone, '普通结局')
+        tone = TONE_CONFIGS.get(game_tone, TONE_CONFIGS['normal_ending'])
+        tone_description = tone.get('name', '普通结局')
 
         style_description = ''
         if image_style:
@@ -539,7 +519,7 @@ def optimize_main_character_prompt_with_llm(
         }
 
         request_body = {
-            "model": "deepseek-v3.2",
+            "model": AI_API_CONFIG.get("model", "claude-opus-4-6"),
             "messages": [{"role": "user", "content": llm_prompt}],
             "temperature": 0.7,
             "max_tokens": 2000
