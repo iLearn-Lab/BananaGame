@@ -1,0 +1,122 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "清晨六点四十七分，澜城的天际线还压着一层铅灰色的云。\n\n苏锦书站在瀚宇资本大厦的旋转门前，玻璃幕墙映出她的轮廓黑色西装裤…",
+    "first_img_id": "img_20260218_001",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771401661_x80n9w\\配角1_img_20260218_001.png",
+    "first_prompt": "**程砚秋-配角1：** 位于画面右侧偏后方，靠在茶水间门框上，全身可见",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**程砚秋-配角1：** 位于画面右侧偏后方，靠在茶水间门框上，全身可见"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "配角2",
+    "aliases": [
+      "配角2"
+    ],
+    "story_background": "",
+    "first_appear_scene": "清晨七点四十分，澜城金融中心的玻璃幕墙将初夏的阳光切割成锋利的光柱，投射在瀚宇资本大厦的旋转门前。苏锦书穿着一件剪裁利落…",
+    "first_img_id": "img_20260218_002",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771401661_x80n9w\\配角2_img_20260218_002.png",
+    "first_prompt": "**程砚-配角2：** 位于画面中央偏右，与苏锦书隔桌对坐，膝上可见，约四分之三侧面朝向镜头",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**程砚-配角2：** 位于画面中央偏右，与苏锦书隔桌对坐，膝上可见，约四分之三侧面朝向镜头"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "配角3",
+    "aliases": [
+      "配角3"
+    ],
+    "story_background": "",
+    "first_appear_scene": "清晨七点四十分，澜城金融中心的玻璃幕墙将初夏的阳光切割成锋利的光柱，投射在瀚宇资本大厦的旋转门前。苏锦书穿着一件剪裁利落…",
+    "first_img_id": "img_20260218_003",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771401661_x80n9w\\配角3_img_20260218_003.png",
+    "first_prompt": "**沈奕川-配角3：** 位于画面右后方靠窗位置，半身可见，侧身约60度",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**沈奕川-配角3：** 位于画面右后方靠窗位置，半身可见，侧身约60度"
+  },
+  "role_004": {
+    "role_id": "role_004",
+    "role_name": "配角4",
+    "aliases": [
+      "配角4"
+    ],
+    "story_background": "",
+    "first_appear_scene": "清晨七点四十分，澜城金融中心的玻璃幕墙将初夏的阳光切割成锋利的光柱，投射在瀚宇资本大厦的旋转门前。苏锦书穿着一件剪裁利落…",
+    "first_img_id": "img_20260218_004",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771401661_x80n9w\\配角4_img_20260218_004.png",
+    "first_prompt": "**林婉清-配角4：** 位于沈奕川旁边，画面最右侧，半身可见，接近正面微侧",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**林婉清-配角4：** 位于沈奕川旁边，画面最右侧，半身可见，接近正面微侧"
+  },
+  "role_005": {
+    "role_id": "role_005",
+    "role_name": "配角5",
+    "aliases": [
+      "配角5"
+    ],
+    "story_background": "",
+    "first_appear_scene": "午休时段，瀚宇资本28楼的开放办公区逐渐安静下来。多数实习生结伴去了楼下的员工餐厅，荧光灯管在空旷的工位上方嗡嗡作响，空…",
+    "first_img_id": "img_20260218_005",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771401661_x80n9w\\配角5_img_20260218_005.png",
+    "first_prompt": "**主角——苏锦书（使用 Image 1 侧面视图，保持参考图中该角色的面部特征完全一致，仅改变姿势与表情以贴合当前剧情）：** 位于画面左侧，膝上可见，约四分之三侧面朝向镜头，身体微微面向右侧的小周-配角5方向，呈现一种自然的对话侧身姿态",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**主角——苏锦书（使用 Image 1 侧面视图，保持参考图中该角色的面部特征完全一致，仅改变姿势与表情以贴合当前剧情）：** 位于画面左侧，膝上可见，约四分之三侧面朝向镜头，身体微微面向右侧的小周-配角5方向，呈现一种自然的对话侧身姿态"
+  },
+  "role_006": {
+    "role_id": "role_006",
+    "role_name": "画面右侧偏后方，林若棠",
+    "aliases": [
+      "画面右侧偏后方，林若棠"
+    ],
+    "story_background": "",
+    "first_appear_scene": "深夜的瀚宇资本档案区灯光昏黄，走廊尽头的电子门禁亮着冷蓝色的指示灯。苏锦书站在公共资料终端前，屏幕的白光映在她沉静的面容…",
+    "first_img_id": "img_20260218_006",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771401661_x80n9w\\画面右侧偏后方，林若棠_img_20260218_006.png",
+    "first_prompt": "画面右侧偏后方，林若棠-配角6 倚靠在隔间入口的挡板边缘，身体重心偏向一侧，姿态松弛却带有审视感",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "画面右侧偏后方，林若棠-配角6 倚靠在隔间入口的挡板边缘，身体重心偏向一侧，姿态松弛却带有审视感"
+  },
+  "role_007": {
+    "role_id": "role_007",
+    "role_name": "画面右侧约三分之一位置，沈奕川",
+    "aliases": [
+      "画面右侧约三分之一位置，沈奕川"
+    ],
+    "story_background": "",
+    "first_appear_scene": "午后的茶水间弥漫着速溶咖啡的苦涩气味，阳光透过百叶窗在灰白色台面上切割出一道道细长的光影。苏锦书端着纸杯走进来时，沈奕川…",
+    "first_img_id": "img_20260218_007",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771401661_x80n9w\\画面右侧约三分之一位置，沈奕川_img_20260218_007.png",
+    "first_prompt": "画面右侧约三分之一位置，沈奕川-配角6 侧身靠在饮水机旁，左肩抵着饮水机侧面，身体呈四分之三角度面向主角方向（即面部微微朝向画面左侧）",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "画面右侧约三分之一位置，沈奕川-配角6 侧身靠在饮水机旁，左肩抵着饮水机侧面，身体呈四分之三角度面向主角方向（即面部微微朝向画面左侧）"
+  },
+  "role_008": {
+    "role_id": "role_008",
+    "role_name": "本镜头为主角独自深夜调查的特写画面，陆则渊",
+    "aliases": [
+      "本镜头为主角独自深夜调查的特写画面，陆则渊"
+    ],
+    "story_background": "",
+    "first_appear_scene": "瀚宇资本三十七楼的开放办公区在夜间十一点后彻底安静下来，只剩走廊尽头应急灯投下的冷白光。苏锦书坐在自己工位上，笔记本屏幕…",
+    "first_img_id": "img_20260218_008",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771401661_x80n9w\\本镜头为主角独自深夜调查的特写画面，陆则渊_img_20260218_008.png",
+    "first_prompt": "**配角说明：** 本镜头为主角独自深夜调查的特写画面，陆则渊-配角1 在本场剧情中出场但不出现在本镜头画面内（其出场将在后续镜头中呈现），本画面中无配角",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**配角说明：** 本镜头为主角独自深夜调查的特写画面，陆则渊-配角1 在本场剧情中出场但不出现在本镜头画面内（其出场将在后续镜头中呈现），本画面中无配角"
+  }
+}

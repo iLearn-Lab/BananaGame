@@ -983,9 +983,9 @@ def generate_scene_image(
         image_width, image_height = calculate_image_size_for_viewport(viewport_width, viewport_height, provider)
         print(f"📐 根据视口尺寸 {viewport_width}x{viewport_height} 计算生成尺寸：{image_width}x{image_height}")
     else:
-        # 如果没有提供视口尺寸，使用默认尺寸
-        image_width, image_height = 1024, 1024
-        print(f"📐 使用默认生成尺寸：{image_width}x{image_height}")
+        # 如果没有提供视口尺寸，使用默认 16:9 横屏尺寸（适合电脑屏幕，减少裁剪）
+        image_width, image_height = 1024, 576
+        print(f"📐 使用默认生成尺寸（16:9 横屏）：{image_width}x{image_height}")
     
     # 1. 提取图片风格信息
     image_style = global_state.get('image_style', None)

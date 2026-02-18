@@ -188,14 +188,29 @@ def optimize_image_prompt_with_llm(
 
 {continuity_requirements if continuity_requirements else ''}
 
+【角色一致性（必遵）】
+若提供了主角/配角参考图：生成的视觉描述中必须明确「保持参考图中该角色的面部特征、服装完全一致；仅可改变姿势、表情、站位以贴合当前剧情」。若当前剧情中角色为背对镜头、侧身等，必须明确写出对应朝向，并指明使用哪张参考图（如背面用 Image 2）。
+
+【优先级规则】
+当前剧情与当前镜头的描述（朝向、动作、站位）优先级最高。若与上一张图或参考图的默认朝向冲突，以当前剧情为准。例如：剧情明确为「背对观众」「转身离开」时，必须在视觉描述中写明角色背对镜头，并指明使用背面参考图（如 Image 2），不得为追求与正面参考图一致而写成正面。
+
 请根据以上信息，生成一个详细的视觉描述提示词，要求：
-1. 准确反映当前剧情场景
-2. 体现主角的外貌特征和能力特点；若有【主角规范信息】，描写主角时必须严格遵循其性别、年龄感与标志性外观关键词
-3. 符合游戏主题和世界观设定
-4. 匹配游戏基调（如悲剧基调应体现沉重氛围）
-5. 符合指定的图片风格
-6. 不要包含任何文字、符号、乱码（重要：必须在提示词中明确告诉生图AI不要生成任何文字、符号、乱码）
-7. 描述要具体、生动，包含场景、人物、光线、氛围等细节
+1. 镜头/景别（必选其一，且须与剧情匹配）：根据【当前剧情】的情绪、重点与节奏，在视觉描述开头或明显位置写明「本镜头为：XXX」。只能从以下景别中选一种，且选择需与剧情相符：
+- 大特写（极近景）：眼睛、手、关键道具等局部，适合情绪爆发、关键道具、重要台词（非必要不用此景别）
+- 特写（近景）：面部或胸以上，适合对话、表情、内心戏
+- 中近景：胸以上，适合对话、轻微动作
+- 中景：膝上或半身，适合日常动作、多人互动
+- 中远景：全身可见，适合肢体语言、姿态、走位
+- 远景（全身）：人物在环境中的位置，适合人物与环境关系、入场/离场
+- 大远景（广角）：环境、场景、人群，适合建立场景、氛围、群像
+不得省略景别；若剧情偏对话/情绪则优先特写或中近景，若偏动作或环境则优先中景、远景或大远景。
+2. 准确反映当前剧情场景；角色必须与当前镜头/景别匹配，不得偏离；画面为横屏宽幅比例（如16:9），适合电脑屏幕展示，构图时避免竖版导致上下大量留白。
+3. 体现主角的外貌特征和能力特点；若有【主角规范信息】，描写主角时必须严格遵循其性别、年龄感与标志性外观关键词
+4. 符合游戏主题和世界观设定
+5. 匹配游戏基调（如悲剧基调应体现沉重氛围）
+6. 符合指定的图片风格；当本次选用写实或默认风格时，在生成的视觉描述中应包含英文风格词：realistic, cinematic（或中文「电影感」），以利于生图模型表现；其他风格（如动漫、水墨、油画、赛博朋克等）按【图片风格要求】描述即可
+7. 不要包含任何文字、符号、乱码（重要：必须在提示词中明确告诉生图AI不要生成任何文字、符号、乱码）
+8. 描述要具体、生动，包含场景、人物、光线、氛围等细节
 {('8. 如果提供了主角参考图说明，必须在提示词中明确说明主角使用 Image 0/1/2 中的哪张（根据主角在场景中的视角）' if protagonist_reference_section else '')}
 {('9. 如果提供了配角参考图说明，必须在提示词中明确说明每个配角参考 Image N，并强调保持其核心特征不变' if (supporting_role_references and len(supporting_role_references) >= 1) else '')}
 {('9. 如果提供了配角标注要求，必须在视觉描述中对出场的配角使用「角色名-配角N」格式（如凌川-配角1），便于系统识别' if (available_supporting_roles_for_tagging and len(available_supporting_roles_for_tagging) >= 1 and not (supporting_role_references and len(supporting_role_references) >= 1)) else '')}
@@ -241,6 +256,11 @@ def optimize_image_prompt_with_llm(
                 optimized_prompt = f"{optimized_prompt}, no text, no symbols, no garbled characters, no words"
                 if continuity_requirements:
                     optimized_prompt = f"{optimized_prompt}, consistent character design, consistent outfit and key props, consistent color palette and lighting"
+                # 写实/默认风格时兜底追加 realistic, cinematic
+                style_type = (image_style or {}).get("type", "")
+                if style_type in ("", "realistic", "default") or style_type not in ("anime", "ink_painting", "oil_painting", "cyberpunk", "custom"):
+                    if not any(kw in optimized_prompt for kw in ("realistic", "cinematic", "电影感")):
+                        optimized_prompt = f"{optimized_prompt}, realistic, cinematic"
                 print(f"✅ LLM提示词优化完成，长度：{len(optimized_prompt)}字符")
                 return optimized_prompt
 
