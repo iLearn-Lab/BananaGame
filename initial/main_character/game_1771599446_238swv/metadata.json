@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771599446_238swv",
+  "generated_at": "2026-02-20T22:58:54.779102",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **Full-body character design of Shinji Ikari, a teenage boy with deep blue short hair and melancholic temperament. Pale skin with delicate, youthful facial features showing a sensitive and slightly anxious expression. Deep, contemplative eyes that convey inner turmoil and intelligence. Slender, lean build typical of a 14-year-old boy. Wearing a dark blue school uniform consisting of a collared shirt and dark pants, with the uniform appearing neat but slightly oversized on his thin frame. His posture is slightly introverted and tense, with shoulders slightly hunched, hands positioned nervously at his sides. His facial expression shows a mixture of vulnerability and determination, with a subtle frown and downcast gaze that occasionally lifts with resolve. The character embodies extremely high attractiveness, intelligence, physical capability and charisma despite his reserved demeanor. Anime art style with vibrant colors, Japanese animation aesthetic, clean line work and detailed shading. Pure white background, character centered and standing upright in full view. No text, no symbols, no words.**, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**Full-body character design of Shinji Ikari, a teenage boy with deep blue short hair and melancholic temperament. Pale skin with delicate, youthful facial features showing a sensitive and slightly anxious expression. Deep, contemplative eyes that convey inner turmoil and intelligence. Slender, lean build typical of a 14-year-old boy. Wearing a dark blue school uniform consisting of a collared shirt and dark pants, with the uniform appearing neat but slightly oversized on his thin frame. His posture is slightly introverted and tense, with shoulders slightly hunched, hands positioned nervously at his sides. His facial expression shows a mixture of vulnerability and determination, with a subtle frown and downcast gaze that occasionally lifts with resolve. The character embodies extremely high attractiveness, intelligence, physical capability and charisma despite his reserved demeanor. Anime art style with vibrant colors, Japanese animation aesthetic, clean line work and detailed shading. Pure white background, character centered and standing upright in full view. No text, no symbols, no words.**, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771599446_238swv/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **Full-body character design of Shinji Ikari, a teenage boy with deep blue short hair and melancholic temperament. Pale skin with delicate, youthful facial features showing a sensitive and slightly anxious expression. Deep, contemplative eyes that convey inner turmoil and intelligence. Slender, lean build typical of a 14-year-old boy. Wearing a dark blue school uniform consisting of a collared shirt and dark pants, with the uniform appearing neat but slightly oversized on his thin frame. His posture is slightly introverted and tense, with shoulders slightly hunched, hands positioned nervously at his sides. His facial expression shows a mixture of vulnerability and determination, with a subtle frown and downcast gaze that occasionally lifts with resolve. The character embodies extremely high attractiveness, intelligence, physical capability and charisma despite his reserved demeanor. Anime art style with vibrant colors, Japanese animation aesthetic, clean line work and detailed shading. Pure white background, character centered and standing upright in full view. No text, no symbols, no words.**, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-20T22:58:54.779102"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771599446_238swv/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771599446_238swv\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-20T22:59:11.594104"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771599446_238swv/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771599446_238swv\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-20T22:59:17.654699"
+    }
+  }
+}

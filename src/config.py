@@ -47,6 +47,24 @@ IMAGE_GENERATION_CONFIG = {
 }
 
 # ------------------------------
+# 视觉模型（初登场图里标出配角位置并裁成单人参考图）
+# 可用 gpt-4o / gpt-4o-latest 等带识图能力的模型；不配置则跳过裁剪，仍用整张初登场图
+# ------------------------------
+_def_vision_timeout = os.getenv("VISION_REF_TIMEOUT", "")
+_def_vision_side = os.getenv("VISION_REF_MAX_IMAGE_SIDE", "")
+_def_vision_tokens = os.getenv("VISION_REF_MAX_TOKENS", "")
+_use_gemini_ep = os.getenv("VISION_REF_USE_GEMINI_ENDPOINT", "").lower() in ("1", "true", "yes")
+VISION_FOR_REF_CROP = {
+    "model": os.getenv("VISION_REF_MODEL", ""),  # 如 gpt-4o-latest 或 gemini-3-pro-preview
+    "api_key": os.getenv("VISION_REF_API_KEY") or os.getenv("OPENAI_API_KEY", ""),
+    "base_url": os.getenv("VISION_REF_BASE_URL", ""),  # 空则用 OpenAI 默认
+    "timeout": int(_def_vision_timeout) if str(_def_vision_timeout).strip().isdigit() else 120,  # 带图请求较慢，默认 120 秒
+    "max_image_side": int(_def_vision_side) if str(_def_vision_side).strip().isdigit() else 1024,  # 发给视觉模型前长边最大像素，越小请求越快
+    "max_output_tokens": int(_def_vision_tokens) if str(_def_vision_tokens).strip().isdigit() else 512,  # 视觉回复最大 token，默认 512（与之前一致）；若被截断可在 .env 设 VISION_REF_MAX_TOKENS 更大
+    "use_gemini_endpoint": _use_gemini_ep,  # true 时走 /v1beta/models/xxx:generateContent，可能比 OpenAI 兼容口回复更长
+}
+
+# ------------------------------
 # 现实题材/IP 资料检索（Wikipedia）
 # ------------------------------
 WIKI_LOOKUP_ENABLED = os.getenv("WIKI_LOOKUP_ENABLED", "true").lower() == "true"

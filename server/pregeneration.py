@@ -235,6 +235,9 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                     if scene_for_image and option_data:
                         try:
                             print(f"🎨 [第一层预生成] 开始为选项 {opt_idx + 1} 生成图片...")
+                            # 传入剧情模型输出的本段出场配角（有则名单，无则[]），图片流程以剧情为准不推断
+                            if isinstance(global_state, dict):
+                                global_state["_plot_supporting_characters"] = option_data.get("plot_supporting_characters", [])
                             img = generate_scene_image(scene_for_image, global_state, "default", use_cache=True)
                             print(f"🎨 [第一层预生成] generate_scene_image 返回：img={img is not None}, type={type(img)}")
                             
@@ -554,7 +557,7 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                             
                             # 为下一轮的每个选项生成再下一层剧情（在锁外执行，避免长时间持有锁）
                             try:
-                                layer2_data = generate_all_options(updated_global_state, next_options, skip_images=True)
+                                layer2_data = generate_all_options(updated_global_state, next_options, skip_images=False)
                                 
                                 # 再次检查取消标志并写入缓存（生成过程中可能被取消）
                                 with cache_lock:
@@ -642,7 +645,7 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                                 
                                 # 为下一轮的每个选项生成再下一层剧情（在锁外执行，避免长时间持有锁）
                                 try:
-                                    layer2_data = generate_all_options(updated_global_state, next_options, skip_images=True)
+                                    layer2_data = generate_all_options(updated_global_state, next_options, skip_images=False)
                                     
                                     # 再次检查取消标志并写入缓存（生成过程中可能被取消）
                                     with cache_lock:

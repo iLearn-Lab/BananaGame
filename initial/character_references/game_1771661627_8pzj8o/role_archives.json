@@ -1,0 +1,19 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "华生",
+    "aliases": [
+      "华生"
+    ],
+    "story_background": "",
+    "first_appear_scene": "年10月的伦敦，秋雨绵绵。贝克街221B号的壁炉中火光跳跃，橘黄色的光芒在书架上投下摇曳的阴影。我坐在那张熟悉的扶手椅中…",
+    "first_img_id": "img_20260221_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771661627_8pzj8o\\华生_img_20260221_001.png",
+    "first_prompt": "华生-配角1站在房间另一侧整理医疗器械，偶尔抬头看向主角，眼中闪过思索的光芒",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "华生-配角1站在房间另一侧整理医疗器械，偶尔抬头看向主角，眼中闪过思索的光芒",
+    "face_ref_path": "华生_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771661627_8pzj8o\\华生_body_ref.png"
+  }
+}

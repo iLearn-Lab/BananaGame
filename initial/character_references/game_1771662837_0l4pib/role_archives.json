@@ -1,0 +1,17 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "赫德森太太",
+    "aliases": [
+      "赫德森太太"
+    ],
+    "story_background": "",
+    "first_appear_scene": "你决定从福尔摩斯失踪前的最后行踪开始调查。回到贝克街221B号，你仔细搜查了福尔摩斯的房间，在他的书桌抽屉深处发现了一本…",
+    "first_img_id": "img_20260221_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771662837_0l4pib\\赫德森太太_img_20260221_001.png",
+    "first_prompt": "画面右侧站着赫德森太太-配角1，这是一位中年女性，身穿朴素的维多利亚时代女仆装，白色围裙整洁，神色紧张不安",
+    "img_model": "gemini-2.5-flash-image",
+    "update_log": [],
+    "core_features": "画面右侧站着赫德森太太-配角1，这是一位中年女性，身穿朴素的维多利亚时代女仆装，白色围裙整洁，神色紧张不安"
+  }
+}

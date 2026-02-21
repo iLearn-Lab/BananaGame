@@ -15,6 +15,7 @@ from src.llm.api import call_ai_api
 from src.wiki.lookup import _format_protagonist_canonical_for_prompt
 from src.image.api_providers import generate_scene_image
 from src.image.validation import validate_image_url, fix_incomplete_url
+from src.characters.pending_roles import add_mentioned_roles
 
 # 选项剪枝函数：过滤不合理、重复或过于相似的选项
 def prune_options(options: List[str]) -> List[str]:
@@ -216,9 +217,10 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
     4. 所有生成内容必须严格贴合选定的故事基调！
     5. 如果有已解锁的深层背景，后续剧情必须围绕这些深层背景展开，将深层背景信息自然融入主线剧情中，不要直接向玩家显示深层背景内容！
     6. 描写主角时必须与【主角规范信息】一致（性别、年龄、外貌、人称）。
+    7. **【本段出场配角】必须与【场景】内容一致**：你在【场景】里写了谁有对话、谁做了自我介绍（如「我是葛城美里」），就必须在【本段出场配角】里按「角色名-配角1」列出，不能漏填或写「无」。
     
     ## 【硬性输出格式】必须严格遵守，否则无法解析
-    你的回复必须且仅包含以下四块，**不要有任何前缀、解释或代码块**（如「好的，以下是…」或 ```），**第一行就必须是【场景】：**：
+    你的回复必须且仅包含以下六块，**不要有任何前缀、解释或代码块**（如「好的，以下是…」或 ```），**第一行就必须是【场景】：**：
     【场景】：（此处写场景正文，可多段）
     【选项】：
     1. 选项一文字
@@ -230,6 +232,8 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
     章节矛盾：已解决/未解决
     【深层背景关联】：
     选项1：角色名 或 选项2：角色名
+    【本段出场配角】：角色名-配角1、角色名-配角2（**必须与【场景】一致**：凡在场景中有对话、自我介绍（如「我是XXX」）或明确出场的有名有姓非主角角色，都必须在此按「角色名-配角1」列出，无则写「无」）
+    【本段提及但未出场】：角色名1、角色名2（仅列本段只被提及、未实际出场的角色，无则写「无」）
     """
     
     # 添加调试信息：打印生成的Prompt前500字符
@@ -245,7 +249,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
         normal_tokens = 2500
     max_tokens = initial_tokens if is_initial_scene else normal_tokens
     
-    system_msg = "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：。不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
+    system_msg = "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：、【本段出场配角】：、【本段提及但未出场】：。不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
     request_body = {
         "model": AI_API_CONFIG.get("model", ""),
         "messages": [
@@ -459,6 +463,46 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                                 option_idx = int(option_num_match.group(1)) - 1  # 转换为0-based索引
                                 deep_background_links[option_idx] = char_name
             
+            # 5. 提取本段出场配角（剧情模型直接输出；仅有名有姓/有对话者，其余为NPC不建档）
+            plot_supporting_characters = []
+            plot_sr_match = re.search(r'【本段出场配角】：([\s\S]*?)(?=【本段提及|【|$)', raw_content)
+            if plot_sr_match:
+                plot_sr_text = plot_sr_match.group(1).strip()
+                if plot_sr_text and plot_sr_text != "无" and "无" not in plot_sr_text[:2]:
+                    seen_slots = set()
+                    for m in re.finditer(r"([^\s\-、\n]+)\s*[-－]?\s*(配角\d+)(?:\s|$|，|。|、)", plot_sr_text):
+                        name, slot = m.group(1).strip(), m.group(2)
+                        if slot not in seen_slots and not re.match(r"^配角\d+$", name):
+                            seen_slots.add(slot)
+                            plot_supporting_characters.append((name, slot))
+                    if plot_supporting_characters:
+                        def _slot_key(item):
+                            n = re.search(r"\d+", item[1])
+                            return int(n.group()) if n else 0
+                        plot_supporting_characters.sort(key=_slot_key)
+                        print(f"📋 选项 {i+1} 剧情模型输出本段出场配角：{[f'{n}-{s}' for n, s in plot_supporting_characters]}")
+            # 5.1 若模型未填【本段出场配角】但场景中有自我介绍（如「我是葛城美里」），补一条避免漏建档
+            if not plot_supporting_characters and scene and len(scene.strip()) >= 10:
+                intro_match = re.search(r'我是([^，。！？\n、]+?)(?=[，。！？\n]|$)', scene.strip())
+                if intro_match:
+                    name = intro_match.group(1).strip()
+                    if name and len(name) >= 2 and len(name) <= 10:
+                        plot_supporting_characters = [(name, "配角1")]
+                        print(f"📋 选项 {i+1} 从场景自我介绍补全本段出场配角：{name}-配角1（模型未填【本段出场配角】）")
+            
+            # 6. 提取本段提及但未出场（预配角，只积累碎片，正式出场时再建档）
+            plot_mentioned_only = []
+            plot_mentioned_match = re.search(r'【本段提及但未出场】：([\s\S]*?)(?=【|$)', raw_content)
+            if plot_mentioned_match:
+                plot_mentioned_text = plot_mentioned_match.group(1).strip()
+                if plot_mentioned_text and plot_mentioned_text != "无" and "无" not in plot_mentioned_text[:2]:
+                    for part in re.split(r'[、\n]', plot_mentioned_text):
+                        name = part.strip()
+                        if name and len(name) >= 2 and name != "无":
+                            plot_mentioned_only.append(name)
+                    if plot_mentioned_only:
+                        print(f"📋 选项 {i+1} 剧情模型输出本段提及但未出场：{plot_mentioned_only}")
+            
             # 选项剪枝：过滤不合理、重复或过于相似的选项
             original_options_count = len(next_options)
             original_options = next_options.copy()  # 保存原始选项
@@ -488,8 +532,19 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 "scene": scene,
                 "next_options": next_options,
                 "flow_update": flow_update,
-                "deep_background_links": deep_background_links
+                "deep_background_links": deep_background_links,
+                "plot_supporting_characters": plot_supporting_characters,
+                "plot_mentioned_only": plot_mentioned_only,
             }
+            
+            # 本段提及但未出场：写入预配角并积累本段碎片（正式出场时合并进配角档案）
+            game_id = global_state.get("game_id") if isinstance(global_state, dict) else None
+            if game_id and scene and plot_mentioned_only:
+                add_mentioned_roles(game_id, plot_mentioned_only, scene)
+            
+            # 始终传入本段出场配角（有则名单，无则[]）；图片流程以剧情为准，不再从提示词推断
+            if isinstance(global_state, dict):
+                global_state["_plot_supporting_characters"] = plot_supporting_characters
             
             # 新增：生成场景图片（使用本地缓存，避免OSS URL失效问题）
             # 修复：移除“线程 join 6分钟后丢结果”的逻辑，改为同步调用 + 可控的网络超时/重试。
@@ -637,7 +692,8 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 "quest_progress": f"你正在执行任务：{option}",
                 "chapter_conflict_solved": False
             },
-            "deep_background_links": {}
+            "deep_background_links": {},
+            "plot_supporting_characters": [],
         }
         # 默认剧情不生成图片和视频
     
@@ -792,15 +848,18 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
     4. 所有生成内容必须严格贴合选定的故事基调！
     5. 如果有已解锁的深层背景，后续剧情必须围绕这些深层背景展开，将深层背景信息自然融入主线剧情中，不要直接向玩家显示深层背景内容！
     6. 描写主角时必须与【主角规范信息】一致（性别、年龄、外貌、人称）。
+    7. **【本段出场配角】必须与【场景】内容一致**：你在【场景】里写了谁有对话、谁做了自我介绍（如「我是葛城美里」），就必须在【本段出场配角】里按「角色名-配角1」列出，不能漏填或写「无」。
     
     ## 【硬性输出格式】必须严格遵守，否则无法解析
-    你的回复必须且仅包含以下四块，**不要有任何前缀、解释或代码块**，**第一行就必须是【场景】：**：
+    你的回复必须且仅包含以下六块，**不要有任何前缀、解释或代码块**，**第一行就必须是【场景】：**：
     【场景】：（此处写场景正文）
     【选项】：
     1. 选项一文字
     2. 选项二文字
     【世界线更新】：…
     【深层背景关联】：…
+    【本段出场配角】：**必须与【场景】一致**，凡在场景中有对话/自我介绍（如「我是XXX」）或出场的有名有姓角色，按 名称-配角N 列出，无则写「无」
+    【本段提及但未出场】：仅列本段只被提及未出场的角色名，无则写「无」
     """
     
     # 构建请求体，如果是第一次生成，增加max_tokens以确保生成足够长的内容
@@ -812,7 +871,7 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
         normal_tokens = 2500
     max_tokens = initial_tokens if is_initial_scene else normal_tokens
     
-    system_msg = "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：。不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
+    system_msg = "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：、【本段出场配角】：、【本段提及但未出场】：。不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
     request_body = {
         "model": AI_API_CONFIG.get("model", ""),
         "messages": [
@@ -992,6 +1051,51 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                                 option_idx = int(option_num_match.group(1)) - 1
                                 deep_background_links[option_idx] = char_name
             
+            # 提取本段出场配角（与 _generate_single_option 一致，供后续补图时使用）
+            plot_supporting_characters = []
+            plot_sr_match = re.search(r'【本段出场配角】：([\s\S]*?)(?=【本段提及|【|$)', raw_content)
+            if plot_sr_match:
+                plot_sr_text = plot_sr_match.group(1).strip()
+                if plot_sr_text and plot_sr_text != "无" and "无" not in plot_sr_text[:2]:
+                    seen_slots = set()
+                    for m in re.finditer(r"([^\s\-、\n]+)\s*[-－]?\s*(配角\d+)(?:\s|$|，|。|、)", plot_sr_text):
+                        name, slot = m.group(1).strip(), m.group(2)
+                        if slot not in seen_slots and not re.match(r"^配角\d+$", name):
+                            seen_slots.add(slot)
+                            plot_supporting_characters.append((name, slot))
+                    if plot_supporting_characters:
+                        def _slot_key(item):
+                            n = re.search(r"\d+", item[1])
+                            return int(n.group()) if n else 0
+                        plot_supporting_characters.sort(key=_slot_key)
+                        print(f"📋 选项 {i+1} 剧情模型输出本段出场配角（文本模式）：{[f'{n}-{s}' for n, s in plot_supporting_characters]}")
+            # 若模型未填【本段出场配角】但场景中有自我介绍，补一条（与主流程一致）
+            if not plot_supporting_characters and scene and len(scene.strip()) >= 10:
+                intro_match = re.search(r'我是([^，。！？\n、]+?)(?=[，。！？\n]|$)', scene.strip())
+                if intro_match:
+                    name = intro_match.group(1).strip()
+                    if name and len(name) >= 2 and len(name) <= 10:
+                        plot_supporting_characters = [(name, "配角1")]
+                        print(f"📋 选项 {i+1} 从场景自我介绍补全本段出场配角（文本模式）：{name}-配角1")
+            
+            # 提取本段提及但未出场（预配角）
+            plot_mentioned_only = []
+            plot_mentioned_match = re.search(r'【本段提及但未出场】：([\s\S]*?)(?=【|$)', raw_content)
+            if plot_mentioned_match:
+                plot_mentioned_text = plot_mentioned_match.group(1).strip()
+                if plot_mentioned_text and plot_mentioned_text != "无" and "无" not in plot_mentioned_text[:2]:
+                    for part in re.split(r'[、\n]', plot_mentioned_text):
+                        name = part.strip()
+                        if name and len(name) >= 2 and name != "无":
+                            plot_mentioned_only.append(name)
+                    if plot_mentioned_only:
+                        print(f"📋 选项 {i+1} 剧情模型输出本段提及但未出场（文本模式）：{plot_mentioned_only}")
+            
+            # 本段提及但未出场：写入预配角并积累本段碎片
+            game_id = global_state.get("game_id") if isinstance(global_state, dict) else None
+            if game_id and scene and plot_mentioned_only:
+                add_mentioned_roles(game_id, plot_mentioned_only, scene)
+            
             # 选项剪枝
             original_options_count = len(next_options)
             original_options = next_options.copy()
@@ -1013,7 +1117,9 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 "scene": scene,
                 "next_options": next_options,
                 "flow_update": flow_update,
-                "deep_background_links": deep_background_links
+                "deep_background_links": deep_background_links,
+                "plot_supporting_characters": plot_supporting_characters,
+                "plot_mentioned_only": plot_mentioned_only,
             }
             
             # 只有当场景描述和选项都有内容时，才返回结果（至少2个选项）
@@ -1049,7 +1155,9 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 "quest_progress": f"你正在执行任务：{option}",
                 "chapter_conflict_solved": False
             },
-            "deep_background_links": {}
+            "deep_background_links": {},
+            "plot_supporting_characters": [],
+            "plot_mentioned_only": [],
         }
         scene = option_data["scene"]
     

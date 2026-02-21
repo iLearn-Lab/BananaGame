@@ -13,6 +13,29 @@ from src.wiki.lookup import (
     _infer_gender_from_text,
 )
 
+# 颜值等级 → 用于生图的具体外貌描述（供 LLM 参考 + 默认提示词兜底）
+# 格式: (给 LLM 的中文说明, 拼进最终提示词的英文关键词，高/极高时用于后处理追加)
+APPEARANCE_LEVEL_MAP = {
+    "极低": ("相貌很普通，无明显亮点", "plain, unremarkable appearance"),
+    "低": ("相貌平平", "plain, average appearance"),
+    "普通": ("相貌普通", "average looking"),
+    "高": ("英俊或美丽，相貌出众，五官端正", "handsome, beautiful, attractive, good-looking, clear skin"),
+    "极高": ("非常英俊或美丽，五官精致，皮肤细腻，气质出众", "very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive"),
+}
+
+
+def _get_appearance_hint_for_llm(level: str) -> str:
+    """返回给 LLM 的颜值视觉描述要求（中文）。"""
+    entry = APPEARANCE_LEVEL_MAP.get(level, APPEARANCE_LEVEL_MAP["普通"])
+    return entry[0]
+
+
+def _get_appearance_english_suffix(level: str) -> str:
+    """返回高/极高时追加的英文关键词，其余返回空字符串。"""
+    if level not in ("高", "极高"):
+        return ""
+    return ", " + APPEARANCE_LEVEL_MAP.get(level, APPEARANCE_LEVEL_MAP["普通"])[1]
+
 
 def optimize_image_prompt_with_llm(
     scene_description: str,
@@ -345,6 +368,8 @@ def optimize_main_character_prompt_with_llm(
                 style_description = f"自定义风格：{image_style.get('value', '')}"
 
         attr_description = f"颜值{protagonist_attr.get('颜值', '普通')}，智商{protagonist_attr.get('智商', '普通')}，体力{protagonist_attr.get('体力', '普通')}，魅力{protagonist_attr.get('魅力', '普通')}"
+        appearance_level = protagonist_attr.get("颜值", "普通")
+        appearance_visual_hint = _get_appearance_hint_for_llm(appearance_level)
 
         def _build_worldview_context_text() -> str:
             try:
@@ -452,9 +477,10 @@ def optimize_main_character_prompt_with_llm(
                     protagonist_gender = _infer_gender_from_text(wiki_evidence_text)
             except Exception:
                 pass
+        # 不再使用随机性别，避免与剧情文本中的主角性别不一致；若仍缺失则使用默认，与世界观解析侧补全逻辑保持一致
         if not protagonist_gender:
-            import random
-            protagonist_gender = random.choice(['男性', '女性'])
+            protagonist_gender = "男性"
+            print("⚠️ 主角规范信息中无性别且无法从文本推断，生图使用默认「男性」以与剧情保持一致")
 
         canonical_block_lines = []
         if name_zh or name_en:
@@ -493,13 +519,18 @@ def optimize_main_character_prompt_with_llm(
 - 主角性格：{protagonist_info.get('personality', '')}
 - 主角背景：{protagonist_info.get('appearance', '')}
 
+【颜值视觉要求】（必须严格体现）
+- 主角颜值等级：{appearance_level}
+- 对应外貌描述要求：{appearance_visual_hint}
+- 请在视觉描述中明确写出与上述一致的外貌特征。若颜值为「高」或「极高」，必须在描述中包含具体的美貌相关用语（如五官精致、皮肤细腻、气质出众等），并在最终提示词中加入英文关键词（如 handsome/beautiful, attractive, delicate features, clear skin）以便生图模型更好识别；若为「低」或「极低」则描述为普通或平凡外貌。
+
 【图片风格要求】
 {style_description if style_description else '默认风格'}
 
 请根据以上信息，生成一个详细的主角形象描述提示词，要求：
 1. 必须优先使用【主角规范信息】中的姓名、性别与标志性外观关键词；若【Wikipedia 检索补充】存在，可补充细节；若有参考图，生图阶段会使用参考图以提高还原度。
 2. 主角性别为{protagonist_gender}，请根据性别特征进行描述。
-3. 详细描述主角的外貌特征（面部特征、五官、肤色、表情等），并融入【主角规范信息】中的标志性外观关键词（若有）。
+3. 详细描述主角的外貌特征（面部特征、五官、肤色、表情等），并融入【主角规范信息】中的标志性外观关键词（若有）；【颜值视觉要求】必须在描述中明确体现，不可忽略。
 4. 若【必须保留的名称标识】不为"（无）"，最终提示词中必须包含这些名称（原样保留，不要用同义词替换）。
 5. 详细描述主角的穿着与发型；体现主角属性特点；符合游戏主题、世界观与基调；符合指定图片风格。
 6. 强调全身角色设计（full-body），纯白背景，人物居中站立；禁止生成任何文字/符号/乱码（no text, no symbols, no words）。
@@ -511,7 +542,8 @@ def optimize_main_character_prompt_with_llm(
 
         if not api_key or not base_url:
             print("⚠️ LLM API未配置，使用默认提示词")
-            return f"全身，主角形象，纯白背景，人物居中站立，{game_theme}风格，{attr_description}，{style_description if style_description else '写实风格'}，detailed, high quality, 4k, no text, no symbols"
+            appearance_extra = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
+            return f"全身，主角形象，纯白背景，人物居中站立，{game_theme}风格，{attr_description}{appearance_extra}，{style_description if style_description else '写实风格'}，detailed, high quality, 4k, no text, no symbols"
 
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -548,16 +580,22 @@ def optimize_main_character_prompt_with_llm(
                         optimized_prompt = f"{identity_hint}, {optimized_prompt}"
                 except Exception:
                     pass
+                # 高/极高颜值时追加英文外貌关键词，确保生图模型收到明确信号
+                appearance_suffix = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
+                if appearance_suffix:
+                    optimized_prompt = optimized_prompt.rstrip() + appearance_suffix
                 optimized_prompt = f"{optimized_prompt}, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words"
                 print(f"✅ LLM主角形象提示词生成完成，长度：{len(optimized_prompt)}字符")
                 return optimized_prompt
 
         print("⚠️ LLM生成失败，使用默认提示词")
-        return f"全身，主角形象，纯白背景，人物居中站立，{game_theme}风格，{attr_description}，{style_description if style_description else '写实风格'}，detailed, high quality, 4k, no text, no symbols"
+        appearance_extra = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
+        return f"全身，主角形象，纯白背景，人物居中站立，{game_theme}风格，{attr_description}{appearance_extra}，{style_description if style_description else '写实风格'}，detailed, high quality, 4k, no text, no symbols"
 
     except Exception as e:
         print(f"⚠️ LLM主角形象提示词生成出错：{str(e)}，使用默认提示词")
         core_worldview = global_state.get('core_worldview', {})
         game_style = core_worldview.get('game_style', '')
         attr_description = f"颜值{protagonist_attr.get('颜值', '普通')}，智商{protagonist_attr.get('智商', '普通')}，体力{protagonist_attr.get('体力', '普通')}，魅力{protagonist_attr.get('魅力', '普通')}"
-        return f"全身，主角形象，纯白背景，人物居中站立，{game_style}风格，{attr_description}，detailed, high quality, 4k, no text, no symbols"
+        appearance_extra = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
+        return f"全身，主角形象，纯白背景，人物居中站立，{game_style}风格，{attr_description}{appearance_extra}，detailed, high quality, 4k, no text, no symbols"

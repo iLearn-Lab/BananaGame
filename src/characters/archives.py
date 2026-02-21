@@ -61,6 +61,7 @@ def _next_role_id(archives: Dict) -> str:
 def _find_archive_by_name_or_alias(archives: Dict, display_name: str) -> Optional[Tuple[str, Dict]]:
     """
     根据角色名或别号在档案中查找。
+    先精确匹配；若无则按「名字包含」匹配，避免 美里 / 葛城美里 被当成两人。
     :return: (role_id, archive) 或 None
     """
     dn = _safe_str(display_name).strip()
@@ -75,7 +76,24 @@ def _find_archive_by_name_or_alias(archives: Dict, display_name: str) -> Optiona
         aliases = arch.get("aliases", [])
         if isinstance(aliases, list) and dn in aliases:
             return (role_id, arch)
-    return None
+    # 无精确匹配时：按「包含关系」视为同一人（如 美里 与 葛城美里）
+    # 要求较短名至少 2 字，避免单字名误匹配（如「美」误用「美里」的图）
+    substring_match = None
+    for role_id, arch in archives.items():
+        if not isinstance(arch, dict):
+            continue
+        rn = _safe_str(arch.get("role_name", "")).strip()
+        aliases = arch.get("aliases", []) or []
+        all_names = [rn] + [a for a in aliases if isinstance(a, str)]
+        for other in all_names:
+            if not other:
+                continue
+            if dn in other or other in dn:
+                if min(len(dn), len(other)) >= 2:
+                    if substring_match is None or len(rn) > len(_safe_str(substring_match[1].get("role_name", "")).strip()):
+                        substring_match = (role_id, arch)
+                break
+    return substring_match
 
 
 def _sanitize_filename_for_role(s: str) -> str:

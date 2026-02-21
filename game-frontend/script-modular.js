@@ -342,8 +342,8 @@ const Game = (() => {
             console.log('🔧 [背景图片] 使用全屏背景图片（#global-bg）显示');
         }
         
-        // 显示场景图片
-        function displaySceneImage(imageData) {
+        // 显示场景图片；optionDataForArchive 可选，展示完成后通知后端做配角首次出场建档
+        function displaySceneImage(imageData, optionDataForArchive) {
             // ========== 代码版本标识 ==========
             // 版本：文本直接定位在图片上，无覆盖层（2024-12-XX）
             // 改动说明：已移除.narration-overlay覆盖层，文本元素直接定位在图片层上
@@ -452,6 +452,11 @@ const Game = (() => {
             
             console.log('🔍 处理后的图片URL:', imageUrl);
             
+            // 将「当前展示请求」与本次要加载的图绑定，避免因加载顺序导致 notify 发错段（只对「仍是当前请求」的加载进行绘制和 notify）
+            if (gameState) {
+                gameState._pendingDisplay = { imageUrl: imageUrl, optionData: optionDataForArchive };
+            }
+            
             // 预加载图片（添加超时机制，避免长时间等待）
             const imageLoadTimeout = setTimeout(() => {
                 console.warn('⚠️ 图片加载超时（10秒），继续显示场景（不等待图片）');
@@ -464,6 +469,13 @@ const Game = (() => {
                 .then(() => {
                     clearTimeout(imageLoadTimeout);
                     console.log('✅ 图片预加载成功:', imageUrl);
+                    
+                    // 只对「仍是当前展示请求」的这张图进行绘制和 notify，避免后加载的图覆盖画面且错误建档
+                    const isCurrentDisplay = gameState && gameState._pendingDisplay && gameState._pendingDisplay.imageUrl === imageUrl;
+                    if (!isCurrentDisplay) {
+                        console.log('⏭️ 本次加载已过时（当前展示请求已切换），跳过绘制与 notify');
+                        return;
+                    }
                     
                     // ========== 方案：使用同一定位上下文 ==========
                     // 背景图片通过全屏背景（#global-bg）显示
@@ -492,6 +504,16 @@ const Game = (() => {
                             loadingDiv.style.display = 'none';
                             console.log('✅ 全屏背景图片已设置，文本直接显示在背景上');
                         }, 100);
+                    }
+                    // 方案1：与当前画面绑定——仅当本次加载仍是当前展示请求时才 notify，保证建档用的是画面上这张图
+                    const dataToNotify = gameState._pendingDisplay && gameState._pendingDisplay.optionData;
+                    if (dataToNotify && typeof dataToNotify === 'object' && gameState.gameData && gameState.gameData.game_id) {
+                        const gameId = gameState.gameData.game_id;
+                        fetch('http://127.0.0.1:5001/notify-scene-displayed', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ game_id: gameId, option_data: dataToNotify })
+                        }).then(() => {}).catch(() => {});
                     }
                     
                     /* 已移除的代码块：
@@ -747,7 +769,7 @@ const Game = (() => {
             isLoadedGame: false, // 是否是从加载开始的游戏
             loadedSaveName: null, // 如果是从加载开始的，记录加载的存档名称
             currentTypeInterval: null, // 当前打字机动画的interval，用于清理防止重复
-            textSegments: [], // 文本分段数组，每段1-2句话
+            textSegments: [], // 文本分段数组，按句切分，每句一段分次展示
             currentTextSegmentIndex: 0, // 当前显示的段落索引
             isShowingSegments: false, // 是否处于分段显示状态
             pendingOptions: null, // 待显示的选项（在所有段落显示完成后显示）
@@ -1794,7 +1816,7 @@ const Game = (() => {
                     console.warn('⚠️ 初始场景没有图片数据');
                 }
                 
-                displayScene(initialScene, initialOptions, validatedSceneImage, null);  // 视频参数设为null
+                displayScene(initialScene, initialOptions, validatedSceneImage, null, optionData);  // 视频null；optionData 用于展示后通知建档
             } else {
                 console.error('❌ API调用失败:', result.message);
                 loadingIndicator.remove(); // 移除加载指示器
@@ -1892,54 +1914,57 @@ const Game = (() => {
         return `scene_${timestamp}_${random}`;
     }
     
-    // 文本切分函数：将完整文本切分成1-2句话的段落
+    // 仅右引号：句号后紧跟此类引号时，在引号后面截断（该引号归上一句）。左引号（「 『 "）不延后截断，在句号处拆开，左引号归下一句。
+    const SENTENCE_END_QUOTES = /^\s*[\u201D\u0022\u300D\u300F]/;  // " 半角" 」 』（不含左引号 " 「 『）
+    
+    // 文本切分函数：按句切分，每句单独一段，分多次展示
+    // 句号后紧跟右引号（如 。" 、。」）则在引号后截断；句号后是左引号（如。「）则在句号处截断，左引号归下一句
     function splitTextIntoSegments(text) {
         if (!text || typeof text !== 'string') {
             return [];
         }
         
-        // 按句号、问号、感叹号切分，保留分隔符
-        const parts = text.split(/([。！？])/);
+        const trimText = text.trim();
+        if (!trimText) return [];
         
-        // 合并成完整的句子（包含标点）
-        const completeSentences = [];
-        for (let i = 0; i < parts.length; i += 2) {
-            const content = parts[i] ? parts[i].trim() : '';
-            const punctuation = (i + 1 < parts.length) ? parts[i + 1] : '';
-            
-            if (content) {
-                completeSentences.push(content + punctuation);
-            } else if (punctuation && completeSentences.length > 0) {
-                // 如果只有标点符号，追加到上一句
-                completeSentences[completeSentences.length - 1] += punctuation;
+        // 找出所有「句末」位置：要么是 [。！？]，要么是 [。！？] + 可选空格 + 一个闭引号
+        const endIndices = [];
+        const re = /[。！？]/g;
+        let match;
+        while ((match = re.exec(trimText)) !== null) {
+            let cutAfter = match.index + 1; // 默认在标点后截断
+            const afterPunct = trimText.slice(cutAfter);
+            const quoteMatch = afterPunct.match(SENTENCE_END_QUOTES);
+            if (quoteMatch) {
+                cutAfter += quoteMatch[0].length; // 在引号后面才截断
             }
+            endIndices.push(cutAfter);
         }
         
-        // 过滤空句子
-        const validSentences = completeSentences.filter(s => s.trim().length > 0);
-        
-        // 如果没有找到句子分隔符，返回整个文本作为一段
-        if (validSentences.length === 0) {
-            return [text.trim()];
+        if (endIndices.length === 0) {
+            return [trimText];
         }
         
-        // 将句子合并成段落，每段1-2句话
         const segments = [];
-        for (let i = 0; i < validSentences.length; i += 2) {
-            if (i + 1 < validSentences.length) {
-                // 合并两句话
-                segments.push(validSentences[i] + validSentences[i + 1]);
-            } else {
-                // 只有一句话
-                segments.push(validSentences[i]);
+        let last = 0;
+        for (const end of endIndices) {
+            const segment = trimText.slice(last, end).trim();
+            if (segment.length > 0) {
+                segments.push(segment);
             }
+            last = end;
+        }
+        if (last < trimText.length) {
+            const tail = trimText.slice(last).trim();
+            if (tail.length > 0) segments.push(tail);
         }
         
-        return segments;
+        return segments.length > 0 ? segments : [trimText];
     }
     
     // 显示场景文本（支持图片和视频）
-    function displayScene(text, options, imageData = null, videoData = null) {
+    // optionDataForArchive: 可选，当前选项完整数据；剧情图展示后用于通知后端做配角首次出场建档
+    function displayScene(text, options, imageData = null, videoData = null, optionDataForArchive = null) {
         console.log('🔍 displayScene调用:', {
             textLength: text ? text.length : 0,
             optionsCount: options ? options.length : 0,
@@ -2015,7 +2040,7 @@ const Game = (() => {
             
             // 立即调用，不使用setTimeout，确保图片能及时显示
             try {
-                VisualContentManager.displaySceneImage(imageData);
+                VisualContentManager.displaySceneImage(imageData, optionDataForArchive);
             } catch (error) {
                 console.error('❌ displaySceneImage调用失败:', error);
                 console.error('❌ 错误堆栈:', error.stack);
@@ -2813,7 +2838,7 @@ const Game = (() => {
                             });
                             
                             try {
-                                displayScene(cleanedNextScene, nextOptions, validatedSceneImage, null);  // 视频参数设为null
+                                displayScene(cleanedNextScene, nextOptions, validatedSceneImage, null, optionData);  // 视频null；optionData 用于展示后通知建档
                                 console.log('✅ displayScene调用成功');
                             } catch (error) {
                                 console.error('❌ displayScene调用失败:', error);

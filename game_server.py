@@ -36,11 +36,62 @@ from server.cache import (
 )
 from server.utils import clean_error_message, generate_scene_id
 from server.pregeneration import _pregenerate_next_layers_logic
+from server.config import IMAGE_CACHE_DIR
+from src.characters.supporting import (
+    get_or_create_supporting_role_archive,
+    archive_supporting_role_first_appearance,
+)
+from src.characters.archives import _load_role_archives
+from src.utils.text_utils import _clip_text
 
 # 初始化 Flask 应用
 app = Flask(__name__)
 load_dotenv()
 ensure_dirs()
+
+
+def _archive_supporting_roles_on_option_shown(game_id, option_data, global_state):
+    """
+    仅当选项即将展示到前端时，为本段首次出场的配角做初登场图建档。
+    避免未选中选项中的角色也被建档。
+    """
+    if not game_id or not option_data or not isinstance(option_data, dict):
+        return
+    plot_supporting_characters = option_data.get("plot_supporting_characters") or []
+    if not plot_supporting_characters:
+        return
+    scene_image = option_data.get("scene_image") or {}
+    scene_url = (scene_image.get("url") or "").strip()
+    prompt = (scene_image.get("prompt") or "").strip()
+    if not scene_url or not prompt:
+        return
+    # 仅支持本地缓存路径（/image_cache/xxx.png 或 image_cache/xxx.png）
+    if scene_url.startswith("/image_cache/"):
+        name = Path(scene_url).name
+    elif scene_url.startswith("image_cache/"):
+        name = Path(scene_url).name
+    else:
+        return
+    local_path = Path(IMAGE_CACHE_DIR) / name
+    if not local_path.exists():
+        return
+    chars = (global_state or {}).get("supporting_role_archives") or {}
+    if not isinstance(chars, dict) or not chars:
+        chars = _load_role_archives(game_id)
+    first_appear_scene = _clip_text(option_data.get("scene", ""), 60)
+    for display_name, slot in plot_supporting_characters:
+        role_info = chars.get(slot, {}) or chars.get(display_name, {}) or {}
+        if not isinstance(role_info, dict):
+            role_info = {}
+        arch = get_or_create_supporting_role_archive(
+            game_id, str(display_name).strip(), str(slot).strip(), role_info, first_appear_scene
+        )
+        if arch.get("_pending_first_appearance"):
+            try:
+                archive_supporting_role_first_appearance(game_id, arch, str(local_path), prompt)
+            except Exception as e:
+                print(f"⚠️ 配角初登场建档失败：{e}")
+
 
 # 允许前端跨域访问
 @app.after_request
@@ -212,6 +263,8 @@ def generate_worldview():
                     initial_cache['initial_scene'] = initial_scene
                     initial_cache['initial_scene_image'] = initial_scene_image  # 保存图片数据
                     initial_cache['initial_options'] = initial_options
+                    # 保存本段出场配角，供展示初始场景时建档用（与后续选项一致）
+                    initial_cache['plot_supporting_characters'] = initial_option_data.get('plot_supporting_characters', [])
                     # 选项剧情未预生成，状态保持 pending（如后续需要可由预生成写入 scene_id 对应缓存）
                     initial_cache['generation_status'] = {i: 'pending' for i in range(len(initial_options))}
                     initial_cache['completed'] = True
@@ -355,7 +408,8 @@ def generate_option():
                                 "scene_image": initial_scene_image,  # 修复：包含图片数据
                                 "next_options": initial_options,
                                 "flow_update": {},
-                                "deep_background_links": {}
+                                "deep_background_links": {},
+                                "plot_supporting_characters": initial_cache.get("plot_supporting_characters", []),
                             }
                             if initial_scene_image:
                                 print(f"✅ 从initial缓存中读取初始场景和选项，场景长度: {len(initial_scene)}，包含图片数据")
@@ -867,7 +921,14 @@ def generate_option():
                 
                 if need_generate_image and isinstance(scene_text, str) and scene_text.strip():
                     print(f"🎨 正在为场景生成图片（确保图片和文本匹配）...")
-                    img = generate_scene_image(scene_text, global_state, "default", use_cache=True)
+                    # 补图时传入剧情模型输出的本段出场配角（有则名单，无则[]），图片流程以剧情为准不推断
+                    if isinstance(global_state, dict) and option_data is not None:
+                        global_state["_plot_supporting_characters"] = option_data.get("plot_supporting_characters", [])
+                    # 补图时不查缓存复用旧图，但仍保存到本地（skip_cache_lookup=True）
+                    img = generate_scene_image(
+                        scene_text, global_state, "default",
+                        use_cache=True, skip_cache_lookup=True
+                    )
                     if img and isinstance(img, dict) and img.get("url"):
                         # 计算并存储场景文本哈希，用于后续匹配检查
                         scene_text_hash = hashlib.md5(scene_text.encode('utf-8')).hexdigest()
@@ -888,6 +949,7 @@ def generate_option():
             import traceback
             traceback.print_exc()
         
+        # 建档改为前端展示剧情图后由前端调用 /notify-scene-displayed 触发，此处不再建档
         # 返回结果
         return jsonify({
             "status": "success",
@@ -1119,6 +1181,9 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                     if scene_for_image and option_data:
                         try:
                             print(f"🎨 [第一层预生成] 开始为选项 {opt_idx + 1} 生成图片...")
+                            # 传入剧情模型输出的本段出场配角（有则名单，无则[]），图片流程以剧情为准不推断
+                            if isinstance(global_state, dict):
+                                global_state["_plot_supporting_characters"] = option_data.get("plot_supporting_characters", [])
                             # 传入选项级缓存后缀，避免多选项共用同一缓存键导致两张图相同
                             img = generate_scene_image(
                                 scene_for_image, global_state, "default", use_cache=True,
@@ -1440,7 +1505,7 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                             
                             # 为下一轮的每个选项生成再下一层剧情（在锁外执行，避免长时间持有锁）
                             try:
-                                layer2_data = generate_all_options(updated_global_state, next_options, skip_images=True)
+                                layer2_data = generate_all_options(updated_global_state, next_options, skip_images=False)
                                 
                                 # 再次检查取消标志并写入缓存（生成过程中可能被取消）
                                 with cache_lock:
@@ -1528,7 +1593,7 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                                 
                                 # 为下一轮的每个选项生成再下一层剧情（在锁外执行，避免长时间持有锁）
                                 try:
-                                    layer2_data = generate_all_options(updated_global_state, next_options, skip_images=True)
+                                    layer2_data = generate_all_options(updated_global_state, next_options, skip_images=False)
                                     
                                     # 再次检查取消标志并写入缓存（生成过程中可能被取消）
                                     with cache_lock:
@@ -1685,24 +1750,30 @@ def pregenerate_next_layers():
 def get_pregenerated_layer2():
     """获取预生成的第二层内容（当用户选择了第一层的某个选项后，可以立即获取第二层）"""
     try:
-        data = request.json
+        data = request.json or {}
         scene_id = data.get('sceneId', None)
         layer1_option_index = data.get('layer1OptionIndex', None)
         layer2_option_index = data.get('layer2OptionIndex', None)
+        global_state = data.get('globalState', {})
         
         if not scene_id or layer1_option_index is None or layer2_option_index is None:
             return jsonify({"status": "error", "message": "参数不完整！"})
         
+        option_data = None
         with cache_lock:
             if scene_id in pregeneration_cache:
                 cache_entry = pregeneration_cache[scene_id]
                 if 'layer2' in cache_entry and layer1_option_index in cache_entry['layer2']:
                     layer2_data = cache_entry['layer2'][layer1_option_index]
                     if layer2_option_index in layer2_data:
-                        return jsonify({
-                            "status": "success",
-                            "optionData": layer2_data[layer2_option_index]
-                        })
+                        option_data = layer2_data[layer2_option_index]
+        
+        if option_data is not None:
+            # 建档改为前端展示剧情图后由前端调用 /notify-scene-displayed 触发
+            return jsonify({
+                "status": "success",
+                "optionData": option_data
+            })
         
         return jsonify({"status": "error", "message": "未找到预生成的第二层内容！"})
         
@@ -1971,6 +2042,34 @@ def generate_ending():
         traceback.print_exc()
         error_msg = clean_error_message(str(e))
         return jsonify({"status": "error", "message": f"生成游戏结局失败：{error_msg}"})
+
+# ------------------------------ 前端展示后建档（方案1） ------------------------------
+@app.route('/notify-scene-displayed', methods=['POST'])
+def notify_scene_displayed():
+    """
+    前端在展示某选项的剧情图后调用，后端据此判断本段首次出场的配角并建档。
+    请求体：{ "game_id": "...", "option_data": { "scene", "scene_image": { "url", "prompt" }, "plot_supporting_characters": [[display_name, slot], ...] } }
+    """
+    try:
+        data = request.json or {}
+        game_id = (data.get("game_id") or "").strip()
+        option_data = data.get("option_data")
+        if not game_id:
+            return jsonify({"status": "error", "message": "game_id 不能为空"})
+        if not option_data or not isinstance(option_data, dict):
+            return jsonify({"status": "error", "message": "option_data 不能为空"})
+        scene_image = option_data.get("scene_image") or {}
+        scene_url = (scene_image.get("url") or "").strip()
+        image_display = Path(scene_url).name if scene_url else "(无图)"
+        print(f"📤 notify已传送 | game_id={game_id} | 本段图片={image_display}")
+        _archive_supporting_roles_on_option_shown(game_id, option_data, None)
+        return jsonify({"status": "success", "message": "已处理"})
+    except Exception as e:
+        print(f"⚠️ notify-scene-displayed 处理失败：{e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)})
+
 
 # ------------------------------ 视觉内容生成API接口 ------------------------------
 @app.route('/generate-scene-image', methods=['POST'])

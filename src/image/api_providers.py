@@ -32,7 +32,6 @@ from src.characters.archives import _load_role_archives
 from src.characters.supporting import (
     extract_supporting_characters_with_names,
     get_or_create_supporting_role_archive,
-    archive_supporting_role_first_appearance,
     update_supporting_role_aliases_from_plot,
 )
 
@@ -955,6 +954,7 @@ def generate_scene_image(
     viewport_width: int = None,
     viewport_height: int = None,
     cache_key_suffix: str = None,
+    skip_cache_lookup: bool = False,
 ) -> Dict:
     """
     生成场景图片（支持本地缓存）
@@ -965,6 +965,7 @@ def generate_scene_image(
     :param viewport_width: 视口宽度（可选，用于按视口宽高比生成图片）
     :param viewport_height: 视口高度（可选，用于按视口宽高比生成图片）
     :param cache_key_suffix: 可选，参与缓存键（如 scene_id_optionIdx），避免不同选项复用同一缓存导致两张图相同
+    :param skip_cache_lookup: 为True时不查本地缓存复用旧图，但仍会下载并保存到本地（用于补图等需要每次新图的场景）
     :return: 包含图片URL和元数据的字典
     """
     # 检查是否配置了图片生成API
@@ -1085,11 +1086,23 @@ def generate_scene_image(
         print(f"📝 [剧情图提示词] LLM 生成内容（前{min(_preview_len, len(prompt))}字）：\n{_preview}")
     
     # 3. 从优化后的提示词中识别出场配角（名称-配角N），区分已有档案（有参考图）与首次出场（待建档）
+    # 以剧情模型为准：若存在本段出场配角（含空列表），则不再从提示词推断；仅当未传入该字段时才 fallback 推断
     supporting_role_references = []
     supporting_role_images = []
     first_appearance_pending = []
     if game_id:
-        char_tuples = extract_supporting_characters_with_names(prompt)
+        has_plot_key = "_plot_supporting_characters" in (global_state or {})
+        plot_char_tuples = (global_state or {}).get("_plot_supporting_characters")
+        if has_plot_key and isinstance(plot_char_tuples, list):
+            char_tuples = [(str(n).strip(), str(s).strip()) for n, s in plot_char_tuples if n and s]
+            if char_tuples:
+                print(f"📋 使用剧情模型输出的本段出场配角（共{len(char_tuples)}个）")
+            else:
+                print(f"📋 剧情模型未列出本段出场配角，本段不建档配角图")
+        else:
+            char_tuples = extract_supporting_characters_with_names(prompt)
+        if isinstance(global_state, dict) and "_plot_supporting_characters" in global_state:
+            del global_state["_plot_supporting_characters"]
         image_index = 3  # Image 0,1,2 为主角；从 3 起为配角
         for display_name, slot in char_tuples:
             role_info = chars.get(slot, {}) or chars.get(display_name, {}) or {}
@@ -1104,10 +1117,10 @@ def generate_scene_image(
             )
             if arch.get("_pending_first_appearance"):
                 first_appearance_pending.append(arch)
-                print(f"📌 配角 {display_name}-{slot} 首次出场，将在剧情图生成后建档")
-                print(f"   📋 待建档信息：display_name={display_name}, slot={slot}, first_appear_scene={_clip_text(arch.get('first_appear_scene',''),40)}…")
+                # 首次出场判断与建档改为前端展示剧情图后由 /notify-scene-displayed 触发，此处仅不传参考图
             else:
-                img_path = arch.get("_resolved_first_img_path") or arch.get("first_img_path", "")
+                # 优先使用视觉裁剪的单人全身参考图，避免多人同框时用错人
+                img_path = arch.get("_resolved_face_ref_path") or arch.get("_resolved_first_img_path") or arch.get("first_img_path", "")
                 if img_path:
                     supporting_role_images.append(img_path)
                     supporting_role_references.append({
@@ -1262,15 +1275,10 @@ def generate_scene_image(
                 prompt_hash = hashlib.md5(cache_key_seed.encode()).hexdigest()
                 cache_path = Path(IMAGE_CACHE_DIR) / f"{prompt_hash}.png"
                 
-                # 检查是否已缓存
-                if cache_path.exists():
+                # 检查是否已缓存（skip_cache_lookup 时跳过，仍下载并保存本次生成结果）
+                # 配角初登场建档改为「展示到前端后」由 game_server 统一执行，此处不再建档
+                if not skip_cache_lookup and cache_path.exists():
                     print(f"✅ 使用本地缓存的图片：{cache_path}")
-                    if first_appearance_pending and game_id:
-                        try:
-                            for p in first_appearance_pending:
-                                archive_supporting_role_first_appearance(game_id, p, str(cache_path), prompt)
-                        except Exception as ar_err:
-                            print(f"⚠️ 配角初登场建档失败：{ar_err}")
                     return {
                         "url": f"/image_cache/{prompt_hash}.png",
                         "prompt": prompt,
@@ -1293,12 +1301,6 @@ def generate_scene_image(
                             # 如果文件存在，使用现有的hash，或者复制到新的hash
                             if existing_hash == prompt_hash:
                                 print(f"✅ 使用现有的本地缓存图片：{existing_path}")
-                                if first_appearance_pending and game_id:
-                                    try:
-                                        for p in first_appearance_pending:
-                                            archive_supporting_role_first_appearance(game_id, p, str(existing_path), prompt)
-                                    except Exception as ar_err:
-                                        print(f"⚠️ 配角初登场建档失败：{ar_err}")
                                 return {
                                     "url": f"/image_cache/{prompt_hash}.png",
                                     "prompt": prompt,
@@ -1311,12 +1313,6 @@ def generate_scene_image(
                                 # API 返回的本地路径与当前请求的缓存键不一致（例如本请求用了 cache_key_suffix）。
                                 # 不复制到 prompt_hash，避免覆盖其他选项的图片导致“两张图相同”；直接返回本次生成结果的路径。
                                 print(f"✅ 使用本次生成结果（与缓存键不同，不复制避免覆盖）：{existing_path}")
-                                if first_appearance_pending and game_id:
-                                    try:
-                                        for p in first_appearance_pending:
-                                            archive_supporting_role_first_appearance(game_id, p, str(existing_path), prompt)
-                                    except Exception as ar_err:
-                                        print(f"⚠️ 配角初登场建档失败：{ar_err}")
                                 return {
                                     "url": f"/image_cache/{existing_hash}.png",
                                     "prompt": prompt,
@@ -1406,12 +1402,6 @@ def generate_scene_image(
                         f.write(chunk)
                 
                 print(f"✅ 图片已缓存到本地：{cache_path}")
-                if first_appearance_pending and game_id:
-                    try:
-                        for p in first_appearance_pending:
-                            archive_supporting_role_first_appearance(game_id, p, str(cache_path), prompt)
-                    except Exception as ar_err:
-                        print(f"⚠️ 配角初登场建档失败：{ar_err}")
                 return {
                     "url": f"/image_cache/{prompt_hash}.png",
                     "prompt": prompt,

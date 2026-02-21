@@ -1,0 +1,44 @@
+{
+  "game_id": "game_1771663338_kh7utw",
+  "generated_at": "2026-02-21T16:43:33.067278",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **亚瑟·莫里森角色视觉描述提示词：**\n\nA handsome young man named Arthur Morrison with extremely attractive and delicate features, clear porcelain skin, and an outstanding elegant temperament. He has beautiful golden curly hair that catches light naturally, with refined facial features including piercing yet gentle eyes, a well-defined nose, and perfectly shaped lips. His expression shows warmth and intelligence with a subtle, confident smile.\n\nHe wears a sophisticated deep navy blue double-breasted coat with polished buttons, underneath a crisp white dress shirt and black silk tie, all perfectly tailored to his tall, slender physique. A silver pocket watch chain is visible, black leather gloves in one hand, and he stands in polished black leather shoes. His posture is upright and graceful, embodying the refined gentleman of 1889 Victorian London era.\n\nThe character design emphasizes his exceptionally handsome appearance with attractive, delicate features and clear skin that reflects his extremely high attractiveness level. His overall demeanor suggests a young detective with natural charm and observational skills, perfectly suited for the Sherlock Holmes themed mystery setting.\n\nFull-body character design, centered standing pose against pure white background, painted in impressionist oil painting style with rich light and shadow variations, visible brushstrokes, atmospheric lighting effects. No text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: oil_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**亚瑟·莫里森角色视觉描述提示词：**\n\nA handsome young man named Arthur Morrison with extremely attractive and delicate features, clear porcelain skin, and an outstanding elegant temperament. He has beautiful golden curly hair that catches light naturally, with refined facial features including piercing yet gentle eyes, a well-defined nose, and perfectly shaped lips. His expression shows warmth and intelligence with a subtle, confident smile.\n\nHe wears a sophisticated deep navy blue double-breasted coat with polished buttons, underneath a crisp white dress shirt and black silk tie, all perfectly tailored to his tall, slender physique. A silver pocket watch chain is visible, black leather gloves in one hand, and he stands in polished black leather shoes. His posture is upright and graceful, embodying the refined gentleman of 1889 Victorian London era.\n\nThe character design emphasizes his exceptionally handsome appearance with attractive, delicate features and clear skin that reflects his extremely high attractiveness level. His overall demeanor suggests a young detective with natural charm and observational skills, perfectly suited for the Sherlock Holmes themed mystery setting.\n\nFull-body character design, centered standing pose against pure white background, painted in impressionist oil painting style with rich light and shadow variations, visible brushstrokes, atmospheric lighting effects. No text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "普通",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "oil_painting",
+    "subtype": "impressionist"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771663338_kh7utw/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **亚瑟·莫里森角色视觉描述提示词：**\n\nA handsome young man named Arthur Morrison with extremely attractive and delicate features, clear porcelain skin, and an outstanding elegant temperament. He has beautiful golden curly hair that catches light naturally, with refined facial features including piercing yet gentle eyes, a well-defined nose, and perfectly shaped lips. His expression shows warmth and intelligence with a subtle, confident smile.\n\nHe wears a sophisticated deep navy blue double-breasted coat with polished buttons, underneath a crisp white dress shirt and black silk tie, all perfectly tailored to his tall, slender physique. A silver pocket watch chain is visible, black leather gloves in one hand, and he stands in polished black leather shoes. His posture is upright and graceful, embodying the refined gentleman of 1889 Victorian London era.\n\nThe character design emphasizes his exceptionally handsome appearance with attractive, delicate features and clear skin that reflects his extremely high attractiveness level. His overall demeanor suggests a young detective with natural charm and observational skills, perfectly suited for the Sherlock Holmes themed mystery setting.\n\nFull-body character design, centered standing pose against pure white background, painted in impressionist oil painting style with rich light and shadow variations, visible brushstrokes, atmospheric lighting effects. No text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: oil_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-21T16:43:33.067278"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771663338_kh7utw/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771663338_kh7utw\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-21T16:43:44.809303"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771663338_kh7utw/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771663338_kh7utw\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-21T16:43:46.201991"
+    }
+  }
+}

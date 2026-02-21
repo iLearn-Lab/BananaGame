@@ -1,0 +1,44 @@
+{
+  "game_id": "game_1771662134_29uq1s",
+  "generated_at": "2026-02-21T16:23:27.538804",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: A full-body portrait of Sherlock Holmes, a handsome young man with extremely attractive and refined features. He has deep gray-green eyes that are penetrating and intelligent, a prominent straight nose, and sharply defined facial contours with delicate bone structure and clear, smooth skin. His dark curly hair is perfectly styled in the Victorian fashion. His tall, lean physique exudes elegance and nobility.\n\nHe wears a long dark overcoat in deep charcoal or black, perfectly tailored to his slender frame, over a crisp white shirt and dark waistcoat. His attire reflects the sophisticated fashion of 1895 London, complete with formal trousers and polished leather shoes. His posture is upright and confident, embodying the grace of an English gentleman.\n\nHis expression is coolly analytical with a slight furrow of concentration, his sharp gaze seeming to observe and deduce everything around him. His overall demeanor combines intellectual brilliance with aristocratic bearing, radiating both cold rationality and magnetic charisma that befits a consulting detective of extraordinary abilities.\n\nThe artwork is rendered in Impressionist oil painting style with rich light and shadow variations, visible brushstrokes creating texture and depth. The figure stands centered against a pure white background in a full-body composition, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: oil_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "A full-body portrait of Sherlock Holmes, a handsome young man with extremely attractive and refined features. He has deep gray-green eyes that are penetrating and intelligent, a prominent straight nose, and sharply defined facial contours with delicate bone structure and clear, smooth skin. His dark curly hair is perfectly styled in the Victorian fashion. His tall, lean physique exudes elegance and nobility.\n\nHe wears a long dark overcoat in deep charcoal or black, perfectly tailored to his slender frame, over a crisp white shirt and dark waistcoat. His attire reflects the sophisticated fashion of 1895 London, complete with formal trousers and polished leather shoes. His posture is upright and confident, embodying the grace of an English gentleman.\n\nHis expression is coolly analytical with a slight furrow of concentration, his sharp gaze seeming to observe and deduce everything around him. His overall demeanor combines intellectual brilliance with aristocratic bearing, radiating both cold rationality and magnetic charisma that befits a consulting detective of extraordinary abilities.\n\nThe artwork is rendered in Impressionist oil painting style with rich light and shadow variations, visible brushstrokes creating texture and depth. The figure stands centered against a pure white background in a full-body composition, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "oil_painting",
+    "subtype": "impressionist"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771662134_29uq1s/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: A full-body portrait of Sherlock Holmes, a handsome young man with extremely attractive and refined features. He has deep gray-green eyes that are penetrating and intelligent, a prominent straight nose, and sharply defined facial contours with delicate bone structure and clear, smooth skin. His dark curly hair is perfectly styled in the Victorian fashion. His tall, lean physique exudes elegance and nobility.\n\nHe wears a long dark overcoat in deep charcoal or black, perfectly tailored to his slender frame, over a crisp white shirt and dark waistcoat. His attire reflects the sophisticated fashion of 1895 London, complete with formal trousers and polished leather shoes. His posture is upright and confident, embodying the grace of an English gentleman.\n\nHis expression is coolly analytical with a slight furrow of concentration, his sharp gaze seeming to observe and deduce everything around him. His overall demeanor combines intellectual brilliance with aristocratic bearing, radiating both cold rationality and magnetic charisma that befits a consulting detective of extraordinary abilities.\n\nThe artwork is rendered in Impressionist oil painting style with rich light and shadow variations, visible brushstrokes creating texture and depth. The figure stands centered against a pure white background in a full-body composition, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: oil_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-21T16:23:27.538804"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771662134_29uq1s/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771662134_29uq1s\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-21T16:23:40.151153"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771662134_29uq1s/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771662134_29uq1s\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-21T16:26:43.735375"
+    }
+  }
+}

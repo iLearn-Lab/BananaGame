@@ -16,6 +16,8 @@ from src.characters.archives import (
     _sanitize_filename_for_role,
     _next_img_id,
 )
+from src.characters.pending_roles import get_and_consume_pending
+from src.characters.vision_ref_crop import get_character_bbox_and_crop
 from src.utils.text_utils import _safe_str, _clip_text, _extract_core_features_from_prompt
 
 
@@ -41,6 +43,21 @@ def extract_supporting_characters_in_scene(optimized_prompt: str) -> List[str]:
     return result
 
 
+def _trim_phrase_to_character_name(name: str, slot: str) -> str:
+    """
+    提示词里常出现「主角身后是葛城美里-配角1」等句式，正则会误把整句当名字。
+    只保留真实角色名：若有「是」则取最后一「是」之后；若仍含「主角」或过长则退回 slot。
+    """
+    s = _safe_str(name).strip()
+    if not s or re.match(r"^配角\d+$", s):
+        return slot
+    if "是" in s:
+        s = s.split("是")[-1].strip()
+    if not s or "主角" in s or len(s) > 12:
+        return slot
+    return s
+
+
 def extract_supporting_characters_with_names(optimized_prompt: str) -> List[Tuple[str, str]]:
     """
     从优化后的视觉描述提示词中提取出场的配角及角色名。
@@ -58,7 +75,8 @@ def extract_supporting_characters_with_names(optimized_prompt: str) -> List[Tupl
         if slot in seen_slots:
             continue
         seen_slots.add(slot)
-        display_name = name if name and not re.match(r"^配角\d+$", name) else slot
+        raw_name = name if name and not re.match(r"^配角\d+$", name) else slot
+        display_name = _trim_phrase_to_character_name(raw_name, slot)
         result.append((display_name, slot))
     if not result:
         for slot in extract_supporting_characters_in_scene(text):
@@ -86,23 +104,46 @@ def get_or_create_supporting_role_archive(
     found = _find_archive_by_name_or_alias(archives, display_name)
     if found:
         role_id, arch = found
+        rn = _safe_str(arch.get("role_name", "")).strip()
+        aliases = list(arch.get("aliases") or [])
+        if display_name != rn and display_name not in aliases:
+            aliases.append(display_name)
+            arch = dict(arch)
+            arch["aliases"] = aliases
+            archives[role_id] = arch
+            _save_role_archives(game_id, archives)
         first_path = _safe_str(arch.get("first_img_path", "")).strip()
         if first_path:
+            ref_dir = ensure_character_references_dir(game_id)
             p = Path(first_path)
             if not p.is_absolute():
-                p = Path("initial") / "character_references" / game_id / Path(first_path).name
+                p = ref_dir / Path(first_path).name
             if p.exists():
                 arch = dict(arch)
                 arch["_resolved_first_img_path"] = str(p.resolve())
                 arch["_role_id"] = role_id
+                # 若有单人全身参考图，解析路径供生图使用
+                face_ref = _safe_str(arch.get("face_ref_path", "")).strip()
+                if face_ref:
+                    fp = ref_dir / Path(face_ref).name
+                    if fp.exists():
+                        arch["_resolved_face_ref_path"] = str(fp.resolve())
                 return arch
         print(f"⚠️ 配角 {display_name} 档案存在但首图路径无效")
+    # 正式出场时：若该角色曾为预配角，取出积累的碎片化特征并合并进待建档项，后续写入正式档案
+    pending_data = get_and_consume_pending(game_id, display_name)
+    pending_fragments = []
+    if pending_data and isinstance(pending_data.get("fragments"), list):
+        pending_fragments = pending_data["fragments"]
+        if pending_fragments:
+            print(f"📋 配角 {display_name} 由预配角正式出场，已取出 {len(pending_fragments)} 条碎片化特征将合并进档案")
     return {
         "_pending_first_appearance": True,
         "display_name": display_name,
         "slot": slot,
         "role_info": role_info,
         "first_appear_scene": first_appear_scene,
+        "_pending_fragments": pending_fragments,
     }
 
 
@@ -165,11 +206,18 @@ def archive_supporting_role_first_appearance(
     first_prompt = _extract_character_core_from_prompt(prompt, display_name) or _clip_text(prompt, 300)
     core_features = _extract_core_features_from_prompt(first_prompt)
 
+    # 预配角正式出场：将出场前积累的碎片化特征合并进正式档案
+    story_bg = _safe_str(role_info.get("shallow_background", "")).strip()
+    pending_fragments = pending_item.get("_pending_fragments") or []
+    if pending_fragments:
+        story_bg = (story_bg + "\n\n【出场前碎片积累】\n" + "\n".join(pending_fragments)).strip()
+        print(f"   📋 已合并 {len(pending_fragments)} 条碎片化特征进配角档案")
+
     archive = {
         "role_id": role_id,
         "role_name": display_name,
         "aliases": [display_name],
-        "story_background": _safe_str(role_info.get("shallow_background", "")),
+        "story_background": story_bg,
         "first_appear_scene": first_appear_scene,
         "first_img_id": first_img_id,
         "first_img_path": str(first_img_path.resolve()),
@@ -178,6 +226,32 @@ def archive_supporting_role_first_appearance(
         "update_log": [],
         "core_features": core_features,
     }
+
+    # 视觉模型标出该角色在初登场图中的位置并裁成单人全身参考图，便于后续生图时明确「参考谁」
+    face_ref_path_value = None
+    appearance_hints = f"{first_appear_scene}\n{core_features}".strip() or ""
+    body_ref_basename = f"{role_prefix}_body_ref.png"
+    try:
+        _bbox, _cropped_path = get_character_bbox_and_crop(
+            first_img_path,
+            ref_dir,
+            character_name=display_name,
+            appearance_hints=appearance_hints,
+            body_ref_filename=body_ref_basename,
+        )
+        if _cropped_path and _cropped_path.exists():
+            face_ref_path_value = _cropped_path.name
+            archive["face_ref_path"] = face_ref_path_value
+            archive["_resolved_face_ref_path"] = str(_cropped_path.resolve())
+            print(f"✅ 配角 {display_name} 已裁出单人全身参考图：{_cropped_path.name}")
+            print(f"   📁 保存位置：{_cropped_path.resolve()}")
+        elif _bbox is None:
+            print(f"   📌 未配置视觉模型，或调用失败（如 503/超时/不支持的请求），跳过单人参考图裁剪（将使用整张初登场图作参考）")
+        else:
+            print(f"   ⚠️ 视觉模型未返回有效 bbox 或裁剪失败，将使用整张初登场图作参考")
+    except Exception as e:
+        print(f"⚠️ 配角 {display_name} 单人参考图裁剪失败（将使用整张初登场图）：{e}")
+
     archives[role_id] = archive
     _save_role_archives(game_id, archives)
     archive["_resolved_first_img_path"] = str(first_img_path.resolve())

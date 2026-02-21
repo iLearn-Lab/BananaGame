@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771661060_q6vqot",
+  "generated_at": "2026-02-21T16:05:33.906406",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **角色视觉描述提示词：**\n\nA handsome teenage boy named Kaworu Nagisa from Neon Genesis Evangelion, full-body character design, standing centered on pure white background. He has distinctive silver-gray short hair styled neatly, striking red pupils that gleam with mysterious depth, and extremely attractive delicate facial features. His skin is pale and flawless with a porcelain-like quality, creating an ethereal appearance. His facial expression shows a subtle mysterious smile with calm, deep eyes that convey an otherworldly presence and elegant temperament.\n\nHe wears a standard Japanese school uniform - dark blazer jacket, white collared shirt, and dark trousers, all fitted to his slender, graceful physique. His posture is upright and composed, radiating a transcendent aura and enigmatic charm. His refined features include sharp jawline, perfectly shaped eyebrows, and an overall beautiful appearance that seems almost angelic yet mysterious.\n\nThe character embodies extremely high intelligence and charisma through his serene expression and confident stance. His entire presence suggests someone with exceptional analytical abilities and psychological insight, fitting for a high-level logical reasoning game setting.\n\nArt style: Japanese anime style, vibrant colors, clean animation aesthetic typical of Neon Genesis Evangelion series. Full-body character design, pure white background, character centered, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**角色视觉描述提示词：**\n\nA handsome teenage boy named Kaworu Nagisa from Neon Genesis Evangelion, full-body character design, standing centered on pure white background. He has distinctive silver-gray short hair styled neatly, striking red pupils that gleam with mysterious depth, and extremely attractive delicate facial features. His skin is pale and flawless with a porcelain-like quality, creating an ethereal appearance. His facial expression shows a subtle mysterious smile with calm, deep eyes that convey an otherworldly presence and elegant temperament.\n\nHe wears a standard Japanese school uniform - dark blazer jacket, white collared shirt, and dark trousers, all fitted to his slender, graceful physique. His posture is upright and composed, radiating a transcendent aura and enigmatic charm. His refined features include sharp jawline, perfectly shaped eyebrows, and an overall beautiful appearance that seems almost angelic yet mysterious.\n\nThe character embodies extremely high intelligence and charisma through his serene expression and confident stance. His entire presence suggests someone with exceptional analytical abilities and psychological insight, fitting for a high-level logical reasoning game setting.\n\nArt style: Japanese anime style, vibrant colors, clean animation aesthetic typical of Neon Genesis Evangelion series. Full-body character design, pure white background, character centered, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771661060_q6vqot/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **角色视觉描述提示词：**\n\nA handsome teenage boy named Kaworu Nagisa from Neon Genesis Evangelion, full-body character design, standing centered on pure white background. He has distinctive silver-gray short hair styled neatly, striking red pupils that gleam with mysterious depth, and extremely attractive delicate facial features. His skin is pale and flawless with a porcelain-like quality, creating an ethereal appearance. His facial expression shows a subtle mysterious smile with calm, deep eyes that convey an otherworldly presence and elegant temperament.\n\nHe wears a standard Japanese school uniform - dark blazer jacket, white collared shirt, and dark trousers, all fitted to his slender, graceful physique. His posture is upright and composed, radiating a transcendent aura and enigmatic charm. His refined features include sharp jawline, perfectly shaped eyebrows, and an overall beautiful appearance that seems almost angelic yet mysterious.\n\nThe character embodies extremely high intelligence and charisma through his serene expression and confident stance. His entire presence suggests someone with exceptional analytical abilities and psychological insight, fitting for a high-level logical reasoning game setting.\n\nArt style: Japanese anime style, vibrant colors, clean animation aesthetic typical of Neon Genesis Evangelion series. Full-body character design, pure white background, character centered, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-21T16:05:33.906406"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771661060_q6vqot/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771661060_q6vqot\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-21T16:05:48.562284"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771661060_q6vqot/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771661060_q6vqot\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-21T16:05:49.227569"
+    }
+  }
+}

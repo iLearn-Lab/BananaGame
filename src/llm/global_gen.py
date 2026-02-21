@@ -9,6 +9,7 @@ from src.config import AI_API_CONFIG
 from src.constants import PERFORMANCE_OPTIMIZATION, TONE_CONFIGS, get_tone_brief_for_worldview
 from src.llm.api import call_ai_api
 from src.llm.council_core import run_full_council_sync
+from src.wiki.lookup import _infer_gender_from_text
 from src.worldview.parser import _regex_fill_worldview
 from src.worldview.template import _background_fill_worldview_details
 
@@ -276,7 +277,8 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                     else:
                         matched = False
                         for cn_key, en_key in _canonical_key_map:
-                            if line.startswith(cn_key + "："):
+                            # 兼容全角冒号「：」与半角冒号「:」，避免 LLM 输出半角时性别等未被解析
+                            if line.startswith(cn_key + "：") or line.startswith(cn_key + ":"):
                                 if current_canonical_key and current_canonical_content:
                                     protagonist_canonical[current_canonical_key] = ' '.join(current_canonical_content).strip().replace('**', '').replace('*', '')
                                 val = line[len(cn_key) + 1:].strip()
@@ -541,6 +543,21 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
 
             core_worldview['chapters'] = chapters
             global_state['core_worldview'] = core_worldview
+            # 若解析结果中缺少性别，从主角角色描述中推断并写回，保证剧情与主角参考图使用同一性别
+            if not (protagonist_canonical.get("gender") or "").strip() or ("男" not in protagonist_canonical.get("gender", "") and "女" not in protagonist_canonical.get("gender", "")):
+                protagonist_char = (core_worldview.get("characters") or {}).get("主角") or {}
+                protagonist_text_parts = []
+                if isinstance(protagonist_char, dict):
+                    for key in ("core_personality", "shallow_background", "deep_background"):
+                        protagonist_text_parts.append(str(protagonist_char.get(key, "") or ""))
+                protagonist_text = " ".join(protagonist_text_parts)
+                inferred = _infer_gender_from_text(protagonist_text)
+                if inferred:
+                    protagonist_canonical["gender"] = inferred
+                    print("✅ 主角规范信息性别缺失，已从主角描述推断并写回：", inferred)
+                else:
+                    protagonist_canonical["gender"] = "男性"
+                    print("✅ 主角规范信息性别缺失且无法推断，已写回默认：男性（与生图兜底一致）")
             global_state['protagonist_canonical'] = protagonist_canonical
             if protagonist_canonical:
                 print("✅ 主角规范信息解析结果：", json.dumps(protagonist_canonical, ensure_ascii=False, indent=2))

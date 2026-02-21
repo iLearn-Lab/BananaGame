@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771644849_qpthf4",
+  "generated_at": "2026-02-21T11:35:30.538608",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **碇真嗣 (Shinji Ikari) - 主角形象描述**\n\n一位拥有极高颜值的14岁少年男性，五官极其精致英俊，深邃的蓝紫色眼眸透露着超越年龄的理性光芒和忧郁气质。深蓝色短发略显凌乱但富有层次感，刘海自然垂落遮住部分额头。皮肤细腻苍白，几乎透明般的质感，面部轮廓清晰立体，高挺的鼻梁和薄润的嘴唇展现出贵族般的气质。\n\n表情呈现沉思状态，眉头微蹙显示出内心的复杂思考，眼神中既有坚毅神情又带着略显疲惫的神色。纤细修长的手指紧握成拳，体现内心的紧张与决心。整体身材瘦削但比例完美，散发着脆弱中带有坚强的矛盾魅力。\n\n穿着标准的日式学生校服：深蓝色立领学生制服外套，内搭白色衬衫，深色长裤，黑色皮鞋。校服剪裁合身，突出了少年挺拔的身姿。衣着整洁但略显疲惫，符合长期承受精神压力的状态。\n\n整体气质融合了少年的青涩与超越年龄的成熟理性，散发着高智商天才特有的神秘魅力和忧郁美感。\n\n**视觉关键词：** handsome, extremely attractive, delicate features, clear pale skin, deep blue hair, school uniform, melancholic beauty, intelligent aura, Shinji Ikari\n\n**技术要求：** full-body character design, anime style, Japanese animation style, vibrant colors, pure white background, character centered standing pose, no text, no symbols, no words, very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**碇真嗣 (Shinji Ikari) - 主角形象描述**\n\n一位拥有极高颜值的14岁少年男性，五官极其精致英俊，深邃的蓝紫色眼眸透露着超越年龄的理性光芒和忧郁气质。深蓝色短发略显凌乱但富有层次感，刘海自然垂落遮住部分额头。皮肤细腻苍白，几乎透明般的质感，面部轮廓清晰立体，高挺的鼻梁和薄润的嘴唇展现出贵族般的气质。\n\n表情呈现沉思状态，眉头微蹙显示出内心的复杂思考，眼神中既有坚毅神情又带着略显疲惫的神色。纤细修长的手指紧握成拳，体现内心的紧张与决心。整体身材瘦削但比例完美，散发着脆弱中带有坚强的矛盾魅力。\n\n穿着标准的日式学生校服：深蓝色立领学生制服外套，内搭白色衬衫，深色长裤，黑色皮鞋。校服剪裁合身，突出了少年挺拔的身姿。衣着整洁但略显疲惫，符合长期承受精神压力的状态。\n\n整体气质融合了少年的青涩与超越年龄的成熟理性，散发着高智商天才特有的神秘魅力和忧郁美感。\n\n**视觉关键词：** handsome, extremely attractive, delicate features, clear pale skin, deep blue hair, school uniform, melancholic beauty, intelligent aura, Shinji Ikari\n\n**技术要求：** full-body character design, anime style, Japanese animation style, vibrant colors, pure white background, character centered standing pose, no text, no symbols, no words, very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "极高",
+    "魅力": "极高"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771644849_qpthf4/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **碇真嗣 (Shinji Ikari) - 主角形象描述**\n\n一位拥有极高颜值的14岁少年男性，五官极其精致英俊，深邃的蓝紫色眼眸透露着超越年龄的理性光芒和忧郁气质。深蓝色短发略显凌乱但富有层次感，刘海自然垂落遮住部分额头。皮肤细腻苍白，几乎透明般的质感，面部轮廓清晰立体，高挺的鼻梁和薄润的嘴唇展现出贵族般的气质。\n\n表情呈现沉思状态，眉头微蹙显示出内心的复杂思考，眼神中既有坚毅神情又带着略显疲惫的神色。纤细修长的手指紧握成拳，体现内心的紧张与决心。整体身材瘦削但比例完美，散发着脆弱中带有坚强的矛盾魅力。\n\n穿着标准的日式学生校服：深蓝色立领学生制服外套，内搭白色衬衫，深色长裤，黑色皮鞋。校服剪裁合身，突出了少年挺拔的身姿。衣着整洁但略显疲惫，符合长期承受精神压力的状态。\n\n整体气质融合了少年的青涩与超越年龄的成熟理性，散发着高智商天才特有的神秘魅力和忧郁美感。\n\n**视觉关键词：** handsome, extremely attractive, delicate features, clear pale skin, deep blue hair, school uniform, melancholic beauty, intelligent aura, Shinji Ikari\n\n**技术要求：** full-body character design, anime style, Japanese animation style, vibrant colors, pure white background, character centered standing pose, no text, no symbols, no words, very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-21T11:35:30.538608"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771644849_qpthf4/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771644849_qpthf4\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-21T11:35:41.476124"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771644849_qpthf4/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771644849_qpthf4\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-21T11:35:45.286960"
+    }
+  }
+}

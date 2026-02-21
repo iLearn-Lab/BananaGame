@@ -6,6 +6,7 @@ from pathlib import Path
 
 
 SUPPORTING_ROLE_ARCHIVES_FILE = "role_archives.json"
+PENDING_ROLES_FILE = "pending_roles.json"  # 预配角：只被提及未出场，积累碎片化特征
 
 
 def generate_game_id() -> str:
