@@ -42,7 +42,7 @@ from src.characters.supporting import (
     archive_supporting_role_first_appearance,
 )
 from src.characters.archives import _load_role_archives
-from src.utils.text_utils import _clip_text
+from src.utils.text_utils import _clip_text, get_protagonist_names
 
 # 初始化 Flask 应用
 app = Flask(__name__)
@@ -50,10 +50,11 @@ load_dotenv()
 ensure_dirs()
 
 
-def _archive_supporting_roles_on_option_shown(game_id, option_data, global_state):
+def _archive_supporting_roles_on_option_shown(game_id, option_data, global_state, protagonist_names=None):
     """
     仅当选项即将展示到前端时，为本段首次出场的配角做初登场图建档。
     避免未选中选项中的角色也被建档。
+    若 display_name 与主角姓名/别名匹配，则跳过建档，避免将主角误建档为配角。
     """
     if not game_id or not option_data or not isinstance(option_data, dict):
         return
@@ -75,16 +76,26 @@ def _archive_supporting_roles_on_option_shown(game_id, option_data, global_state
     local_path = Path(IMAGE_CACHE_DIR) / name
     if not local_path.exists():
         return
+    # 主角称呼集合：用于排除主角（如「拍短片的」可能是主角别称）
+    if protagonist_names is None and global_state:
+        protagonist_names = get_protagonist_names(global_state)
+    protagonist_names = protagonist_names or set()
+    if isinstance(protagonist_names, (list, tuple)):
+        protagonist_names = set(str(x).strip() for x in protagonist_names if x)
     chars = (global_state or {}).get("supporting_role_archives") or {}
     if not isinstance(chars, dict) or not chars:
         chars = _load_role_archives(game_id)
     first_appear_scene = _clip_text(option_data.get("scene", ""), 60)
     for display_name, slot in plot_supporting_characters:
+        dn = str(display_name).strip()
+        if protagonist_names and dn in protagonist_names:
+            print(f"⏭️ 跳过建档：{dn} 为主角称呼，不建配角档案")
+            continue
         role_info = chars.get(slot, {}) or chars.get(display_name, {}) or {}
         if not isinstance(role_info, dict):
             role_info = {}
         arch = get_or_create_supporting_role_archive(
-            game_id, str(display_name).strip(), str(slot).strip(), role_info, first_appear_scene
+            game_id, dn, str(slot).strip(), role_info, first_appear_scene
         )
         if arch.get("_pending_first_appearance"):
             try:
@@ -2061,8 +2072,9 @@ def notify_scene_displayed():
         scene_image = option_data.get("scene_image") or {}
         scene_url = (scene_image.get("url") or "").strip()
         image_display = Path(scene_url).name if scene_url else "(无图)"
+        protagonist_names = data.get("protagonist_names")  # 前端传入主角姓名/别名，用于排除主角误建档
         print(f"📤 notify已传送 | game_id={game_id} | 本段图片={image_display}")
-        _archive_supporting_roles_on_option_shown(game_id, option_data, None)
+        _archive_supporting_roles_on_option_shown(game_id, option_data, None, protagonist_names=protagonist_names)
         return jsonify({"status": "success", "message": "已处理"})
     except Exception as e:
         print(f"⚠️ notify-scene-displayed 处理失败：{e}")

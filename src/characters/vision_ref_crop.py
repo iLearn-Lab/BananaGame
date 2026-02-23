@@ -13,14 +13,45 @@ from src.config import VISION_FOR_REF_CROP
 from src.utils.text_utils import _safe_str, _clip_text
 
 
+def _load_image_as_data_uri(path: Path, max_side: int = 1024) -> Optional[str]:
+    """将图片加载为 base64 data URI，用于 vision API 多图输入。"""
+    if not path or not path.exists():
+        return None
+    try:
+        import io
+        from PIL import Image
+
+        img = Image.open(path).convert("RGB")
+        w, h = img.size
+        if max(w, h) > max_side:
+            scale = max_side / max(w, h)
+            new_w, new_h = int(w * scale), int(h * scale)
+            img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=85, optimize=True)
+        b64 = base64.standard_b64encode(buf.getvalue()).decode("ascii")
+        return f"data:image/jpeg;base64,{b64}"
+    except Exception:
+        try:
+            with open(path, "rb") as f:
+                raw = f.read()
+            b64 = base64.standard_b64encode(raw).decode("ascii")
+            mime = "image/png" if path.suffix.lower() == ".png" else "image/jpeg"
+            return f"data:{mime};base64,{b64}"
+        except Exception:
+            return None
+
+
 def _call_vision_bbox(
     image_path: Path,
     character_name: str,
     appearance_hints: str,
+    protagonist_ref_path: Optional[Path] = None,
 ) -> Optional[Dict[str, float]]:
     """
     调用视觉模型：在图中找到指定角色，返回其 bounding box（归一化 0~1），尽量全身。
     通过「角色名 + 外观描述」让模型知道要找的是哪个人。
+    若提供 protagonist_ref_path，传入主角参考图让模型排除与主角相似的人，避免裁错。
     :return: {"x": 0-1, "y": 0-1, "width": 0-1, "height": 0-1} 或 None
     """
     cfg = VISION_FOR_REF_CROP or {}
@@ -68,38 +99,64 @@ def _call_vision_bbox(
 
     # 为兼容云雾等对回复长度严格限制的 API：优先让模型只输出 4 个数字（极短），否则再解析 JSON
     hints = _clip_text(_safe_str(appearance_hints), 300)
-    user_content = f"""在这张图中找出名为「{character_name}」的角色，尽量框全身（从头到脚）。
+    has_protagonist_ref = protagonist_ref_path and protagonist_ref_path.exists()
+    if has_protagonist_ref:
+        user_content = f"""第一张图是场景图，第二张图是主角的参考图。请在第一张图中找出名为「{character_name}」的配角，尽量框全身（从头到脚）。
+重要：不要框选与第二张图（主角）人物相似的人，只框选该配角。
+{f'外观或位置参考：{hints}' if hints else ''}
+
+坐标用 0～1 比例：左x 上y 宽width 高height。
+只输出一行 4 个数字，用空格分隔，不要其他文字、不要 JSON。例如：0.2 0.3 0.25 0.6
+若找不到该角色则输出：0 0 1 1"""
+    else:
+        user_content = f"""在这张图中找出名为「{character_name}」的角色，尽量框全身（从头到脚）。
 {f'外观或位置参考：{hints}' if hints else ''}
 
 坐标用 0～1 比例：左x 上y 宽width 高height。
 只输出一行 4 个数字，用空格分隔，不要其他文字、不要 JSON。例如：0.2 0.3 0.25 0.6
 若找不到该角色则输出：0 0 1 1"""
 
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": user_content},
-                {"type": "image_url", "image_url": {"url": data_uri}},
-            ],
-        }
-    ]
+    # 构建 content：单图或 [场景图, 主角参考图]
+    content_parts = []
+    if has_protagonist_ref:
+        prot_uri = _load_image_as_data_uri(protagonist_ref_path, max_vision_side)
+        if prot_uri:
+            content_parts.append({"type": "text", "text": user_content})
+            content_parts.append({"type": "image_url", "image_url": {"url": data_uri}})
+            content_parts.append({"type": "image_url", "image_url": {"url": prot_uri}})
+            print(f"   📌 [vision] 使用主角排除法：已传入主角参考图，避免裁到主角")
+        if not content_parts or len(content_parts) < 3:
+            has_protagonist_ref = False
+    if not has_protagonist_ref:
+        content_parts = [
+            {"type": "text", "text": user_content},
+            {"type": "image_url", "image_url": {"url": data_uri}},
+        ]
+
+    messages = [{"role": "user", "content": content_parts}]
 
     base_url = (cfg.get("base_url") or "").strip().rstrip("/")
-    use_gemini_ep = cfg.get("use_gemini_endpoint") and base_url and "gemini" in model.lower()
+    use_gemini_ep = cfg.get("use_gemini_endpoint") and base_url and "gemini" in (model or "").lower()
     if use_gemini_ep:
-        # 走 Gemini 原生 /v1beta/models/xxx:generateContent，回复长度可能更宽松
+        # 走 Gemini 原生 /v1beta/models/xxx:generateContent
         base_host = base_url.rstrip("/").replace("/v1", "") or base_url
         url = f"{base_host}/v1beta/models/{model}:generateContent"
-        b64_img = data_uri.split(",", 1)[1] if "," in data_uri else ""
         max_tok = cfg.get("max_output_tokens") if isinstance(cfg.get("max_output_tokens"), (int, float)) else 512
+        # Gemini parts: 先图后文，多图时依次添加 inlineData
+        gemini_parts = []
+        for p in content_parts:
+            if p.get("type") == "image_url":
+                uri = p.get("image_url", {}).get("url", "")
+                if uri and "," in uri:
+                    b64_data = uri.split(",", 1)[1]
+                    gemini_parts.append({"inlineData": {"mimeType": "image/jpeg", "data": b64_data}})
+            elif p.get("type") == "text":
+                gemini_parts.append({"text": p.get("text", "")})
+        if not gemini_parts:
+            b64_img = data_uri.split(",", 1)[1] if "," in data_uri else ""
+            gemini_parts = [{"inlineData": {"mimeType": "image/jpeg", "data": b64_img}}, {"text": user_content}]
         body = {
-            "contents": [{
-                "parts": [
-                    {"inlineData": {"mimeType": "image/jpeg", "data": b64_img}},
-                    {"text": user_content},
-                ]
-            }],
+            "contents": [{"parts": gemini_parts}],
             "generationConfig": {"maxOutputTokens": max(32, int(max_tok)), "temperature": 0.1},
         }
     else:
@@ -407,16 +464,19 @@ def get_character_bbox_and_crop(
     character_name: str,
     appearance_hints: str,
     body_ref_filename: str,
+    protagonist_ref_path: Optional[Path] = None,
 ) -> Tuple[Optional[Dict[str, float]], Optional[Path]]:
     """
     在场景图中定位指定角色（bbox），并裁成单人全身参考图保存。
     通过 character_name + appearance_hints 让视觉模型知道要找的是哪个人。
+    若提供 protagonist_ref_path，会排除与主角相似的人物，只框选配角。
     :return: (bbox, 裁剪图路径)；任一步失败则对应为 None
     """
     bbox = _call_vision_bbox(
         Path(scene_image_path),
         character_name,
         appearance_hints,
+        protagonist_ref_path=protagonist_ref_path,
     )
     if not bbox:
         return None, None

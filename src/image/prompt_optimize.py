@@ -178,6 +178,7 @@ def optimize_image_prompt_with_llm(
             lines_sr.append("3. 必须在描述中写明「XXX 参考 Image N，以图中XX位置/特征的人物为准，保持核心特征不变」")
             lines_sr.append("4. 可变化：服饰细节、动作、表情、所处位置")
             lines_sr.append("5. 不可变化：五官、发型、肤色、体型等核心特征")
+            lines_sr.append("6. **必须严格保持该配角的面部、发型、体型与参考图一致，不可因场景变化而变形**")
             supporting_role_reference_section = "\n".join(lines_sr) + "\n"
         elif available_supporting_roles_for_tagging and len(available_supporting_roles_for_tagging) >= 1:
             lines_tag = ["【配角标注要求（重要）】"]
@@ -196,6 +197,7 @@ def optimize_image_prompt_with_llm(
                 lines_tag.append("")
             lines_tag.append("新出场的配角：分析【当前剧情】中是否有**新登场**的非主角人物，若有则用「角色名-配角N」格式标注，角色名必须从剧情文本中得出（如黑衣人-配角1、老者-配角2）。")
             lines_tag.append("只对剧情中实际出场且非主角的配角使用该格式；未出场者不要写。不要写「参考 Image N」，由系统后续自动添加。")
+            lines_tag.append("**新登场配角构图要求**：若有配角首次出场，请在描述中明确写出该配角在画面中的位置或显著特征（如画面左侧、持相机者、穿深色外套者），便于后续建立单人参考图。")
             supporting_role_reference_section = "\n".join(lines_tag) + "\n"
 
         protagonist_canonical_block = _format_protagonist_canonical_for_prompt(

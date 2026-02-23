@@ -147,6 +147,37 @@ def get_or_create_supporting_role_archive(
     }
 
 
+def _extract_position_hint(first_prompt: str, first_appear_scene: str) -> str:
+    """
+    从 first_prompt、first_appear_scene 抽取位置信息，供 vision 裁剪时辅助定位。
+    例如：左侧、右侧、第二个人、持某物等。
+    """
+    text = f"{_safe_str(first_prompt)}\n{_safe_str(first_appear_scene)}".strip()
+    if not text or len(text) < 2:
+        return ""
+    hints = []
+    # 左右位置
+    if re.search(r"左侧|左边|左側|左邊|靠左|居左|画面左侧|在左侧", text):
+        hints.append("该角色在画面左侧")
+    elif re.search(r"右侧|右边|右側|右邊|靠右|居右|画面右侧|在右侧", text):
+        hints.append("该角色在画面右侧")
+    # 顺序：第 N 个人
+    m = re.search(r"从左到右\s*第\s*([一二三四五六七八九十\d]+)\s*个", text)
+    if m:
+        hints.append(f"从左到右第{m.group(1)}个人")
+    else:
+        m = re.search(r"第\s*([一二三四五六七八九十\d]+)\s*个\s*人", text)
+        if m:
+            hints.append(f"第{m.group(1)}个人")
+    # 持某物、穿某物
+    m = re.search(r"(持[^\s，。]+|穿[^\s，。]+(?:者|的人)?)", text)
+    if m and len(m.group(1)) <= 20:
+        hints.append(m.group(1).strip())
+    if not hints:
+        return ""
+    return "位置参考：" + "；".join(hints[:2])  # 最多取 2 条
+
+
 def _extract_character_core_from_prompt(prompt: str, display_name: str) -> str:
     """从提示词中提取与某角色相关的核心描述（简化：取含该名的句子或附近上下文）"""
     text = _safe_str(prompt).strip()
@@ -228,8 +259,16 @@ def archive_supporting_role_first_appearance(
     }
 
     # 视觉模型标出该角色在初登场图中的位置并裁成单人全身参考图，便于后续生图时明确「参考谁」
+    # 若存在主角参考图，传入以排除与主角相似的人，避免裁到主角
+    protagonist_ref = None
+    if game_id:
+        main_dir = Path("initial") / "main_character" / game_id
+        if (main_dir / "main_character.png").exists():
+            protagonist_ref = main_dir / "main_character.png"
     face_ref_path_value = None
-    appearance_hints = f"{first_appear_scene}\n{core_features}".strip() or ""
+    appearance_base = f"{first_appear_scene}\n{first_prompt}\n{core_features}".strip() or ""
+    position_hint = _extract_position_hint(first_prompt, first_appear_scene)
+    appearance_hints = (appearance_base + ("\n" + position_hint if position_hint else "")).strip()
     body_ref_basename = f"{role_prefix}_body_ref.png"
     try:
         _bbox, _cropped_path = get_character_bbox_and_crop(
@@ -238,13 +277,24 @@ def archive_supporting_role_first_appearance(
             character_name=display_name,
             appearance_hints=appearance_hints,
             body_ref_filename=body_ref_basename,
+            protagonist_ref_path=protagonist_ref,
         )
-        if _cropped_path and _cropped_path.exists():
+        # 视觉模型返回整图(0,0,1,1)表示找不到人，不将裁剪图作为 body_ref（避免废图当参考）
+        _is_full_image_bbox = (
+            _bbox
+            and abs((_bbox.get("x") or 0)) < 0.01
+            and abs((_bbox.get("y") or 0)) < 0.01
+            and abs((_bbox.get("width") or 0) - 1) < 0.01
+            and abs((_bbox.get("height") or 0) - 1) < 0.01
+        )
+        if _cropped_path and _cropped_path.exists() and not _is_full_image_bbox:
             face_ref_path_value = _cropped_path.name
             archive["face_ref_path"] = face_ref_path_value
             archive["_resolved_face_ref_path"] = str(_cropped_path.resolve())
             print(f"✅ 配角 {display_name} 已裁出单人全身参考图：{_cropped_path.name}")
             print(f"   📁 保存位置：{_cropped_path.resolve()}")
+        elif _is_full_image_bbox:
+            print(f"   ⏭️ 视觉模型返回整图 bbox（未找到该角色），跳过 body_ref，将使用整张初登场图作参考")
         elif _bbox is None:
             print(f"   📌 未配置视觉模型，或调用失败（如 503/超时/不支持的请求），跳过单人参考图裁剪（将使用整张初登场图作参考）")
         else:
@@ -260,10 +310,12 @@ def archive_supporting_role_first_appearance(
     return archive
 
 
-def update_supporting_role_aliases_from_plot(game_id: str, scene_description: str) -> None:
+def update_supporting_role_aliases_from_plot(
+    game_id: str, scene_description: str, protagonist_names: Optional[set] = None
+) -> None:
     """
     每次剧情更新时：从剧情文本中识别身份揭示（如「黑衣人就是艾玛」「A正是B的妹妹」），
-    更新对应配角的 aliases。
+    更新对应配角的 aliases。若 orig 或 new_id 属于主角称呼，则跳过，避免将主角称呼加入配角。
     """
     if not game_id or not scene_description or len(scene_description.strip()) < 10:
         return
@@ -274,6 +326,7 @@ def update_supporting_role_aliases_from_plot(game_id: str, scene_description: st
     base_url = AI_API_CONFIG.get("base_url", "")
     if not api_key or not base_url:
         return
+    protagonist_names = protagonist_names or set()
     existing_aliases = []
     for _rid, arch in archives.items():
         if isinstance(arch, dict):
@@ -308,6 +361,8 @@ def update_supporting_role_aliases_from_plot(game_id: str, scene_description: st
             orig, new_id = parts[0].strip(), parts[1].strip()
             if not orig or not new_id:
                 continue
+            if protagonist_names and (orig in protagonist_names or new_id in protagonist_names):
+                continue  # 主角称呼不入配角别名
             for role_id, arch in archives.items():
                 if not isinstance(arch, dict):
                     continue

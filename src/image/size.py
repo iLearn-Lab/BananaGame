@@ -1,6 +1,30 @@
 # -*- coding: utf-8 -*-
 """图片尺寸计算。"""
 
+# 16:9 剧情图：针对 16 寸笔记本屏幕优化，保证在 1920x1080 等常见分辨率下显示清晰
+STORY_IMAGE_ASPECT = (16, 9)
+STORY_IMAGE_WIDTH_16INCH = 1920  # Full HD 宽，适配 16 寸屏
+STORY_IMAGE_HEIGHT_16INCH = 1080  # Full HD 高
+
+
+def get_story_image_size(provider: str = "yunwu") -> tuple:
+    """
+    剧情图固定 16:9 比例，在 16 寸屏幕上显示清晰。
+    按 provider 的 API 限制做适配。
+    """
+    if provider == "openai":
+        # DALL-E 3 支持 1792x1024 横向，用 1792x1008 近似 16:9
+        return (1792, 1008)
+    elif provider == "stable_diffusion":
+        # SD 常用 8 的倍数，1920/8=240, 1080/8=135
+        w, h = STORY_IMAGE_WIDTH_16INCH, STORY_IMAGE_HEIGHT_16INCH
+        h = (h // 8) * 8
+        w = (w // 8) * 8
+        return (w, h)
+    else:
+        # yunwu/gemini 等：1920x1080
+        return (STORY_IMAGE_WIDTH_16INCH, STORY_IMAGE_HEIGHT_16INCH)
+
 
 def calculate_image_size_for_viewport(viewport_width: int, viewport_height: int, provider: str = "yunwu") -> tuple:
     """

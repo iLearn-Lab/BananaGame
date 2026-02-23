@@ -14,8 +14,8 @@ from typing import Dict, List, Optional
 
 from src.config import IMAGE_GENERATION_CONFIG
 from src.constants import _YUNWU_RATE_LOCK, _YUNWU_LAST_CALL_TS
-from src.utils.text_utils import _safe_str, _clip_text
-from src.image.size import calculate_image_size_for_viewport
+from src.utils.text_utils import _safe_str, _clip_text, get_protagonist_names
+from src.image.size import calculate_image_size_for_viewport, get_story_image_size
 from src.image.api_common import (
     _ref_image_to_input,
     call_dalle_api_with_size,
@@ -981,14 +981,9 @@ def generate_scene_image(
         print("⚠️ OpenAI API Key未配置，跳过图片生成")
         return None
     
-    # 计算图片生成尺寸（基于视口宽高比）
-    if viewport_width and viewport_height:
-        image_width, image_height = calculate_image_size_for_viewport(viewport_width, viewport_height, provider)
-        print(f"📐 根据视口尺寸 {viewport_width}x{viewport_height} 计算生成尺寸：{image_width}x{image_height}")
-    else:
-        # 如果没有提供视口尺寸，使用默认尺寸
-        image_width, image_height = 1024, 1024
-        print(f"📐 使用默认生成尺寸：{image_width}x{image_height}")
+    # 剧情图固定 16:9，在 16 寸屏幕上显示清晰
+    image_width, image_height = get_story_image_size(provider)
+    print(f"📐 剧情图 16:9 尺寸：{image_width}x{image_height}（适配 16 寸屏）")
     
     # 1. 提取图片风格信息
     image_style = global_state.get('image_style', None)
@@ -1038,9 +1033,10 @@ def generate_scene_image(
         else:
             print(f"⚠️ 主角正面图尚未就绪，将不使用主角参考图")
     
-    # 1.6b 每次剧情更新时检查身份揭示，更新配角 aliases
+    # 1.6b 每次剧情更新时检查身份揭示，更新配角 aliases（排除主角称呼）
     if game_id and scene_description:
-        update_supporting_role_aliases_from_plot(game_id, scene_description)
+        protagonist_names = get_protagonist_names(global_state) if global_state else None
+        update_supporting_role_aliases_from_plot(game_id, scene_description, protagonist_names=protagonist_names)
 
     # 1.7 先由提示词优化 LLM 生成带「名称-配角N」的视觉描述，再根据优化后的 prompt 识别出场配角
     core_worldview = global_state.get("core_worldview", {}) or {}
@@ -1153,7 +1149,7 @@ def generate_scene_image(
             display_name = _safe_str(sr.get("display_name", "")).strip()
             img_idx = sr.get("image_index", 3)
             dn = display_name or slot
-            append_parts.append(f"{dn}-{slot} 参考 Image {img_idx}，以图中对应人物的形象为准，保持核心特征不变")
+            append_parts.append(f"{dn}-{slot} 参考 Image {img_idx}，以图中对应人物的形象为准，保持核心特征不变（重要：Image {img_idx} 中该配角的五官与体型不可改动）")
         if append_parts:
             prompt = (prompt.rstrip() + "。" + "。".join(append_parts))
         # 打印拼接「参考 Image N」后的提示词尾部
@@ -1205,7 +1201,7 @@ def generate_scene_image(
                             idx = sr.get("image_index", len(prefix_lines))
                             rn = sr.get("display_name", "") or sr.get("role_name", "")
                             cf = _clip_text(sr.get("core_features", ""), 80)
-                            prefix_lines.append(f"Image {idx}: {rn} first appearance scene (may contain multiple characters). Identify this character by position in image. Core features (DO NOT MODIFY): {cf}")
+                            prefix_lines.append(f"Image {idx}: {rn} (MUST preserve - face, hair, build). Core features (DO NOT MODIFY): {cf}")
                         if previous_scene_image_path:
                             prev_idx = len(prefix_lines)
                             prefix_lines.append(f"Image {prev_idx}: Previous scene image (for visual continuity - maintain consistent style, lighting, and character appearance).")

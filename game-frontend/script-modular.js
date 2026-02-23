@@ -509,10 +509,22 @@ const Game = (() => {
                     const dataToNotify = gameState._pendingDisplay && gameState._pendingDisplay.optionData;
                     if (dataToNotify && typeof dataToNotify === 'object' && gameState.gameData && gameState.gameData.game_id) {
                         const gameId = gameState.gameData.game_id;
+                        // 提取主角姓名/别名，供后端排除主角误建档为配角
+                        const protagonistNames = [];
+                        const gd = gameState.gameData;
+                        const canonical = gd?.protagonist_canonical || {};
+                        if (canonical.name_zh) protagonistNames.push(String(canonical.name_zh).trim());
+                        if (canonical.name_en) protagonistNames.push(String(canonical.name_en).trim());
+                        const protoChar = gd?.core_worldview?.characters?.主角;
+                        if (protoChar?.name) protagonistNames.push(String(protoChar.name).trim());
                         fetch('http://127.0.0.1:5001/notify-scene-displayed', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ game_id: gameId, option_data: dataToNotify })
+                            body: JSON.stringify({
+                                game_id: gameId,
+                                option_data: dataToNotify,
+                                protagonist_names: protagonistNames.filter(Boolean)
+                            })
                         }).then(() => {}).catch(() => {});
                     }
                     
@@ -2107,7 +2119,8 @@ const Game = (() => {
                                 const img = result.image;
                                 console.log('✅ 异步补图成功:', img.url);
                                 try {
-                                    VisualContentManager.displaySceneImage(img);
+                                    // 传递 optionDataForArchive，确保配角首次出场建档能正确触发
+                                    VisualContentManager.displaySceneImage(img, optionDataForArchive);
                                 } catch (e) {
                                     console.warn('⚠️ 异步补图展示失败:', e);
                                 }
@@ -2314,10 +2327,11 @@ const Game = (() => {
                         
                         // 判断是否还有更多段落需要显示
                         if (gameState.isShowingSegments && gameState.currentTextSegmentIndex < segments.length - 1) {
-                            // 还有更多段落，显示"->"按钮
+                            // 还有更多段落，显示"->"按钮（点击后显示下一段，非选项）
                             console.log('✅ 当前段落显示完成，显示"->"按钮等待用户点击');
                             if (nextSegmentBtn) {
                                 nextSegmentBtn.classList.remove('hidden');
+                                nextSegmentBtn.dataset.showOptions = 'false';
                             }
                         } else {
                             // 所有段落都显示完了，显示"->"按钮等待用户点击后再显示选项
@@ -2419,21 +2433,24 @@ const Game = (() => {
                     
                     // 判断是否还有更多段落
                     if (gameState.currentTextSegmentIndex < gameState.textSegments.length - 1) {
-                        // 还有更多段落，显示"->"按钮
+                        // 还有更多段落，显示"->"按钮（点击后显示下一段，非选项）
                         console.log('✅ 当前段落显示完成，显示"->"按钮等待用户点击');
                         if (nextSegmentBtn) {
                             nextSegmentBtn.classList.remove('hidden');
+                            nextSegmentBtn.dataset.showOptions = 'false';
                         }
                     } else {
                         // 所有段落都显示完了，显示"->"按钮等待用户点击后再显示选项
                         console.log('✅ 所有段落显示完成，显示"->"按钮等待用户点击显示选项');
                         
+                        // 确保选项可用（与 displayScene 行为一致）
+                        gameState.pendingOptions = gameState.pendingOptions || gameState.currentOptions;
+                        
                         // 显示"->"按钮（点击后显示选项）
-                        const nextSegmentBtn = document.getElementById('next-segment-btn');
-                        if (nextSegmentBtn) {
-                            nextSegmentBtn.classList.remove('hidden');
-                            // 标记这是最后一段，点击后应该显示选项
-                            nextSegmentBtn.dataset.showOptions = 'true';
+                        const btn = document.getElementById('next-segment-btn');
+                        if (btn) {
+                            btn.classList.remove('hidden');
+                            btn.dataset.showOptions = 'true';
                         }
                     }
                 }
