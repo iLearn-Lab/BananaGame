@@ -330,19 +330,51 @@
                 </button>
             </div>
             
-            <!-- 油画风格子选项（初始隐藏） -->
-            <div id="oil-painting-submenu" class="oil-painting-submenu hidden w-full max-w-2xl mt-4">
-                <div class="submenu-title text-[18px] font-bold text-[#ECF0F1] mb-4 text-center">选择油画风格类型</div>
-                <div class="submenu-buttons flex gap-4 justify-center">
-                    <button class="submenu-btn w-[180px] h-[60px] rounded-[8px] bg-[#E67E22] text-[14px] font-bold text-white transition-all hover:bg-[#D35400] hover:scale-105 shadow-lg" data-substyle="impressionist" data-substyle-name="印象派">
-                        印象派
-                    </button>
-                    <button class="submenu-btn w-[180px] h-[60px] rounded-[8px] bg-[#E67E22] text-[14px] font-bold text-white transition-all hover:bg-[#D35400] hover:scale-105 shadow-lg" data-substyle="rococo" data-substyle-name="洛可可风格">
-                        洛可可风格
-                    </button>
-                    <button class="submenu-btn w-[180px] h-[60px] rounded-[8px] bg-[#E67E22] text-[14px] font-bold text-white transition-all hover:bg-[#D35400] hover:scale-105 shadow-lg" data-substyle="classic_oil" data-substyle-name="普通油画">
-                        普通油画
-                    </button>
+            <!-- 风格子选项（动态显示，初始隐藏） -->
+            <div id="style-submenu" class="style-submenu hidden w-full max-w-4xl mt-4">
+                <div id="style-submenu-title" class="submenu-title text-[18px] font-bold text-[#ECF0F1] mb-4 text-center">选择风格类型</div>
+                <div id="style-submenu-buttons" class="submenu-buttons grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-center">
+                    <!-- 写实风格子选项 -->
+                    <template id="tmpl-realistic">
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#2980B9]" data-substyle="photorealistic" data-substyle-name="照片级写实">照片级写实</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#2980B9]" data-substyle="game_realistic" data-substyle-name="3A游戏写实">3A游戏写实</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#2980B9]" data-substyle="cinematic_realistic" data-substyle-name="电影写实">电影写实</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#2980B9]" data-substyle="hyper_realistic" data-substyle-name="极致超写实">极致超写实</button>
+                    </template>
+                    <!-- 动漫风格子选项 -->
+                    <template id="tmpl-anime">
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#C0392B]" data-substyle="hayao_miyazaki" data-substyle-name="宫崎骏">宫崎骏</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#C0392B]" data-substyle="makoto_shinkai" data-substyle-name="新海诚">新海诚</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#C0392B]" data-substyle="shonen_jump" data-substyle-name="少年JUMP">少年JUMP</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#C0392B]" data-substyle="cyber_anime" data-substyle-name="赛博动漫">赛博动漫</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#C0392B]" data-substyle="genshin" data-substyle-name="原神/星铁">原神/星铁</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#C0392B]" data-substyle="josei" data-substyle-name="女性向治愈">女性向治愈</button>
+                    </template>
+                    <!-- 水墨画风格子选项 -->
+                    <template id="tmpl-ink_painting">
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#34495E]" data-substyle="shanshui" data-substyle-name="宋代山水">宋代山水</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#34495E]" data-substyle="xieyi" data-substyle-name="大写意">大写意</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#34495E]" data-substyle="gongbi" data-substyle-name="工笔重彩">工笔重彩</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#34495E]" data-substyle="wuxia" data-substyle-name="武侠水墨">武侠水墨</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#34495E]" data-substyle="modern_ink" data-substyle-name="新中式现代">新中式现代</button>
+                    </template>
+                    <!-- 油画风格子选项 -->
+                    <template id="tmpl-oil_painting">
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#E67E22]" data-substyle="impressionist" data-substyle-name="印象派">印象派</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#E67E22]" data-substyle="rococo" data-substyle-name="洛可可">洛可可</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#E67E22]" data-substyle="renaissance" data-substyle-name="文艺复兴">文艺复兴</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#E67E22]" data-substyle="baroque" data-substyle-name="巴洛克">巴洛克</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#E67E22]" data-substyle="abstract_oil" data-substyle-name="立体抽象">立体抽象</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#E67E22]" data-substyle="classic_oil" data-substyle-name="经典古典">经典古典</button>
+                    </template>
+                    <!-- 赛博朋克风格子选项 -->
+                    <template id="tmpl-cyberpunk">
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#8E44AD]" data-substyle="night_city" data-substyle-name="夜之城">夜之城</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#8E44AD]" data-substyle="blade_runner" data-substyle-name="银翼杀手">银翼杀手</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#8E44AD]" data-substyle="anime_cyber" data-substyle-name="日式赛博">日式赛博</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#8E44AD]" data-substyle="dystopian" data-substyle-name="反乌托邦废土">反乌托邦废土</button>
+                        <button class="submenu-btn rounded-[8px] h-[56px] text-[13px] font-bold text-white transition-all hover:scale-105 shadow-lg bg-[#8E44AD]" data-substyle="neon_asia" data-substyle-name="东方霓虹">东方霓虹</button>
+                    </template>
                 </div>
             </div>
             

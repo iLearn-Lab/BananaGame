@@ -51,41 +51,59 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
     # 修改Prompt：根据配置选择核心版或完整版
     if staged_mode:
         prompt = f"""
-        你是资深游戏编剧，请生成【核心世界观速写】，简洁但覆盖关键要素。
-        要求：中文输出，无代码块，无多余解释；严格贴合基调：{get_tone_brief_for_worldview(tone)}
+        你是资深游戏编剧，请严格贴合基调：{get_tone_brief_for_worldview(tone)}，生成【核心世界观速写】。要求：中文输出、无代码块、无多余解释，简洁凝练且覆盖全部关键要素。
 
-        ## 【核心世界观】
-        游戏风格：至少60字
-        世界观基础设定：至少250字，包含背景/历史/地理/社会/文化/关键事件
-        主角核心能力：至少80字，包含来源、使用方式、限制
+        【核心世界观】
 
-        ### 【主线任务】
-        游戏主线任务：至少150字，说明目标、步骤、挑战
+        1. 游戏风格：不少于60字，明确视觉风格与玩法调性，贴合基调。
 
-        ### 【章节设定】
+        2. 世界观基础设定：不少于250字，涵盖背景/历史/地理/社会/文化/关键事件，逻辑连贯。
+
+        3. 主角核心能力：不少于80字；可无能力（需写明后期解锁契机与限制），若有能力需写来源、使用方式与限制。
+
+        【主线任务】
+
+        游戏主线任务：不少于150字，说明核心目标、关键步骤与核心挑战，贴合世界观与基调。
+
+        【章节设定】
+
         第1章：
-        - 核心矛盾：≥80字
-        - 矛盾结束条件：≥60字
+
+        - 核心矛盾：不少于80字，贴合章节与主线。
+
+        - 矛盾结束条件：不少于60字，明确可落地。
+
         第2章：
-        - 核心矛盾：≥80字
-        - 矛盾结束条件：≥60字
+
+        - 核心矛盾：不少于80字，承接上章，深化冲突。
+
+        - 矛盾结束条件：不少于60字。
+
         第3章：
-        - 核心矛盾：≥80字
-        - 矛盾结束条件：≥60字
 
-        ### 【主角规范信息】（仅内部使用，不展示给玩家；必填，用于后续主角形象生成）
-        主角姓名(中)：（如碇真嗣）
-        主角姓名(英)：（如Shinji Ikari）
-        性别：男性或女性
+        - 核心矛盾：不少于80字，聚焦主线核心冲突。
+
+        - 矛盾结束条件：不少于60字。
+
+        【主角规范信息】（仅内部使用，必填）
+
+        主角姓名：（如碇真嗣）
+
+        性别：男性/女性
+
         年龄感：少年/青年/中年/其他
-        所属作品(中)：（如新世纪福音战士）
-        所属作品(英)：（如Neon Genesis Evangelion）
-        标志性外观关键词：（6–12条逗号分隔，如黑色短发、校服、瘦削、忧郁气质）
 
-        ## 【初始世界线】
-        当前章节：chapter1
-        主线进度：初始主线进度
-        章节矛盾：未解决
+        所属作品(中)：(如新世纪福音战士）
+
+        标志性外观关键词：（6–12条逗号分隔）
+
+        【初始世界线】
+
+        当前章节：chapter1（第一章）
+
+        主线进度：初始阶段（未开启核心主线任务，仅触发入门剧情）
+
+        章节矛盾：第一章核心矛盾未触发/未解决
 
         ## 【输入数据】
         - 主题：{user_idea}
@@ -95,53 +113,77 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
         """
     else:
         prompt = f"""
-        你是资深游戏编剧，请生成完整的文本冒险游戏世界观。
-        规则：中文输出；无代码块/解释；按分隔符输出且字段齐全；必须贴合基调：{get_tone_brief_for_worldview(tone)}
+        你是拥有25年以上游戏核心剧情及世界观创作经验的资深游戏编剧，擅长构建逻辑严谨、情感饱满的游戏世界与主角成长线，精通各类游戏风格的剧情适配，请严格贴合基调：{get_tone_brief_for_worldview(tone)}，生成【完整文本冒险游戏世界观】，要求中文输出、无代码块、无多余解释，按分隔符输出且字段齐全，为首轮选项提供充足背景信息，具体要求如下：
 
-        ## 【核心世界观】
-        游戏风格：≥80字
-        世界观基础设定：≥320字，包含背景/历史/地理/社会/文化/关键事件，为首轮选项提供足够信息
-        主角核心能力：≥100字
+        【核心世界观】
 
-        ### 【角色设定】
-        主角：核心性格≥70字；浅层背景≥120字；深层背景≥250字（含主线相关秘密）
-        配角1：核心性格≥70字；浅层背景≥120字；深层背景≥250字
+        1. 游戏风格：不少于80字，需明确游戏视觉风格、核心玩法调性，贴合整体基调，体现游戏核心气质。
 
-        ### 【势力设定】
-        正派势力：每个≥50字；反派势力：每个≥50字；中立势力：每个≥50字
+        2. 世界观基础设定：不少于320字，需完整涵盖世界背景、核心历史脉络、关键地理节点、社会结构、文化特质及推动世界格局变化的关键事件，逻辑连贯，为首轮选项提供足够信息。
 
-        ### 【主线任务】
-        游戏主线任务：≥180字
+        3. 主角核心能力：不少于100字，需明确能力的来源、使用方式与限制，避免设定过于全能。
 
-        ### 【章节设定】
+        【角色设定】
+
+        主角：核心性格不少于70字；浅层背景不少于120字；深层背景不少于250字（含主线相关秘密）。
+
+        配角1：核心性格不少于70字；浅层背景不少于120字；深层背景不少于250字。
+
+        【势力设定】
+
+        正派势力：每个不少于50字；反派势力：每个不少于50字；中立势力：每个不少于50字。
+
+        【主线任务】
+
+        游戏主线任务：不少于180字，清晰说明主线核心目标、关键推进步骤与核心挑战，紧密贴合世界观与基调。
+
+        【章节设定】
+
         第1章：
-        - 核心矛盾：≥90字
-        - 矛盾结束条件：≥70字
+
+        - 核心矛盾：不少于90字，贴合章节场景与主线，符合整体基调。
+
+        - 矛盾结束条件：不少于70字，明确可落地，推动主线进度。
+
         第2章：
-        - 核心矛盾：≥90字
-        - 矛盾结束条件：≥70字
+
+        - 核心矛盾：不少于90字，承接上一章，深化主线冲突。
+
+        - 矛盾结束条件：不少于70字，推动主线向核心目标迈进。
+
         第3章：
-        - 核心矛盾：≥90字
-        - 矛盾结束条件：≥70字
 
-        ### 【游戏结束触发条件】
-        游戏结束触发条件：≥90字
+        - 核心矛盾：不少于90字，聚焦主线核心冲突，确保剧情连贯。
 
-        ### 【主角规范信息】（仅内部使用，不展示给玩家；必填，用于后续主角形象生成）
-        主角姓名(中)：（如碇真嗣）
-        主角姓名(英)：（如Shinji Ikari）
-        性别：男性或女性
+        - 矛盾结束条件：不少于70字，为后续铺垫，符合世界观设定。
+
+        【游戏结束触发条件】
+
+        游戏结束触发条件：不少于90字，明确可判定，贴合世界观与主线目标。
+
+        【主角规范信息】（仅内部使用，不展示给玩家；必填，用于后续主角形象生成）
+
+        主角姓名：（如碇真嗣）
+
+        性别：男性/女性
+
         年龄感：少年/青年/中年/其他
-        所属作品(中)：（如新世纪福音战士）
-        所属作品(英)：（如Neon Genesis Evangelion）
-        标志性外观关键词：（6–12条逗号分隔，如黑色短发、校服、瘦削、忧郁气质）
 
-        ## 【初始世界线】
-        当前章节：chapter1
+        所属作品(中)：(如新世纪福音战士）
+
+        标志性外观关键词：（6–12条，逗号分隔，贴合世界观及主角身份，如黑色短发、破损披风、银质手钏、清冷眼神、伤疤、工装靴）
+
+        【初始世界线】
+
+        当前章节：chapter1（第一章）
+
         角色初始状态：主角/配角1的想法、身体状态、深层背景解锁、深度
+
         环境初始状态：天气/位置/势力关系
-        主线进度：初始主线进度
-        章节矛盾：已解决/未解决
+
+        主线进度：初始阶段（未开启核心主线任务，仅触发入门剧情）
+
+        章节矛盾：第一章核心矛盾未触发/未解决
 
         ## 【输入数据】
         - 主题：{user_idea}
@@ -221,7 +263,7 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
             in_canonical_section = False
             protagonist_canonical = {}
             _canonical_key_map = [
-                ("主角姓名(中)", "name_zh"), ("主角姓名(英)", "name_en"), ("性别", "gender"),
+                ("主角姓名", "name_zh"), ("主角姓名(中)", "name_zh"), ("主角姓名(英)", "name_en"), ("性别", "gender"),
                 ("年龄感", "age_range"), ("所属作品(中)", "work_zh"), ("所属作品(英)", "work_en"),
                 ("标志性外观关键词", "signature_look_keywords")
             ]
@@ -245,11 +287,12 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                     else:
                         continue
 
-                # 检测章节
-                if line.startswith('## 【核心世界观】'):
+                # 检测章节（兼容带 ## 或不带 ##、有无【】的标题）
+                if (line.startswith('## 【核心世界观】') or line.startswith('【核心世界观】')
+                    or line.startswith('## 核心世界观') or line.strip() == '核心世界观'):
                     core_section = True
                     continue
-                elif line.startswith('## 【初始世界线】'):
+                elif line.startswith('## 【初始世界线】') or line.startswith('【初始世界线】'):
                     # 退出主角规范信息前先保存未刷新的字段
                     if in_canonical_section and current_canonical_key and current_canonical_content:
                         protagonist_canonical[current_canonical_key] = ' '.join(current_canonical_content).strip().replace('**', '').replace('*', '')
@@ -575,7 +618,7 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                 if not line:
                     continue
 
-                if line.startswith('## 【初始世界线】'):
+                if line.startswith('## 【初始世界线】') or line.startswith('【初始世界线】'):
                     flow_section = True
                     continue
                 elif flow_section and line.startswith('## 【'):
@@ -587,12 +630,20 @@ def llm_generate_global(user_idea: str, protagonist_attr: Dict, difficulty: str,
                         continue
 
                     if "当前章节：" in line:
-                        flow_worldline['current_chapter'] = line.split("当前章节：")[1].strip()
+                        raw_chapter = line.split("当前章节：")[1].strip()
+                        # 规范为 chapterN，便于与 chapters 的 key 一致（如 "chapter1（第一章）" -> "chapter1"）
+                        match = re.search(r'chapter\d+', raw_chapter, re.I)
+                        flow_worldline['current_chapter'] = match.group(0) if match else raw_chapter
                     elif "初始主线进度：" in line:
                         flow_worldline['quest_progress'] = line.split("初始主线进度：")[1].strip()
+                    elif "主线进度：" in line:
+                        flow_worldline['quest_progress'] = line.split("主线进度：")[1].strip()
                     elif "章节矛盾已解决：" in line:
                         status = line.split("章节矛盾已解决：")[1].strip()
                         flow_worldline['chapter_conflict_solved'] = status == "是"
+                    elif "章节矛盾：" in line:
+                        conflict_val = line.split("章节矛盾：")[1].strip()
+                        flow_worldline['chapter_conflict_solved'] = "未解决" not in conflict_val and "未触发" not in conflict_val and "已解决" in conflict_val
 
                     elif "天气：" in line:
                         environment['weather'] = line.split("天气：")[1].strip()

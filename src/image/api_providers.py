@@ -981,9 +981,13 @@ def generate_scene_image(
         print("⚠️ OpenAI API Key未配置，跳过图片生成")
         return None
     
-    # 剧情图固定 16:9，在 16 寸屏幕上显示清晰
-    image_width, image_height = get_story_image_size(provider)
-    print(f"📐 剧情图 16:9 尺寸：{image_width}x{image_height}（适配 16 寸屏）")
+    # 计算图片生成尺寸（视口优先，否则使用剧情图固定 16:9）
+    if viewport_width and viewport_height:
+        image_width, image_height = calculate_image_size_for_viewport(viewport_width, viewport_height, provider)
+        print(f"📐 根据视口尺寸 {viewport_width}x{viewport_height} 计算生成尺寸：{image_width}x{image_height}")
+    else:
+        image_width, image_height = get_story_image_size(provider)
+        print(f"📐 剧情图 16:9 尺寸：{image_width}x{image_height}（适配 16 寸屏）")
     
     # 1. 提取图片风格信息
     image_style = global_state.get('image_style', None)

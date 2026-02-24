@@ -1,0 +1,32 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "配角1",
+    "aliases": [
+      "配角1"
+    ],
+    "story_background": "",
+    "first_appear_scene": "雨落在铁皮屋顶上，像无数细小的指节在敲击棺盖。\n\n我蹲在工位前，焊枪的蓝光映在护目镜片上，把整个世界切割成冰冷的色块。空…",
+    "first_img_id": "img_20260218_001",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771400321_rct3xq\\配角1_img_20260218_001.png",
+    "first_prompt": "**新登场配角标注：老赵-配角1**",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**新登场配角标注：老赵-配角1**"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "老陈",
+    "aliases": [
+      "老陈"
+    ],
+    "story_background": "",
+    "first_appear_scene": "拆解刀沿着机体第7区段的接缝切入，金属外壳在液压钳的作用下缓缓分离。主角没有抬头看那些闪烁的异常读数，手指稳定地推进切割…",
+    "first_img_id": "img_20260218_002",
+    "first_img_path": "C:\\Users\\zhang\\Desktop\\DN\\initial\\character_references\\game_1771400321_rct3xq\\老陈_img_20260218_002.png",
+    "first_prompt": "**新登场配角标注：老陈-配角2**",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "**新登场配角标注：老陈-配角2**"
+  }
+}

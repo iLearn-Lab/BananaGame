@@ -187,7 +187,7 @@ PERFORMANCE_OPTIMIZATION = {
     "optimize_prompt": os.getenv("PERF_OPT_PROMPT", "true").lower() == "true",
     "optimize_tokens": os.getenv("PERF_OPT_TOKENS", "true").lower() == "true",
     "worldview_max_tokens": int(os.getenv("PERF_WORLDVIEW_TOKENS", "3500")),
-    "plot_max_tokens_initial": int(os.getenv("PERF_PLOT_TOKENS_INITIAL", "2500")),
+    "plot_max_tokens_initial": int(os.getenv("PERF_PLOT_TOKENS_INITIAL", "2000")),
     "plot_max_tokens_normal": int(os.getenv("PERF_PLOT_TOKENS_NORMAL", "2000")),
     "staged_worldview": os.getenv("PERF_STAGED_WORLDVIEW", "true").lower() == "true",
     "use_templates": os.getenv("PERF_USE_TEMPLATES", "false").lower() == "true",
