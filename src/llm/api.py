@@ -37,7 +37,11 @@ def call_ai_api(request_body: Dict) -> Dict:
 
     try:
         connect_timeout = 30   # 连接阶段超时（秒）
-        read_timeout = 180     # 读取响应超时（秒）
+        read_timeout = request_body.get("timeout")
+        if read_timeout is not None and isinstance(read_timeout, (int, float)) and read_timeout > 0:
+            read_timeout = int(read_timeout)
+        else:
+            read_timeout = AI_API_CONFIG.get("read_timeout", 180)
         timeout = (connect_timeout, read_timeout)
         stream_flag = False
         if request_body.get("stream"):

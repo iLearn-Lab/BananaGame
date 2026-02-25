@@ -250,7 +250,12 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
         normal_tokens = 2500
     max_tokens = initial_tokens if is_initial_scene else normal_tokens
     
-    system_msg = "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：、【本段出场配角】：、【本段提及但未出场】：。不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
+    system_msg = (
+        "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：、【本段出场配角】：、【本段提及但未出场】：。"
+        "不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
+        "必须包含且仅包含上述六个区块，不要输出任何解释或代码块。"
+        "【选项】：至少2个选项，每行一个或明确编号，例如：1. 选项A  2. 选项B。"
+    )
     request_body = {
         "model": AI_API_CONFIG.get("model", ""),
         "messages": [
@@ -367,9 +372,18 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 print(f"✅ 选项 {i+1} 场景提取成功（方式4-兼容无方括号）：{scene[:50]}...")
             else:
                 print(f"❌ 选项 {i+1} 场景提取失败，原始内容中未找到【场景】标签")
+                # 兜底：更宽松的场景匹配（从「场景」到「选项」或结尾，最多2000字）
+                scene_fallback = re.search(
+                    r'(?:【?场景】?[：:]\s*)([\s\S]*?)(?=【?选项】?[：:]|世界线更新|深层背景关联|$)',
+                    cleaned_content or "", re.DOTALL
+                )
+                if scene_fallback:
+                    scene = scene_fallback.group(1).strip()[:2000]
+                    print(f"✅ 选项 {i+1} 场景兜底提取成功：{scene[:50]}...")
                 # 调试：打印 AI 实际返回内容的前 800 字符，便于排查格式问题
-                preview = (cleaned_content or raw_content or "")[:800]
-                print(f"📋 选项 {i+1} AI 返回内容预览（前800字）：\n{preview}\n---")
+                if not scene:
+                    preview = (cleaned_content or raw_content or "")[:800]
+                    print(f"📋 选项 {i+1} AI 返回内容预览（前800字）：\n{preview}\n---")
             
             # 2. 进一步清理提取到的场景描述
             if scene:
@@ -417,16 +431,31 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
             else:
                 options_text = ""
             
+            # 兜底：未匹配到【选项】时，尝试从「选项」到「世界线」或结尾按行切分，或匹配 1. xxx 2. xxx
+            if not options_text and (cleaned_content or "").strip():
+                opt_fallback = re.search(
+                    r'(?:【?选项】?[：:]\s*)([\s\S]*?)(?=【?世界线】|世界线更新|深层背景关联|$)',
+                    cleaned_content or "", re.DOTALL
+                )
+                if opt_fallback:
+                    options_text = opt_fallback.group(1).strip()
+                if not options_text:
+                    inline_opts = re.findall(r'\d+[\.．]\s*([^\d\n]{2,40})', cleaned_content or "")
+                    if len(inline_opts) >= 2:
+                        next_options.extend(inline_opts[:2])
+                        options_text = "\n".join(inline_opts[:2])
+                        print(f"✅ 选项 {i+1} 选项兜底提取成功（行内编号）：{next_options}")
+            
             if options_text:
-                # 解析选项行
-                option_lines = options_text.split('\n')
-                for line in option_lines:
-                    stripped_line = line.strip()
-                    if stripped_line:
-                        # 移除序号和可能的点号
-                        next_option = re.sub(r'^\s*\d+\.?\s*', '', stripped_line)
-                        if next_option:
-                            next_options.append(next_option)
+                # 解析选项行（若兜底已填 next_options 则不再重复解析）
+                if not next_options:
+                    option_lines = options_text.split('\n')
+                    for line in option_lines:
+                        stripped_line = line.strip()
+                        if stripped_line:
+                            next_option = re.sub(r'^\s*\d+\.?\s*', '', stripped_line)
+                            if next_option:
+                                next_options.append(next_option)
             
             # 3. 提取世界线更新 - 使用正则表达式
             worldline_match = re.search(r'【世界线更新】：([\s\S]*?)(?:【深层背景关联】：|$)', raw_content, re.DOTALL)
@@ -525,6 +554,12 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 if original_options_count >= 2:
                     print(f"⚠️ 选项 {i+1} 剪枝后选项过少（{len(next_options)}个），使用原始选项的前2个")
                     next_options = original_options[:2]
+                else:
+                    # 原始也不足2个时，用默认选项补足到2个，避免直接判为提取失败
+                    _default_options = ["继续探索", "暂时观望"]
+                    while len(next_options) < 2:
+                        next_options.append(_default_options[len(next_options) % 2])
+                    print(f"⚠️ 选项 {i+1} 选项不足2个，已用默认选项补足：{next_options}")
             
             print(f"📊 选项 {i+1} 剪枝统计：原始{original_options_count}个 -> 剪枝后{len(next_options)}个")
             
@@ -663,6 +698,13 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 print(f"✅ 选项 {i+1} 剧情生成成功，共{len(next_options)}个选项：{next_options}")
                 break
             else:
+                # 诊断：提取失败时打印原始内容与解析结果，便于排查格式/截断/选项不足
+                preview_len = 1200
+                content_preview = (raw_content or "")[:preview_len]
+                if len(raw_content or "") > preview_len:
+                    content_preview += "\n...(截断)"
+                print(f"📋 [诊断] 选项 {i+1} 提取失败 - AI 返回内容预览（前{min(preview_len, len(raw_content or ''))}字）：\n{content_preview}\n---")
+                print(f"📋 [诊断] 选项 {i+1} 解析结果 - scene长度={len(scene or '')}, 前100字={repr((scene or '')[:100])}, next_options数量={len(next_options)}, 内容={next_options}")
                 # 如果提取失败，继续重试
                 print(f"❌ 错误：无法从选项 {i+1} 的AI返回内容中提取有效剧情信息，将重试...")
                 if attempt < max_retries - 1:
@@ -873,7 +915,12 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
         normal_tokens = 2500
     max_tokens = initial_tokens if is_initial_scene else normal_tokens
     
-    system_msg = "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：、【本段出场配角】：、【本段提及但未出场】：。不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
+    system_msg = (
+        "你是剧情生成器。你必须只输出指定格式的剧情内容：以【场景】：开头，接着【选项】：、【世界线更新】：、【深层背景关联】：、【本段出场配角】：、【本段提及但未出场】：。"
+        "不要输出任何解释、问候语、代码块或前缀文字，第一行就是【场景】：。"
+        "必须包含且仅包含上述六个区块，不要输出任何解释或代码块。"
+        "【选项】：至少2个选项，每行一个或明确编号，例如：1. 选项A  2. 选项B。"
+    )
     request_body = {
         "model": AI_API_CONFIG.get("model", ""),
         "messages": [
@@ -963,6 +1010,7 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 cleaned_content = re.sub(pattern, '', cleaned_content, flags=re.IGNORECASE)
             
             # 提取场景描述（与 _generate_single_option 一致，含兼容格式）
+            scene = ""
             scene_match1 = re.search(r'【场景】：([\s\S]*?)【选项】：', cleaned_content, re.DOTALL)
             scene_match2 = re.search(r'【场景】：([\s\S]*?)$', cleaned_content, re.DOTALL)
             scene_match3 = re.search(r'【场景】：([^\n]*)', cleaned_content)
@@ -976,6 +1024,15 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 scene = scene_match3.group(1).strip()
             elif scene_match4:
                 scene = scene_match4.group(1).strip()
+            else:
+                # 兜底：更宽松的场景匹配（文本模式）
+                scene_fallback = re.search(
+                    r'(?:【?场景】?[：:]\s*)([\s\S]*?)(?=【?选项】?[：:]|世界线更新|深层背景关联|$)',
+                    cleaned_content or "", re.DOTALL
+                )
+                if scene_fallback:
+                    scene = scene_fallback.group(1).strip()[:2000]
+                    print(f"✅ 选项 {i+1} 场景兜底提取成功（文本模式）：{scene[:50]}...")
             
             # 清理场景描述
             if scene:
@@ -1012,7 +1069,22 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
             else:
                 options_text = ""
             
-            if options_text:
+            # 兜底：未匹配到【选项】时尝试宽松匹配（文本模式）
+            if not options_text and (cleaned_content or "").strip():
+                opt_fallback = re.search(
+                    r'(?:【?选项】?[：:]\s*)([\s\S]*?)(?=【?世界线】|世界线更新|深层背景关联|$)',
+                    cleaned_content or "", re.DOTALL
+                )
+                if opt_fallback:
+                    options_text = opt_fallback.group(1).strip()
+                if not options_text:
+                    inline_opts = re.findall(r'\d+[\.．]\s*([^\d\n]{2,40})', cleaned_content or "")
+                    if len(inline_opts) >= 2:
+                        next_options.extend(inline_opts[:2])
+                        options_text = "\n".join(inline_opts[:2])
+                        print(f"✅ 选项 {i+1} 选项兜底提取成功（文本模式，行内编号）：{next_options}")
+            
+            if options_text and not next_options:
                 option_lines = options_text.split('\n')
                 for line in option_lines:
                     stripped_line = line.strip()
@@ -1113,6 +1185,11 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 if original_options_count >= 2:
                     print(f"⚠️ 选项 {i+1} 剪枝后选项过少（{len(next_options)}个），使用原始选项的前2个")
                     next_options = original_options[:2] if len(original_options) >= 2 else original_options
+                else:
+                    _default_options = ["继续探索", "暂时观望"]
+                    while len(next_options) < 2:
+                        next_options.append(_default_options[len(next_options) % 2])
+                    print(f"⚠️ 选项 {i+1} 选项不足2个，已用默认选项补足（文本模式）：{next_options}")
             
             # 构建选项数据（不包含图片）
             option_data = {
@@ -1129,6 +1206,13 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 print(f"✅ 选项 {i+1} 剧情生成成功，共{len(next_options)}个选项：{next_options}")
                 break
             else:
+                # 诊断：提取失败时打印原始内容与解析结果（仅在此处打印，文本模式）
+                preview_len = 1200
+                content_preview = (raw_content or "")[:preview_len]
+                if len(raw_content or "") > preview_len:
+                    content_preview += "\n...(截断)"
+                print(f"📋 [诊断] 选项 {i+1} 提取失败（文本模式）- AI 返回内容预览（前{min(preview_len, len(raw_content or ''))}字）：\n{content_preview}\n---")
+                print(f"📋 [诊断] 选项 {i+1} 解析结果 - scene长度={len(scene or '')}, 前100字={repr((scene or '')[:100])}, next_options数量={len(next_options)}, 内容={next_options}")
                 print(f"❌ 错误：无法从选项 {i+1} 的AI返回内容中提取有效剧情信息，将重试...")
                 if attempt < max_retries - 1:
                     continue

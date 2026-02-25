@@ -2533,11 +2533,14 @@ def call_comfyui_api(prompt: str, style: str) -> str:
         print(f"❌ ComfyUI API调用失败：{str(e)}")
         raise
 
-def call_replicate_api(prompt: str, style: str) -> str:
+def call_replicate_api(prompt: str, style: str) -> Optional[str]:
     """调用Replicate API生成图片"""
     try:
-        # import replicate
-        replicate_client = replicate.Client(api_token=IMAGE_GENERATION_CONFIG.get("replicate_api_token"))
+        import replicate
+        api_token = IMAGE_GENERATION_CONFIG.get("replicate_api_token")
+        if not api_token:
+            raise ValueError("Replicate API Token 未配置（REPLICATE_API_TOKEN）")
+        replicate_client = replicate.Client(api_token=api_token)
         
         # 使用Stable Diffusion模型
         output = replicate_client.run(

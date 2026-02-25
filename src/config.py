@@ -8,10 +8,12 @@ load_dotenv()
 # ------------------------------
 # 全局常量定义（替换为yunwu.ai配置）
 # ------------------------------
+_def_read_timeout = os.getenv("Camera_Analyst_READ_TIMEOUT", "")
 AI_API_CONFIG = {
     "api_key": os.getenv("Camera_Analyst_API_KEY"),
     "base_url": os.getenv("Camera_Analyst_BASE_URL"),
-    "model": os.getenv("Camera_Analyst_MODEL")
+    "model": os.getenv("Camera_Analyst_MODEL"),
+    "read_timeout": int(_def_read_timeout) if str(_def_read_timeout).strip().isdigit() else 180,
 }
 
 # ------------------------------
