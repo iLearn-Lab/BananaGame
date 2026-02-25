@@ -44,6 +44,8 @@ IMAGE_GENERATION_CONFIG = {
     "img2img_base_url": os.getenv("Img2img_BASE_URL", "https://yunwu.ai/v1"),
     "img2img_path": os.getenv("Img2img_PATH", "/images/edit"),
     "img2img_model": os.getenv("Img2img_MODEL", "stability-ai/stable-diffusion-img2img"),
+    # 质感/风格参考图目录：放入你喜欢的漫画图，动漫风格生图时会作为「仅参考线条、网点、阴影质感」传入，不抄人物
+    "style_reference_dir": os.getenv("STYLE_REFERENCE_DIR", "initial/style_references"),
 }
 
 # ------------------------------

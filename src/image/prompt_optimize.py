@@ -13,6 +13,81 @@ from src.wiki.lookup import (
     _infer_gender_from_text,
 )
 
+# 剧情图提示词格式示例（默认）：固定参数勿改，仅首行风格与角色/发色随画风与剧情变化
+PROMPT_FORMAT_EXAMPLE = """(masterpiece, best quality, 8K, ultra-detailed), anime close-up, soft watercolor wash techniques (strength 45%), subtle film grain, surrealist aesthetics, rich layering, moderate white space, harmonious contrasting colors, artistic narrative, original aspect ratio, elegant scholarly demeanor.
+
+--面部系统--
+8K hyper-realistic anime facial modeling, sharp iris highlights, slight bloodshot texture on sclera, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15.
+
+--头发系统--
+intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm,
+color layering: main color #4A5568, secondary color #718096, highlight #E2E8F0, shadow #1A202C, 3-5 strands of gradient per cluster,
+physical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.
+
+--衣物系统--
+slight shoulder line folds (depth 0.3), fabric: matte black satin, surface oil-splash texture (density 0.3), local iridescent reflection (angle-dependent strength 0.6).
+
+--视角与构图--
+perspective locked: close-up elevation 30°, focal length 50mm, depth of field f/1.8, focal plane locked on face,
+action constraints: only hair flutters gently with wind field, all other body parts completely static."""
+
+# 水墨画风格专用示例：同一结构，首行改为水墨/淡彩风格，发色为淡彩；固定参数与默认示例一致
+PROMPT_FORMAT_EXAMPLE_INK = """(masterpiece, best quality, 8K, ultra-detailed), traditional Chinese ink wash and soft watercolor, dreamy ethereal aesthetic, delicate paper texture and visible brushstrokes, diffused natural light, soft color gradients, moderate white space, pastel and iridescent color palette, original aspect ratio, refined contemplative presence.
+
+--面部系统--
+8K hyper-realistic anime facial modeling, sharp iris highlights, slight bloodshot texture on sclera, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15.
+
+--头发系统--
+intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm,
+color layering: main color #B8E0F7, secondary color #D8B4FE, highlight #FDE68A, shadow #94A3B8, 3-5 strands of gradient per cluster,
+physical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.
+
+--衣物系统--
+slight shoulder line folds (depth 0.3), fabric: matte black satin, surface oil-splash texture (density 0.3), local iridescent reflection (angle-dependent strength 0.6).
+
+--视角与构图--
+perspective locked: close-up elevation 30°, focal length 50mm, depth of field f/1.8, focal plane locked on face,
+action constraints: only hair flutters gently with wind field, all other body parts completely static."""
+
+# 动漫风格专用示例：日式漫画、柔和线条、网点阴影、手绘感、含场景与氛围与角色动作
+PROMPT_FORMAT_EXAMPLE_MANGA = """(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, refined ink outlines and moderate line weight, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, vibrant colors, intense psychological thriller scene in high-tech NERV laboratory, sterile fluorescent lighting with blue-green monitor glow casting dramatic shadows, tense atmosphere as secrets are revealed, young male protagonist listening intently while female scientist explains EVA mysteries, protagonist uses Image 0, 赤木律子博士-配角1.
+
+--面部系统--
+8K hyper-realistic anime facial modeling, refined manga-style line art with soft outlines, defined jawline, intense gaze, soft ink outlines around eyes and lips, subtle iris highlights, slight bloodshot texture on sclera, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15.
+
+--头发系统--
+defined hair strands with refined outlines, distinct clumps of hair with screentone shading, intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm,
+color layering: main color #2D1B69, secondary color #4A4A4A, highlight #6B7280, shadow #1F2937, 3-5 strands of gradient per cluster, natural color transition,
+physical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.
+
+--衣物系统--
+crisp lab coat with clean folds and soft outlines, NERV logo on collar, black turtleneck underneath, subtle screentone on fabric, slight shoulder line folds (depth 0.3), fabric: matte white lab coat, subtle texture, professional and sterile appearance.
+
+--场景与氛围--
+high-tech NERV laboratory, multiple glowing monitors with blue-green light, sterile white walls, metallic surfaces, dramatic shadows from fluorescent lights, hand-drawn background details, tense atmosphere, secrets being revealed, psychological thriller vibe, cinematic composition, close-up on faces to emphasize tension.
+
+--视角与构图--
+perspective locked: medium shot, eye-level angle, focal length 50mm, depth of field f/2.8, focal plane locked on the two characters' faces,
+action constraints: protagonist leaning forward slightly, scientist gesturing with a data pad, both characters with intense expressions, no unnecessary movements."""
+
+# 主角形象·动漫风格专用示例：全身正面、纯白背景、单角色，分模块格式（线条略柔和）
+PROMPT_FORMAT_EXAMPLE_MAIN_CHAR_ANIME = """(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, refined ink outlines and moderate line weight, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, young male protagonist with refined features.
+
+--面部系统--
+8K hyper-realistic anime facial modeling, refined manga-style line art with soft outlines, defined jawline, intense gaze, soft ink outlines around eyes and lips, subtle iris highlights, slight bloodshot texture on sclera, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15.
+
+--头发系统--
+defined hair strands with refined outlines, distinct clumps of hair with screentone shading, intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm,
+color layering: main color #2D1B69, secondary color #4A4A4A, highlight #6B7280, shadow #1F2937, 3-5 strands of gradient per cluster, natural color transition,
+physical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.
+
+--衣物系统--
+crisp clothing with clean folds and soft outlines, subtle screentone on fabric, slight shoulder line folds (depth 0.3), fabric: matte texture, professional appearance.
+
+--视角与构图--
+perspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements,
+action constraints: standing straight, arms relaxed at sides, completely static, no unnecessary movements."""
+
 # 颜值等级 → 用于生图的具体外貌描述（供 LLM 参考 + 默认提示词兜底）
 # 格式: (给 LLM 的中文说明, 拼进最终提示词的英文关键词，高/极高时用于后处理追加)
 APPEARANCE_LEVEL_MAP = {
@@ -115,7 +190,7 @@ def optimize_image_prompt_with_llm(
             if style_type == 'realistic':
                 style_description = '写实风格，真实细腻，细节丰富'
             elif style_type == 'anime':
-                style_description = '动漫风格，日式动画风格，色彩鲜明'
+                style_description = '动漫风格，日式漫画美学，柔和线条（适中线宽），网点阴影，高对比，戏剧性阴影，含场景与氛围与角色动作'
             elif style_type == 'ink_painting':
                 style_description = '水墨画风格，中国传统水墨画，黑白灰调，意境深远'
             elif style_type == 'oil_painting':
@@ -207,6 +282,14 @@ def optimize_image_prompt_with_llm(
         protagonist_name = _safe_str(canonical.get("name_zh") or canonical.get("name_en") or "").strip()
         protagonist_identity_warning = f"\n【重要】主角身份：{protagonist_name or '玩家视角主角'}（上述主角规范信息描述的人）。**切勿将主角标注为配角**，只对剧情中出场的**非主角**人物使用「名称-配角N」格式。\n"
 
+        # 按画风选择格式示例：水墨 / 动漫（用漫画式提示词模板）/ 默认
+        if image_style and image_style.get("type") == "ink_painting":
+            format_example = PROMPT_FORMAT_EXAMPLE_INK
+        elif image_style and image_style.get("type") == "anime":
+            format_example = PROMPT_FORMAT_EXAMPLE_MANGA
+        else:
+            format_example = PROMPT_FORMAT_EXAMPLE
+
         llm_prompt = f"""假设你是一个专业的剧情分析师和视觉设计师，现在需要你将剧情转化为具体的视觉描述，告诉生图AI如何生成图片。
 
 【游戏背景信息】
@@ -245,7 +328,21 @@ def optimize_image_prompt_with_llm(
 {('9. 如果提供了配角参考图说明，必须在提示词中明确说明每个配角参考 Image N，并强调保持其核心特征不变' if (supporting_role_references and len(supporting_role_references) >= 1) else '')}
 {('9. 如果提供了配角标注要求，必须在视觉描述中对出场的配角使用「角色名-配角N」格式（如凌川-配角1），便于系统识别' if (available_supporting_roles_for_tagging and len(available_supporting_roles_for_tagging) >= 1 and not (supporting_role_references and len(supporting_role_references) >= 1)) else '')}
 
-只输出视觉描述，不要输出其他内容。"""
+【输出格式】请严格按下面示例的格式输出。必须包含五部分：① 首行风格标签（含角色特征） ② --面部系统-- ③ --头发系统-- ④ --衣物系统-- ⑤ --视角与构图--。示例为英文，你可输出英文或中英混合；每个模块只填「技术参数与数值」，不要塞入剧情叙述。
+
+固定参数（勿改）：root fixation coefficient 0.95, tip swing amplitude 10cm, wind speed 1.2m/s, turbulence 5%, wind direction 45°, fold depth 0.3, density 0.3, strength 0.6, focal length 50mm, f/1.8, lip line depth 0.15。仅根据【图片风格要求】调整首行风格（动漫/水墨/写实等），根据主角与剧情调整首行末尾角色特征及头发 main/secondary/highlight/shadow 配色。
+
+结构说明（必须遵守）：
+- 首行：画质与风格标签 + 末尾角色特征，再换行。
+- --面部系统--：保持示例参数（sharp iris, lip 0.3/0.15），不写「谁、什么表情」。
+- --头发系统--：0.95、10cm、1.2m/s、5%、45° 不变；main/secondary/highlight/shadow 随角色发色与画风填。
+- --衣物系统--：必须写。保持 depth 0.3, density 0.3, strength 0.6；材质可随画风微调。
+- --视角与构图--：必须写。保持 30°、50mm、f/1.8；仅头发随风动、其余静止。no text 等由系统添加。
+
+示例：
+{format_example}
+
+只输出一版上述格式的提示词，不要其他内容。"""
 
         api_key = AI_API_CONFIG.get('api_key', '')
         base_url = AI_API_CONFIG.get('base_url', '')
@@ -353,7 +450,7 @@ def optimize_main_character_prompt_with_llm(
             if style_type == 'realistic':
                 style_description = '写实风格，真实细腻，细节丰富'
             elif style_type == 'anime':
-                style_description = '动漫风格，日式动画风格，色彩鲜明'
+                style_description = '动漫风格，日式漫画美学，柔和线条（适中线宽），网点阴影，高对比，戏剧性阴影，含场景与氛围与角色动作'
             elif style_type == 'ink_painting':
                 style_description = '水墨画风格，中国传统水墨画，黑白灰调，意境深远'
             elif style_type == 'oil_painting':
@@ -495,7 +592,37 @@ def optimize_main_character_prompt_with_llm(
             canonical_block_lines.append(f"标志性外观关键词：{canonical_signature}")
         canonical_block = "\n".join(canonical_block_lines) if canonical_block_lines else "（无）"
 
-        llm_prompt = f"""你现在是一个专业的角色设计师，要将具体角色描述给生图ai，让生图ai能够生成准确的主角形象。
+        use_anime_structured = style_type == "anime"
+
+        if use_anime_structured:
+            llm_prompt = f"""你现在是一个专业的角色设计师，要为「动漫风格」生图生成主角形象提示词。请严格按下面示例的格式输出（分模块、英文），只把内容换成当前主角信息。
+
+固定参数（勿改，必须保留在输出中）：
+- --面部系统--：lip peak highlight strength 0.3, lip line depth 0.15
+- --头发系统--：root fixation coefficient 0.95, tip swing amplitude 10cm, wind speed 1.2m/s, turbulence intensity 5%, wind direction 45°
+- --衣物系统--：slight shoulder line folds (depth 0.3)
+- --视角与构图--：focal length 50mm, depth of field f/2.8, full-body front view, pure white background, standing still
+
+仅根据主角填写：首行角色特征、发色 main/secondary/highlight/shadow 配色。
+
+【主角规范信息】
+{canonical_block}
+
+【必须保留的名称标识】{(" / ".join(required_name_tokens)) if required_name_tokens else "（无）"}
+【身份提示】{identity_hint if identity_hint else "（无）"}
+
+【主角信息】性别：{protagonist_gender}，属性：{attr_description}，能力：{protagonist_ability}，性格与外貌：{protagonist_info.get('personality', '')}；{protagonist_info.get('appearance', '')}
+【颜值视觉要求】等级：{appearance_level}；{appearance_visual_hint}
+【Wikipedia 补充】{wiki_evidence_text if wiki_evidence_text else "（无）"}
+
+必须包含五部分：首行、--面部系统--、--头发系统--、--衣物系统--、--视角与构图--。禁止任何文字/符号入图。
+
+示例：
+{PROMPT_FORMAT_EXAMPLE_MAIN_CHAR_ANIME}
+
+只输出一版上述格式的提示词，不要其他内容。"""
+        else:
+            llm_prompt = f"""你现在是一个专业的角色设计师，要将具体角色描述给生图ai，让生图ai能够生成准确的主角形象。
 
 【游戏背景信息】
 - 游戏主题：{user_theme or game_theme}
@@ -573,6 +700,8 @@ def optimize_main_character_prompt_with_llm(
         if choices and len(choices) > 0:
             optimized_prompt = choices[0].get("message", {}).get("content", "").strip()
             if optimized_prompt:
+                optimized_prompt = re.sub(r'https?://\S+', '', optimized_prompt).strip()
+                optimized_prompt = re.sub(r'data:image/\S+', '', optimized_prompt).strip()
                 try:
                     if required_name_tokens:
                         missing = [t for t in required_name_tokens if t and t not in optimized_prompt]
@@ -582,11 +711,13 @@ def optimize_main_character_prompt_with_llm(
                         optimized_prompt = f"{identity_hint}, {optimized_prompt}"
                 except Exception:
                     pass
-                # 高/极高颜值时追加英文外貌关键词，确保生图模型收到明确信号
-                appearance_suffix = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
-                if appearance_suffix:
-                    optimized_prompt = optimized_prompt.rstrip() + appearance_suffix
-                optimized_prompt = f"{optimized_prompt}, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words"
+                if use_anime_structured:
+                    optimized_prompt = f"{optimized_prompt}, no text, no symbols, no garbled characters, no words"
+                else:
+                    appearance_suffix = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
+                    if appearance_suffix:
+                        optimized_prompt = optimized_prompt.rstrip() + appearance_suffix
+                    optimized_prompt = f"{optimized_prompt}, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words"
                 print(f"✅ LLM主角形象提示词生成完成，长度：{len(optimized_prompt)}字符")
                 return optimized_prompt
 

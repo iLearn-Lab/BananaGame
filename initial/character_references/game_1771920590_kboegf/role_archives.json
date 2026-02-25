@@ -1,0 +1,53 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "葛城美里",
+    "aliases": [
+      "葛城美里"
+    ],
+    "story_background": "",
+    "first_appear_scene": "我睁开眼睛的瞬间，刺眼的白光让我本能地眯起双眼。这里不是我熟悉的房间，天花板上规整的日光灯管发出冷白色的光芒，空气中弥漫…",
+    "first_img_id": "img_20260224_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771920590_kboegf\\葛城美里_img_20260224_001.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, sterile medical …",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, sterile medical …",
+    "face_ref_path": "葛城美里_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771920590_kboegf\\葛城美里_body_ref.png"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "碇源堂",
+    "aliases": [
+      "碇源堂"
+    ],
+    "story_background": "【出场前碎片积累】\n你的父亲碇源堂司令需要你",
+    "first_appear_scene": "碇真嗣走过NERV总部冰冷的金属走廊，脚步声在空旷的通道中回响。经过层层安检和身份验证后，他终于来到了司令室的厚重金属门…",
+    "first_img_id": "img_20260224_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771920590_kboegf\\碇源堂_img_20260224_002.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, cold corporate a…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, cold corporate a…",
+    "face_ref_path": "碇源堂_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771920590_kboegf\\碇源堂_body_ref.png"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "冬月副司令",
+    "aliases": [
+      "冬月副司令"
+    ],
+    "story_background": "",
+    "first_appear_scene": "司令室内的气氛瞬间凝固。碇源堂的手指在桌面上轻敲了三下，这个细微动作暴露了他内心的波动。他缓缓抬起头，橙色镜片后的双眼凝…",
+    "first_img_id": "img_20260224_003",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771920590_kboegf\\冬月副司令_img_20260224_003.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, cold corporate atmosphere in NERV commander's office, tense psychological confrontation scene as dark truths about E…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, cold corporate a…",
+    "face_ref_path": "冬月副司令_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771920590_kboegf\\冬月副司令_body_ref.png"
+  }
+}

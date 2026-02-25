@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771920590_kboegf",
+  "generated_at": "2026-02-24T16:11:08.091959",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **主角视觉描述提示词：**\n\nShinji Ikari, male teenager, extremely handsome and attractive with delicate refined features, clear pale skin, and outstanding elegant temperament. Deep blue short hair styled neatly, penetrating deep eyes with intelligent and contemplative gaze, slender lean build typical of a 14-year-old boy. Wearing dark blue school uniform with white shirt underneath, perfectly fitted and pristine. His facial expression shows quiet contemplation and analytical thinking, with a subtle melancholic beauty that reflects his high intelligence and observational nature. Sharp jawline, well-defined eyebrows, and naturally graceful posture that conveys both vulnerability and hidden strength.\n\nFull-body character design, standing upright in center position, arms naturally at sides in a thoughtful pose. The character embodies the essence of a brilliant young detective - beautiful yet introspective, with an aura of mystery and intellectual depth. His overall appearance suggests someone capable of unraveling complex psychological puzzles while carrying the weight of profound secrets.\n\nAnime art style, Japanese manga aesthetics, bold ink lines, halftone dot shadows, high contrast lighting, dramatic shadowing effects, atmospheric background suggesting the mysterious world of NERV and Eva units, pure white background, character centered.\n\nNo text, no symbols, no words, full-body, handsome, beautiful, attractive, delicate features, clear skin., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**主角视觉描述提示词：**\n\nShinji Ikari, male teenager, extremely handsome and attractive with delicate refined features, clear pale skin, and outstanding elegant temperament. Deep blue short hair styled neatly, penetrating deep eyes with intelligent and contemplative gaze, slender lean build typical of a 14-year-old boy. Wearing dark blue school uniform with white shirt underneath, perfectly fitted and pristine. His facial expression shows quiet contemplation and analytical thinking, with a subtle melancholic beauty that reflects his high intelligence and observational nature. Sharp jawline, well-defined eyebrows, and naturally graceful posture that conveys both vulnerability and hidden strength.\n\nFull-body character design, standing upright in center position, arms naturally at sides in a thoughtful pose. The character embodies the essence of a brilliant young detective - beautiful yet introspective, with an aura of mystery and intellectual depth. His overall appearance suggests someone capable of unraveling complex psychological puzzles while carrying the weight of profound secrets.\n\nAnime art style, Japanese manga aesthetics, bold ink lines, halftone dot shadows, high contrast lighting, dramatic shadowing effects, atmospheric background suggesting the mysterious world of NERV and Eva units, pure white background, character centered.\n\nNo text, no symbols, no words, full-body, handsome, beautiful, attractive, delicate features, clear skin., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771920590_kboegf/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **主角视觉描述提示词：**\n\nShinji Ikari, male teenager, extremely handsome and attractive with delicate refined features, clear pale skin, and outstanding elegant temperament. Deep blue short hair styled neatly, penetrating deep eyes with intelligent and contemplative gaze, slender lean build typical of a 14-year-old boy. Wearing dark blue school uniform with white shirt underneath, perfectly fitted and pristine. His facial expression shows quiet contemplation and analytical thinking, with a subtle melancholic beauty that reflects his high intelligence and observational nature. Sharp jawline, well-defined eyebrows, and naturally graceful posture that conveys both vulnerability and hidden strength.\n\nFull-body character design, standing upright in center position, arms naturally at sides in a thoughtful pose. The character embodies the essence of a brilliant young detective - beautiful yet introspective, with an aura of mystery and intellectual depth. His overall appearance suggests someone capable of unraveling complex psychological puzzles while carrying the weight of profound secrets.\n\nAnime art style, Japanese manga aesthetics, bold ink lines, halftone dot shadows, high contrast lighting, dramatic shadowing effects, atmospheric background suggesting the mysterious world of NERV and Eva units, pure white background, character centered.\n\nNo text, no symbols, no words, full-body, handsome, beautiful, attractive, delicate features, clear skin., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-24T16:11:08.091959"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771920590_kboegf/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771920590_kboegf\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T16:11:19.654094"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771920590_kboegf/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771920590_kboegf\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T16:11:24.698717"
+    }
+  }
+}

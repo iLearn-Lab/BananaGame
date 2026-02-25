@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771925859_kltoan",
+  "generated_at": "2026-02-24T17:38:55.948420",
+  "prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, refined ink outlines and moderate line weight, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, young male protagonist with exceptionally refined features and intellectual aura.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, refined manga-style line art with soft outlines, sharp defined jawline, piercing analytical gaze with subtle heterochromia hints, soft ink outlines around eyes and lips, intense iris highlights suggesting enhanced perception, slight bloodshot texture on sclera from mental strain, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless porcelain skin texture.\n\n--头发系统--\ndefined hair strands with refined outlines, distinct clumps of hair with screentone shading, intricate hair strands with slight disheveled look from mental exhaustion, root fixation coefficient 0.95, tip swing amplitude 10cm,\ncolor layering: main color #1A1A2E, secondary color #16213E, highlight #0F3460, shadow #0E1B2E, 3-5 strands of gradient per cluster, natural color transition with subtle blue undertones,\nphysical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp dark academic clothing with clean folds and soft outlines, subtle screentone on fabric suggesting high-tech material, slight shoulder line folds (depth 0.3), fabric: matte texture with minimal tech details, intellectual professional appearance, dark colors to emphasize mysterious analytical nature.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements,\naction constraints: standing straight with slight head tilt suggesting analytical observation, arms relaxed at sides, completely static, no unnecessary movements., no text, no symbols, no garbled characters, no words, aspect ratio 1024:1536, portrait orientation",
+  "features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, refined ink outlines and moderate line weight, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, young male protagonist with exceptionally refined features and intellectual aura.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, refined manga-style line art with soft outlines, sharp defined jawline, piercing analytical gaze with subtle heterochromia hints, soft ink outlines around eyes and lips, intense iris highlights suggesting enhanced perception, slight bloodshot texture on sclera from mental strain, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless porcelain skin texture.\n\n--头发系统--\ndefined hair strands with refined outlines, distinct clumps of hair with screentone shading, intricate hair strands with slight disheveled look from mental exhaustion, root fixation coefficient 0.95, tip swing amplitude 10cm,\ncolor layering: main color #1A1A2E, secondary color #16213E, highlight #0F3460, shadow #0E1B2E, 3-5 strands of gradient per cluster, natural color transition with subtle blue undertones,\nphysical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp dark academic clothing with clean folds and soft outlines, subtle screentone on fabric suggesting high-tech material, slight shoulder line folds (depth 0.3), fabric: matte texture with minimal tech details, intellectual professional appearance, dark colors to emphasize mysterious analytical nature.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements,\naction constraints: standing straight with slight head tilt suggesting analytical observation, arms relaxed at sides, completely static, no unnecessary movements., no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771925859_kltoan/main_character.png",
+      "prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, refined ink outlines and moderate line weight, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, young male protagonist with exceptionally refined features and intellectual aura.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, refined manga-style line art with soft outlines, sharp defined jawline, piercing analytical gaze with subtle heterochromia hints, soft ink outlines around eyes and lips, intense iris highlights suggesting enhanced perception, slight bloodshot texture on sclera from mental strain, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless porcelain skin texture.\n\n--头发系统--\ndefined hair strands with refined outlines, distinct clumps of hair with screentone shading, intricate hair strands with slight disheveled look from mental exhaustion, root fixation coefficient 0.95, tip swing amplitude 10cm,\ncolor layering: main color #1A1A2E, secondary color #16213E, highlight #0F3460, shadow #0E1B2E, 3-5 strands of gradient per cluster, natural color transition with subtle blue undertones,\nphysical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp dark academic clothing with clean folds and soft outlines, subtle screentone on fabric suggesting high-tech material, slight shoulder line folds (depth 0.3), fabric: matte texture with minimal tech details, intellectual professional appearance, dark colors to emphasize mysterious analytical nature.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements,\naction constraints: standing straight with slight head tilt suggesting analytical observation, arms relaxed at sides, completely static, no unnecessary movements., no text, no symbols, no garbled characters, no words, aspect ratio 1024:1536, portrait orientation",
+      "generated_at": "2026-02-24T17:38:55.948420"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771925859_kltoan/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771925859_kltoan\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T17:39:09.009461"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771925859_kltoan/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771925859_kltoan\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T17:39:10.954193"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "技术员",
+    "aliases": [
+      "技术员"
+    ],
+    "story_background": "",
+    "first_appear_scene": "渚薰将目光转向技术员，银灰色的短发在实验室灯光下泛着淡淡光泽。\"关于同步率异常，能否提供更具体的数据细节？\"他的红色瞳孔…",
+    "first_img_id": "img_20260224_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771923378_6rdnld\\技术员_img_20260224_001.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, sterile NERV lab…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, sterile NERV lab…",
+    "face_ref_path": "技术员_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771923378_6rdnld\\技术员_body_ref.png"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "葛城美里",
+    "aliases": [
+      "葛城美里"
+    ],
+    "story_background": "",
+    "first_appear_scene": "渚薰通过NERV的内部系统查询初号机驾驶员的基本信息。屏幕上显示着一份简洁的档案：碇真嗣，十四岁，第三适格者。然而当他试…",
+    "first_img_id": "img_20260224_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771923378_6rdnld\\葛城美里_img_20260224_002.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, tense NERV offic…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, tense NERV offic…",
+    "face_ref_path": "葛城美里_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771923378_6rdnld\\葛城美里_body_ref.png"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "碇真嗣",
+    "aliases": [
+      "碇真嗣"
+    ],
+    "story_background": "【出场前碎片积累】\n你调出了更详细的生物监测记录，发现在同步率飙升的那一刻，驾驶员碇真嗣的脑波模式发生了根本性改变从正常的波突然转换为一种前所未见的特殊频率\n屏幕上显示着一份简洁的档案：碇真嗣，十四岁，第三适格者\n第一种是驾驶员碇真嗣的正常脑波，第二种我们无法识别，但频率异常高\n\"碇真嗣，14岁，父亲碇源堂NERV最高指挥官",
+    "first_appear_scene": "渚薰通过NERV的内部通讯系统联系到了碇真嗣的所在位置。在一间位于地下三层的休息室内，他找到了这位初号机的驾驶员。真嗣正…",
+    "first_img_id": "img_20260224_003",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771923378_6rdnld\\碇真嗣_img_20260224_003.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, underground NERV…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, underground NERV…"
+  }
+}

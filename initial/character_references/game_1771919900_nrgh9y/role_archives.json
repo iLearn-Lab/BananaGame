@@ -1,0 +1,20 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "冬月",
+    "aliases": [
+      "冬月",
+      "冬月副司令"
+    ],
+    "story_background": "",
+    "first_appear_scene": "渚薰深吸一口气，决定采用最直接的方式。他转身面对冬月，红色瞳孔中闪烁着坚定的光芒。\"冬月副司令，我需要了解ADAM计划的…",
+    "first_img_id": "img_20260224_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771919900_nrgh9y\\冬月_img_20260224_001.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), anime style, Japanese manga aesthetic, bold ink lines, screentone shading, high contrast, dramatic shadows, tense confrontation scene in NERV undergrou…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), anime style, Japanese manga aesthetic, bold ink lines, screentone shading, high contrast, dramatic shadows, tense confrontation scene in NERV undergrou…",
+    "face_ref_path": "冬月_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771919900_nrgh9y\\冬月_body_ref.png"
+  }
+}
