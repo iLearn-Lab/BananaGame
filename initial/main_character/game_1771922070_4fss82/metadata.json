@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771922070_4fss82",
+  "generated_at": "2026-02-24T16:36:02.903766",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **主角视觉描述提示词：**\n\nA handsome young man named Lin Wanfeng with extremely high attractiveness, delicate facial features and clear skin. Deep black eyes that seem to hold gentle mysteries, soft and warm temperament radiating quiet charisma. Clean white dress shirt with simple elegant cut, tall and slender physique with graceful proportions. Gentle smile playing on his lips, serene and peaceful expression, clear crystalline gaze that appears to see beyond the surface of things, tranquil demeanor suggesting inner wisdom.\n\nHis facial features are perfectly sculpted - sharp yet gentle jawline, straight refined nose, expressive eyebrows that frame his deep black eyes beautifully. Flawless porcelain-like skin with natural healthy glow. Dark hair styled in a naturally tousled yet neat manner, falling softly around his face. The white shirt is crisp and well-fitted, sleeves rolled up slightly to reveal elegant forearms, conveying both sophistication and approachability.\n\nFull-body character design showing him standing centered in a relaxed but dignified pose, one hand casually in pocket, the other slightly extended as if sensing invisible emotional currents around him. His posture reflects quiet confidence and empathetic awareness.\n\nAnime art style with Japanese manga aesthetics, bold ink outlines, screentone shadows, high contrast lighting, dramatic shadows that enhance his mysterious yet gentle aura. The atmosphere suggests urban fantasy elements with subtle ethereal lighting effects around him, hinting at his empathic vision abilities.\n\nPure white background, character centered, full-body view, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**主角视觉描述提示词：**\n\nA handsome young man named Lin Wanfeng with extremely high attractiveness, delicate facial features and clear skin. Deep black eyes that seem to hold gentle mysteries, soft and warm temperament radiating quiet charisma. Clean white dress shirt with simple elegant cut, tall and slender physique with graceful proportions. Gentle smile playing on his lips, serene and peaceful expression, clear crystalline gaze that appears to see beyond the surface of things, tranquil demeanor suggesting inner wisdom.\n\nHis facial features are perfectly sculpted - sharp yet gentle jawline, straight refined nose, expressive eyebrows that frame his deep black eyes beautifully. Flawless porcelain-like skin with natural healthy glow. Dark hair styled in a naturally tousled yet neat manner, falling softly around his face. The white shirt is crisp and well-fitted, sleeves rolled up slightly to reveal elegant forearms, conveying both sophistication and approachability.\n\nFull-body character design showing him standing centered in a relaxed but dignified pose, one hand casually in pocket, the other slightly extended as if sensing invisible emotional currents around him. His posture reflects quiet confidence and empathetic awareness.\n\nAnime art style with Japanese manga aesthetics, bold ink outlines, screentone shadows, high contrast lighting, dramatic shadows that enhance his mysterious yet gentle aura. The atmosphere suggests urban fantasy elements with subtle ethereal lighting effects around him, hinting at his empathic vision abilities.\n\nPure white background, character centered, full-body view, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771922070_4fss82/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **主角视觉描述提示词：**\n\nA handsome young man named Lin Wanfeng with extremely high attractiveness, delicate facial features and clear skin. Deep black eyes that seem to hold gentle mysteries, soft and warm temperament radiating quiet charisma. Clean white dress shirt with simple elegant cut, tall and slender physique with graceful proportions. Gentle smile playing on his lips, serene and peaceful expression, clear crystalline gaze that appears to see beyond the surface of things, tranquil demeanor suggesting inner wisdom.\n\nHis facial features are perfectly sculpted - sharp yet gentle jawline, straight refined nose, expressive eyebrows that frame his deep black eyes beautifully. Flawless porcelain-like skin with natural healthy glow. Dark hair styled in a naturally tousled yet neat manner, falling softly around his face. The white shirt is crisp and well-fitted, sleeves rolled up slightly to reveal elegant forearms, conveying both sophistication and approachability.\n\nFull-body character design showing him standing centered in a relaxed but dignified pose, one hand casually in pocket, the other slightly extended as if sensing invisible emotional currents around him. His posture reflects quiet confidence and empathetic awareness.\n\nAnime art style with Japanese manga aesthetics, bold ink outlines, screentone shadows, high contrast lighting, dramatic shadows that enhance his mysterious yet gentle aura. The atmosphere suggests urban fantasy elements with subtle ethereal lighting effects around him, hinting at his empathic vision abilities.\n\nPure white background, character centered, full-body view, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-24T16:36:02.903766"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771922070_4fss82/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771922070_4fss82\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T16:36:23.440337"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771922070_4fss82/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771922070_4fss82\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T16:36:24.575551"
+    }
+  }
+}

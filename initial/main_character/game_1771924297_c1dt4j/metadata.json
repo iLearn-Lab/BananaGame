@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771924297_c1dt4j",
+  "generated_at": "2026-02-24T17:12:49.688437",
+  "prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, young male protagonist with exceptionally refined and handsome features, sharp observational eyes.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, sharp manga-style line art, perfectly sculpted jawline, intensely focused gaze with analytical depth, clean ink outlines around eyes and lips, piercing iris highlights with subtle intelligence gleam, slight contemplative expression, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless skin texture with delicate shading.\n\n--头发系统--\nbold, defined hair strands with sharp ink outlines, distinct clumps of hair with screentone shading, intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm,\ncolor layering: main color #3D2914, secondary color #5C4033, highlight #8B6F47, shadow #2C1810, 3-5 strands of gradient per cluster, natural color transition,\nphysical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp clothing with sharp folds and ink outlines, subtle screentone on fabric, slight shoulder line folds (depth 0.3), fabric: matte texture, casual yet neat appearance suitable for a thoughtful observer.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements,\naction constraints: standing straight, arms relaxed at sides, completely static, no unnecessary movements., no text, no symbols, no garbled characters, no words, aspect ratio 1024:1536, portrait orientation",
+  "features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, young male protagonist with exceptionally refined and handsome features, sharp observational eyes.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, sharp manga-style line art, perfectly sculpted jawline, intensely focused gaze with analytical depth, clean ink outlines around eyes and lips, piercing iris highlights with subtle intelligence gleam, slight contemplative expression, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless skin texture with delicate shading.\n\n--头发系统--\nbold, defined hair strands with sharp ink outlines, distinct clumps of hair with screentone shading, intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm,\ncolor layering: main color #3D2914, secondary color #5C4033, highlight #8B6F47, shadow #2C1810, 3-5 strands of gradient per cluster, natural color transition,\nphysical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp clothing with sharp folds and ink outlines, subtle screentone on fabric, slight shoulder line folds (depth 0.3), fabric: matte texture, casual yet neat appearance suitable for a thoughtful observer.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements,\naction constraints: standing straight, arms relaxed at sides, completely static, no unnecessary movements., no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "普通",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771924297_c1dt4j/main_character.png",
+      "prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, young male protagonist with exceptionally refined and handsome features, sharp observational eyes.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, sharp manga-style line art, perfectly sculpted jawline, intensely focused gaze with analytical depth, clean ink outlines around eyes and lips, piercing iris highlights with subtle intelligence gleam, slight contemplative expression, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless skin texture with delicate shading.\n\n--头发系统--\nbold, defined hair strands with sharp ink outlines, distinct clumps of hair with screentone shading, intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm,\ncolor layering: main color #3D2914, secondary color #5C4033, highlight #8B6F47, shadow #2C1810, 3-5 strands of gradient per cluster, natural color transition,\nphysical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp clothing with sharp folds and ink outlines, subtle screentone on fabric, slight shoulder line folds (depth 0.3), fabric: matte texture, casual yet neat appearance suitable for a thoughtful observer.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements,\naction constraints: standing straight, arms relaxed at sides, completely static, no unnecessary movements., no text, no symbols, no garbled characters, no words, aspect ratio 1024:1536, portrait orientation",
+      "generated_at": "2026-02-24T17:12:49.688437"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771924297_c1dt4j/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771924297_c1dt4j\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T17:13:03.792859"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771924297_c1dt4j/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771924297_c1dt4j\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T17:13:05.147006"
+    }
+  }
+}

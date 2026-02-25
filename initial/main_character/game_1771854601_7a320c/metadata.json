@@ -1,0 +1,44 @@
+{
+  "game_id": "game_1771854601_7a320c",
+  "generated_at": "2026-02-23T21:51:17.688845",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **主角视觉描述提示词：**\n\nCharlie Gordon, handsome young man with extremely attractive and delicate features, clear smooth skin, refined facial structure with sharp jawline, piercing clear blue eyes showing intelligence and sincerity, neat brown short hair with natural texture, gentle warm smile with slight boyish charm, tall slender build with scholarly elegance, wearing simple light blue button-up shirt and dark blue jeans, thin-framed glasses resting on nose bridge, thoughtful focused expression, graceful posture showing both innocence and emerging wisdom, beautiful refined appearance with outstanding temperament, soft lighting creating gentle shadows across his attractive face, standing centered against pure white background, full-body character design, impressionist oil painting style with rich light and shadow variations, visible brushstrokes, warm color palette, no text, no symbols, no words, very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: oil_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**主角视觉描述提示词：**\n\nCharlie Gordon, handsome young man with extremely attractive and delicate features, clear smooth skin, refined facial structure with sharp jawline, piercing clear blue eyes showing intelligence and sincerity, neat brown short hair with natural texture, gentle warm smile with slight boyish charm, tall slender build with scholarly elegance, wearing simple light blue button-up shirt and dark blue jeans, thin-framed glasses resting on nose bridge, thoughtful focused expression, graceful posture showing both innocence and emerging wisdom, beautiful refined appearance with outstanding temperament, soft lighting creating gentle shadows across his attractive face, standing centered against pure white background, full-body character design, impressionist oil painting style with rich light and shadow variations, visible brushstrokes, warm color palette, no text, no symbols, no words, very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "oil_painting",
+    "subtype": "impressionist"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771854601_7a320c/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **主角视觉描述提示词：**\n\nCharlie Gordon, handsome young man with extremely attractive and delicate features, clear smooth skin, refined facial structure with sharp jawline, piercing clear blue eyes showing intelligence and sincerity, neat brown short hair with natural texture, gentle warm smile with slight boyish charm, tall slender build with scholarly elegance, wearing simple light blue button-up shirt and dark blue jeans, thin-framed glasses resting on nose bridge, thoughtful focused expression, graceful posture showing both innocence and emerging wisdom, beautiful refined appearance with outstanding temperament, soft lighting creating gentle shadows across his attractive face, standing centered against pure white background, full-body character design, impressionist oil painting style with rich light and shadow variations, visible brushstrokes, warm color palette, no text, no symbols, no words, very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: oil_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-23T21:51:17.688845"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771854601_7a320c/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771854601_7a320c\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-23T21:51:35.683545"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771854601_7a320c/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771854601_7a320c\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-23T21:51:37.305380"
+    }
+  }
+}

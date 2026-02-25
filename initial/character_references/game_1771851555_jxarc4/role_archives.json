@@ -1,0 +1,104 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "护士",
+    "aliases": [
+      "护士"
+    ],
+    "story_background": "",
+    "first_appear_scene": "夏洛克来到威廉哈里森的私人诊所，这是一家位于肯辛顿区的高档医疗机构。接待处的护士查阅了电子病历系统后，神情略显困惑。\"莉…",
+    "first_img_id": "img_20260223_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\护士_img_20260223_001.png",
+    "first_prompt": "场景设置：\"肯辛顿区高档私人诊所内景，主角使用Image 0正面朝向镜头站立于接待台前，手中持有电子病历打印资料，护士-配角1站在接待台后方操作电子病历系统，现代化医疗设备环境，冷白色LED照明与温暖接待区灯光形成对比，电影感构图，no text, no symbols, no garbled characters, no words\"",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "场景设置：\"肯辛顿区高档私人诊所内景，主角使用Image 0正面朝向镜头站立于接待台前，手中持有电子病历打印资料，护士-配角1站在接待台后方操作电子病历系统，现代化医疗设备环境，冷白色LED照明与温暖接待区灯光形成对比，电影感构图，no text, no symbols, no garbled characters, no words\"",
+    "face_ref_path": "护士_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\护士_body_ref.png"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "威廉·哈里森医生",
+    "aliases": [
+      "威廉·哈里森医生"
+    ],
+    "story_background": "",
+    "first_appear_scene": "威廉哈里森医生的诊所位于伦敦西区一栋维多利亚式建筑的三层，古典的红砖外墙与现代化的医疗设施形成鲜明对比。夏洛克推开厚重的…",
+    "first_img_id": "img_20260223_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\威廉·哈里森医生_img_20260223_002.png",
+    "first_prompt": "面部：\"8K超写实面部建模，专注倾听表情，眉头略微放松显示礼貌交流状态，深邃眼眸注视威廉哈里森医生，冷静观察神情，柔肤滤镜(强度36%)\"\n\n眨眼参数：\"2.1秒眨眼周期(±0.2s)，上眼脸下垂角度135，下眼脸微颤频率0.4Hz，体现与医生初次会面的谨慎观察状态\"\n\n头发系统：\"1900+发丝独立动力学模拟，发根固定系数0.94，发梢轻微飘动幅度6-9cm，维多利亚式诊所室内环境\"\n\n物理模拟·风场设置：\"诊所通风系统微气流源（风速0.7m/s，湍流强度3%），营造古典与现代结合的医疗环境氛围\"\n\n衣物锁定：\"深色衣物材质纹理锁定，保持在皮质沙发前的站立姿态，袖口自然垂放，布料弹性模量设为…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "面部：\"8K超写实面部建模，专注倾听表情，眉头略微放松显示礼貌交流状态，深邃眼眸注视威廉哈里森医生，冷静观察神情，柔肤滤镜(强度36%)\"\n\n眨眼参数：\"2.1秒眨眼周期(±0.2s)，上眼脸下垂角度135，下眼脸微颤频率0.4Hz，体现与医生初次会面的谨慎观察状态\"\n\n头发系统：\"1900+发丝独立动力学模拟，发根固定系数0.94，发梢轻微飘动幅度6-9cm，维多利亚式诊所室内环境\"\n\n物理模拟…",
+    "face_ref_path": "威廉·哈里森医生_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\威廉·哈里森医生_body_ref.png"
+  },
+  "role_003": {
+    "role_id": "role_003",
+    "role_name": "华生",
+    "aliases": [
+      "华生"
+    ],
+    "story_background": "",
+    "first_appear_scene": "夏洛克将心理评估报告放在桌上，深邃的眼眸凝视着那些关键词句。他的手指轻敲着桌面，这是他思考时的习惯动作。\"重要秘密\"这个…",
+    "first_img_id": "img_20260223_003",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\华生_img_20260223_003.png",
+    "first_prompt": "面部：\"8K超写实面部建模，专注分析表情，眉头微皱显示发现疑点的思考状态，深邃眼眸凝视心理评估报告上的关键词句，手指轻敲桌面的习惯性思考动作，柔肤滤镜(强度38%)\"\n\n眨眼参数：\"1.6秒眨眼周期(±0.12s)，上眼脸下垂角度135，下眼脸微颤频率0.4Hz，体现仔细观察报告细节发现笔迹异常的专注状态\"\n\n头发系统：\"1950+发丝独立动力学模拟，发根固定系数0.94，发梢轻微飘动幅度6-9cm，诊所室内稳定环境下的自然状态\"\n\n物理模拟·风场设置：\"诊所通风系统微气流源（风速0.5m/s，湍流强度1.8%），营造专业医疗咨询环境的静谧分析氛围\"\n\n衣物锁定：\"深色衣物材质纹理锁定，保持在…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "面部：\"8K超写实面部建模，专注分析表情，眉头微皱显示发现疑点的思考状态，深邃眼眸凝视心理评估报告上的关键词句，手指轻敲桌面的习惯性思考动作，柔肤滤镜(强度38%)\"\n\n眨眼参数：\"1.6秒眨眼周期(±0.12s)，上眼脸下垂角度135，下眼脸微颤频率0.4Hz，体现仔细观察报告细节发现笔迹异常的专注状态\"\n\n头发系统：\"1950+发丝独立动力学模拟，发根固定系数0.94，发梢轻微飘动幅度6-9c…",
+    "face_ref_path": "华生_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\华生_body_ref.png"
+  },
+  "role_004": {
+    "role_id": "role_004",
+    "role_name": "詹姆斯·莫里森医生",
+    "aliases": [
+      "詹姆斯·莫里森医生"
+    ],
+    "story_background": "",
+    "first_appear_scene": "夏洛克拨通了心理医生的电话，经过一番查询后联系到了为死者做心理评估的詹姆斯莫里森医生。电话中，莫里森医生的声音显得有些紧…",
+    "first_img_id": "img_20260223_004",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\詹姆斯·莫里森医生_img_20260223_004.png",
+    "first_prompt": "面部：\"8K超写实面部建模，专注通话表情，眉头微蹙显示对电话内容的深度思考，深邃眼眸凝视前方整理信息，嘴角微抿体现对新线索的严肃态度，柔肤滤镜(强度36%)\"\n\n眨眼参数：\"1.4秒眨眼周期(±0.15s)，上眼脸下垂角度128，下眼脸微颤频率0.3Hz，体现接听重要电话时的高度专注状态\"\n\n头发系统：\"1980+发丝独立动力学模拟，发根固定系数0.93，发梢轻微飘动幅度5-8cm，室内通话环境下的自然状态\"\n\n物理模拟·风场设置：\"室内空调微气流源（风速0.3m/s，湍流强度1.5%），营造安静通话环境的沉思氛围\"\n\n衣物锁定：\"深色衣物材质纹理锁定，保持站立通话姿态，左手持电话贴近耳朵，右…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "面部：\"8K超写实面部建模，专注通话表情，眉头微蹙显示对电话内容的深度思考，深邃眼眸凝视前方整理信息，嘴角微抿体现对新线索的严肃态度，柔肤滤镜(强度36%)\"\n\n眨眼参数：\"1.4秒眨眼周期(±0.15s)，上眼脸下垂角度128，下眼脸微颤频率0.3Hz，体现接听重要电话时的高度专注状态\"\n\n头发系统：\"1980+发丝独立动力学模拟，发根固定系数0.93，发梢轻微飘动幅度5-8cm，室内通话环境下…",
+    "face_ref_path": "詹姆斯·莫里森医生_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\詹姆斯·莫里森医生_body_ref.png"
+  },
+  "role_005": {
+    "role_id": "role_005",
+    "role_name": "心理医生",
+    "aliases": [
+      "心理医生"
+    ],
+    "story_background": "",
+    "first_appear_scene": "夏洛克将注意力转向心理医生，深邃的眼眸中闪烁着锐利的光芒。\"关于那位神秘来访者，您能详细描述一下他的外貌特征吗？任何细节…",
+    "first_img_id": "img_20260223_005",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\心理医生_img_20260223_005.png",
+    "first_prompt": "面部：\"8K超写实面部建模，深度专注询问表情，眉头轻蹙显示对线索的深入分析，深邃眼眸锐利凝视心理医生获取关键信息，嘴角微张正在提出追问，体现推理过程中的高度集中，柔肤滤镜(强度38%)\"",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "面部：\"8K超写实面部建模，深度专注询问表情，眉头轻蹙显示对线索的深入分析，深邃眼眸锐利凝视心理医生获取关键信息，嘴角微张正在提出追问，体现推理过程中的高度集中，柔肤滤镜(强度38%)\"",
+    "face_ref_path": "心理医生_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\心理医生_body_ref.png"
+  },
+  "role_006": {
+    "role_id": "role_006",
+    "role_name": "雷斯垂德",
+    "aliases": [
+      "雷斯垂德"
+    ],
+    "story_background": "",
+    "first_appear_scene": "夏洛克在办公室中踱步，深邃的眼眸扫视着周围的环境布局。他停在接待台前，修长的手指轻抚着台面边缘，仔细观察着磨损痕迹。\"这…",
+    "first_img_id": "img_20260223_006",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\雷斯垂德_img_20260223_006.png",
+    "first_prompt": "场景设置：\"现代伦敦警察厅办公室内部场景，主角使用Image 1侧面朝向镜头在办公室中进行实地勘察分析，雷斯垂德-配角1站在一旁聆听推理，背景为现代化办公环境包含接待台、监控摄像头、文件柜等办公设施，室内专业照明突出推理侦探的工作氛围，窗外可见伦敦街景建筑，电影感构图强调主角运用超凡观察力分析现场线索的专业推理过程，no text, no symbols, no garbled character…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "场景设置：\"现代伦敦警察厅办公室内部场景，主角使用Image 1侧面朝向镜头在办公室中进行实地勘察分析，雷斯垂德-配角1站在一旁聆听推理，背景为现代化办公环境包含接待台、监控摄像头、文件柜等办公设施，室内专业照明突出推理侦探的工作氛围，窗外可见伦敦街景建筑，电影感构图强调主角运用超凡观察力分析现场线索的专业推理过程，no text, no symbols, no garbled character…",
+    "face_ref_path": "雷斯垂德_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771851555_jxarc4\\雷斯垂德_body_ref.png"
+  }
+}

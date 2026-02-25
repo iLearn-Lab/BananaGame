@@ -1,0 +1,38 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "葛城美里",
+    "aliases": [
+      "葛城美里",
+      "美里"
+    ],
+    "story_background": "",
+    "first_appear_scene": "刺耳的警报声撕裂了第三新东京市的宁静，红色的紧急灯光在街道上疯狂闪烁。我站在空旷的车站月台上，手中紧握着那张皱巴巴的召集…",
+    "first_img_id": "img_20260224_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771921263_nc10ma\\葛城美里_img_20260224_001.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, vibrant colors, …",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, vibrant colors, …",
+    "face_ref_path": "葛城美里_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771921263_nc10ma\\葛城美里_body_ref.png"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "律子",
+    "aliases": [
+      "律子",
+      "律子博士"
+    ],
+    "story_background": "",
+    "first_appear_scene": "真嗣将注意力集中在美里的面部表情上，运用自己敏锐的观察能力仔细分析她的每一个微妙变化。当提到第四使徒的攻击路径时，美里的…",
+    "first_img_id": "img_20260224_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771921263_nc10ma\\律子_img_20260224_002.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, vibrant colors, intense psychological analysis scene in NERV briefing room, harsh fluorescent lighting casting sharp…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, vibrant colors, …",
+    "face_ref_path": "律子_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771921263_nc10ma\\律子_body_ref.png"
+  }
+}

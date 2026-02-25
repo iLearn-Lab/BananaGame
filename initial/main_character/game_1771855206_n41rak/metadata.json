@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771855206_n41rak",
+  "generated_at": "2026-02-23T22:01:38.989852",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **主角视觉描述提示词：**\n\nA handsome young Chinese man named Lin Shenxing in traditional Chinese ink painting style. Extremely attractive with delicate facial features, clear and refined skin, and outstanding temperament. Deep, penetrating eyes that show sharp intelligence and slight weariness from investigation work. Clean-shaven face with elegant bone structure and a composed, scholarly expression. Slender fingers and graceful posture reflecting his refined nature.\n\nWearing a simple blue-gray traditional Chinese long robe (changshan) in Ming Dynasty style, with clean lines and modest design appropriate for a government investigator. Hair styled in a simple traditional topknot, neat and practical. His slender build and scholarly bearing convey both intellectual capability and the hardships of traveling through famine-stricken lands.\n\nStanding upright in center frame, full-body character design, pure white background. Traditional Chinese ink wash painting style with black, white and gray tones, creating profound artistic mood and distant atmosphere. The character embodies the essence of a brilliant young investigator in late Ming Dynasty - handsome, intelligent, composed yet carrying the weight of uncovering dark conspiracies.\n\nNo text, no symbols, no words, no background elements - only the character figure in classical Chinese ink painting aesthetic., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: ink_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**主角视觉描述提示词：**\n\nA handsome young Chinese man named Lin Shenxing in traditional Chinese ink painting style. Extremely attractive with delicate facial features, clear and refined skin, and outstanding temperament. Deep, penetrating eyes that show sharp intelligence and slight weariness from investigation work. Clean-shaven face with elegant bone structure and a composed, scholarly expression. Slender fingers and graceful posture reflecting his refined nature.\n\nWearing a simple blue-gray traditional Chinese long robe (changshan) in Ming Dynasty style, with clean lines and modest design appropriate for a government investigator. Hair styled in a simple traditional topknot, neat and practical. His slender build and scholarly bearing convey both intellectual capability and the hardships of traveling through famine-stricken lands.\n\nStanding upright in center frame, full-body character design, pure white background. Traditional Chinese ink wash painting style with black, white and gray tones, creating profound artistic mood and distant atmosphere. The character embodies the essence of a brilliant young investigator in late Ming Dynasty - handsome, intelligent, composed yet carrying the weight of uncovering dark conspiracies.\n\nNo text, no symbols, no words, no background elements - only the character figure in classical Chinese ink painting aesthetic., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "ink_painting"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771855206_n41rak/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **主角视觉描述提示词：**\n\nA handsome young Chinese man named Lin Shenxing in traditional Chinese ink painting style. Extremely attractive with delicate facial features, clear and refined skin, and outstanding temperament. Deep, penetrating eyes that show sharp intelligence and slight weariness from investigation work. Clean-shaven face with elegant bone structure and a composed, scholarly expression. Slender fingers and graceful posture reflecting his refined nature.\n\nWearing a simple blue-gray traditional Chinese long robe (changshan) in Ming Dynasty style, with clean lines and modest design appropriate for a government investigator. Hair styled in a simple traditional topknot, neat and practical. His slender build and scholarly bearing convey both intellectual capability and the hardships of traveling through famine-stricken lands.\n\nStanding upright in center frame, full-body character design, pure white background. Traditional Chinese ink wash painting style with black, white and gray tones, creating profound artistic mood and distant atmosphere. The character embodies the essence of a brilliant young investigator in late Ming Dynasty - handsome, intelligent, composed yet carrying the weight of uncovering dark conspiracies.\n\nNo text, no symbols, no words, no background elements - only the character figure in classical Chinese ink painting aesthetic., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: ink_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-23T22:01:38.989852"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771855206_n41rak/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771855206_n41rak\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-23T22:02:06.138354"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771855206_n41rak/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771855206_n41rak\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-23T22:02:09.268419"
+    }
+  }
+}

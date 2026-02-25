@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1771921263_nc10ma",
+  "generated_at": "2026-02-24T16:22:32.552426",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **碇真嗣/Shinji Ikari from 新世纪福音战士/Neon Genesis Evangelion**\n\n一位拥有极致美貌的14岁少年，五官精致如雕塑般完美，深邃的蓝色眼眸透露着超越年龄的智慧与忧郁。深蓝色短发略显凌乱，发丝轻柔地遮住部分额头，增添了几分脆弱感。苍白细腻的肌肤在光线下呈现出近乎透明的质感，薄唇微抿，流露出内向而敏感的气质。\n\n面容轮廓分明却不失柔和，高挺的鼻梁与深邃眼窝构成立体的侧脸线条。眉头微蹙，眼神中既有少年的纯真，又带着承受巨大心理压力后的成熟与警觉。表情复杂多层次，既有思考时的专注，又有面对未知时的紧张不安。\n\n身着经典的日式学生校服：白色长袖衬衫，深蓝色立领外套，胸前有学校徽章。校服版型合身但略显宽松，突出了他瘦削纤细的少年身材。深色长裤搭配黑色皮鞋，整体造型简洁而富有标志性。\n\n全身站姿体现出内向谨慎的性格特征：双手自然下垂或轻握，肩膀略微内收，身体姿态带有一丝防备与孤独感。头部微微低垂，但目光敏锐地观察着前方，展现出高智商少年特有的洞察力。\n\n动漫风格渲染，日式漫画美学，粗重的墨线勾勒轮廓，网点阴影技法营造层次感，高对比度的光影效果突出角色的戏剧性气质。整体色调偏冷，符合新世纪福音战士的末世科幻氛围。\n\nFull-body character design, centered standing pose, pure white background, handsome, attractive, delicate features, clear skin, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "**碇真嗣/Shinji Ikari from 新世纪福音战士/Neon Genesis Evangelion**\n\n一位拥有极致美貌的14岁少年，五官精致如雕塑般完美，深邃的蓝色眼眸透露着超越年龄的智慧与忧郁。深蓝色短发略显凌乱，发丝轻柔地遮住部分额头，增添了几分脆弱感。苍白细腻的肌肤在光线下呈现出近乎透明的质感，薄唇微抿，流露出内向而敏感的气质。\n\n面容轮廓分明却不失柔和，高挺的鼻梁与深邃眼窝构成立体的侧脸线条。眉头微蹙，眼神中既有少年的纯真，又带着承受巨大心理压力后的成熟与警觉。表情复杂多层次，既有思考时的专注，又有面对未知时的紧张不安。\n\n身着经典的日式学生校服：白色长袖衬衫，深蓝色立领外套，胸前有学校徽章。校服版型合身但略显宽松，突出了他瘦削纤细的少年身材。深色长裤搭配黑色皮鞋，整体造型简洁而富有标志性。\n\n全身站姿体现出内向谨慎的性格特征：双手自然下垂或轻握，肩膀略微内收，身体姿态带有一丝防备与孤独感。头部微微低垂，但目光敏锐地观察着前方，展现出高智商少年特有的洞察力。\n\n动漫风格渲染，日式漫画美学，粗重的墨线勾勒轮廓，网点阴影技法营造层次感，高对比度的光影效果突出角色的戏剧性气质。整体色调偏冷，符合新世纪福音战士的末世科幻氛围。\n\nFull-body character design, centered standing pose, pure white background, handsome, attractive, delicate features, clear skin, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1771921263_nc10ma/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: **碇真嗣/Shinji Ikari from 新世纪福音战士/Neon Genesis Evangelion**\n\n一位拥有极致美貌的14岁少年，五官精致如雕塑般完美，深邃的蓝色眼眸透露着超越年龄的智慧与忧郁。深蓝色短发略显凌乱，发丝轻柔地遮住部分额头，增添了几分脆弱感。苍白细腻的肌肤在光线下呈现出近乎透明的质感，薄唇微抿，流露出内向而敏感的气质。\n\n面容轮廓分明却不失柔和，高挺的鼻梁与深邃眼窝构成立体的侧脸线条。眉头微蹙，眼神中既有少年的纯真，又带着承受巨大心理压力后的成熟与警觉。表情复杂多层次，既有思考时的专注，又有面对未知时的紧张不安。\n\n身着经典的日式学生校服：白色长袖衬衫，深蓝色立领外套，胸前有学校徽章。校服版型合身但略显宽松，突出了他瘦削纤细的少年身材。深色长裤搭配黑色皮鞋，整体造型简洁而富有标志性。\n\n全身站姿体现出内向谨慎的性格特征：双手自然下垂或轻握，肩膀略微内收，身体姿态带有一丝防备与孤独感。头部微微低垂，但目光敏锐地观察着前方，展现出高智商少年特有的洞察力。\n\n动漫风格渲染，日式漫画美学，粗重的墨线勾勒轮廓，网点阴影技法营造层次感，高对比度的光影效果突出角色的戏剧性气质。整体色调偏冷，符合新世纪福音战士的末世科幻氛围。\n\nFull-body character design, centered standing pose, pure white background, handsome, attractive, delicate features, clear skin, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: anime\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-02-24T16:22:32.552426"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1771921263_nc10ma/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771921263_nc10ma\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T16:22:50.101020"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1771921263_nc10ma/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1771921263_nc10ma\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-02-24T16:22:50.578520"
+    }
+  }
+}

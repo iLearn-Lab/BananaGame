@@ -1,0 +1,20 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "赤木律子",
+    "aliases": [
+      "赤木律子",
+      "赤木律子博士"
+    ],
+    "story_background": "",
+    "first_appear_scene": "真嗣深吸一口气，直视着赤木律子博士的眼睛。\"博士，我想知道EVA初号机失控时到底发生了什么。官方报告说是同步率异常，但我…",
+    "first_img_id": "img_20260224_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771918818_xkylgn\\赤木律子_img_20260224_001.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), anime style, Japanese animation aesthetic, vibrant colors, tense confrontational scene in high-tech laboratory, sterile fluorescent lighting with blue …",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), anime style, Japanese animation aesthetic, vibrant colors, tense confrontational scene in high-tech laboratory, sterile fluorescent lighting with blue …",
+    "face_ref_path": "赤木律子_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771918818_xkylgn\\赤木律子_body_ref.png"
+  }
+}

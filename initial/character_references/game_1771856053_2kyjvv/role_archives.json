@@ -1,0 +1,36 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "赵明德",
+    "aliases": [
+      "赵明德"
+    ],
+    "story_background": "",
+    "first_appear_scene": "夜色如墨，方逸尘悄然潜伏在县令府邸后墙的阴影中。他仔细观察着府内的动静，果然如白日里观察到的那般深夜时分，府邸后院灯火通…",
+    "first_img_id": "img_20260223_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771856053_2kyjvv\\赵明德_img_20260223_001.png",
+    "first_prompt": "总结：夜色中县令府邸后墙，男性主角方逸尘（使用Image 2）背对镜头潜伏在阴影中，透过围墙缝隙窥视院内，赵明德-配角1与胖商人-配角2正在后院交谈，三辆载重马车停在院中，东侧小门前单马车和车夫-配角3警觉张望，中国传统水墨画风格，黑白灰调，月色朦胧，营造紧张的夜间潜伏氛围，视角固定，头发微动，1.6秒眨眼一次, no text, no symbols, no garbled characters…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "总结：夜色中县令府邸后墙，男性主角方逸尘（使用Image 2）背对镜头潜伏在阴影中，透过围墙缝隙窥视院内，赵明德-配角1与胖商人-配角2正在后院交谈，三辆载重马车停在院中，东侧小门前单马车和车夫-配角3警觉张望，中国传统水墨画风格，黑白灰调，月色朦胧，营造紧张的夜间潜伏氛围，视角固定，头发微动，1.6秒眨眼一次, no text, no symbols, no garbled characters…",
+    "face_ref_path": "赵明德_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771856053_2kyjvv\\赵明德_body_ref.png"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "胖商人",
+    "aliases": [
+      "胖商人"
+    ],
+    "story_background": "",
+    "first_appear_scene": "夜色如墨，方逸尘悄然潜伏在县令府邸后墙的阴影中。他仔细观察着府内的动静，果然如白日里观察到的那般深夜时分，府邸后院灯火通…",
+    "first_img_id": "img_20260223_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771856053_2kyjvv\\胖商人_img_20260223_002.png",
+    "first_prompt": "总结：夜色中县令府邸后墙，男性主角方逸尘（使用Image 2）背对镜头潜伏在阴影中，透过围墙缝隙窥视院内，赵明德-配角1与胖商人-配角2正在后院交谈，三辆载重马车停在院中，东侧小门前单马车和车夫-配角3警觉张望，中国传统水墨画风格，黑白灰调，月色朦胧，营造紧张的夜间潜伏氛围，视角固定，头发微动，1.6秒眨眼一次, no text, no symbols, no garbled characters…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "总结：夜色中县令府邸后墙，男性主角方逸尘（使用Image 2）背对镜头潜伏在阴影中，透过围墙缝隙窥视院内，赵明德-配角1与胖商人-配角2正在后院交谈，三辆载重马车停在院中，东侧小门前单马车和车夫-配角3警觉张望，中国传统水墨画风格，黑白灰调，月色朦胧，营造紧张的夜间潜伏氛围，视角固定，头发微动，1.6秒眨眼一次, no text, no symbols, no garbled characters…",
+    "face_ref_path": "胖商人_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771856053_2kyjvv\\胖商人_body_ref.png"
+  }
+}

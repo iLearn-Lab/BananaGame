@@ -1,0 +1,20 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "美里",
+    "aliases": [
+      "美里",
+      "葛城美里"
+    ],
+    "story_background": "",
+    "first_appear_scene": "真嗣深吸一口气，决定直接询问关于上次测试的具体情况。他转向美里，眼神中带着一丝谨慎的探究：\"美里小姐，关于上次的同步测试…",
+    "first_img_id": "img_20260224_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771924929_3jyox7\\美里_img_20260224_001.png",
+    "first_prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, intense colors, …",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, bold black ink outlines, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, intense colors, …",
+    "face_ref_path": "美里_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771924929_3jyox7\\美里_body_ref.png"
+  }
+}

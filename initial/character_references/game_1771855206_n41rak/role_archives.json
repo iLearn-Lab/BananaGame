@@ -1,0 +1,19 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "赵文渊",
+    "aliases": [
+      "赵文渊"
+    ],
+    "story_background": "",
+    "first_appear_scene": "林慎行策马进入县城，青色长衫在晨风中轻摆。城门口的守卫见他衣着整洁，腰间悬着官印，连忙躬身行礼放行。县城内景象萧条，街道…",
+    "first_img_id": "img_20260223_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771855206_n41rak\\赵文渊_img_20260223_001.png",
+    "first_prompt": "物理模拟·风场设置：\"衙役-配角1和衙役-配角2正在县衙门前张贴告示，赵文渊-配角3县令五十余岁中年男性面容消瘦但精神矍铄，眼中闪过紧张神色，恭敬迎接姿态\"",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "物理模拟·风场设置：\"衙役-配角1和衙役-配角2正在县衙门前张贴告示，赵文渊-配角3县令五十余岁中年男性面容消瘦但精神矍铄，眼中闪过紧张神色，恭敬迎接姿态\"",
+    "face_ref_path": "赵文渊_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1771855206_n41rak\\赵文渊_body_ref.png"
+  }
+}

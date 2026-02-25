@@ -820,27 +820,63 @@ def generate_main_character_image(
                     except Exception as e:
                         print(f"   ❌ 再次删除失败 path={p} error={e}，侧/背图可能仍为旧图")
         
-        # 1. 使用LLM生成“人物特征描述”（后续套入三视图模板）
+        # 1. 使用LLM生成“人物特征描述”（动漫风格时为分模块提示词）
         features = optimize_main_character_prompt_with_llm(protagonist_attr, global_state, image_style)
-        front_prompt = prompt_template_front.format(
-            identifier=identifier,
-            features=features,
-            style=style_label
-        )
-        
+        is_anime = image_style and image_style.get("type") == "anime"
+        if is_anime and "--面部系统--" in (features or ""):
+            front_prompt = f"{features}, aspect ratio 1024:1536, portrait orientation"
+        else:
+            front_prompt = prompt_template_front.format(
+                identifier=identifier,
+                features=features,
+                style=style_label
+            )
+
         # 2. 调用生图API生成图片（1024x1536）
-        # 获取使用的模型信息（用于日志）
         provider = IMAGE_GENERATION_CONFIG.get("provider", "yunwu")
         model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "sora_image") if provider == "yunwu" else "N/A"
         print(f"🎨 正在生成主角形象图片（1024x1536），使用模型：{model}...")
         if reference_image_url:
             print(f"🧷 主角参考图已就绪，将用于生图：{reference_image_url[:120]}...")
-        image_url_or_data = call_image_api_with_custom_size(
-            front_prompt,
-            width=1024,
-            height=1536,
-            reference_image_url=reference_image_url
-        )
+
+        # 动漫风格 + yunwu + Gemini：可用质感参考图 + 多图图生图
+        style_ref_images = []
+        if is_anime and provider == "yunwu" and "gemini" in (model or "").lower() and "image" in (model or "").lower():
+            style_ref_dir = IMAGE_GENERATION_CONFIG.get("style_reference_dir", "initial/style_references")
+            project_root = Path(__file__).resolve().parent.parent.parent
+            style_dir = project_root / style_ref_dir if not os.path.isabs(style_ref_dir) else Path(style_ref_dir)
+            if style_dir.exists() and style_dir.is_dir():
+                for ext in ("*.png", "*.jpg", "*.jpeg", "*.webp"):
+                    for p in sorted(style_dir.glob(ext))[:3]:
+                        style_ref_images.append(str(p.resolve()))
+                if style_ref_images:
+                    print(f"🎨 主角生图已加入 {len(style_ref_images)} 张质感参考图（仅参考画风）：{style_ref_dir}")
+
+        all_main_refs = []
+        if reference_image_url and isinstance(reference_image_url, str) and reference_image_url.strip():
+            all_main_refs.append(reference_image_url.strip())
+        all_main_refs.extend(style_ref_images)
+
+        if is_anime and all_main_refs and provider == "yunwu" and "gemini" in (model or "").lower() and "image" in (model or "").lower():
+            prefix_lines = []
+            idx = 0
+            if reference_image_url and reference_image_url.strip():
+                prefix_lines.append(f"Image {idx}: Reference for the protagonist appearance (match this character).")
+                idx += 1
+            for _ in style_ref_images:
+                prefix_lines.append(f"Image {idx}: STYLE REFERENCE - You MUST generate in the exact same visual style as this image: same line art, screentone, cell shading, manga texture. Match this image's style strictly. Do not copy characters, only the visual style.")
+                idx += 1
+            style_emphasis = "CRITICAL: Generate in the exact same visual style as the style reference image(s) above: same line quality, screentone, shading, manga texture.\n\n" if style_ref_images else ""
+            prefix_prompt = "\n".join(prefix_lines) + "\n\n"
+            full_prompt = prefix_prompt + style_emphasis + front_prompt + ", aspect ratio 1024:1536, portrait orientation"
+            image_url_or_data = call_gemini_img2img(full_prompt, all_main_refs, cache_key_suffix=f"mainchar_{game_id or 'new'}")
+        else:
+            image_url_or_data = call_image_api_with_custom_size(
+                front_prompt,
+                width=1024,
+                height=1536,
+                reference_image_url=reference_image_url
+            )
         
         print(f"🔍 call_image_api_with_custom_size 返回结果:")
         print(f"   - 类型: {type(image_url_or_data)}")
@@ -1077,13 +1113,12 @@ def generate_scene_image(
         supporting_role_references=None,
         available_supporting_roles_for_tagging=available_supporting_roles_for_tagging
     )
-    # 打印剧情图提示词 LLM 生成内容（便于确认主角/配角与 Image 编号是否写对）
+    # 打印剧情图提示词 LLM 生成完整内容到后端
     if prompt and isinstance(prompt, str):
-        _preview_len = 800
-        _preview = prompt.strip()[: _preview_len]
-        if len(prompt.strip()) > _preview_len:
-            _preview += "..."
-        print(f"📝 [剧情图提示词] LLM 生成内容（前{min(_preview_len, len(prompt))}字）：\n{_preview}")
+        print(f"📝 [剧情图提示词] LLM 生成完整内容（共{len(prompt.strip())}字）：")
+        print("---------- 以下为提示词全文 ----------")
+        print(prompt.strip())
+        print("---------- 以上为提示词全文 ----------")
     
     # 3. 从优化后的提示词中识别出场配角（名称-配角N），区分已有档案（有参考图）与首次出场（待建档）
     # 以剧情模型为准：若存在本段出场配角（含空列表），则不再从提示词推断；仅当未传入该字段时才 fallback 推断
@@ -1156,10 +1191,12 @@ def generate_scene_image(
             append_parts.append(f"{dn}-{slot} 参考 Image {img_idx}，以图中对应人物的形象为准，保持核心特征不变")
         if append_parts:
             prompt = (prompt.rstrip() + "。" + "。".join(append_parts))
-        # 打印拼接「参考 Image N」后的提示词尾部
-        _tail_len = 350
-        if prompt and len(prompt) > _tail_len:
-            print(f"📝 [剧情图提示词] 拼接配角参考后，末尾{_tail_len}字：...{prompt[-_tail_len:]}")
+    # 打印最终完整提示词（发送给生图 API 的全文）到后端
+    if prompt and isinstance(prompt, str):
+        print(f"📝 [剧情图提示词] 最终完整提示词（发送给生图API，共{len(prompt.strip())}字）：")
+        print("---------- 以下为最终提示词全文 ----------")
+        print(prompt.strip())
+        print("---------- 以上为最终提示词全文 ----------")
     
     # 5. 调用AI图片生成API（传递尺寸参数和参考图）
     # 若有上一张剧情图，解析为可加载路径并作为最后一张参考图（用于视觉延续）
@@ -1181,36 +1218,52 @@ def generate_scene_image(
                 # yunwu.ai可能不支持自定义尺寸，在提示词中添加尺寸要求
                 size_prompt = f"{prompt}, aspect ratio {image_width}:{image_height}"
                 
-                # 参考图：主角 + 配角 + 上一张剧情图（若有）
+                # 参考图顺序：主角 → 质感参考图（动漫时）→ 配角 → 上一张剧情图（若有）
                 model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview")
+                style_ref_images = []
+                if image_style and image_style.get("type") == "anime":
+                    style_ref_dir = IMAGE_GENERATION_CONFIG.get("style_reference_dir", "initial/style_references")
+                    project_root = Path(__file__).resolve().parent.parent.parent
+                    style_dir = project_root / style_ref_dir if not os.path.isabs(style_ref_dir) else Path(style_ref_dir)
+                    if style_dir.exists() and style_dir.is_dir():
+                        for ext in ("*.png", "*.jpg", "*.jpeg", "*.webp"):
+                            for p in sorted(style_dir.glob(ext))[:3]:
+                                style_ref_images.append(str(p.resolve()))
+                        if style_ref_images:
+                            print(f"🎨 已加入 {len(style_ref_images)} 张质感参考图（紧接主角后，仅参考画风）：{style_ref_dir}")
                 all_reference_images = list(protagonist_reference_images) if protagonist_reference_images else []
+                all_reference_images.extend(style_ref_images)
                 all_reference_images.extend(supporting_role_images if supporting_role_images else [])
                 if previous_scene_image_path:
                     all_reference_images.append(previous_scene_image_path)
                     print(f"🖼️ 已将上一张剧情图加入参考图（共{len(all_reference_images)}张）")
                 if all_reference_images and len(all_reference_images) >= 1:
                     if "gemini" in model.lower() and "image" in model.lower():
-                        n_prev = 1 if previous_scene_image_path else 0
-                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(all_reference_images)}张参考图（主角{len(protagonist_reference_images or [])}张+配角{len(supporting_role_images or [])}张+上一张剧情图{n_prev}张）")
-                        # 构建参考图说明：主角 Image 0/1/2 + 配角 Image 3/4/... + 上一张剧情图 Image N
-                        prefix_lines = []
                         n_prot = len(protagonist_reference_images or [])
+                        n_style = len(style_ref_images)
+                        n_prev = 1 if previous_scene_image_path else 0
+                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(all_reference_images)}张参考图（主角{n_prot}张+质感{n_style}张+配角{len(supporting_role_images or [])}张+上一张剧情图{n_prev}张）")
+                        # 说明顺序与 all_reference_images 一致：主角 → 质感参考 → 配角 → 上一张
+                        prefix_lines = []
                         if n_prot >= 1:
                             prefix_lines.append("Image 0: Front view portrait of the protagonist")
                         if n_prot >= 2:
                             prefix_lines.append("Image 1: Side view portrait of the protagonist")
                         if n_prot >= 3:
                             prefix_lines.append("Image 2: Back view portrait of the protagonist")
+                        for _ in style_ref_images:
+                            prefix_lines.append("Image {}: STYLE REFERENCE - You MUST generate in the exact same visual style as this image: same line art, screentone, cell shading, and manga texture. Match this image's style strictly. Do not copy the characters or composition.".format(len(prefix_lines)))
                         for sr in (supporting_role_references or []):
-                            idx = sr.get("image_index", len(prefix_lines))
                             rn = sr.get("display_name", "") or sr.get("role_name", "")
                             cf = _clip_text(sr.get("core_features", ""), 80)
-                            prefix_lines.append(f"Image {idx}: {rn} first appearance scene (may contain multiple characters). Identify this character by position in image. Core features (DO NOT MODIFY): {cf}")
+                            prefix_lines.append(f"Image {len(prefix_lines)}: {rn} first appearance scene (may contain multiple characters). Identify this character by position in image. Core features (DO NOT MODIFY): {cf}")
                         if previous_scene_image_path:
-                            prev_idx = len(prefix_lines)
-                            prefix_lines.append(f"Image {prev_idx}: Previous scene image (for visual continuity - maintain consistent style, lighting, and character appearance).")
+                            prefix_lines.append(f"Image {len(prefix_lines)}: Previous scene image (for visual continuity - maintain consistent style, lighting, and character appearance).")
+                        style_emphasis = ""
+                        if style_ref_images:
+                            style_emphasis = "CRITICAL: You MUST generate in the exact same visual style as the style reference image(s) above: same line quality, screentone, cell shading, and manga texture. The output must look like it was drawn in that style.\n\n"
                         prefix_prompt = "\n".join(prefix_lines) + "\n\n"
-                        full_prompt = prefix_prompt + prompt + f", aspect ratio {image_width}:{image_height}"
+                        full_prompt = prefix_prompt + style_emphasis + prompt + f", aspect ratio {image_width}:{image_height}"
                         # 传入 cache_key_suffix，使里层 save_base64_image 也按选项区分，避免“上一次的图当成本次的”
                         image_url = call_gemini_img2img(full_prompt, all_reference_images, cache_key_suffix=cache_key_suffix)
                     else:
@@ -1886,6 +1939,15 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                 else:
                     # 最后一次尝试也失败，抛出异常
                     response.raise_for_status()
+            
+            elif response.status_code in (502, 503, 504):
+                # 502 Bad Gateway / 503 Service Unavailable / 504 Gateway Timeout：服务端临时故障，可重试
+                wait_time = 8 + (attempt * 5)  # 8s, 13s, 18s
+                print(f"⚠️ yunwu.ai 服务暂时不可用（{response.status_code}），{wait_time} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
+                if attempt < max_retries - 1:
+                    time.sleep(wait_time)
+                    continue
+                response.raise_for_status()
             
             # 其他HTTP错误直接抛出
             response.raise_for_status()
