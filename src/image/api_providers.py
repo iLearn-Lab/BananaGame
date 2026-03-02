@@ -839,36 +839,17 @@ def generate_main_character_image(
         if reference_image_url:
             print(f"🧷 主角参考图已就绪，将用于生图：{reference_image_url[:120]}...")
 
-        # 动漫风格 + yunwu + Gemini：可用质感参考图 + 多图图生图
-        style_ref_images = []
-        if is_anime and provider == "yunwu" and "gemini" in (model or "").lower() and "image" in (model or "").lower():
-            style_ref_dir = IMAGE_GENERATION_CONFIG.get("style_reference_dir", "initial/style_references")
-            project_root = Path(__file__).resolve().parent.parent.parent
-            style_dir = project_root / style_ref_dir if not os.path.isabs(style_ref_dir) else Path(style_ref_dir)
-            if style_dir.exists() and style_dir.is_dir():
-                for ext in ("*.png", "*.jpg", "*.jpeg", "*.webp"):
-                    for p in sorted(style_dir.glob(ext))[:3]:
-                        style_ref_images.append(str(p.resolve()))
-                if style_ref_images:
-                    print(f"🎨 主角生图已加入 {len(style_ref_images)} 张质感参考图（仅参考画风）：{style_ref_dir}")
-
+        # 动漫风格 + yunwu + Gemini：仅主角参考图，不再使用质感参考图
         all_main_refs = []
         if reference_image_url and isinstance(reference_image_url, str) and reference_image_url.strip():
             all_main_refs.append(reference_image_url.strip())
-        all_main_refs.extend(style_ref_images)
 
         if is_anime and all_main_refs and provider == "yunwu" and "gemini" in (model or "").lower() and "image" in (model or "").lower():
             prefix_lines = []
-            idx = 0
             if reference_image_url and reference_image_url.strip():
-                prefix_lines.append(f"Image {idx}: Reference for the protagonist appearance (match this character).")
-                idx += 1
-            for _ in style_ref_images:
-                prefix_lines.append(f"Image {idx}: STYLE REFERENCE - You MUST generate in the exact same visual style as this image: same line art, screentone, cell shading, manga texture. Match this image's style strictly. Do not copy characters, only the visual style.")
-                idx += 1
-            style_emphasis = "CRITICAL: Generate in the exact same visual style as the style reference image(s) above: same line quality, screentone, shading, manga texture.\n\n" if style_ref_images else ""
+                prefix_lines.append("Image 0: Reference for the protagonist appearance (match this character).")
             prefix_prompt = "\n".join(prefix_lines) + "\n\n"
-            full_prompt = prefix_prompt + style_emphasis + front_prompt + ", aspect ratio 1024:1536, portrait orientation"
+            full_prompt = prefix_prompt + front_prompt + ", aspect ratio 1024:1536, portrait orientation"
             image_url_or_data = call_gemini_img2img(full_prompt, all_main_refs, cache_key_suffix=f"mainchar_{game_id or 'new'}")
         else:
             image_url_or_data = call_image_api_with_custom_size(
@@ -1214,52 +1195,62 @@ def generate_scene_image(
                 # yunwu.ai可能不支持自定义尺寸，在提示词中添加尺寸要求
                 size_prompt = f"{prompt}, aspect ratio {image_width}:{image_height}"
                 
-                # 参考图顺序：主角 → 质感参考图（动漫时）→ 配角 → 上一张剧情图（若有）
+                # 参考图顺序：主角（按需1～2张）→ 配角 → 上一张剧情图（若有）；不再使用质感参考图
                 model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview")
-                style_ref_images = []
-                if image_style and image_style.get("type") == "anime":
-                    style_ref_dir = IMAGE_GENERATION_CONFIG.get("style_reference_dir", "initial/style_references")
-                    project_root = Path(__file__).resolve().parent.parent.parent
-                    style_dir = project_root / style_ref_dir if not os.path.isabs(style_ref_dir) else Path(style_ref_dir)
-                    if style_dir.exists() and style_dir.is_dir():
-                        for ext in ("*.png", "*.jpg", "*.jpeg", "*.webp"):
-                            for p in sorted(style_dir.glob(ext))[:3]:
-                                style_ref_images.append(str(p.resolve()))
-                        if style_ref_images:
-                            print(f"🎨 已加入 {len(style_ref_images)} 张质感参考图（紧接主角后，仅参考画风）：{style_ref_dir}")
-                all_reference_images = list(protagonist_reference_images) if protagonist_reference_images else []
-                all_reference_images.extend(style_ref_images)
+                # 根据提示词中提到的 Image 0/1/2 筛选主角参考图，最多传 2 张（如只需正面则不传背面）
+                protagonist_refs_to_send = []
+                used_sorted = []
+                prompt_renumbered = prompt
+                if protagonist_reference_images and len(protagonist_reference_images) >= 1:
+                    used = set()
+                    for i in (0, 1, 2):
+                        if i < len(protagonist_reference_images) and ("Image " + str(i) in prompt or ("Image " + str(i) + "：") in prompt or ("Image " + str(i) + ":") in prompt):
+                            used.add(i)
+                    if not used:
+                        used = {0}
+                    used_sorted = sorted(used)[:2]
+                    protagonist_refs_to_send = [protagonist_reference_images[i] for i in used_sorted]
+                    # 重编号：提示词中的 Image N 与 all_reference_images 顺序一致
+                    old_to_new = {used_sorted[j]: j for j in range(len(used_sorted))}
+                    n_prot_sent = len(protagonist_refs_to_send)
+                    for old_i in (2, 1, 0):
+                        if old_i in old_to_new and old_to_new[old_i] != old_i:
+                            prompt_renumbered = re.sub(r"\bImage\s+" + str(old_i) + r"\b", "Image " + str(old_to_new[old_i]), prompt_renumbered)
+                    n_sr = len(supporting_role_references or [])
+                    for idx in range(n_sr - 1, -1, -1):
+                        old_idx = 3 + idx
+                        new_idx = n_prot_sent + idx
+                        if old_idx != new_idx:
+                            prompt_renumbered = re.sub(r"\bImage\s+" + str(old_idx) + r"\b", "Image " + str(new_idx), prompt_renumbered)
+                    prev_idx_old = 3 + n_sr
+                    prev_idx_new = n_prot_sent + n_sr
+                    if previous_scene_image_path and prev_idx_old != prev_idx_new:
+                        prompt_renumbered = re.sub(r"\bImage\s+" + str(prev_idx_old) + r"\b", "Image " + str(prev_idx_new), prompt_renumbered)
+                    if protagonist_refs_to_send:
+                        print(f"✅ 主角参考图按需传递 {len(protagonist_refs_to_send)} 张（视角索引 {used_sorted}）")
+                all_reference_images = list(protagonist_refs_to_send)
                 all_reference_images.extend(supporting_role_images if supporting_role_images else [])
                 if previous_scene_image_path:
                     all_reference_images.append(previous_scene_image_path)
                     print(f"🖼️ 已将上一张剧情图加入参考图（共{len(all_reference_images)}张）")
                 if all_reference_images and len(all_reference_images) >= 1:
                     if "gemini" in model.lower() and "image" in model.lower():
-                        n_prot = len(protagonist_reference_images or [])
-                        n_style = len(style_ref_images)
+                        n_prot = len(protagonist_refs_to_send)
                         n_prev = 1 if previous_scene_image_path else 0
-                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(all_reference_images)}张参考图（主角{n_prot}张+质感{n_style}张+配角{len(supporting_role_images or [])}张+上一张剧情图{n_prev}张）")
-                        # 说明顺序与 all_reference_images 一致：主角 → 质感参考 → 配角 → 上一张
+                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(all_reference_images)}张参考图（主角{n_prot}张+配角{len(supporting_role_images or [])}张+上一张剧情图{n_prev}张）")
                         prefix_lines = []
-                        if n_prot >= 1:
-                            prefix_lines.append("Image 0: Front view portrait of the protagonist")
-                        if n_prot >= 2:
-                            prefix_lines.append("Image 1: Side view portrait of the protagonist")
-                        if n_prot >= 3:
-                            prefix_lines.append("Image 2: Back view portrait of the protagonist")
-                        for _ in style_ref_images:
-                            prefix_lines.append("Image {}: STYLE REFERENCE - You MUST generate in the exact same visual style as this image: same line art, screentone, cell shading, and manga texture. Match this image's style strictly. Do not copy the characters or composition.".format(len(prefix_lines)))
+                        view_labels = ["Front view portrait of the protagonist", "Side view portrait of the protagonist", "Back view portrait of the protagonist"]
+                        for j in range(n_prot):
+                            view_type = used_sorted[j] if j < len(used_sorted) else 0
+                            prefix_lines.append(f"Image {j}: {view_labels[view_type]}")
                         for sr in (supporting_role_references or []):
                             rn = sr.get("display_name", "") or sr.get("role_name", "")
                             cf = _clip_text(sr.get("core_features", ""), 80)
                             prefix_lines.append(f"Image {len(prefix_lines)}: {rn} first appearance scene (may contain multiple characters). Identify this character by position in image. Core features (DO NOT MODIFY): {cf}")
                         if previous_scene_image_path:
                             prefix_lines.append(f"Image {len(prefix_lines)}: Previous scene image (for visual continuity - maintain consistent style, lighting, and character appearance).")
-                        style_emphasis = ""
-                        if style_ref_images:
-                            style_emphasis = "CRITICAL: You MUST generate in the exact same visual style as the style reference image(s) above: same line quality, screentone, cell shading, and manga texture. The output must look like it was drawn in that style.\n\n"
                         prefix_prompt = "\n".join(prefix_lines) + "\n\n"
-                        full_prompt = prefix_prompt + style_emphasis + prompt + f", aspect ratio {image_width}:{image_height}"
+                        full_prompt = prefix_prompt + prompt_renumbered + f", aspect ratio {image_width}:{image_height}"
                         # 传入 cache_key_suffix，使里层 save_base64_image 也按选项区分，避免“上一次的图当成本次的”
                         image_url = call_gemini_img2img(full_prompt, all_reference_images, cache_key_suffix=cache_key_suffix)
                     else:
@@ -1277,8 +1268,8 @@ def generate_scene_image(
                 if sd_base:
                     try:
                         print("🛟 使用 Stable Diffusion 作为兜底生图（yunwu 失败/无返回）")
-                        # SD 兜底时，如果有主角参考图，使用第一张（正面）作为参考
-                        sd_ref = protagonist_reference_images[0] if protagonist_reference_images else reference_image_url
+                        # SD 兜底时，如果有主角参考图，使用按需筛选后的第一张作为参考
+                        sd_ref = (protagonist_refs_to_send[0] if protagonist_refs_to_send else protagonist_reference_images[0]) if protagonist_reference_images else reference_image_url
                         image_url = call_stable_diffusion_api_with_size(prompt, image_width, image_height, style, reference_image_url=sd_ref)
                     except Exception as e:
                         print(f"⚠️ Stable Diffusion 兜底失败：{str(e)}")
@@ -1340,8 +1331,7 @@ def generate_scene_image(
                 # 检查image_url是否是相对路径（本地缓存路径）
                 if image_url.startswith('/image_cache/') or image_url.startswith('image_cache/'):
                     # 如果image_url已经是相对路径，说明可能是从其他地方传入的缓存路径
-                    # 检查对应的文件是否存在
-                    import re
+                    # 检查对应的文件是否存在（使用模块顶层的 re，勿在此处 import re 否则会令整函数 re 变为局部变量，导致前面 re.sub 报 UnboundLocalError）
                     hash_match = re.search(r'([a-f0-9]{32})\.png', image_url)
                     if hash_match:
                         existing_hash = hash_match.group(1)
@@ -1677,6 +1667,14 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
         print(f"⚠️ gemini-2.5-flash-image 图生图响应中未找到图片数据")
         return None
         
+    except requests.exceptions.ConnectTimeout as e:
+        print(f"❌ gemini-2.5-flash-image 图生图连接超时：无法在 {request_timeout} 秒内连上 yunwu.ai")
+        print(f"   可能原因：1) 本机网络无法访问 yunwu.ai  2) 需代理时请设置环境变量 HTTPS_PROXY  3) 防火墙/地区限制")
+        return None
+    except requests.exceptions.ConnectionError as e:
+        print(f"❌ gemini-2.5-flash-image 图生图连接失败：无法连接 yunwu.ai（{e})")
+        print(f"   请检查网络或设置 HTTPS_PROXY 后再试")
+        return None
     except Exception as e:
         print(f"❌ gemini-2.5-flash-image 图生图调用异常: {str(e)}")
         import traceback

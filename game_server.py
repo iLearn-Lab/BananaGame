@@ -2119,10 +2119,11 @@ def generate_scene_image_api():
         )
         
         if image_data:
-            return jsonify({
-                "status": "success",
-                "image": image_data
-            })
+            resp = {"status": "success", "image": image_data}
+            # 将本次剧情图提示词 JSON 一并返回，便于后端/前端查看
+            if isinstance(global_state, dict) and "_last_scene_prompt_json" in global_state:
+                resp["prompt_json"] = global_state["_last_scene_prompt_json"]
+            return jsonify(resp)
         else:
             return jsonify({
                 "status": "error",

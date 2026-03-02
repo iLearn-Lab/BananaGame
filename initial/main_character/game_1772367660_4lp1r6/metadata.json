@@ -1,0 +1,44 @@
+{
+  "game_id": "game_1772367660_4lp1r6",
+  "generated_at": "2026-03-01T20:22:10.562813",
+  "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: A handsome teenage male student with extremely attractive features and delicate facial structure, clear smooth skin, and an outstanding elegant temperament. He has chestnut brown hair styled naturally, with piercing clear eyes that hold a gentle yet slightly melancholic expression. His facial features are refined and precise, with a slender graceful physique. He wears a traditional Japanese school uniform consisting of a dark navy blazer, white dress shirt, and matching trousers, all impeccably fitted. His posture is upright and intelligent, radiating both high intelligence and natural charm. The character design emphasizes his exceptional beauty with soft lighting highlighting his delicate bone structure. Rendered in impressionist oil painting style with rich light and shadow variations, visible brushstrokes creating atmospheric depth. Full-body character design, pure white background, character centered and standing upright, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: oil_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+  "features": "A handsome teenage male student with extremely attractive features and delicate facial structure, clear smooth skin, and an outstanding elegant temperament. He has chestnut brown hair styled naturally, with piercing clear eyes that hold a gentle yet slightly melancholic expression. His facial features are refined and precise, with a slender graceful physique. He wears a traditional Japanese school uniform consisting of a dark navy blazer, white dress shirt, and matching trousers, all impeccably fitted. His posture is upright and intelligent, radiating both high intelligence and natural charm. The character design emphasizes his exceptional beauty with soft lighting highlighting his delicate bone structure. Rendered in impressionist oil painting style with rich light and shadow variations, visible brushstrokes creating atmospheric depth. Full-body character design, pure white background, character centered and standing upright, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "极高",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "oil_painting",
+    "subtype": "impressionist"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1772367660_4lp1r6/main_character.png",
+      "prompt": "Generate a full-body, front-view portrait of character protagonist based on the following description, with a pure white background. The character should be centered in the image, occupying most of the frame. Gazing straight ahead. Standing with arms relaxed at sides. Natural expression.\nFeatures: A handsome teenage male student with extremely attractive features and delicate facial structure, clear smooth skin, and an outstanding elegant temperament. He has chestnut brown hair styled naturally, with piercing clear eyes that hold a gentle yet slightly melancholic expression. His facial features are refined and precise, with a slender graceful physique. He wears a traditional Japanese school uniform consisting of a dark navy blazer, white dress shirt, and matching trousers, all impeccably fitted. His posture is upright and intelligent, radiating both high intelligence and natural charm. The character design emphasizes his exceptional beauty with soft lighting highlighting his delicate bone structure. Rendered in impressionist oil painting style with rich light and shadow variations, visible brushstrokes creating atmospheric depth. Full-body character design, pure white background, character centered and standing upright, no text, no symbols, no words., very handsome, very beautiful, stunning, delicate features, symmetrical face, clear skin, attractive, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words\nStyle: oil_painting\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "generated_at": "2026-03-01T20:22:10.562813"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1772367660_4lp1r6/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1772367660_4lp1r6\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-03-01T20:22:25.841477"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1772367660_4lp1r6/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1772367660_4lp1r6\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-03-01T20:22:26.309216"
+    }
+  }
+}

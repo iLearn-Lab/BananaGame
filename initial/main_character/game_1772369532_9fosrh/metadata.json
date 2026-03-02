@@ -1,0 +1,43 @@
+{
+  "game_id": "game_1772369532_9fosrh",
+  "generated_at": "2026-03-01T20:55:49.514706",
+  "prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, refined ink outlines and moderate line weight, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, extremely handsome young male protagonist with exquisitely refined features, perfect facial structure, flawless skin, outstanding aura, mysterious and contemplative expression.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, refined manga-style line art with soft outlines, perfectly sculpted jawline, deep contemplative gaze with hint of mystical awareness, soft ink outlines around eyes and lips, subtle iris highlights with ethereal gleam, slight bloodshot texture on sclera, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless skin texture with subtle highlights.\n\n--头发系统--\ndefined hair strands with refined outlines, distinct clumps of hair with screentone shading, intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm, color layering: main color #4A5568, secondary color #2D3748, highlight #718096, shadow #1A202C, 3-5 strands of gradient per cluster, natural color transition, physical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp clothing with clean folds and soft outlines, subtle screentone on fabric, slight shoulder line folds (depth 0.3), fabric: matte texture, casual yet refined appearance, clothing that suggests sensitivity to emotional atmospheres, comfortable materials suitable for contemplative activities.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements, action constraints: standing straight, arms relaxed at sides, completely static, no unnecessary movements, serene and composed posture reflecting inner balance., no text, no symbols, no garbled characters, no words, aspect ratio 1024:1536, portrait orientation",
+  "features": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, refined ink outlines and moderate line weight, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, extremely handsome young male protagonist with exquisitely refined features, perfect facial structure, flawless skin, outstanding aura, mysterious and contemplative expression.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, refined manga-style line art with soft outlines, perfectly sculpted jawline, deep contemplative gaze with hint of mystical awareness, soft ink outlines around eyes and lips, subtle iris highlights with ethereal gleam, slight bloodshot texture on sclera, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless skin texture with subtle highlights.\n\n--头发系统--\ndefined hair strands with refined outlines, distinct clumps of hair with screentone shading, intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm, color layering: main color #4A5568, secondary color #2D3748, highlight #718096, shadow #1A202C, 3-5 strands of gradient per cluster, natural color transition, physical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp clothing with clean folds and soft outlines, subtle screentone on fabric, slight shoulder line folds (depth 0.3), fabric: matte texture, casual yet refined appearance, clothing that suggests sensitivity to emotional atmospheres, comfortable materials suitable for contemplative activities.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements, action constraints: standing straight, arms relaxed at sides, completely static, no unnecessary movements, serene and composed posture reflecting inner balance., no text, no symbols, no garbled characters, no words",
+  "reference_image_url": "",
+  "required_name_tokens": [],
+  "protagonist_attr": {
+    "颜值": "极高",
+    "智商": "普通",
+    "体力": "普通",
+    "魅力": "普通"
+  },
+  "image_style": {
+    "type": "anime"
+  },
+  "width": 1024,
+  "height": 1536,
+  "views": {
+    "front": {
+      "filename": "main_character.png",
+      "image_url": "/initial/main_character/game_1772369532_9fosrh/main_character.png",
+      "prompt": "(masterpiece, best quality, 8K, ultra-detailed), Japanese manga style, refined ink outlines and moderate line weight, screentone shading, high contrast, dramatic shadows, hand-drawn illustration aesthetic, full-body front-view portrait, pure white background, single character, extremely handsome young male protagonist with exquisitely refined features, perfect facial structure, flawless skin, outstanding aura, mysterious and contemplative expression.\n\n--面部系统--\n8K hyper-realistic anime facial modeling, refined manga-style line art with soft outlines, perfectly sculpted jawline, deep contemplative gaze with hint of mystical awareness, soft ink outlines around eyes and lips, subtle iris highlights with ethereal gleam, slight bloodshot texture on sclera, matte translucent lip color, lip peak highlight strength 0.3, lip line depth 0.15, flawless skin texture with subtle highlights.\n\n--头发系统--\ndefined hair strands with refined outlines, distinct clumps of hair with screentone shading, intricate hair strands, root fixation coefficient 0.95, tip swing amplitude 10cm, color layering: main color #4A5568, secondary color #2D3748, highlight #718096, shadow #1A202C, 3-5 strands of gradient per cluster, natural color transition, physical wind simulation: point wind source behind neck (wind speed 1.2m/s, turbulence intensity 5%), wind direction 45°.\n\n--衣物系统--\ncrisp clothing with clean folds and soft outlines, subtle screentone on fabric, slight shoulder line folds (depth 0.3), fabric: matte texture, casual yet refined appearance, clothing that suggests sensitivity to emotional atmospheres, comfortable materials suitable for contemplative activities.\n\n--视角与构图--\nperspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements, action constraints: standing straight, arms relaxed at sides, completely static, no unnecessary movements, serene and composed posture reflecting inner balance., no text, no symbols, no garbled characters, no words, aspect ratio 1024:1536, portrait orientation",
+      "generated_at": "2026-03-01T20:55:49.514706"
+    },
+    "side": {
+      "filename": "main_character_side.png",
+      "image_url": "/initial/main_character/game_1772369532_9fosrh/main_character_side.png",
+      "prompt": "Generate a full-body, side-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. Facing left. Standing with arms relaxed at sides.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1772369532_9fosrh\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-03-01T20:56:09.416997"
+    },
+    "back": {
+      "filename": "main_character_back.png",
+      "image_url": "/initial/main_character/game_1772369532_9fosrh/main_character_back.png",
+      "prompt": "Generate a full-body, back-view portrait of character protagonist based on the provided front-view portrait, with a pure white background. The character should be centered in the image, occupying most of the frame. No facial features should be visible.\nNo text, no symbols, no watermark, no garbled characters, no words.",
+      "reference_front_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\main_character\\game_1772369532_9fosrh\\main_character.png",
+      "generation_method": "img2img",
+      "generated_at": "2026-03-01T20:56:42.864846"
+    }
+  }
+}

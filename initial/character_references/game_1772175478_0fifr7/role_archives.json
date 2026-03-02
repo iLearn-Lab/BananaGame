@@ -1,0 +1,19 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "李老伯",
+    "aliases": [
+      "李老伯"
+    ],
+    "story_background": "",
+    "first_appear_scene": "霜露凝结在破旧的窗棂上，透过斑驳的纸窗洒进几缕苍白的晨光。沈归尘缓缓睁开双眼，深邃的眸子里映着屋顶横梁上的蛛网，那些细密…",
+    "first_img_id": "img_20260227_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772175478_0fifr7\\李老伯_img_20260227_001.png",
+    "first_prompt": "perspective locked: medium shot elevation 30°, focal length 50mm, depth of field f/1.8, focal plane locked on face, action constraints: only hair flutters gently with wind field, all other body parts …",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "perspective locked: medium shot elevation 30°, focal length 50mm, depth of field f/1.8, focal plane locked on face, action constraints: only hair flutters gently with wind field, all other body parts …",
+    "face_ref_path": "李老伯_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772175478_0fifr7\\李老伯_body_ref.png"
+  }
+}

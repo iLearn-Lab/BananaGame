@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """LLM 图片提示词优化（场景图、主角形象）。"""
+import json
 import re
 import requests
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from src.config import AI_API_CONFIG
 from src.constants import TONE_CONFIGS
@@ -88,6 +89,112 @@ crisp clothing with clean folds and soft outlines, subtle screentone on fabric, 
 perspective locked: full-body front view, eye-level, focal length 50mm, depth of field f/2.8, focal plane on character, pure white background only, no background elements,
 action constraints: standing straight, arms relaxed at sides, completely static, no unnecessary movements."""
 
+# 剧情图「精简 JSON 模板」参考示例：供 LLM 按此结构输出，含 face/hair/clothing 参数与 subject/environment 拆分
+PROMPT_JSON_EXAMPLE_SCENE = {
+    "label": "scene-6-memory-mirror-star-night-revelation",
+    "tags": ["fantasy", "mystical", "ethereal-atmosphere", "impressionist", "dreamlike"],
+    "style": ["impressionist oil painting", "rich brushstrokes", "luminous color transitions", "atmospheric perspective", "soft-shading"],
+    "subject": {
+        "body_traits": [
+            "young male protagonist with ethereal presence",
+            "淡蓝色眼眸 reflecting mirror's starlight",
+            "moon-like luminous skin with silver-blue aura",
+            "serene surprised contemplative expression",
+            "barefoot on ancient stone platform"
+        ],
+        "outfit": [
+            "flowing white long dress with luminous dream-like fabric",
+            "ethereal translucent material catching mirror light"
+        ],
+        "pose": [
+            "standing gracefully beside large ornate memory mirror",
+            "body turned slightly toward 晨曦-配角1",
+            "arms naturally at sides with gentle questioning gesture",
+            "posture showing emotional resonance with mirror's revelation"
+        ]
+    },
+    "face_system": [
+        "8K detailed facial features with soft impressionist rendering",
+        "淡蓝色眼眸 with starlight reflections from mirror",
+        "surprised yet contemplative expression",
+        "lip color naturally muted with soft highlights",
+        "facial highlights catching silver-blue aura light",
+        "soft shadows creating ethereal depth"
+    ],
+    "hair_system": [
+        "long silver-white hair flowing like liquid mercury",
+        "root fixation coefficient 0.9",
+        "tip swing amplitude 15cm",
+        "color layering: main color #F7FAFC, secondary color #E2E8F0, highlight #FFFFFF, shadow #CBD5E0",
+        "gentle breeze effect with moonlight highlights",
+        "wind speed 0.8m/s",
+        "turbulence intensity 3%",
+        "wind direction from mirror's magical aura"
+    ],
+    "clothing_system": [
+        "flowing white dress with ethereal fabric movement",
+        "slight fabric flutter from magical mirror energy",
+        "luminous translucent material with dream-like quality",
+        "fabric catching and reflecting mirror's starlight"
+    ],
+    "environment": {
+        "background": [
+            "large ornate memory mirror with starry garden reflection",
+            "memory mirror showing star night tending flowers",
+            "circular stone platform with ancient mystical symbols",
+            "seven crystal pillars glowing with different colored magical light",
+            "night sky with gentle starlight filtering down",
+            "moon-stone pathway extending into distance"
+        ],
+        "characters": [
+            "晨曦-配角1 standing beside mirror in deep blue robes"
+        ],
+        "effects": [
+            "magical light emanating from mirror surface",
+            "floating light particles around mirror frame",
+            "gentle magical aura surrounding the scene"
+        ]
+    },
+    "color_restriction": [
+        "silver-blue moonlight tones",
+        "starlight white and crystal blue",
+        "deep blue robes for 晨曦-配角1",
+        "warm golden light from mirror's garden scene"
+    ],
+    "lighting": [
+        "soft moonlight from above",
+        "magical starlight from memory mirror",
+        "gentle crystal pillar glow",
+        "ethereal silver-blue aura around protagonist"
+    ],
+    "camera": {
+        "type": "medium shot",
+        "lens": "50mm",
+        "aperture": "f/2.8",
+        "depth_of_field": "shallow focus on protagonist and mirror",
+        "flash": "none",
+        "grain": "subtle impressionist texture",
+        "texture": "oil painting brushstrokes"
+    },
+    "composition": [
+        "protagonist side view toward mirror",
+        "晨曦-配角1 positioned on right side of frame",
+        "memory mirror as central focal element",
+        "action constraints: gentle questioning gesture and contemplative stance"
+    ],
+    "mood": [
+        "mystical revelation",
+        "gentle surprise and recognition",
+        "ethereal contemplation",
+        "magical discovery atmosphere",
+        "warm emotional resonance between characters and mirror"
+    ],
+    "output_style": [
+        "dreamlike magical realism",
+        "no text or symbols in image"
+    ]
+}
+
 # 颜值等级 → 用于生图的具体外貌描述（供 LLM 参考 + 默认提示词兜底）
 # 格式: (给 LLM 的中文说明, 拼进最终提示词的英文关键词，高/极高时用于后处理追加)
 APPEARANCE_LEVEL_MAP = {
@@ -110,6 +217,136 @@ def _get_appearance_english_suffix(level: str) -> str:
     if level not in ("高", "极高"):
         return ""
     return ", " + APPEARANCE_LEVEL_MAP.get(level, APPEARANCE_LEVEL_MAP["普通"])[1]
+
+
+def _parse_json_from_llm_response(content: str) -> Optional[Dict]:
+    """从 LLM 返回文本中解析 JSON，支持裸 JSON 或 ```json ... ``` 代码块。"""
+    if not content or not isinstance(content, str):
+        return None
+    text = content.strip()
+    for pattern in (r"```json\s*\n?(.*?)```", r"```\s*\n?(.*?)```"):
+        m = re.search(pattern, text, re.DOTALL)
+        if m:
+            try:
+                return json.loads(m.group(1).strip())
+            except (json.JSONDecodeError, ValueError):
+                pass
+    try:
+        return json.loads(text)
+    except (json.JSONDecodeError, ValueError):
+        return None
+
+
+def _build_prompt_from_structured_json(data: Dict, include_scene_atmosphere: bool = False) -> str:
+    """
+    将结构化 JSON 拼成剧情图/主角形象用的完整提示词字符串。
+    data 应包含: first_line, face_system, hair_system, clothing_system, view_composition；
+    可选 scene_atmosphere（剧情图动漫风格时使用）。
+    """
+    parts = []
+    first = _safe_str(data.get("first_line") or data.get("first_line_en", "")).strip()
+    if first:
+        parts.append(first)
+    face = _safe_str(data.get("face_system", "")).strip()
+    if face:
+        parts.append("--面部系统--\n" + face)
+    hair = _safe_str(data.get("hair_system", "")).strip()
+    if hair:
+        parts.append("--头发系统--\n" + hair)
+    clothing = _safe_str(data.get("clothing_system", "")).strip()
+    if clothing:
+        parts.append("--衣物系统--\n" + clothing)
+    if include_scene_atmosphere:
+        scene_atm = _safe_str(data.get("scene_atmosphere", "")).strip()
+        if scene_atm:
+            parts.append("--场景与氛围--\n" + scene_atm)
+    view = _safe_str(data.get("view_composition", "")).strip()
+    if view:
+        parts.append("--视角与构图--\n" + view)
+    return "\n\n".join(parts) if parts else ""
+
+
+def _is_rich_prompt_json(data: Dict) -> bool:
+    """判断是否为「完整 JSON 模板」格式（含 label / subject / environment 等）。"""
+    if not data or not isinstance(data, dict):
+        return False
+    return (
+        "label" in data
+        or ("subject" in data and isinstance(data.get("subject"), dict))
+        or ("environment" in data and isinstance(data.get("environment"), dict))
+    )
+
+
+def _join_list_or_str(val) -> str:
+    """将数组或字符串转为逗号分隔的字符串。"""
+    if val is None:
+        return ""
+    if isinstance(val, list):
+        return ", ".join(_safe_str(x).strip() for x in val if _safe_str(x).strip())
+    return _safe_str(val).strip()
+
+
+def _build_prompt_from_rich_json(data: Dict) -> str:
+    """
+    将「精简 JSON 模板」格式拼成一行长提示词。支持：
+    subject: body_traits, outfit, pose（或 made_out_of, arrangement）；
+    environment: background, characters, effects（或 room_objects, accessories）；
+    composition 或 view_composition；可选 edit。
+    """
+    parts = []
+    label = _safe_str(data.get("label", "")).strip()
+    if label:
+        parts.append(label)
+    tags = _join_list_or_str(data.get("tags"))
+    if tags:
+        parts.append(tags)
+    style = _join_list_or_str(data.get("style"))
+    if style:
+        parts.append(style)
+    subject = data.get("subject")
+    if isinstance(subject, dict):
+        for key in ("body_traits", "outfit", "pose", "made_out_of", "arrangement"):
+            v = subject.get(key)
+            s = _join_list_or_str(v)
+            if s:
+                parts.append(s)
+    for key in ("face_system", "hair_system", "clothing_system"):
+        v = data.get(key)
+        s = _join_list_or_str(v)
+        if s:
+            parts.append(s)
+    env = data.get("environment")
+    if isinstance(env, dict):
+        for key in ("background", "characters", "effects", "room_objects", "accessories"):
+            v = env.get(key)
+            s = _join_list_or_str(v)
+            if s:
+                parts.append(s)
+    parts.append(_join_list_or_str(data.get("color_restriction")))
+    parts.append(_join_list_or_str(data.get("lighting")))
+    camera = data.get("camera")
+    if isinstance(camera, dict):
+        cam_parts = []
+        for k in ("type", "lens", "aperture", "depth_of_field", "flash", "grain", "texture"):
+            v = camera.get(k)
+            if v is not None and _safe_str(v).strip():
+                cam_parts.append(f"{k} {_safe_str(v).strip()}")
+        if cam_parts:
+            parts.append(", ".join(cam_parts))
+    # composition 与 view_composition 二选一或都有则都拼入
+    parts.append(_join_list_or_str(data.get("composition")))
+    parts.append(_join_list_or_str(data.get("view_composition")))
+    parts.append(_join_list_or_str(data.get("output_style")))
+    parts.append(_join_list_or_str(data.get("mood")))
+    edit = data.get("edit")
+    if isinstance(edit, dict):
+        for k in ("location", "atmosphere"):
+            v = edit.get(k)
+            s = _join_list_or_str(v)
+            if s:
+                parts.append(s)
+    combined = ", ".join(p for p in parts if p)
+    return combined
 
 
 def optimize_image_prompt_with_llm(
@@ -209,21 +446,21 @@ def optimize_image_prompt_with_llm(
         protagonist_reference_section = ""
         if protagonist_reference_images and len(protagonist_reference_images) >= 1:
             n = len(protagonist_reference_images)
-            lines = ["【主角参考图说明（重要）】", f"生图API将接收{n}张主角参考图，编号从 Image 0 起："]
+            lines = ["【主角参考图说明（重要）】", "生图API根据本镜头需要仅传递 1～2 张主角参考图（如只需正面则只传正面），请根据剧情只引用需要的视角："]
             lines.append("- Image 0：主角正面视图（Front view portrait of the protagonist）")
             if n >= 2:
                 lines.append("- Image 1：主角侧面视图（Side view portrait of the protagonist）")
             if n >= 3:
                 lines.append("- Image 2：主角背面视图（Back view portrait of the protagonist）")
             lines.append("")
-            lines.append("在生成场景图片时，根据剧情中主角的视角明确说明主角使用哪张参考图（仅使用已提供的编号）：")
+            lines.append("在生成场景图片时，根据剧情中主角的视角明确说明主角使用哪张参考图（仅使用已提供的编号，最多引用 2 张）：")
             lines.append("- 正面朝向镜头 → 主角使用 Image 0")
             if n >= 2:
                 lines.append("- 侧面朝向镜头 → 主角使用 Image 1")
             if n >= 3:
                 lines.append("- 背面朝向镜头 → 主角使用 Image 2")
             if n >= 2:
-                lines.append("- 其他角度可写「主角主要参考 Image 0 和 Image 1」等")
+                lines.append("- 其他角度可写「主角主要参考 Image 0 和 Image 1」等（最多 2 张）")
             lines.append("")
             lines.append("请在最终视觉描述中明确说明主角使用哪张参考图，确保主角形象与参考图一致。")
             protagonist_reference_section = "\n".join(lines) + "\n"
@@ -289,6 +526,12 @@ def optimize_image_prompt_with_llm(
             format_example = PROMPT_FORMAT_EXAMPLE_MANGA
         else:
             format_example = PROMPT_FORMAT_EXAMPLE
+        include_scene_atmosphere = bool(image_style and image_style.get("type") == "anime")
+        scene_atmosphere_instruction = (
+            "- scene_atmosphere：（动漫/漫画风格时必填）场景与氛围内容，对应示例中的 --场景与氛围-- 段落。\n"
+            if include_scene_atmosphere else ""
+        )
+        json_example_str = json.dumps(PROMPT_JSON_EXAMPLE_SCENE, ensure_ascii=False, indent=2)
 
         llm_prompt = f"""假设你是一个专业的剧情分析师和视觉设计师，现在需要你将剧情转化为具体的视觉描述，告诉生图AI如何生成图片。
 
@@ -328,21 +571,35 @@ def optimize_image_prompt_with_llm(
 {('9. 如果提供了配角参考图说明，必须在提示词中明确说明每个配角参考 Image N，并强调保持其核心特征不变' if (supporting_role_references and len(supporting_role_references) >= 1) else '')}
 {('9. 如果提供了配角标注要求，必须在视觉描述中对出场的配角使用「角色名-配角N」格式（如凌川-配角1），便于系统识别' if (available_supporting_roles_for_tagging and len(available_supporting_roles_for_tagging) >= 1 and not (supporting_role_references and len(supporting_role_references) >= 1)) else '')}
 
-【输出格式】请严格按下面示例的格式输出。必须包含五部分：① 首行风格标签（含角色特征） ② --面部系统-- ③ --头发系统-- ④ --衣物系统-- ⑤ --视角与构图--。示例为英文，你可输出英文或中英混合；每个模块只填「技术参数与数值」，不要塞入剧情叙述。
+【输出格式】请严格按照以下「精简 JSON 模板」输出，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。**数组字段请逐条列出，一条一句。**
 
-固定参数（勿改）：root fixation coefficient 0.95, tip swing amplitude 10cm, wind speed 1.2m/s, turbulence 5%, wind direction 45°, fold depth 0.3, density 0.3, strength 0.6, focal length 50mm, f/1.8, lip line depth 0.15。仅根据【图片风格要求】调整首行风格（动漫/水墨/写实等），根据主角与剧情调整首行末尾角色特征及头发 main/secondary/highlight/shadow 配色。
+JSON 结构（所有数组均为字符串数组；嵌套对象见说明）：
 
-结构说明（必须遵守）：
-- 首行：画质与风格标签 + 末尾角色特征，再换行。
-- --面部系统--：保持示例参数（sharp iris, lip 0.3/0.15），不写「谁、什么表情」。
-- --头发系统--：0.95、10cm、1.2m/s、5%、45° 不变；main/secondary/highlight/shadow 随角色发色与画风填。
-- --衣物系统--：必须写。保持 depth 0.3, density 0.3, strength 0.6；材质可随画风微调。
-- --视角与构图--：必须写。保持 30°、50mm、f/1.8；仅头发随风动、其余静止。no text 等由系统添加。
+- label：本镜头的简短内部名称（英文），如 "scene-6-memory-mirror-star-night-revelation"。
+- tags：整体美学标签数组，如 ["fantasy", "mystical", "ethereal-atmosphere"]。
+- style：画风数组，如 ["impressionist oil painting", "rich brushstrokes", "soft-shading"]。
+- subject：对象。内嵌：
+  - body_traits：身体特征数组，每项一句（年龄、皮肤、眼眸、表情、站姿等）。
+  - outfit：服装/材质数组，每项一句，如 "flowing white long dress", "ethereal translucent material"。
+  - pose：姿势与位置数组，每项一句，如 "standing beside mirror", "arms naturally at sides", "身体朝向XXX-配角1"。
+- face_system：面部系统数组，每项一句；可含 "8K detailed facial features", "lip color naturally muted", "soft shadows" 等。
+- hair_system：头发系统数组，每项一句；须含 root fixation coefficient、tip swing amplitude、color layering（main/secondary/highlight/shadow）、wind speed、turbulence intensity 等参数。
+- clothing_system：衣物系统数组，每项一句；可含 "slight fabric flutter", "luminous translucent material" 等。
+- environment：对象。内嵌：
+  - background：背景描述数组，每项一句。
+  - characters：场景中其他角色描述数组，如 ["晨曦-配角1 standing beside mirror in deep blue robes"]。
+  - effects：氛围/特效数组，如 "magical light from mirror", "floating light particles"。
+- color_restriction：色彩限制数组，每项一句。
+- lighting：光源数组，每项一句。
+- camera：对象。内嵌 type, lens, aperture, depth_of_field, flash, grain, texture，值为字符串。
+- composition：构图数组，每项一句；须含角色站位、焦点、action constraints。
+- mood：氛围数组，如 "mystical revelation", "ethereal contemplation"。
+- output_style：成片风格数组，如 "dreamlike magical realism", "no text or symbols in image"。
 
-示例：
-{format_example}
+以上字段均需根据【当前剧情】与【图片风格要求】填写；配角请用「角色名-配角N」格式。参考示例（按此结构输出，仅替换为当前剧情内容）：
+{json_example_str}
 
-只输出一版上述格式的提示词，不要其他内容。"""
+只输出一个合法的 JSON 对象，不要用 markdown 代码块包裹以外的内容。"""
 
         api_key = AI_API_CONFIG.get('api_key', '')
         base_url = AI_API_CONFIG.get('base_url', '')
@@ -375,16 +632,34 @@ def optimize_image_prompt_with_llm(
         result = response.json()
         choices = result.get("choices", [])
         if choices and len(choices) > 0:
-            optimized_prompt = choices[0].get("message", {}).get("content", "").strip()
-            if optimized_prompt:
-                optimized_prompt = re.sub(r'https?://\S+', '', optimized_prompt).strip()
-                optimized_prompt = re.sub(r'data:image/\S+', '', optimized_prompt).strip()
-                optimized_prompt = re.sub(r'[/\\]image_cache[/\\]\S+', '', optimized_prompt).strip()
-                optimized_prompt = f"{optimized_prompt}, no text, no symbols, no garbled characters, no words"
-                if continuity_requirements:
-                    optimized_prompt = f"{optimized_prompt}, consistent character design, consistent outfit and key props, consistent color palette and lighting"
-                print(f"✅ LLM提示词优化完成，长度：{len(optimized_prompt)}字符")
-                return optimized_prompt
+            raw_content = choices[0].get("message", {}).get("content", "").strip()
+            if raw_content:
+                structured = _parse_json_from_llm_response(raw_content)
+                if structured:
+                    if _is_rich_prompt_json(structured):
+                        optimized_prompt = _build_prompt_from_rich_json(structured)
+                    else:
+                        optimized_prompt = _build_prompt_from_structured_json(
+                            structured, include_scene_atmosphere=include_scene_atmosphere
+                        )
+                    # 将解析出的 JSON 写入 global_state 并打印到后端，便于调试/展示
+                    if isinstance(global_state, dict):
+                        global_state["_last_scene_prompt_json"] = structured
+                    print("📋 [剧情图] 提示词 JSON：")
+                    print(json.dumps(structured, ensure_ascii=False, indent=2))
+                else:
+                    optimized_prompt = raw_content
+                    if isinstance(global_state, dict) and "_last_scene_prompt_json" in global_state:
+                        del global_state["_last_scene_prompt_json"]
+                if optimized_prompt:
+                    optimized_prompt = re.sub(r'https?://\S+', '', optimized_prompt).strip()
+                    optimized_prompt = re.sub(r'data:image/\S+', '', optimized_prompt).strip()
+                    optimized_prompt = re.sub(r'[/\\]image_cache[/\\]\S+', '', optimized_prompt).strip()
+                    optimized_prompt = f"{optimized_prompt}, no text, no symbols, no garbled characters, no words"
+                    if continuity_requirements:
+                        optimized_prompt = f"{optimized_prompt}, consistent character design, consistent outfit and key props, consistent color palette and lighting"
+                    print(f"✅ LLM提示词优化完成，长度：{len(optimized_prompt)}字符")
+                    return optimized_prompt
 
         print("⚠️ LLM优化失败，使用原始提示词")
         return f"{game_theme}, {scene_description[:500]}, cinematic, detailed, high quality, 4k, dramatic lighting, atmospheric"
@@ -595,15 +870,16 @@ def optimize_main_character_prompt_with_llm(
         use_anime_structured = style_type == "anime"
 
         if use_anime_structured:
-            llm_prompt = f"""你现在是一个专业的角色设计师，要为「动漫风格」生图生成主角形象提示词。请严格按下面示例的格式输出（分模块、英文），只把内容换成当前主角信息。
+            llm_prompt = f"""你现在是一个专业的角色设计师，要为「动漫风格」生图生成主角形象提示词。请输出一个 JSON 对象，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。
 
-固定参数（勿改，必须保留在输出中）：
-- --面部系统--：lip peak highlight strength 0.3, lip line depth 0.15
-- --头发系统--：root fixation coefficient 0.95, tip swing amplitude 10cm, wind speed 1.2m/s, turbulence intensity 5%, wind direction 45°
-- --衣物系统--：slight shoulder line folds (depth 0.3)
-- --视角与构图--：focal length 50mm, depth of field f/2.8, full-body front view, pure white background, standing still
+JSON 结构（必须包含以下键，值均为字符串，内容为英文提示词片段）：
+- first_line：首行（画质+风格+全身正面+纯白背景+单角色+当前主角特征描述），对应示例第一行。
+- face_system：面部系统内容（须含 lip peak highlight strength 0.3, lip line depth 0.15），对应示例 --面部系统--。
+- hair_system：头发系统内容（须含 root fixation coefficient 0.95, tip swing amplitude 10cm, wind speed 1.2m/s, turbulence intensity 5%, wind direction 45°；main/secondary/highlight/shadow 随主角发色填写）。
+- clothing_system：衣物系统内容（须含 slight shoulder line folds (depth 0.3)），对应示例 --衣物系统--。
+- view_composition：视角与构图内容（须含 focal length 50mm, depth of field f/2.8, full-body front view, pure white background, standing still），对应示例 --视角与构图--。
 
-仅根据主角填写：首行角色特征、发色 main/secondary/highlight/shadow 配色。
+固定参数（勿改）：上述各模块中的数值与物理参数必须保留。仅根据主角填写：首行角色特征、发色配色。
 
 【主角规范信息】
 {canonical_block}
@@ -615,12 +891,10 @@ def optimize_main_character_prompt_with_llm(
 【颜值视觉要求】等级：{appearance_level}；{appearance_visual_hint}
 【Wikipedia 补充】{wiki_evidence_text if wiki_evidence_text else "（无）"}
 
-必须包含五部分：首行、--面部系统--、--头发系统--、--衣物系统--、--视角与构图--。禁止任何文字/符号入图。
-
-示例：
+禁止任何文字/符号入图。示例（仅供参考格式与风格，请按当前主角输出你的 JSON）：
 {PROMPT_FORMAT_EXAMPLE_MAIN_CHAR_ANIME}
 
-只输出一版上述格式的提示词，不要其他内容。"""
+只输出一个合法的 JSON 对象，不要用 markdown 代码块包裹以外的内容。"""
         else:
             llm_prompt = f"""你现在是一个专业的角色设计师，要将具体角色描述给生图ai，让生图ai能够生成准确的主角形象。
 
@@ -664,7 +938,10 @@ def optimize_main_character_prompt_with_llm(
 5. 详细描述主角的穿着与发型；体现主角属性特点；符合游戏主题、世界观与基调；符合指定图片风格。
 6. 强调全身角色设计（full-body），纯白背景，人物居中站立；禁止生成任何文字/符号/乱码（no text, no symbols, no words）。
 
-只输出视觉描述，不要输出其他内容。"""
+【输出格式】请输出一个 JSON 对象，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。
+JSON 结构：只包含一个键 "visual_description"，值为字符串，即完整的主角形象视觉描述（英文，可直接用于生图）。禁止任何文字/符号入图。
+
+只输出一个合法的 JSON 对象，例如：{{"visual_description": "你的英文描述内容"}}"""
 
         api_key = AI_API_CONFIG.get('api_key', '')
         base_url = AI_API_CONFIG.get('base_url', '')
@@ -698,28 +975,48 @@ def optimize_main_character_prompt_with_llm(
         result = response.json()
         choices = result.get("choices", [])
         if choices and len(choices) > 0:
-            optimized_prompt = choices[0].get("message", {}).get("content", "").strip()
-            if optimized_prompt:
-                optimized_prompt = re.sub(r'https?://\S+', '', optimized_prompt).strip()
-                optimized_prompt = re.sub(r'data:image/\S+', '', optimized_prompt).strip()
-                try:
-                    if required_name_tokens:
-                        missing = [t for t in required_name_tokens if t and t not in optimized_prompt]
-                        if missing:
-                            optimized_prompt = f"{' / '.join(required_name_tokens)}, {optimized_prompt}"
-                    if identity_hint and identity_hint not in optimized_prompt:
-                        optimized_prompt = f"{identity_hint}, {optimized_prompt}"
-                except Exception:
-                    pass
-                if use_anime_structured:
-                    optimized_prompt = f"{optimized_prompt}, no text, no symbols, no garbled characters, no words"
+            raw_content = choices[0].get("message", {}).get("content", "").strip()
+            if raw_content:
+                structured = _parse_json_from_llm_response(raw_content)
+                if use_anime_structured and structured and all(
+                    k in structured for k in ("first_line", "face_system", "hair_system", "clothing_system", "view_composition")
+                ):
+                    optimized_prompt = _build_prompt_from_structured_json(structured, include_scene_atmosphere=False)
+                    if isinstance(global_state, dict):
+                        global_state["_last_main_char_prompt_json"] = structured
+                    print("📋 [主角形象] 提示词 JSON：")
+                    print(json.dumps(structured, ensure_ascii=False, indent=2))
+                elif not use_anime_structured and structured and isinstance(structured.get("visual_description"), str):
+                    optimized_prompt = (structured.get("visual_description") or "").strip()
+                    if isinstance(global_state, dict):
+                        global_state["_last_main_char_prompt_json"] = structured
+                    print("📋 [主角形象] 提示词 JSON：")
+                    print(json.dumps(structured, ensure_ascii=False, indent=2))
                 else:
-                    appearance_suffix = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
-                    if appearance_suffix:
-                        optimized_prompt = optimized_prompt.rstrip() + appearance_suffix
-                    optimized_prompt = f"{optimized_prompt}, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words"
-                print(f"✅ LLM主角形象提示词生成完成，长度：{len(optimized_prompt)}字符")
-                return optimized_prompt
+                    optimized_prompt = raw_content
+                    if isinstance(global_state, dict) and "_last_main_char_prompt_json" in global_state:
+                        del global_state["_last_main_char_prompt_json"]
+                if optimized_prompt:
+                    optimized_prompt = re.sub(r'https?://\S+', '', optimized_prompt).strip()
+                    optimized_prompt = re.sub(r'data:image/\S+', '', optimized_prompt).strip()
+                    try:
+                        if required_name_tokens:
+                            missing = [t for t in required_name_tokens if t and t not in optimized_prompt]
+                            if missing:
+                                optimized_prompt = f"{' / '.join(required_name_tokens)}, {optimized_prompt}"
+                        if identity_hint and identity_hint not in optimized_prompt:
+                            optimized_prompt = f"{identity_hint}, {optimized_prompt}"
+                    except Exception:
+                        pass
+                    if use_anime_structured:
+                        optimized_prompt = f"{optimized_prompt}, no text, no symbols, no garbled characters, no words"
+                    else:
+                        appearance_suffix = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
+                        if appearance_suffix:
+                            optimized_prompt = optimized_prompt.rstrip() + appearance_suffix
+                        optimized_prompt = f"{optimized_prompt}, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words"
+                    print(f"✅ LLM主角形象提示词生成完成，长度：{len(optimized_prompt)}字符")
+                    return optimized_prompt
 
         print("⚠️ LLM生成失败，使用默认提示词")
         appearance_extra = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))

@@ -627,7 +627,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                             
                             # 确保返回的数据格式正确（含 scene_text_hash，避免 /generate-option 误判文本变化而重复生成）
                             scene_text_hash = hashlib.md5(scene.encode("utf-8")).hexdigest() if (scene and scene.strip()) else None
-                            option_data["scene_image"] = {
+                            scene_img_payload = {
                                 "url": image_url,
                                 "prompt": scene_image.get("prompt", ""),
                                 "style": scene_image.get("style", "default"),
@@ -637,6 +637,9 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                                 "cached": True if is_local_path else scene_image.get("cached", False),
                                 "scene_text_hash": scene_text_hash,
                             }
+                            if isinstance(global_state, dict) and "_last_scene_prompt_json" in global_state:
+                                scene_img_payload["prompt_json"] = global_state["_last_scene_prompt_json"]
+                            option_data["scene_image"] = scene_img_payload
                             if is_local_path:
                                 print(f"✅ 选项 {i+1} 场景图片生成成功并已保存到本地")
                                 print(f"   本地路径: {image_url}")
@@ -649,7 +652,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                                 fixed_url = fix_incomplete_url(image_url)
                                 if fixed_url and validate_image_url(fixed_url):
                                     scene_text_hash = hashlib.md5(scene.encode("utf-8")).hexdigest() if (scene and scene.strip()) else None
-                                    option_data["scene_image"] = {
+                                    fixed_img = {
                                         "url": fixed_url,
                                         "prompt": scene_image.get("prompt", ""),
                                         "style": scene_image.get("style", "default"),
@@ -658,6 +661,9 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                                         "cached": scene_image.get("cached", False),
                                         "scene_text_hash": scene_text_hash,
                                     }
+                                    if isinstance(global_state, dict) and "_last_scene_prompt_json" in global_state:
+                                        fixed_img["prompt_json"] = global_state["_last_scene_prompt_json"]
+                                    option_data["scene_image"] = fixed_img
                                     print(f"✅ 选项 {i+1} 场景图片URL修复成功: {fixed_url[:80]}...")
                                 else:
                                     print(f"⚠️ 选项 {i+1} 场景图片URL无效，跳过图片: {image_url[:80]}...")
