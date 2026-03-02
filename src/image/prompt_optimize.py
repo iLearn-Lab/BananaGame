@@ -195,6 +195,100 @@ PROMPT_JSON_EXAMPLE_SCENE = {
     ]
 }
 
+# 主角形象「精简 JSON 模板」参考示例：与剧情图同结构，仅人物、纯白背景、无场景
+PROMPT_JSON_EXAMPLE_MAIN_CHAR = {
+    "label": "main-character-full-body-portrait",
+    "tags": ["fantasy", "ethereal", "portrait", "full-body", "single character"],
+    "style": ["impressionist oil painting", "rich brushstrokes", "luminous color transitions", "soft-shading", "clean rendering"],
+    "subject": {
+        "body_traits": [
+            "young male protagonist with ethereal presence",
+            "淡蓝色眼眸, gentle gaze",
+            "moon-like luminous skin with silver-blue aura",
+            "serene contemplative expression",
+            "slender build, standing full body"
+        ],
+        "outfit": [
+            "flowing white long dress with luminous dream-like fabric",
+            "ethereal translucent material, soft folds"
+        ],
+        "pose": [
+            "standing straight, full-body front view",
+            "arms relaxed at sides",
+            "centered in frame",
+            "pure white background only, no environment"
+        ]
+    },
+    "face_system": [
+        "8K detailed facial features with soft impressionist rendering",
+        "淡蓝色眼眸, soft and clear",
+        "serene contemplative expression",
+        "lip color naturally muted with soft highlights",
+        "facial highlights with subtle silver-blue aura",
+        "soft shadows creating gentle depth"
+    ],
+    "hair_system": [
+        "long silver-white hair flowing like liquid mercury",
+        "root fixation coefficient 0.9",
+        "tip swing amplitude 15cm",
+        "color layering: main color #F7FAFC, secondary color #E2E8F0, highlight #FFFFFF, shadow #CBD5E0",
+        "gentle natural fall, no wind",
+        "wind speed 0 m/s",
+        "turbulence intensity 0%"
+    ],
+    "clothing_system": [
+        "flowing white dress with ethereal fabric",
+        "slight soft folds, no motion",
+        "luminous translucent material with dream-like quality",
+        "clean fabric, no background elements"
+    ],
+    "environment": {
+        "background": [
+            "pure white background",
+            "no objects, no scenery",
+            "even white only, no shadows on background"
+        ],
+        "characters": [],
+        "effects": []
+    },
+    "color_restriction": [
+        "pure white background only",
+        "silver-white hair tones",
+        "character clothing and skin as described",
+        "no environmental colors"
+    ],
+    "lighting": [
+        "soft even front lighting",
+        "no dramatic shadows on background",
+        "gentle light on face and body"
+    ],
+    "camera": {
+        "type": "full-body portrait",
+        "lens": "50mm",
+        "aperture": "f/2.8",
+        "depth_of_field": "shallow focus on character",
+        "flash": "none",
+        "grain": "subtle impressionist texture",
+        "texture": "oil painting brushstrokes"
+    },
+    "composition": [
+        "single character only",
+        "full-body front view, centered",
+        "pure white background, no other elements",
+        "action constraints: standing still, arms at sides, no gesture"
+    ],
+    "mood": [
+        "serene",
+        "ethereal contemplation",
+        "calm presence"
+    ],
+    "output_style": [
+        "dreamlike magical realism",
+        "no text or symbols in image",
+        "full-body character design, pure white background only"
+    ]
+}
+
 # 颜值等级 → 用于生图的具体外貌描述（供 LLM 参考 + 默认提示词兜底）
 # 格式: (给 LLM 的中文说明, 拼进最终提示词的英文关键词，高/极高时用于后处理追加)
 APPEARANCE_LEVEL_MAP = {
@@ -867,21 +961,15 @@ def optimize_main_character_prompt_with_llm(
             canonical_block_lines.append(f"标志性外观关键词：{canonical_signature}")
         canonical_block = "\n".join(canonical_block_lines) if canonical_block_lines else "（无）"
 
-        use_anime_structured = style_type == "anime"
+        json_example_main_char = json.dumps(PROMPT_JSON_EXAMPLE_MAIN_CHAR, ensure_ascii=False, indent=2)
+        llm_prompt = f"""假设你是一个专业的角色设计师，需要为「主角形象立绘」生成视觉描述提示词。输出与剧情图相同的「精简 JSON 模板」结构，但仅描述人物本身，背景固定为纯白，无任何场景、道具或其它角色。
 
-        if use_anime_structured:
-            llm_prompt = f"""你现在是一个专业的角色设计师，要为「动漫风格」生图生成主角形象提示词。请输出一个 JSON 对象，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。
+【游戏背景信息】
+- 游戏主题：{user_theme or game_theme}
+- 世界观设定（结构化/节选）：{worldview_context_text}
+- 游戏基调：{tone_description}
 
-JSON 结构（必须包含以下键，值均为字符串，内容为英文提示词片段）：
-- first_line：首行（画质+风格+全身正面+纯白背景+单角色+当前主角特征描述），对应示例第一行。
-- face_system：面部系统内容（须含 lip peak highlight strength 0.3, lip line depth 0.15），对应示例 --面部系统--。
-- hair_system：头发系统内容（须含 root fixation coefficient 0.95, tip swing amplitude 10cm, wind speed 1.2m/s, turbulence intensity 5%, wind direction 45°；main/secondary/highlight/shadow 随主角发色填写）。
-- clothing_system：衣物系统内容（须含 slight shoulder line folds (depth 0.3)），对应示例 --衣物系统--。
-- view_composition：视角与构图内容（须含 focal length 50mm, depth of field f/2.8, full-body front view, pure white background, standing still），对应示例 --视角与构图--。
-
-固定参数（勿改）：上述各模块中的数值与物理参数必须保留。仅根据主角填写：首行角色特征、发色配色。
-
-【主角规范信息】
+【主角规范信息】（必须优先使用；姓名、性别、标志性外观须在描述中体现）
 {canonical_block}
 
 【必须保留的名称标识】{(" / ".join(required_name_tokens)) if required_name_tokens else "（无）"}
@@ -891,57 +979,20 @@ JSON 结构（必须包含以下键，值均为字符串，内容为英文提示
 【颜值视觉要求】等级：{appearance_level}；{appearance_visual_hint}
 【Wikipedia 补充】{wiki_evidence_text if wiki_evidence_text else "（无）"}
 
-禁止任何文字/符号入图。示例（仅供参考格式与风格，请按当前主角输出你的 JSON）：
-{PROMPT_FORMAT_EXAMPLE_MAIN_CHAR_ANIME}
+【图片风格要求】{style_description if style_description else '默认风格'}
+
+要求：
+1. 只描述主角一人：外貌、发型、服装、姿势；背景必须为纯白（environment.background 仅纯白，environment.characters 与 effects 为空）。
+2. 严格遵循【主角规范信息】的性别、年龄感与标志性外观；【颜值视觉要求】必须在 subject/face 等中体现。
+3. 若【必须保留的名称标识】不为"（无）"，在描述中保留这些名称。
+4. 符合指定图片风格；禁止任何文字/符号入图。
+
+【输出格式】请严格按照以下「精简 JSON 模板」输出，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。数组字段请逐条列出。
+
+JSON 结构：label, tags, style, subject（body_traits, outfit, pose）, face_system, hair_system, clothing_system, environment（background 仅纯白、characters 空数组、effects 空数组）, color_restriction, lighting, camera, composition, mood, output_style。参考示例（按此结构输出，替换为当前主角内容）：
+{json_example_main_char}
 
 只输出一个合法的 JSON 对象，不要用 markdown 代码块包裹以外的内容。"""
-        else:
-            llm_prompt = f"""你现在是一个专业的角色设计师，要将具体角色描述给生图ai，让生图ai能够生成准确的主角形象。
-
-【游戏背景信息】
-- 游戏主题：{user_theme or game_theme}
-- 世界观设定（结构化/节选）：{worldview_context_text}
-- 游戏基调：{tone_description}
-
-【主角规范信息】（来自世界观，必须优先使用；姓名、性别、外观关键词须在最终提示词中体现）
-{canonical_block}
-
-【Wikipedia 检索补充】（如存在，可补充细节与参考图；有参考图时会传给生图模型）
-{wiki_evidence_text if wiki_evidence_text else "（无）"}
-
-【必须保留的名称标识】（必须在最终提示词中原样保留）
-{(" / ".join(required_name_tokens)) if required_name_tokens else "（无）"}
-
-【身份提示】（请在最终提示词中显式出现，保持原样）
-{identity_hint if identity_hint else "（无）"}
-
-【主角信息】
-- 主角性别：{protagonist_gender}
-- 主角属性：{attr_description}
-- 主角能力：{protagonist_ability}
-- 主角性格：{protagonist_info.get('personality', '')}
-- 主角背景：{protagonist_info.get('appearance', '')}
-
-【颜值视觉要求】（必须严格体现）
-- 主角颜值等级：{appearance_level}
-- 对应外貌描述要求：{appearance_visual_hint}
-- 请在视觉描述中明确写出与上述一致的外貌特征。若颜值为「高」或「极高」，必须在描述中包含具体的美貌相关用语（如五官精致、皮肤细腻、气质出众等），并在最终提示词中加入英文关键词（如 handsome/beautiful, attractive, delicate features, clear skin）以便生图模型更好识别；若为「低」或「极低」则描述为普通或平凡外貌。
-
-【图片风格要求】
-{style_description if style_description else '默认风格'}
-
-请根据以上信息，生成一个详细的主角形象描述提示词，要求：
-1. 必须优先使用【主角规范信息】中的姓名、性别与标志性外观关键词；若【Wikipedia 检索补充】存在，可补充细节；若有参考图，生图阶段会使用参考图以提高还原度。
-2. 主角性别为{protagonist_gender}，请根据性别特征进行描述。
-3. 详细描述主角的外貌特征（面部特征、五官、肤色、表情等），并融入【主角规范信息】中的标志性外观关键词（若有）；【颜值视觉要求】必须在描述中明确体现，不可忽略。
-4. 若【必须保留的名称标识】不为"（无）"，最终提示词中必须包含这些名称（原样保留，不要用同义词替换）。
-5. 详细描述主角的穿着与发型；体现主角属性特点；符合游戏主题、世界观与基调；符合指定图片风格。
-6. 强调全身角色设计（full-body），纯白背景，人物居中站立；禁止生成任何文字/符号/乱码（no text, no symbols, no words）。
-
-【输出格式】请输出一个 JSON 对象，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。
-JSON 结构：只包含一个键 "visual_description"，值为字符串，即完整的主角形象视觉描述（英文，可直接用于生图）。禁止任何文字/符号入图。
-
-只输出一个合法的 JSON 对象，例如：{{"visual_description": "你的英文描述内容"}}"""
 
         api_key = AI_API_CONFIG.get('api_key', '')
         base_url = AI_API_CONFIG.get('base_url', '')
@@ -978,16 +1029,12 @@ JSON 结构：只包含一个键 "visual_description"，值为字符串，即完
             raw_content = choices[0].get("message", {}).get("content", "").strip()
             if raw_content:
                 structured = _parse_json_from_llm_response(raw_content)
-                if use_anime_structured and structured and all(
-                    k in structured for k in ("first_line", "face_system", "hair_system", "clothing_system", "view_composition")
+                if (
+                    structured
+                    and isinstance(structured.get("subject"), dict)
+                    and isinstance(structured.get("environment"), dict)
                 ):
-                    optimized_prompt = _build_prompt_from_structured_json(structured, include_scene_atmosphere=False)
-                    if isinstance(global_state, dict):
-                        global_state["_last_main_char_prompt_json"] = structured
-                    print("📋 [主角形象] 提示词 JSON：")
-                    print(json.dumps(structured, ensure_ascii=False, indent=2))
-                elif not use_anime_structured and structured and isinstance(structured.get("visual_description"), str):
-                    optimized_prompt = (structured.get("visual_description") or "").strip()
+                    optimized_prompt = _build_prompt_from_rich_json(structured)
                     if isinstance(global_state, dict):
                         global_state["_last_main_char_prompt_json"] = structured
                     print("📋 [主角形象] 提示词 JSON：")
@@ -1008,13 +1055,10 @@ JSON 结构：只包含一个键 "visual_description"，值为字符串，即完
                             optimized_prompt = f"{identity_hint}, {optimized_prompt}"
                     except Exception:
                         pass
-                    if use_anime_structured:
-                        optimized_prompt = f"{optimized_prompt}, no text, no symbols, no garbled characters, no words"
-                    else:
-                        appearance_suffix = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
-                        if appearance_suffix:
-                            optimized_prompt = optimized_prompt.rstrip() + appearance_suffix
-                        optimized_prompt = f"{optimized_prompt}, full body, standing pose, arms relaxed at sides, pure white background, character centered, no text, no symbols, no garbled characters, no words"
+                    appearance_suffix = _get_appearance_english_suffix(protagonist_attr.get("颜值", "普通"))
+                    if appearance_suffix:
+                        optimized_prompt = optimized_prompt.rstrip() + appearance_suffix
+                    optimized_prompt = f"{optimized_prompt}, no text, no symbols, no garbled characters, no words"
                     print(f"✅ LLM主角形象提示词生成完成，长度：{len(optimized_prompt)}字符")
                     return optimized_prompt
 
