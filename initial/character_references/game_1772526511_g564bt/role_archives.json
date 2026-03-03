@@ -1,0 +1,19 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "老陈",
+    "aliases": [
+      "老陈"
+    ],
+    "story_background": "",
+    "first_appear_scene": "潮汐轻抚着礁石，发出细碎的呢喃声，而我站在澜汐村的海岸边，感受着那股从深海传来的异样召唤。\n\n海风中夹杂着一丝不寻常的甜…",
+    "first_img_id": "img_20260303_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772526511_g564bt\\老陈_img_20260303_001.png",
+    "first_prompt": "scene-seaside-night-protagonist-tidal-calling, ink-painting, seaside-night, mystical-atmosphere, tidal-resonance, ethereal, traditional Chinese ink wash painting on heavyweight rice paper, sumi-e with…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "scene-seaside-night-protagonist-tidal-calling, ink-painting, seaside-night, mystical-atmosphere, tidal-resonance, ethereal, traditional Chinese ink wash painting on heavyweight rice paper, sumi-e with…",
+    "face_ref_path": "老陈_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772526511_g564bt\\老陈_body_ref.png"
+  }
+}

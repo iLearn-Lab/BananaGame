@@ -291,6 +291,235 @@ PROMPT_JSON_EXAMPLE_MAIN_CHAR = {
     ]
 }
 
+# 水彩风格（参考图：多色发丝+大眼红唇+淡彩笔触）固定提示词 JSON，用户选水彩时剧情图直接使用，不调 LLM
+PROMPT_JSON_WATERCOLOR_REF = {
+    "label": "scene-ink-closeup-multicolor-hair-heroine",
+    "tags": ["ink-painting", "anime-portrait", "close-up", "ethereal", "dramatic"],
+    "style": [
+        "sumi-e with wet-on-wet watercolor blending",
+        "visible brushstrokes and paper grain texture",
+        "multiple thin ink layers for depth",
+        "soft watercolor wash with subtle bleed-through"
+    ],
+    "subject": {
+        "body_traits": [
+            "young woman with delicate facial features and fair skin",
+            "large expressive eyes with warm reddish-orange eyeshadow and subtle sparkles",
+            "gaze slightly upward with thoughtful confident expression",
+            "head slightly tilted creating dynamic yet calm presence",
+            "soft blush on cheeks rendered as light ink wash"
+        ],
+        "outfit": [
+            "high-collared black garment similar to a turtleneck",
+            "matte black fabric rendered in ink wash with subtle folds",
+            "slight iridescent color speckles embedded in the ink to suggest sheen"
+        ],
+        "pose": [
+            "close-up portrait from chest up",
+            "head slightly tilted, shoulders relaxed",
+            "face centered in frame with direct but gentle gaze toward viewer",
+            "upper body completely still, only hair implied to move with wind"
+        ]
+    },
+    "face_system": [
+        "8K detailed facial features with ink wash and soft watercolor rendering",
+        "large expressive eyes with ink-shaded irises and subtle warm color wash",
+        "subtle reddish-orange eyeshadow as soft ink gradient around the eyes",
+        "sharp iris highlights and tiny sparkles created by ink contrast",
+        "thin defined eyebrows with gentle ink strokes",
+        "small delicate nose with faint highlight and soft shadow",
+        "full lips with glossy reddish-orange tone as light vermillion ink wash",
+        "lip peak highlight strength 0.3 and lip line depth 0.15",
+        "soft blush on cheeks and nose bridge suggested by diluted ink wash",
+        "smooth fair skin with gentle ink shading",
+        "no text, no symbols on the face or skin"
+    ],
+    "hair_system": [
+        "short layered hair with black ink base and 3-5 thin pastel gradient tips (red, orange, yellow, blue)",
+        "smooth color transitions from black to pastel, no hard edges",
+        "bold outline strokes with finer detail strokes for individual strands",
+        "subtle iridescent sheen from mineral pigments on black ink base",
+        "root fixation coefficient 0.95, tip swing amplitude 10cm",
+        "physical wind simulation with point wind source behind the neck, wind speed 1.2m/s, turbulence intensity 5 percent, wind direction 45 degrees"
+    ],
+    "clothing_system": [
+        "high-collared black garment rendered with 3-5 layers of ink wash for depth",
+        "matte black fabric with subtle mineral pigment sheen, not digital glitter",
+        "soft shoulder folds with wet-on-wet ink blending",
+        "no logos, no text, no modern printed patterns on the clothing"
+    ],
+    "environment": {
+        "background": [
+            "pure white or very light paper-like background",
+            "delicate paper texture visible in negative space",
+            "moderate white space around the character to emphasize ink-painting composition"
+        ],
+        "characters": [],
+        "effects": [
+            "tiny scattered ink dots and light color splashes around hair tips to enhance motion",
+            "soft aura around the head created by diluted ink halo",
+            "very subtle color mist behind hair edges to echo multicolor strands"
+        ]
+    },
+    "color_restriction": [
+        "black and gray ink as the main tonal base",
+        "pastel and light color accents only in hair, eyes and lips",
+        "avoid heavy saturated neon colors",
+        "overall palette remains soft, airy and slightly cool with warm accents near the face"
+    ],
+    "lighting": [
+        "diffused soft frontal light illuminating the face evenly",
+        "slightly stronger highlight on the eyes and lips to draw focus",
+        "gentle falloff toward lower part of the garment",
+        "no harsh rim lights or strong backlighting, keeping traditional ink mood"
+    ],
+    "camera": {
+        "type": "close-up portrait",
+        "lens": "50mm",
+        "aperture": "f/1.8",
+        "depth_of_field": "very shallow focus on the face and eyes, background softly blurred",
+        "flash": "none",
+        "grain": "natural rice paper grain and ink bleed texture, no digital noise",
+        "texture": "visible brush hair texture on hair strands, ink splatters at color edges"
+    },
+    "composition": [
+        "character centered in frame with slight head tilt to break symmetry",
+        "close-up crop from chest up with generous white space above hair tips",
+        "eyes placed near the upper third line to strengthen focal point",
+        "hair flowing outward to left and right to create asymmetrical balance with more volume on one side",
+        "generous negative space (30-40% of frame) for traditional ink composition",
+        "action constraints: only hair responds to gentle wind, all other body parts remain static",
+        "no text, no symbols, no UI elements or watermarks anywhere in the image"
+    ],
+    "mood": [
+        "ethereal and dreamy",
+        "quiet but intense presence",
+        "confident yet contemplative gaze",
+        "slightly dramatic atmosphere created by hair movement and color accents"
+    ],
+    "output_style": [
+        "traditional Chinese ink wash mixed with soft watercolor",
+        "anime-inspired facial proportions and expression",
+        "painterly illustration rather than photorealistic rendering",
+        "no text, no symbols, no garbled characters, no words"
+    ]
+}
+
+# 水彩风格主角形象「精简 JSON 模板」：与 PROMPT_JSON_WATERCOLOR_REF 同画风，改为全身、纯白背景、单角色
+PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR = {
+    "gender": "female",
+    "label": "main-character-full-body-portrait-ink-watercolor",
+    "tags": ["ink-painting", "portrait", "full-body", "single character", "ethereal"],
+    "style": [
+        "traditional Chinese ink wash painting",
+        "sumi-e",
+        "soft watercolor wash",
+        "light traditional color wash",
+        "dreamy ethereal aesthetic",
+        "visible brushstrokes",
+        "moderate white space"
+    ],
+    "subject": {
+        "body_traits": [
+            "young protagonist with delicate facial features and fair skin",
+            "large expressive eyes with warm reddish-orange eyeshadow and subtle sparkles",
+            "thoughtful confident expression, slender build, standing full body",
+            "soft blush on cheeks rendered as light ink wash"
+        ],
+        "outfit": [
+            "high-collared black garment similar to a turtleneck",
+            "matte black fabric rendered in ink wash with subtle folds",
+            "slight iridescent color speckles embedded in the ink to suggest sheen"
+        ],
+        "pose": [
+            "standing straight, full-body front view",
+            "arms relaxed at sides",
+            "centered in frame",
+            "pure white background only, no environment"
+        ]
+    },
+    "face_system": [
+        "8K detailed facial features with ink wash and soft watercolor rendering",
+        "large expressive eyes with ink-shaded irises and subtle warm color wash",
+        "subtle reddish-orange eyeshadow as soft ink gradient around the eyes",
+        "sharp iris highlights and tiny sparkles created by ink contrast instead of glitter",
+        "thin defined eyebrows with gentle ink strokes",
+        "small delicate nose with faint highlight and soft shadow",
+        "full lips with glossy reddish-orange tone as light vermillion ink wash",
+        "lip peak highlight strength 0.3 and lip line depth 0.15",
+        "soft blush on cheeks and nose bridge suggested by diluted ink wash",
+        "smooth fair skin with gentle ink shading",
+        "no text, no symbols, no letters rendered on the face or skin"
+    ],
+    "hair_system": [
+        "short layered hair with strong sense of volume and movement",
+        "black ink base for all hair masses, with visible dynamic brushstrokes",
+        "light color wash along selected strands in red, orange, yellow and blue as subtle pastel accents",
+        "3-5 gradient strands per hair cluster with smooth transition between ink and light color wash",
+        "intricate hair strands with clear separation between clumps using bold and thin strokes",
+        "root fixation coefficient 0.95, tip swing amplitude 10cm",
+        "gentle natural fall or light wind, wind speed 0.5m/s, turbulence intensity 3 percent",
+        "painterly ink layering emphasizing color accents in the tips"
+    ],
+    "clothing_system": [
+        "high-collared black garment covering the neck and shoulders",
+        "matte black fabric rendered with layered ink wash to show depth and folds",
+        "slight shoulder line folds with depth 0.3 and soft gradients",
+        "subtle scattered color speckles in the ink to hint at iridescent reflection",
+        "no logos, no text, no modern printed patterns on the clothing"
+    ],
+    "environment": {
+        "background": [
+            "pure white background",
+            "no objects, no scenery",
+            "even white only, delicate paper texture, no shadows on background"
+        ],
+        "characters": [],
+        "effects": []
+    },
+    "color_restriction": [
+        "pure white background only",
+        "black and gray ink as the main tonal base",
+        "pastel and light color accents only in hair, eyes and lips",
+        "avoid heavy saturated neon colors, no environmental colors"
+    ],
+    "lighting": [
+        "diffused soft frontal light illuminating the face and body evenly",
+        "slightly stronger highlight on the eyes and lips to draw focus",
+        "gentle falloff toward lower part of the garment",
+        "no harsh rim lights, keeping traditional ink mood"
+    ],
+    "camera": {
+        "type": "full-body portrait",
+        "lens": "50mm",
+        "aperture": "f/2.8",
+        "depth_of_field": "shallow focus on character, background softly blurred",
+        "flash": "none",
+        "grain": "subtle paper fiber texture instead of digital noise",
+        "texture": "visible ink brushstrokes and soft watercolor bleeding edges"
+    },
+    "composition": [
+        "single character only",
+        "full-body front view, centered",
+        "pure white background, no other elements",
+        "action constraints: standing still, arms at sides, no gesture",
+        "no text, no symbols, no UI elements or watermarks anywhere in the image"
+    ],
+    "mood": [
+        "ethereal and dreamy",
+        "quiet but intense presence",
+        "confident yet contemplative gaze",
+        "calm presence"
+    ],
+    "output_style": [
+        "traditional Chinese ink wash mixed with soft watercolor",
+        "anime-inspired facial proportions and expression",
+        "painterly illustration rather than photorealistic rendering",
+        "full-body character design, pure white background only",
+        "no text, no symbols, no garbled characters, no words"
+    ]
+}
+
 # 颜值等级 → 用于生图的具体外貌描述（供 LLM 参考 + 默认提示词兜底）
 # 格式: (给 LLM 的中文说明, 拼进最终提示词的英文关键词，高/极高时用于后处理追加)
 APPEARANCE_LEVEL_MAP = {
@@ -531,6 +760,8 @@ def optimize_image_prompt_with_llm(
                 style_description = '动漫风格，日式漫画美学，柔和线条（适中线宽），网点阴影，高对比，戏剧性阴影，含场景与氛围与角色动作'
             elif style_type == 'ink_painting':
                 style_description = '水墨画风格，中国传统水墨画，黑白灰调，意境深远'
+            elif style_type == 'watercolor':
+                style_description = '水彩风格，水墨淡彩，中国传统水墨与软水彩结合，意境深远'
             elif style_type == 'oil_painting':
                 subtype = image_style.get('subtype', 'classic_oil')
                 if subtype == 'impressionist':
@@ -632,7 +863,12 @@ def optimize_image_prompt_with_llm(
             "- scene_atmosphere：（动漫/漫画风格时必填）场景与氛围内容，对应示例中的 --场景与氛围-- 段落。\n"
             if include_scene_atmosphere else ""
         )
-        json_example_str = json.dumps(PROMPT_JSON_EXAMPLE_SCENE, ensure_ascii=False, indent=2)
+        # 水彩风格：用参考图版 JSON 作为模板示例，让 LLM 按此风格与结构为当前剧情生成
+        _style_type = image_style.get("type", "") if image_style else ""
+        _custom_val = _safe_str(image_style.get("value", "")).strip() if image_style else ""
+        _use_watercolor_template = _style_type == "watercolor" or (_style_type == "custom" and "水彩" in _custom_val)
+        json_example_for_llm = PROMPT_JSON_WATERCOLOR_REF if _use_watercolor_template else PROMPT_JSON_EXAMPLE_SCENE
+        json_example_str = json.dumps(json_example_for_llm, ensure_ascii=False, indent=2)
 
         llm_prompt = f"""假设你是一个专业的剧情分析师和视觉设计师，现在需要你将剧情转化为具体的视觉描述，告诉生图AI如何生成图片。
 
@@ -698,7 +934,7 @@ JSON 结构（所有数组均为字符串数组；嵌套对象见说明）：
 - output_style：成片风格数组，如 "dreamlike magical realism", "no text or symbols in image"。
 
 以上字段均需根据【当前剧情】与【图片风格要求】填写；配角请用「角色名-配角N」格式。参考示例（按此结构输出，仅替换为当前剧情内容）：
-{json_example_str}
+{("【水彩/水墨淡彩风格】以下示例为水彩风格模板，请严格按此风格、结构与画风描述生成，仅将角色与场景替换为当前剧情。\n\n" if _use_watercolor_template else "")}{json_example_str}
 
 只输出一个合法的 JSON 对象，不要用 markdown 代码块包裹以外的内容。"""
 
@@ -784,6 +1020,8 @@ def _get_style_description(image_style: Dict) -> str:
         return "动漫风格，日式动画，色彩鲜明"
     if t == "ink_painting":
         return "水墨画风格，中国传统水墨"
+    if t == "watercolor":
+        return "水彩风格，水墨淡彩"
     if t == "oil_painting":
         return "油画风格，光影丰富，8K"
     if t == "cyberpunk":
@@ -829,6 +1067,8 @@ def optimize_main_character_prompt_with_llm(
                 style_description = '动漫风格，日式漫画美学，柔和线条（适中线宽），网点阴影，高对比，戏剧性阴影，含场景与氛围与角色动作'
             elif style_type == 'ink_painting':
                 style_description = '水墨画风格，中国传统水墨画，黑白灰调，意境深远'
+            elif style_type == 'watercolor':
+                style_description = '水彩风格，水墨淡彩，中国传统水墨与软水彩结合，意境深远'
             elif style_type == 'oil_painting':
                 subtype = image_style.get('subtype', 'classic_oil')
                 if subtype == 'impressionist':
@@ -971,7 +1211,15 @@ def optimize_main_character_prompt_with_llm(
             canonical_block_lines.append(f"标志性外观关键词：{canonical_signature}")
         canonical_block = "\n".join(canonical_block_lines) if canonical_block_lines else "（无）"
 
-        json_example_main_char = json.dumps(PROMPT_JSON_EXAMPLE_MAIN_CHAR, ensure_ascii=False, indent=2)
+        # 水彩风格：用参考图版主角 JSON 作为模板示例，让 LLM 按此风格与结构生成
+        _mc_style_type = image_style.get("type", "") if image_style else ""
+        _mc_custom_val = _safe_str(image_style.get("value", "")).strip() if image_style else ""
+        _use_watercolor_main_char = _mc_style_type == "watercolor" or (_mc_style_type == "custom" and "水彩" in _mc_custom_val)
+        json_example_main_char = json.dumps(
+            PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR if _use_watercolor_main_char else PROMPT_JSON_EXAMPLE_MAIN_CHAR,
+            ensure_ascii=False,
+            indent=2
+        )
         llm_prompt = f"""假设你是一个专业的角色设计师，需要为「主角形象立绘」生成视觉描述提示词。输出与剧情图相同的「精简 JSON 模板」结构，但仅描述人物本身，背景固定为纯白，无任何场景、道具或其它角色。
 
 【游戏背景信息】
@@ -1001,7 +1249,7 @@ def optimize_main_character_prompt_with_llm(
 【输出格式】请严格按照以下「精简 JSON 模板」输出，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。数组字段请逐条列出。
 
 JSON 结构：**gender**（必填，"male"或"female"），label, tags, style, subject（body_traits, outfit, pose）, face_system, hair_system, clothing_system, environment（background 仅纯白、characters 空数组、effects 空数组）, color_restriction, lighting, camera, composition, mood, output_style。参考示例（按此结构输出，替换为当前主角内容；gender 须与【主角规范信息】一致）：
-{json_example_main_char}
+{("【水彩/水墨淡彩风格】以下示例为水彩风格主角模板，请严格按此风格、结构与画风描述生成，仅将角色替换为当前主角（性别、外貌等须与【主角规范信息】一致）。\n\n" if _use_watercolor_main_char else "")}{json_example_main_char}
 
 只输出一个合法的 JSON 对象，不要用 markdown 代码块包裹以外的内容。"""
 

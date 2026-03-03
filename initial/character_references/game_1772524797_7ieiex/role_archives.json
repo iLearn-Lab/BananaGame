@@ -1,0 +1,19 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "年轻美人鱼歌者",
+    "aliases": [
+      "年轻美人鱼歌者"
+    ],
+    "story_background": "",
+    "first_appear_scene": "林深见缓缓闭上眼睛，让海水的温柔包围着自己的身体。在这片蔚蓝的静谧中，他的声音如潮汐般轻柔地流淌开来。\"海洋对我而言，不…",
+    "first_img_id": "img_20260303_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772524797_7ieiex\\年轻美人鱼歌者_img_20260303_001.png",
+    "first_prompt": "scene-underwater-dialogue-mermaids-protagonist-spiritual-connection, ink-painting, underwater-scene, spiritual-dialogue, ethereal, mystical, traditional Chinese ink wash painting, sumi-e, soft waterco…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "scene-underwater-dialogue-mermaids-protagonist-spiritual-connection, ink-painting, underwater-scene, spiritual-dialogue, ethereal, mystical, traditional Chinese ink wash painting, sumi-e, soft waterco…",
+    "face_ref_path": "年轻美人鱼歌者_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772524797_7ieiex\\年轻美人鱼歌者_body_ref.png"
+  }
+}

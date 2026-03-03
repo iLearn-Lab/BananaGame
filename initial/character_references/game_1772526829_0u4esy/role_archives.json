@@ -1,0 +1,19 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "珊瑚",
+    "aliases": [
+      "珊瑚"
+    ],
+    "story_background": "",
+    "first_appear_scene": "澜心轻抚着珊瑚温润的手臂，银蓝色的长发在水中轻柔摆动，清澈的蓝眸中闪烁着复杂的光芒。她深吸一口气，声音如细流般轻缓：\"珊…",
+    "first_img_id": "img_20260303_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772526829_0u4esy\\珊瑚_img_20260303_001.png",
+    "first_prompt": "scene-underwater-conversation-mysterious-voices-coral-garden, underwater-fantasy, mermaid-mythology, mysterious-atmosphere, ethereal-dialogue, deep-sea-mystery, sumi-e with wet-on-wet watercolor blend…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "scene-underwater-conversation-mysterious-voices-coral-garden, underwater-fantasy, mermaid-mythology, mysterious-atmosphere, ethereal-dialogue, deep-sea-mystery, sumi-e with wet-on-wet watercolor blend…",
+    "face_ref_path": "珊瑚_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772526829_0u4esy\\珊瑚_body_ref.png"
+  }
+}
