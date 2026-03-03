@@ -1,0 +1,17 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "凯斯博士",
+    "aliases": [
+      "凯斯博士"
+    ],
+    "story_background": "",
+    "first_appear_scene": "白石遥走向凯斯博士，试图从她那里了解更多信息。\"博士，我想知道，除了我之外，研究院里还有其他受试者吗？\"他的声音带着谨慎…",
+    "first_img_id": "img_20260303_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772509085_26niy8\\凯斯博士_img_20260303_001.png",
+    "first_prompt": "scene-conversation-protagonist-investigates-other-subjects, mystery, psychological, medical-facility, watercolor, atmospheric, watercolor painting, soft fluid brushstrokes, translucent color washes, b…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "scene-conversation-protagonist-investigates-other-subjects, mystery, psychological, medical-facility, watercolor, atmospheric, watercolor painting, soft fluid brushstrokes, translucent color washes, b…"
+  }
+}

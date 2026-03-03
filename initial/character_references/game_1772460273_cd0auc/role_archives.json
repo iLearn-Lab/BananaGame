@@ -1,0 +1,17 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "葛里正",
+    "aliases": [
+      "葛里正"
+    ],
+    "story_background": "",
+    "first_appear_scene": "崇祯十四年，北直隶，定州府外三十里。\n\n我叫林见深，青色长衫已被风尘染得灰扑扑的，消瘦的身形在官道上显得格外单薄。深邃的…",
+    "first_img_id": "img_20260302_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772460273_cd0auc\\葛里正_img_20260302_001.png",
+    "first_prompt": "scene-1-protagonist-meets-suspicious-village-chief, traditional-chinese-ink-painting, mysterious-atmosphere, historical-drama, subtle-unease, traditional Chinese ink wash painting, black white and gra…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "scene-1-protagonist-meets-suspicious-village-chief, traditional-chinese-ink-painting, mysterious-atmosphere, historical-drama, subtle-unease, traditional Chinese ink wash painting, black white and gra…"
+  }
+}

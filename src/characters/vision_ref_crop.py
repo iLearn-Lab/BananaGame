@@ -186,8 +186,12 @@ def _call_vision_bbox(
                 r.raise_for_status()
                 data = r.json()
                 if use_gemini_ep:
-                    parts = (data.get("candidates") or [{}])[0].get("content", {}).get("parts") or []
-                    content = (parts[0].get("text", "") if parts else "").strip()
+                    candidates = data.get("candidates") or []
+                    if not candidates:
+                        raise ValueError("Gemini 返回的 candidates 为空（可能被安全策略拦截或模型未生成内容）")
+                    first = candidates[0] if isinstance(candidates[0], dict) else {}
+                    parts = first.get("content", {}).get("parts") or [] if isinstance(first.get("content"), dict) else []
+                    content = "".join(p.get("text", "") for p in parts if isinstance(p, dict)).strip()
                 else:
                     msg = (data.get("choices") or [{}])[0].get("message", {})
                     content = msg.get("content")
@@ -233,23 +237,42 @@ def _call_vision_bbox(
         return None
 
     # 优先解析「仅 4 个数字」格式（适配云雾等回复长度被严格限制的 API，模型按 prompt 只输出 x y width height）
+    # 之前固定取「前 4 个」数字，若模型先输出 0 0 1 1 再给正确 bbox、或带说明文字，会取错；改为取「最后一组均在 [0,1] 的连续 4 个数」
     text_raw = content.strip()
     numbers = re.findall(r"[0-9]+\.?[0-9]*", text_raw)
     if len(numbers) >= 4:
         try:
-            x, y, w, h = float(numbers[0]), float(numbers[1]), float(numbers[2]), float(numbers[3])
-            # 云雾常把最后一数截断成 "0"（如 0.5→0），用前三个有效值 + 合理默认 height
-            if 0 <= x <= 1 and 0 <= y <= 1 and w > 0 and h <= 0:
-                h = min(0.5, 1 - y)  # 典型全身约占画面高度一半以内
-            if 0 <= x <= 1 and 0 <= y <= 1 and w > 0 and h > 0:
-                w = max(0.01, min(1 - x, w))
-                h = max(0.01, min(1 - y, h))
-                if h < 0.25:
-                    h_new = min(0.5, h * 2)
-                    y = max(0, y - (h_new - h) * 0.3)
-                    h = h_new
-                return {"x": x, "y": y, "width": w, "height": h}
-        except (ValueError, TypeError):
+            floats = []
+            for n in numbers:
+                try:
+                    f = float(n)
+                    floats.append(f)
+                except (ValueError, TypeError):
+                    continue
+            # 从后往前找最后一组连续 4 个均在 [0,1] 的数，作为 bbox（模型常先输出 0 0 1 1 再给真实框）
+            x, y, w, h = None, None, None, None
+            if len(floats) >= 4:
+                # 从最后一组 4 个开始：i 最大为 len-4，使 i..i+3 不越界
+                for i in range(len(floats) - 4, -1, -1):
+                    a, b, c, d = floats[i], floats[i + 1], floats[i + 2], floats[i + 3]
+                    if 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1 and 0 <= d <= 1:
+                        x, y, w, h = a, b, c, d
+                        break
+                if x is None:
+                    # 回退：没有一组全在 [0,1]，用前 4 个（兼容旧行为）
+                    x, y, w, h = floats[0], floats[1], floats[2], floats[3]
+            if x is not None:
+                if 0 <= x <= 1 and 0 <= y <= 1 and w > 0 and h <= 0:
+                    h = min(0.5, 1 - y)
+                if 0 <= x <= 1 and 0 <= y <= 1 and w > 0 and h > 0:
+                    w = max(0.01, min(1 - x, w))
+                    h = max(0.01, min(1 - y, h))
+                    if h < 0.25:
+                        h_new = max(0.25, min(0.5, h * 2))
+                        y = max(0, y - (h_new - h) * 0.3)
+                        h = h_new
+                    return {"x": x, "y": y, "width": w, "height": h}
+        except (ValueError, TypeError, IndexError):
             pass
 
     # 解析 JSON：允许键顺序任意、嵌套 {"bbox": {...}}、被 ``` 包裹（含无闭合 ``` 或截断）
@@ -291,8 +314,10 @@ def _call_vision_bbox(
         y = max(0, min(1, y))
         w = max(0.01, min(1 - x, w))
         h = max(0.01, min(1 - y, h))
+        if h < 0.12 and w > 0.2:
+            w, h = h, w
         if h < 0.25:
-            h_new = min(0.5, h * 2)
+            h_new = max(0.25, min(0.5, h * 2))
             y = max(0, y - (h_new - h) * 0.3)
             h = h_new
         return {"x": x, "y": y, "width": w, "height": h}
@@ -358,8 +383,10 @@ def _call_vision_bbox(
             h = max(0.01, min(1, float(m_h.group(1))))
             if w <= 0 or h <= 0:
                 return None
+            if h < 0.12 and w > 0.2:
+                w, h = h, w
             if h < 0.25:
-                h_new = min(0.5, h * 2)
+                h_new = max(0.25, min(0.5, h * 2))
                 y = max(0, y - (h_new - h) * 0.3)
                 h = h_new
             return {"x": x, "y": y, "width": w, "height": h}
@@ -378,7 +405,32 @@ def _call_vision_bbox(
         nums = [n for n in nums if n.strip()]
         try:
             if len(nums) >= 4:
-                x, y, w, h = float(nums[0]), float(nums[1]), float(nums[2]), float(nums[3])
+                floats = []
+                for n in nums:
+                    try:
+                        floats.append(float(n))
+                    except (ValueError, TypeError):
+                        continue
+                n0, n1, n2, n3 = None, None, None, None
+                if len(floats) >= 4:
+                    for i in range(len(floats) - 4, -1, -1):
+                        a, b, c, d = floats[i], floats[i + 1], floats[i + 2], floats[i + 3]
+                        if 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1 and 0 <= d <= 1:
+                            n0, n1, n2, n3 = a, b, c, d
+                            break
+                    if n0 is None:
+                        n0, n1, n2, n3 = floats[0], floats[1], floats[2], floats[3]
+                if n0 is None:
+                    return None
+                # 若按 (x,y,w,h) 会越界（x+w>1 或 y+h>1），则按 (x1,y1,x2,y2) 角点解析
+                if (n0 + n2 > 1.01 or n1 + n3 > 1.01) and n2 > n0 and n3 > n1:
+                    w_c, h_c = n2 - n0, n3 - n1
+                    if 0.08 <= w_c <= 0.98 and 0.08 <= h_c <= 0.98:
+                        x, y, w, h = n0, n1, w_c, h_c
+                    else:
+                        x, y, w, h = n0, n1, n2, n3
+                else:
+                    x, y, w, h = n0, n1, n2, n3
             elif len(nums) == 3:
                 x, y, w = float(nums[0]), float(nums[1]), float(nums[2])
                 h = 0.45  # 仅 3 个数时用默认高度（全身约 0.4~0.5）
@@ -388,12 +440,16 @@ def _call_vision_bbox(
             y = max(0, min(1, y))
             w = max(0.01, min(1 - x, w))
             h = max(0.01, min(1 - y, h))
+            # 全身参考图：若高度极小、宽度正常，可能是模型按「高 宽」顺序返回，互换一次
+            if h < 0.12 and w > 0.2:
+                w, h = h, w
+            # 全身参考图至少要有一定高度，避免裁成一条线（此前 0.01 会变成几像素高）
             if h < 0.25:
-                h_new = min(0.5, h * 2)
+                h_new = max(0.25, min(0.5, h * 2))
                 y = max(0, y - (h_new - h) * 0.3)
                 h = h_new
             return {"x": x, "y": y, "width": w, "height": h}
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, IndexError):
             return None
 
     for source in (text, content):
@@ -446,6 +502,19 @@ def crop_image_by_bbox(
     x2 = min(W, int((cx + half_w) * W))
     y2 = min(H, int((cy + half_h) * H))
     if x2 <= x1 or y2 <= y1:
+        return None
+    crop_w, crop_h = x2 - x1, y2 - y1
+    # 全身参考图：裁剪区域过小或过扁/过窄视为无效，不保存废图，由调用方回退到整张初登场图
+    if crop_h < 50 or crop_h < 0.08 * H:
+        print(f"   ⚠️ [vision] 裁剪区域高度过小（{crop_h}px），跳过保存，将使用整张初登场图")
+        return None
+    if crop_w < 80 or crop_w < 0.1 * W:
+        print(f"   ⚠️ [vision] 裁剪区域宽度过小（{crop_w}px），跳过保存，将使用整张初登场图")
+        return None
+    # 拒绝明显异常的宽高比（竖条/横条），全身人像宽高比一般在约 0.25～2 之间
+    aspect = crop_w / crop_h if crop_h else 0
+    if aspect < 0.22 or aspect > 3.5:
+        print(f"   ⚠️ [vision] 裁剪宽高比异常（{crop_w}×{crop_h}，比例 {aspect:.2f}），跳过保存，将使用整张初登场图")
         return None
 
     try:

@@ -820,17 +820,14 @@ def generate_main_character_image(
                     except Exception as e:
                         print(f"   ❌ 再次删除失败 path={p} error={e}，侧/背图可能仍为旧图")
         
-        # 1. 使用LLM生成“人物特征描述”（动漫风格时为分模块提示词）
+        # 1. 使用LLM生成主角提示词（新：精简 JSON 拼成，不再套 prompt_template_front 壳子）
         features = optimize_main_character_prompt_with_llm(protagonist_attr, global_state, image_style)
         is_anime = image_style and image_style.get("type") == "anime"
-        if is_anime and "--面部系统--" in (features or ""):
-            front_prompt = f"{features}, aspect ratio 1024:1536, portrait orientation"
+        front_prompt = (features or "").strip()
+        if front_prompt:
+            front_prompt = f"{front_prompt}, aspect ratio 1024:1536, portrait orientation"
         else:
-            front_prompt = prompt_template_front.format(
-                identifier=identifier,
-                features=features,
-                style=style_label
-            )
+            front_prompt = prompt_template_front.format(identifier=identifier, features="full-body protagonist", style=style_label)
 
         # 2. 调用生图API生成图片（1024x1536）
         provider = IMAGE_GENERATION_CONFIG.get("provider", "yunwu")

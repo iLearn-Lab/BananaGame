@@ -1,0 +1,20 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "人事经理",
+    "aliases": [
+      "人事经理",
+      "王姐",
+      "张姐",
+      "张经理"
+    ],
+    "story_background": "",
+    "first_appear_scene": "林悦然深吸一口气，决定不再绕弯子。她看着面前的人事经理，眼神变得格外认真：\"其实，我想坦白一件事。我来这里应聘的本意是想…",
+    "first_img_id": "img_20260303_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772509580_30e3fm\\人事经理_img_20260303_001.png",
+    "first_prompt": "scene-office-meeting-room-sincere-confession-moment, modern-corporate, professional-environment, cinematic-realism, urban-workplace, contemporary, cinematic photography, professional lighting, realist…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "scene-office-meeting-room-sincere-confession-moment, modern-corporate, professional-environment, cinematic-realism, urban-workplace, contemporary, cinematic photography, professional lighting, realist…"
+  }
+}

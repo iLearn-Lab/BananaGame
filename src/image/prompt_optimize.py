@@ -196,7 +196,9 @@ PROMPT_JSON_EXAMPLE_SCENE = {
 }
 
 # 主角形象「精简 JSON 模板」参考示例：与剧情图同结构，仅人物、纯白背景、无场景
+# gender 必填且必须与【主角规范信息】一致，生图时会强制注入到提示词最前以保障与剧情一致
 PROMPT_JSON_EXAMPLE_MAIN_CHAR = {
+    "gender": "male",
     "label": "main-character-full-body-portrait",
     "tags": ["fantasy", "ethereal", "portrait", "full-body", "single character"],
     "style": ["impressionist oil painting", "rich brushstrokes", "luminous color transitions", "soft-shading", "clean rendering"],
@@ -383,11 +385,16 @@ def _join_list_or_str(val) -> str:
 def _build_prompt_from_rich_json(data: Dict) -> str:
     """
     将「精简 JSON 模板」格式拼成一行长提示词。支持：
+    gender（主角形象时必填，会拼到最前以保障与剧情性别一致）；
     subject: body_traits, outfit, pose（或 made_out_of, arrangement）；
     environment: background, characters, effects（或 room_objects, accessories）；
     composition 或 view_composition；可选 edit。
     """
     parts = []
+    # 主角形象 JSON 的 gender 字段：拼到最前，确保生图与剧情性别一致
+    gender = _safe_str(data.get("gender")).strip().lower()
+    if gender in ("male", "female"):
+        parts.append(f"young {gender} protagonist")
     label = _safe_str(data.get("label", "")).strip()
     if label:
         parts.append(label)
@@ -957,6 +964,9 @@ def optimize_main_character_prompt_with_llm(
             canonical_block_lines.append(f"所属作品(中/英)：{work_zh or '—'} / {work_en or '—'}")
         if protagonist_gender:
             canonical_block_lines.append(f"性别：{protagonist_gender}")
+        age_range = _safe_str(canonical.get("age_range")).strip()
+        if age_range:
+            canonical_block_lines.append(f"年龄感：{age_range}")
         if canonical_signature:
             canonical_block_lines.append(f"标志性外观关键词：{canonical_signature}")
         canonical_block = "\n".join(canonical_block_lines) if canonical_block_lines else "（无）"
@@ -983,13 +993,14 @@ def optimize_main_character_prompt_with_llm(
 
 要求：
 1. 只描述主角一人：外貌、发型、服装、姿势；背景必须为纯白（environment.background 仅纯白，environment.characters 与 effects 为空）。
-2. 严格遵循【主角规范信息】的性别、年龄感与标志性外观；【颜值视觉要求】必须在 subject/face 等中体现。
-3. 若【必须保留的名称标识】不为"（无）"，在描述中保留这些名称。
-4. 符合指定图片风格；禁止任何文字/符号入图。
+2. **gender 为必填字段**：必须与【主角规范信息】的性别严格一致，且只能为 "male"（男性）或 "female"（女性）。该字段会注入到生图提示词最前，确保主角图片与剧情性别一致。
+3. 严格遵循【主角规范信息】的年龄感与标志性外观；【颜值视觉要求】必须在 subject/face 等中体现。
+4. 若【必须保留的名称标识】不为"（无）"，在描述中保留这些名称。
+5. 符合指定图片风格；禁止任何文字/符号入图。
 
 【输出格式】请严格按照以下「精简 JSON 模板」输出，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。数组字段请逐条列出。
 
-JSON 结构：label, tags, style, subject（body_traits, outfit, pose）, face_system, hair_system, clothing_system, environment（background 仅纯白、characters 空数组、effects 空数组）, color_restriction, lighting, camera, composition, mood, output_style。参考示例（按此结构输出，替换为当前主角内容）：
+JSON 结构：**gender**（必填，"male"或"female"），label, tags, style, subject（body_traits, outfit, pose）, face_system, hair_system, clothing_system, environment（background 仅纯白、characters 空数组、effects 空数组）, color_restriction, lighting, camera, composition, mood, output_style。参考示例（按此结构输出，替换为当前主角内容；gender 须与【主角规范信息】一致）：
 {json_example_main_char}
 
 只输出一个合法的 JSON 对象，不要用 markdown 代码块包裹以外的内容。"""
@@ -1034,6 +1045,14 @@ JSON 结构：label, tags, style, subject（body_traits, outfit, pose）, face_s
                     and isinstance(structured.get("subject"), dict)
                     and isinstance(structured.get("environment"), dict)
                 ):
+                    # 强制注入主角性别到 JSON，确保生图与剧情一致（即使用户/LLM 填错也覆盖）
+                    canonical_gender_val = _safe_str(canonical.get("gender")).strip()
+                    if "男" in canonical_gender_val:
+                        structured["gender"] = "male"
+                    elif "女" in canonical_gender_val:
+                        structured["gender"] = "female"
+                    else:
+                        structured["gender"] = "male" if protagonist_gender == "男性" else "female"
                     optimized_prompt = _build_prompt_from_rich_json(structured)
                     if isinstance(global_state, dict):
                         global_state["_last_main_char_prompt_json"] = structured

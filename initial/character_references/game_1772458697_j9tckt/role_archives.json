@@ -1,0 +1,19 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "葛城美里",
+    "aliases": [
+      "葛城美里"
+    ],
+    "story_background": "",
+    "first_appear_scene": "我睁开眼睛的瞬间，世界仿佛在轻微地颤抖。\n\n不对，是我在颤抖。深棕色的短发贴在额头上，汗水顺着脸颊滑落。我坐在一张陌生的…",
+    "first_img_id": "img_20260302_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772458697_j9tckt\\葛城美里_img_20260302_001.png",
+    "first_prompt": "scene-investigation-office-memory-confusion, mystery, psychological-thriller, post-apocalyptic, realistic, unsettling-atmosphere, photorealistic rendering, detailed textures, cinematic lighting, atmos…",
+    "img_model": "gemini-2.5-flash-image-preview",
+    "update_log": [],
+    "core_features": "scene-investigation-office-memory-confusion, mystery, psychological-thriller, post-apocalyptic, realistic, unsettling-atmosphere, photorealistic rendering, detailed textures, cinematic lighting, atmos…",
+    "face_ref_path": "葛城美里_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772458697_j9tckt\\葛城美里_body_ref.png"
+  }
+}
