@@ -115,7 +115,7 @@ PROMPT_JSON_EXAMPLE_SCENE = {
     },
     "face_system": [
         "8K detailed facial features with soft impressionist rendering",
-        "淡蓝色眼眸 with starlight reflections from mirror",
+        "淡蓝色眼眸",
         "surprised yet contemplative expression",
         "lip color naturally muted with soft highlights",
         "facial highlights catching silver-blue aura light",
@@ -288,6 +288,210 @@ PROMPT_JSON_EXAMPLE_MAIN_CHAR = {
         "dreamlike magical realism",
         "no text or symbols in image",
         "full-body character design, pure white background only"
+    ]
+}
+
+# 漫画/动漫风格（anime-digital-portrait）：主角参考图与剧情图统一参考此结构生成
+# 主角参考图：纯白背景、半身/全身；剧情图：同结构，environment.background 为场景、可含配角
+PROMPT_JSON_EXAMPLE_ANIME_MAIN_CHAR = {
+    "gender": "female",
+    "label": "anime-digital-portrait",
+    "tags": ["anime", "digital-painting", "semi-realistic", "clean-lineart", "ethereal", "portrait", "minimalist", "moe", "soft-atmosphere", "school-girl"],
+    "style": ["high-detail japanese anime digital illustration", "semi-realistic anime style", "clean smooth contour line art", "soft cel-shading with seamless gradient transition", "smooth digital brush texture", "transparent luminous lighting rendering", "delicate bishoujo character design", "no watercolor texture, no paper grain, no hand-drawn splatters, no ink bleed"],
+    "subject": {
+        "body_traits": [
+            "young delicate school girl with soft ethereal temperament",
+            "gentle quiet demeanor with innocent vacant expression",
+            "slim graceful figure",
+            "upper body bust shot framing"
+        ],
+        "outfit": [
+            "classic japanese sailor school uniform",
+            "white shirt with navy blue sailor collar with white stripe trim",
+            "smooth soft fabric with natural folds"
+        ],
+        "pose": [
+            "standing straight, full-body front view",
+            "arms relaxed at sides",
+            "centered in frame",
+            "pure white background only, no environment"
+        ]
+    },
+    "face_system": [
+        "ultra-detailed anime facial features, iridescent rainbow highlights in pupils, long curled eyelashes, soft skin shading, bright catchlights in eyes, subtle natural blush, moist glossy lips",
+        "8K ultra-detailed anime facial features with smooth digital rendering",
+        "large clear sparkling eyes with detailed iris texture",
+        "soft rounded facial contours with baby face proportion",
+        "soft warm skin tone with seamless gradient shading",
+        "no harsh shadows on face, soft diffused facial highlights",
+        "innocent slightly surprised gentle expression"
+    ],
+    "hair_system": [
+        "long fluffy wavy dark brown hair with natural volume",
+        "air bangs framing the face, loose strands floating in gentle breeze",
+        "color layering: main color #3A2E28, secondary color #5C4033, highlight #FFFFFF with iridescent blue-purple tint, shadow #271F1B",
+        "smooth silky hair texture with transparent light transmission",
+        "luminous rim light outlining hair edges",
+        "soft flowing hair movement with natural curl",
+        "gradient color transition for layered hair volume"
+    ],
+    "clothing_system": [
+        "classic sailor school uniform with soft natural fabric folds",
+        "smooth fabric texture with soft shading for volume",
+        "subtle light reflection on fabric surface",
+        "clean line art defining clothing contours, no messy texture"
+    ],
+    "environment": {
+        "background": [
+            "minimalist pure white solid background",
+            "no cluttered elements, no extra scenery",
+            "soft light bokeh effect in distant background"
+        ],
+        "characters": [],
+        "effects": [
+            "luminous rim light outlining character silhouette",
+            "soft floating hair strands in gentle breeze",
+            "transparent light particles around hair edges"
+        ]
+    },
+    "color_restriction": [
+        "soft warm dark brown tone for hair",
+        "natural warm porcelain skin tone",
+        "navy blue for sailor collar, pure white for shirt",
+        "soft purple-brown tone for pupils",
+        "iridescent blue-purple highlights for hair and eyes",
+        "overall soft low-saturation fresh color palette",
+        "no over-saturated colors, no messy color mixing"
+    ],
+    "lighting": [
+        "soft diffused side backlight as main rim light",
+        "gentle frontal fill light for facial features",
+        "transparent light passing through hair strands for airy texture",
+        "luminous highlights on hair and eyes",
+        "soft seamless gradient shading, no harsh pure black shadows",
+        "overall bright airy soft atmosphere",
+        "clear bright catchlights in both eyes"
+    ],
+    "camera": {
+        "type": "close-up bust shot",
+        "lens": "50mm",
+        "aperture": "f/1.8",
+        "depth_of_field": "shallow depth of field, sharp focus on face and eyes, soft blurred background",
+        "flash": "none",
+        "grain": "subtle clean digital texture",
+        "texture": "smooth digital brush finish"
+    },
+    "composition": [
+        "character centered in frame",
+        "rule of thirds, character's eyes at upper third intersection",
+        "sharp focus on facial features and eyes",
+        "minimalist composition with no distracting elements",
+        "back view with head turned back, creating dynamic sense"
+    ],
+    "mood": [
+        "ethereal gentle serenity",
+        "innocent quiet atmosphere",
+        "soft fresh healing feeling",
+        "airy dreamlike temperament"
+    ],
+    "output_style": [
+        "high-detail japanese anime digital illustration",
+        "no text, no watermark, no signature, no logo in image",
+        "8K ultra-high resolution",
+        "no 3D render, no photorealistic, no watercolor texture, no hand-drawn paper grain",
+        "perfect anime character anatomy, no distorted features"
+    ]
+}
+
+# 漫画/动漫风格剧情图：与 ANIME_MAIN_CHAR 同结构，environment 为场景、可含配角
+PROMPT_JSON_EXAMPLE_ANIME_SCENE = {
+    "label": "anime-scene-dramatic",
+    "tags": ["anime", "digital-painting", "semi-realistic", "clean-lineart", "dramatic", "scene", "atmosphere"],
+    "style": ["high-detail japanese anime digital illustration", "semi-realistic anime style", "clean smooth contour line art", "soft cel-shading with seamless gradient transition", "smooth digital brush texture", "transparent luminous lighting rendering", "no watercolor texture, no paper grain, no hand-drawn splatters"],
+    "subject": {
+        "body_traits": [
+            "young protagonist with soft ethereal temperament",
+            "slim graceful figure",
+            "medium shot or full body according to scene"
+        ],
+        "outfit": [
+            "outfit consistent with story and previous scenes",
+            "smooth soft fabric with natural folds"
+        ],
+        "pose": [
+            "pose and action matching current story moment",
+            "natural posture and gaze direction",
+            "interaction with environment or other characters if any"
+        ]
+    },
+    "face_system": [
+        "ultra-detailed anime facial features with smooth digital rendering",
+        "large clear sparkling eyes with detailed iris texture",
+        "soft rounded facial contours",
+        "soft warm skin tone with seamless gradient shading",
+        "no harsh shadows on face, soft diffused facial highlights",
+        "expression matching story emotion"
+    ],
+    "hair_system": [
+        "hair consistent with protagonist design",
+        "color layering and volume as established",
+        "smooth silky hair texture with transparent light transmission",
+        "natural flow or wind effect as appropriate to scene"
+    ],
+    "clothing_system": [
+        "clothing with soft natural fabric folds",
+        "smooth fabric texture with soft shading for volume",
+        "clean line art defining clothing contours, no messy texture"
+    ],
+    "environment": {
+        "background": [
+            "detailed scene background matching story setting",
+            "atmospheric perspective and depth",
+            "no cluttered elements unless story requires"
+        ],
+        "characters": [],
+        "effects": [
+            "luminous rim light or atmosphere as needed",
+            "soft particles or lighting effects for mood"
+        ]
+    },
+    "color_restriction": [
+        "overall soft low-saturation fresh color palette",
+        "consistent with previous scene color tone",
+        "no over-saturated colors, no messy color mixing"
+    ],
+    "lighting": [
+        "soft diffused lighting matching scene time and mood",
+        "clear light direction and soft shadows",
+        "luminous highlights on hair and eyes",
+        "soft seamless gradient shading, no harsh pure black shadows"
+    ],
+    "camera": {
+        "type": "medium shot or full shot as needed",
+        "lens": "50mm",
+        "aperture": "f/1.8",
+        "depth_of_field": "shallow depth of field, sharp focus on characters, soft blurred background",
+        "flash": "none",
+        "grain": "subtle clean digital texture",
+        "texture": "smooth digital brush finish"
+    },
+    "composition": [
+        "character or characters positioned according to story",
+        "rule of thirds, clear focal point",
+        "sharp focus on main subjects",
+        "dramatic or calm composition matching mood"
+    ],
+    "mood": [
+        "mood matching current story beat",
+        "ethereal or tense atmosphere as appropriate",
+        "soft fresh or dramatic feeling"
+    ],
+    "output_style": [
+        "high-detail japanese anime digital illustration",
+        "no text, no watermark, no signature, no logo in image",
+        "8K ultra-high resolution",
+        "no 3D render, no photorealistic, no watercolor texture, no hand-drawn paper grain",
+        "perfect anime character anatomy, no distorted features"
     ]
 }
 
@@ -861,11 +1065,17 @@ def optimize_image_prompt_with_llm(
             "- scene_atmosphere：（动漫/漫画风格时必填）场景与氛围内容，对应示例中的 --场景与氛围-- 段落。\n"
             if include_scene_atmosphere else ""
         )
-        # 水彩风格：用参考图版 JSON 作为模板示例，让 LLM 按此风格与结构为当前剧情生成
+        # 按画风选择 JSON 模板：水彩 → 水彩参考；动漫/漫画 → anime-digital-portrait 结构；其余 → 默认剧情示例
         _style_type = image_style.get("type", "") if image_style else ""
         _custom_val = _safe_str(image_style.get("value", "")).strip() if image_style else ""
         _use_watercolor_template = _style_type == "watercolor" or (_style_type == "custom" and "水彩" in _custom_val)
-        json_example_for_llm = PROMPT_JSON_WATERCOLOR_REF if _use_watercolor_template else PROMPT_JSON_EXAMPLE_SCENE
+        _use_anime_template = _style_type == "anime" or (_style_type == "custom" and ("动漫" in _custom_val or "漫画" in _custom_val))
+        if _use_watercolor_template:
+            json_example_for_llm = PROMPT_JSON_WATERCOLOR_REF
+        elif _use_anime_template:
+            json_example_for_llm = PROMPT_JSON_EXAMPLE_ANIME_SCENE
+        else:
+            json_example_for_llm = PROMPT_JSON_EXAMPLE_SCENE
         json_example_str = json.dumps(json_example_for_llm, ensure_ascii=False, indent=2)
 
         llm_prompt = f"""假设你是一个专业的剧情分析师和视觉设计师，现在需要你将剧情转化为具体的视觉描述，告诉生图AI如何生成图片。
@@ -932,7 +1142,7 @@ JSON 结构（所有数组均为字符串数组；嵌套对象见说明）：
 - output_style：成片风格数组，如 "dreamlike magical realism", "no text or symbols in image"。
 
 以上字段均需根据【当前剧情】与【图片风格要求】填写；配角请用「角色名-配角N」格式。参考示例（按此结构输出，仅替换为当前剧情内容）：
-{("【水彩/水墨淡彩风格】以下示例为水彩风格模板，请严格按此风格、结构与画风描述生成，仅将角色与场景替换为当前剧情。\n\n" if _use_watercolor_template else "")}{json_example_str}
+{("【水彩/水墨淡彩风格】以下示例为水彩风格模板，请严格按此风格、结构与画风描述生成，仅将角色与场景替换为当前剧情。\n\n" if _use_watercolor_template else ("【动漫/漫画风格】以下示例为 anime-digital-portrait 结构，请严格按此风格、结构与画风描述生成，仅将角色与场景替换为当前剧情。\n\n" if _use_anime_template else ""))}{json_example_str}
 
 只输出一个合法的 JSON 对象，不要用 markdown 代码块包裹以外的内容。"""
 
@@ -1209,15 +1419,18 @@ def optimize_main_character_prompt_with_llm(
             canonical_block_lines.append(f"标志性外观关键词：{canonical_signature}")
         canonical_block = "\n".join(canonical_block_lines) if canonical_block_lines else "（无）"
 
-        # 水彩风格：用参考图版主角 JSON 作为模板示例，让 LLM 按此风格与结构生成
+        # 按画风选择主角 JSON 模板：水彩 → 水彩参考；动漫/漫画 → anime-digital-portrait 结构；其余 → 默认主角示例
         _mc_style_type = image_style.get("type", "") if image_style else ""
         _mc_custom_val = _safe_str(image_style.get("value", "")).strip() if image_style else ""
         _use_watercolor_main_char = _mc_style_type == "watercolor" or (_mc_style_type == "custom" and "水彩" in _mc_custom_val)
-        json_example_main_char = json.dumps(
-            PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR if _use_watercolor_main_char else PROMPT_JSON_EXAMPLE_MAIN_CHAR,
-            ensure_ascii=False,
-            indent=2
-        )
+        _use_anime_main_char = _mc_style_type == "anime" or (_mc_style_type == "custom" and ("动漫" in _mc_custom_val or "漫画" in _mc_custom_val))
+        if _use_watercolor_main_char:
+            _json_example_mc = PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR
+        elif _use_anime_main_char:
+            _json_example_mc = PROMPT_JSON_EXAMPLE_ANIME_MAIN_CHAR
+        else:
+            _json_example_mc = PROMPT_JSON_EXAMPLE_MAIN_CHAR
+        json_example_main_char = json.dumps(_json_example_mc, ensure_ascii=False, indent=2)
         llm_prompt = f"""假设你是一个专业的角色设计师，需要为「主角形象立绘」生成视觉描述提示词。输出与剧情图相同的「精简 JSON 模板」结构，但仅描述人物本身，背景固定为纯白，无任何场景、道具或其它角色。
 
 【游戏背景信息】
@@ -1247,7 +1460,7 @@ def optimize_main_character_prompt_with_llm(
 【输出格式】请严格按照以下「精简 JSON 模板」输出，且仅输出该 JSON，不要其他解释或 markdown。键名必须为英文。数组字段请逐条列出。
 
 JSON 结构：**gender**（必填，"male"或"female"），label, tags, style, subject（body_traits, outfit, pose）, face_system, hair_system, clothing_system, environment（background 仅纯白、characters 空数组、effects 空数组）, color_restriction, lighting, camera, composition, mood, output_style。参考示例（按此结构输出，替换为当前主角内容；gender 须与【主角规范信息】一致）：
-{("【水彩/水墨淡彩风格】以下示例为水彩风格主角模板，请严格按此风格、结构与画风描述生成，仅将角色替换为当前主角（性别、外貌等须与【主角规范信息】一致）。\n\n" if _use_watercolor_main_char else "")}{json_example_main_char}
+{("【水彩/水墨淡彩风格】以下示例为水彩风格主角模板，请严格按此风格、结构与画风描述生成，仅将角色替换为当前主角（性别、外貌等须与【主角规范信息】一致）。\n\n" if _use_watercolor_main_char else ("【动漫/漫画风格】以下示例为 anime-digital-portrait 结构，请严格按此风格、结构与画风描述生成，仅将角色替换为当前主角（性别、外貌等须与【主角规范信息】一致）。\n\n" if _use_anime_main_char else ""))}{json_example_main_char}
 
 只输出一个合法的 JSON 对象，不要用 markdown 代码块包裹以外的内容。"""
 

@@ -5,8 +5,16 @@
 
 用法示例（在 DN-main 根目录下）：
 
-    
-python scripts/test_gemini_image.py --prompt "a boy standing in a mysterious forest, anime style"
+  # 单行提示词
+  python scripts/test_gemini_image.py --prompt "a boy standing in a mysterious forest, anime style"
+
+  # 多行 / JSON 提示词：从文件读入
+  python scripts/test_gemini_image.py --prompt-file prompt.json
+
+  # 多行 / JSON 提示词：交互输入（粘贴后单独一行输入 END 回车结束）
+  python scripts/test_gemini_image.py
+  （也可用 --prompt-file 指定文件，Windows 下最省事）
+
 环境依赖：
 - .env / 环境变量中已配置：
     Image_Generation_API_KEY
@@ -205,6 +213,32 @@ def run_test(prompt: str) -> None:
         print(img)
 
 
+def _read_prompt(args) -> str:
+    """从 --prompt、--prompt-file 或交互输入取提示词，优先顺序：文件 > 参数 > 交互。"""
+    if args.prompt_file:
+        path = Path(args.prompt_file)
+        if not path.exists():
+            print(f"❌ 文件不存在：{path}")
+            sys.exit(1)
+        return path.read_text(encoding="utf-8").strip()
+    if args.prompt is not None:
+        return args.prompt.strip()
+    # 交互式：多行输入，单独一行 END 结束（Windows 下比 Ctrl+Z 可靠）
+    if sys.stdin.isatty():
+        print("请输入多行提示词（可粘贴 JSON），单独一行输入 END 后回车结束：")
+        lines = []
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break
+            if line.strip() == "END":
+                break
+            lines.append(line)
+        return "\n".join(lines).strip()
+    return sys.stdin.read().strip()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="测试调用 yunwu.ai 的 Gemini 文生图接口（模型见 .env Image_Generation_MODEL）"
@@ -212,11 +246,22 @@ def main() -> None:
     parser.add_argument(
         "--prompt",
         type=str,
-        required=True,
-        help="用来生成图片的英文/中文提示词",
+        default=None,
+        help="单行提示词（英文/中文）",
+    )
+    parser.add_argument(
+        "--prompt-file",
+        type=str,
+        default=None,
+        metavar="FILE",
+        help="从文件读取提示词（可多行或 JSON，UTF-8）",
     )
     args = parser.parse_args()
-    run_test(args.prompt)
+    prompt = _read_prompt(args)
+    if not prompt:
+        print("❌ 提示词为空。")
+        sys.exit(1)
+    run_test(prompt)
 
 
 if __name__ == "__main__":
