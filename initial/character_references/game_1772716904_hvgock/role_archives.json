@@ -1,0 +1,20 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "艾莉娅",
+    "aliases": [
+      "艾莉娅",
+      "美人鱼"
+    ],
+    "story_background": "",
+    "first_appear_scene": "云海轻缓地踏过湿润的礁石，海水轻抚着他的赤足，带来阵阵清凉。他的深蓝色长发在海风中轻柔飘动，白色长袍如云雾般在身后摆动。…",
+    "first_img_id": "img_20260305_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772716904_hvgock\\艾莉娅_img_20260305_001.png",
+    "first_prompt": "scene-reef-encounter-mermaid-introduction-gentle-approach, ink-painting, fantasy-seascape, ethereal-encounter, mystical, oceanic-atmosphere, sumi-e with wet-on-wet watercolor blending, visible brushst…",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "scene-reef-encounter-mermaid-introduction-gentle-approach, ink-painting, fantasy-seascape, ethereal-encounter, mystical, oceanic-atmosphere, sumi-e with wet-on-wet watercolor blending, visible brushst…",
+    "face_ref_path": "艾莉娅_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772716904_hvgock\\艾莉娅_body_ref.png"
+  }
+}

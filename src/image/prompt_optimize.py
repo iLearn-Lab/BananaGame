@@ -292,20 +292,24 @@ PROMPT_JSON_EXAMPLE_MAIN_CHAR = {
 }
 
 # 水彩风格（参考图：多色发丝+大眼红唇+淡彩笔触）固定提示词 JSON，用户选水彩时剧情图直接使用，不调 LLM
+# 优化方向：颜色丰富清新透亮、真实光影、水痕晕染、轻盈随意笔触、水珠/边缘模糊感
 PROMPT_JSON_WATERCOLOR_REF = {
     "label": "scene-ink-closeup-multicolor-hair-heroine",
-    "tags": ["ink-painting", "anime-portrait", "close-up", "ethereal", "dramatic"],
+    "tags": ["watercolor", "anime-portrait", "close-up", "ethereal", "luminous", "fresh"],
     "style": [
-        "sumi-e with wet-on-wet watercolor blending",
-        "visible brushstrokes and paper grain texture",
-        "multiple thin ink layers for depth",
-        "soft watercolor wash with subtle bleed-through"
+        "watercolor painting with rich luminous colors, fresh and translucent palette",
+        "realistic light and shadow, strong chiaroscuro, natural lighting with soft highlights and deep shadows",
+        "visible water marks and wet-on-wet bleeding, soft color bleeding and pigment diffusion at edges",
+        "light casual brushstrokes, loose and spontaneous brushwork, delicate wash layers",
+        "water droplet accents or soft blurred edges, subtle bloom and edge softening",
+        "visible paper grain and brush hair texture, sumi-e wet-on-wet blending"
     ],
     "subject": {
         "body_traits": [
             "young woman with delicate facial features and fair skin",
-            "large expressive eyes with warm reddish-orange eyeshadow and subtle sparkles",
-            "gaze slightly upward with thoughtful confident expression",
+            "large expressive eyes with eyeshadow color determined by overall color tone, irises with fine ink-shaded lines and soft diffused highlights, gaze slightly upward",
+            "full lips with glossy reddish-orange tone, soft highlight on lip peak",
+            "thoughtful confident expression, head slightly tilted creating dynamic yet calm presence",
             "head slightly tilted creating dynamic yet calm presence",
             "soft blush on cheeks rendered as light ink wash"
         ],
@@ -323,13 +327,10 @@ PROMPT_JSON_WATERCOLOR_REF = {
     },
     "face_system": [
         "8K detailed facial features with ink wash and soft watercolor rendering",
-        "large expressive eyes with ink-shaded irises and subtle warm color wash",
-        "subtle reddish-orange eyeshadow as soft ink gradient around the eyes",
-        "sharp iris highlights and tiny sparkles created by ink contrast",
+        "large expressive eyes with eyeshadow color determined by overall color tone, irises with fine ink-shaded lines and soft diffused highlights, gaze slightly upward",
         "thin defined eyebrows with gentle ink strokes",
         "small delicate nose with faint highlight and soft shadow",
-        "full lips with glossy reddish-orange tone as light vermillion ink wash",
-        "lip peak highlight strength 0.3 and lip line depth 0.15",
+        "full lips with glossy reddish-orange tone, soft highlight on lip peak",
         "soft blush on cheeks and nose bridge suggested by diluted ink wash",
         "smooth fair skin with gentle ink shading",
         "no text, no symbols on the face or skin"
@@ -351,27 +352,28 @@ PROMPT_JSON_WATERCOLOR_REF = {
     "environment": {
         "background": [
             "pure white or very light paper-like background",
-            "delicate paper texture visible in negative space",
-            "moderate white space around the character to emphasize ink-painting composition"
+            "delicate paper texture and subtle water marks in negative space",
+            "moderate white space around the character to emphasize watercolor composition"
         ],
         "characters": [],
         "effects": [
             "tiny scattered ink dots and light color splashes around hair tips to enhance motion",
-            "soft aura around the head created by diluted ink halo",
-            "very subtle color mist behind hair edges to echo multicolor strands"
+            "soft aura around the head created by diluted wash halo with gentle edge blur",
+            "very subtle color mist and bleeding behind hair edges to echo multicolor strands",
+            "optional fine water droplet or soft bloom at edges for fresh translucent feel"
         ]
     },
     "color_restriction": [
-        "black and gray ink as the main tonal base",
-        "pastel and light color accents only in hair, eyes and lips",
-        "avoid heavy saturated neon colors",
-        "overall palette remains soft, airy and slightly cool with warm accents near the face"
+        "rich but fresh color palette, luminous and translucent, avoid muddy or dull tones",
+        "black and gray ink as main tonal base with clear highlights and shadows",
+        "pastel and light color accents in hair, eyes and lips with soft bleeding",
+        "overall palette soft and airy with realistic light-and-shadow depth"
     ],
     "lighting": [
-        "diffused soft frontal light illuminating the face evenly",
-        "slightly stronger highlight on the eyes and lips to draw focus",
-        "gentle falloff toward lower part of the garment",
-        "no harsh rim lights or strong backlighting, keeping traditional ink mood"
+        "realistic natural lighting with clear light direction, strong sense of light and shadow",
+        "soft diffused fill light with defined highlights on eyes, lips and hair",
+        "gentle falloff and translucent shadow, luminous skin and fabric where light passes through",
+        "subtle rim light or backlight allowed for edge glow, keeping watercolor mood"
     ],
     "camera": {
         "type": "close-up portrait",
@@ -379,8 +381,8 @@ PROMPT_JSON_WATERCOLOR_REF = {
         "aperture": "f/1.8",
         "depth_of_field": "very shallow focus on the face and eyes, background softly blurred",
         "flash": "none",
-        "grain": "natural rice paper grain and ink bleed texture, no digital noise",
-        "texture": "visible brush hair texture on hair strands, ink splatters at color edges"
+        "grain": "natural rice paper grain, water stain and pigment bleed texture, no digital noise",
+        "texture": "visible light brushstrokes, water marks and bleeding at edges, optional water droplet or soft bloom at color boundaries"
     },
     "composition": [
         "character centered in frame with slight head tilt to break symmetry",
@@ -398,10 +400,10 @@ PROMPT_JSON_WATERCOLOR_REF = {
         "slightly dramatic atmosphere created by hair movement and color accents"
     ],
     "output_style": [
-        "traditional Chinese ink wash mixed with soft watercolor",
+        "watercolor with ink wash, rich luminous colors and realistic light and shadow",
+        "emphasis on water marks, wet bleeding and soft blurred edges, light casual brushwork",
         "anime-inspired facial proportions and expression",
-        "painterly illustration rather than photorealistic rendering",
-        "no text, no symbols, no garbled characters, no words"
+        "painterly illustration with fresh translucent feel, no text, no symbols, no words"
     ]
 }
 
@@ -409,20 +411,20 @@ PROMPT_JSON_WATERCOLOR_REF = {
 PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR = {
     "gender": "female",
     "label": "main-character-full-body-portrait-ink-watercolor",
-    "tags": ["ink-painting", "portrait", "full-body", "single character", "ethereal"],
+    "tags": ["watercolor", "portrait", "full-body", "single character", "ethereal", "luminous"],
     "style": [
-        "traditional Chinese ink wash painting",
-        "sumi-e",
-        "soft watercolor wash",
-        "light traditional color wash",
-        "dreamy ethereal aesthetic",
-        "visible brushstrokes",
-        "moderate white space"
+        "watercolor with rich luminous colors, fresh and translucent palette",
+        "realistic light and shadow, strong chiaroscuro, natural lighting",
+        "water marks and wet-on-wet bleeding, soft color bleeding at edges",
+        "light casual brushstrokes, loose spontaneous brushwork",
+        "water droplet or soft blurred edge feel, delicate wash layers",
+        "traditional ink wash mixed with soft watercolor, visible paper grain"
     ],
     "subject": {
         "body_traits": [
             "young protagonist with delicate facial features and fair skin",
-            "large expressive eyes with warm reddish-orange eyeshadow and subtle sparkles",
+            "large expressive eyes with eyeshadow color determined by overall color tone, irises with fine ink-shaded lines and soft diffused highlights, gaze slightly upward",
+            "full lips with glossy reddish-orange tone, soft highlight on lip peak",
             "thoughtful confident expression, slender build, standing full body",
             "soft blush on cheeks rendered as light ink wash"
         ],
@@ -440,13 +442,10 @@ PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR = {
     },
     "face_system": [
         "8K detailed facial features with ink wash and soft watercolor rendering",
-        "large expressive eyes with ink-shaded irises and subtle warm color wash",
-        "subtle reddish-orange eyeshadow as soft ink gradient around the eyes",
-        "sharp iris highlights and tiny sparkles created by ink contrast instead of glitter",
+        "large expressive eyes with eyeshadow color determined by overall color tone, irises with fine ink-shaded lines and soft diffused highlights, gaze slightly upward",
         "thin defined eyebrows with gentle ink strokes",
         "small delicate nose with faint highlight and soft shadow",
-        "full lips with glossy reddish-orange tone as light vermillion ink wash",
-        "lip peak highlight strength 0.3 and lip line depth 0.15",
+        "full lips with glossy reddish-orange tone, soft highlight on lip peak",
         "soft blush on cheeks and nose bridge suggested by diluted ink wash",
         "smooth fair skin with gentle ink shading",
         "no text, no symbols, no letters rendered on the face or skin"
@@ -484,10 +483,10 @@ PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR = {
         "avoid heavy saturated neon colors, no environmental colors"
     ],
     "lighting": [
-        "diffused soft frontal light illuminating the face and body evenly",
-        "slightly stronger highlight on the eyes and lips to draw focus",
-        "gentle falloff toward lower part of the garment",
-        "no harsh rim lights, keeping traditional ink mood"
+        "realistic natural lighting with clear light direction, strong sense of light and shadow",
+        "soft diffused fill with defined highlights on eyes, lips and hair",
+        "gentle falloff and translucent shadow, luminous where light passes through",
+        "keeping watercolor mood with believable chiaroscuro"
     ],
     "camera": {
         "type": "full-body portrait",
@@ -495,8 +494,8 @@ PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR = {
         "aperture": "f/2.8",
         "depth_of_field": "shallow focus on character, background softly blurred",
         "flash": "none",
-        "grain": "subtle paper fiber texture instead of digital noise",
-        "texture": "visible ink brushstrokes and soft watercolor bleeding edges"
+        "grain": "subtle paper fiber and water stain texture, no digital noise",
+        "texture": "visible light brushstrokes, water marks and soft bleeding at edges"
     },
     "composition": [
         "single character only",
@@ -512,11 +511,10 @@ PROMPT_JSON_WATERCOLOR_REF_MAIN_CHAR = {
         "calm presence"
     ],
     "output_style": [
-        "traditional Chinese ink wash mixed with soft watercolor",
-        "anime-inspired facial proportions and expression",
-        "painterly illustration rather than photorealistic rendering",
-        "full-body character design, pure white background only",
-        "no text, no symbols, no garbled characters, no words"
+        "watercolor with ink wash, rich luminous colors and realistic light and shadow",
+        "water marks, wet bleeding and soft blurred edges, light casual brushwork",
+        "anime-inspired proportions, painterly with fresh translucent feel",
+        "full-body character design, pure white background only, no text, no symbols, no words"
     ]
 }
 
@@ -761,7 +759,7 @@ def optimize_image_prompt_with_llm(
             elif style_type == 'ink_painting':
                 style_description = '水墨画风格，中国传统水墨画，黑白灰调，意境深远'
             elif style_type == 'watercolor':
-                style_description = '水彩风格，水墨淡彩，中国传统水墨与软水彩结合，意境深远'
+                style_description = '水彩风格：颜色丰富、清新透亮，光影感强、追求真实光影效果，讲究水痕与晕染，笔触轻盈随意，可有水珠滴落或边缘模糊感；水墨与软水彩结合。'
             elif style_type == 'oil_painting':
                 subtype = image_style.get('subtype', 'classic_oil')
                 if subtype == 'impressionist':
@@ -1021,7 +1019,7 @@ def _get_style_description(image_style: Dict) -> str:
     if t == "ink_painting":
         return "水墨画风格，中国传统水墨"
     if t == "watercolor":
-        return "水彩风格，水墨淡彩"
+        return "水彩风格：颜色丰富清新透亮、真实光影、水痕晕染、轻盈笔触、水珠/边缘模糊感"
     if t == "oil_painting":
         return "油画风格，光影丰富，8K"
     if t == "cyberpunk":
@@ -1068,7 +1066,7 @@ def optimize_main_character_prompt_with_llm(
             elif style_type == 'ink_painting':
                 style_description = '水墨画风格，中国传统水墨画，黑白灰调，意境深远'
             elif style_type == 'watercolor':
-                style_description = '水彩风格，水墨淡彩，中国传统水墨与软水彩结合，意境深远'
+                style_description = '水彩风格：颜色丰富、清新透亮，光影感强、追求真实光影效果，讲究水痕与晕染，笔触轻盈随意，可有水珠滴落或边缘模糊感；水墨与软水彩结合。'
             elif style_type == 'oil_painting':
                 subtype = image_style.get('subtype', 'classic_oil')
                 if subtype == 'impressionist':

@@ -583,7 +583,7 @@ def generate_main_character_image(
     try:
         import threading
 
-        # 侧/背生成已改用 gemini-2.5-flash-image 图生图，不再使用 denoising_strength
+        # 侧/背生成已改用 Gemini 图生图（模型由 Image_Generation_MODEL 配置），不再使用 denoising_strength
 
         # metadata 并发写保护（侧/背线程会更新 metadata.json）
         _metadata_lock = threading.Lock()
@@ -620,7 +620,9 @@ def generate_main_character_image(
 
                 if image_url_str_local.startswith("data:image"):
                     import base64
-                    base64_data = image_url_str_local.split(",", 1)[1] if "," in image_url_str_local else image_url_str_local
+                    if "," not in image_url_str_local:
+                        return False
+                    base64_data = image_url_str_local.split(",", 1)[1]
                     image_data = base64.b64decode(base64_data)
                     with open(out_path, "wb") as f:
                         f.write(image_data)
@@ -709,18 +711,18 @@ def generate_main_character_image(
                     f"🔎 主角{view_name}图参考正面: {reference_front_path} exists={os.path.exists(reference_front_path) if isinstance(reference_front_path, str) else False} front_mtime_at_start={front_mtime_at_start}"
                 )
                 
-                # 优先使用 gemini-2.5-flash-image 图生图
+                # 优先使用 Gemini 图生图（模型由 Image_Generation_MODEL 配置）
                 img = None
                 use_img2img = False
                 model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview")
                 if "gemini" in model.lower() and "image" in model.lower():
-                    print(f"🔄 尝试使用 gemini-2.5-flash-image 图生图生成{view_name}视图...")
+                    print(f"🔄 尝试使用 Gemini 图生图（{model}）生成{view_name}视图...")
                     img = call_gemini_img2img(prompt_text, reference_front_path, cache_key_suffix=reference_front_path)
                     use_img2img = True
                     if img:
-                        print(f"✅ gemini-2.5-flash-image 图生图成功")
+                        print(f"✅ Gemini 图生图成功")
                     else:
-                        print(f"⚠️ gemini-2.5-flash-image 图生图失败，回退到文生图")
+                        print(f"⚠️ Gemini 图生图失败，回退到文生图")
                 
                 # 如果图生图失败，回退到文生图
                 if not img:
@@ -1234,7 +1236,7 @@ def generate_scene_image(
                     if "gemini" in model.lower() and "image" in model.lower():
                         n_prot = len(protagonist_refs_to_send)
                         n_prev = 1 if previous_scene_image_path else 0
-                        print(f"🎨 使用 gemini-2.5-flash-image 图生图，传递{len(all_reference_images)}张参考图（主角{n_prot}张+配角{len(supporting_role_images or [])}张+上一张剧情图{n_prev}张）")
+                        print(f"🎨 使用 Gemini 图生图，传递{len(all_reference_images)}张参考图（主角{n_prot}张+配角{len(supporting_role_images or [])}张+上一张剧情图{n_prev}张）")
                         prefix_lines = []
                         view_labels = ["Front view portrait of the protagonist", "Side view portrait of the protagonist", "Back view portrait of the protagonist"]
                         for j in range(n_prot):
@@ -1480,7 +1482,7 @@ def generate_scene_image(
 
 def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_images: List[str] = None, cache_key_suffix: str = None) -> str:
     """
-    使用 gemini-2.5-flash-image 进行图生图，支持多张参考图
+    使用 Gemini 图生图模型（由 Image_Generation_MODEL 配置，如 gemini-3-pro-image-preview）进行图生图，支持多张参考图
     :param prompt: 文本提示词
     :param reference_image_path: 参考图片路径（本地路径或 data URI），可以是字符串或字符串列表
     :param additional_reference_images: 额外的参考图片路径列表（可选）
@@ -1489,18 +1491,21 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
     """
     import time
     import base64
-    
+
+    # 确保 prompt 为字符串，避免 content 中出现 "None" 或类型错误
+    prompt = (prompt or "").strip() if prompt is not None else ""
+
     api_key = IMAGE_GENERATION_CONFIG.get("yunwu_api_key")
     base_url = IMAGE_GENERATION_CONFIG.get("yunwu_base_url", "https://yunwu.ai/v1")
     model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview")
     
     if not api_key:
-        print("⚠️ gemini-2.5-flash-image 图生图：API Key未配置")
+        print("⚠️ Gemini 图生图：API Key未配置")
         return None
     
-    # 检查模型是否为 gemini-2.5-flash-image
+    # 检查模型是否为 Gemini 图生图类（名称含 gemini 且含 image）
     if "gemini" not in model.lower() or "image" not in model.lower():
-        print(f"⚠️ 当前模型 {model} 不是 gemini-2.5-flash-image，跳过图生图")
+        print(f"⚠️ 当前模型 {model} 不是 Gemini 图生图模型，跳过图生图")
         return None
     
     # 处理参考图片：支持单个路径或路径列表
@@ -1561,9 +1566,30 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
         "type": "text",
         "text": prompt_text
     })
-    
+
+    # 确保 content 非空，避免 API 报错「缺少 content」
+    if not content_items:
+        print("⚠️ 图生图 content 为空，无法请求")
+        return None
+
+    # 服务端报错 "contents is required" 时说明需传 Gemini 原生格式的 contents（不能只有 messages）
+    # 将 data URI 转为 Gemini parts：inlineData { mimeType, data } + text
+    contents_parts = []
+    for image_data_uri in image_data_uris:
+        if isinstance(image_data_uri, str) and image_data_uri.startswith("data:image") and "," in image_data_uri:
+            header, b64 = image_data_uri.split(",", 1)
+            mime = "image/png"
+            if ";" in header:
+                m = re.search(r"data:image/([^;]+)", header)
+                if m:
+                    mime = m.group(1).strip()
+            contents_parts.append({"inlineData": {"mimeType": mime, "data": b64.strip()}})
+    contents_parts.append({"text": prompt_text})
+    contents_payload = [{"role": "user", "parts": contents_parts}]
+
     request_body = {
         "model": model,
+        "contents": contents_payload,
         "messages": [
             {
                 "role": "user",
@@ -1573,7 +1599,7 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
         "temperature": 0.1,
         "max_tokens": 4000
     }
-    
+
     request_timeout = int(os.getenv("YUNWU_IMAGE_TIMEOUT_SECONDS", "180"))
     min_interval = float(os.getenv("YUNWU_MIN_INTERVAL_SECONDS", "12"))
     
@@ -1589,7 +1615,7 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
                 time.sleep(sleep_s)
             _YUNWU_LAST_CALL_TS = time.time()
         
-        print(f"🔄 调用 gemini-2.5-flash-image 图生图 API（{len(image_data_uris)}张参考图）...")
+        print(f"🔄 调用 Gemini 图生图 API（{model}，{len(image_data_uris)}张参考图）...")
         print(f"   提示词: {prompt[:100]}...")
         ref_paths_str = ", ".join([ref[:50] + "..." if len(ref) > 50 else ref for ref in reference_paths])
         print(f"   参考图: {ref_paths_str}")
@@ -1616,14 +1642,37 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
             except:
                 error_msg = response.text[:200]
             
-            print(f"❌ gemini-2.5-flash-image 图生图 API 错误 {response.status_code}: {error_msg}")
+            print(f"❌ Gemini 图生图 API 错误 {response.status_code}: {error_msg}")
             return None
         
         # 解析响应（复用 call_yunwu_image_api 的解析逻辑）
         result = response.json()
-        
-        # 尝试从响应中提取图片
-        # 使用与 call_yunwu_image_api 相同的解析策略
+
+        # 可能导致 contents/content 解析不出来的情况：
+        # 1. 代理返回体包在 data 里：result = { "data": { "choices": ... } }，需先取 result["data"]
+        # 2. 代理返回顶层 contents（复数）而非 candidates：需兼容 result["contents"][0].parts
+        # 3. Gemini 用 inlineData（驼峰），部分实现用 inline_data（下划线），需兼容两种
+        # 4. candidates[0] 有 content 但 content 不是 dict（如 null/字符串），或 parts 为空/缺失
+        # 5. 响应为非 JSON、或为 list/字符串而非 dict，导致 .get() 报错或取不到
+        def _parts_to_image(parts) -> str:
+            """从 parts 列表中提取第一张图片的 data URI 或 URL。"""
+            for p in parts:
+                if not isinstance(p, dict):
+                    continue
+                # 兼容 inlineData（驼峰）与 inline_data（下划线）
+                inline = p.get("inlineData") or p.get("inline_data")
+                if isinstance(inline, dict) and inline.get("data"):
+                    mime = inline.get("mimeType") or inline.get("mime_type", "image/png")
+                    return f"data:{mime};base64,{inline['data']}"
+                text = p.get("text", "")
+                if isinstance(text, str) and text.strip():
+                    if text.strip().startswith("data:image") or text.strip().startswith("http"):
+                        return text.strip()
+                    base64_match = re.search(r"data:image/[^;]+;base64,[A-Za-z0-9+/=\s]+", text)
+                    if base64_match:
+                        return base64_match.group(0).strip()
+            return ""
+
         def _extract_image_from_response(obj) -> str:
             try:
                 if not isinstance(obj, dict):
@@ -1633,17 +1682,53 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
                     v = obj.get(k)
                     if isinstance(v, str) and v.strip():
                         return v.strip()
-                # choices[0].message.content
+                # Gemini 原生格式：candidates[0].content.parts
+                candidates = obj.get("candidates") or []
+                if candidates and len(candidates) > 0:
+                    first = candidates[0] if isinstance(candidates[0], dict) else {}
+                    content = first.get("content")
+                    parts = []
+                    if isinstance(content, dict):
+                        parts = content.get("parts") or []
+                    # 部分代理把 parts 放在 candidate 下而非 content 下
+                    if not parts and isinstance(first.get("parts"), list):
+                        parts = first.get("parts") or []
+                    if parts:
+                        out = _parts_to_image(parts)
+                        if out:
+                            return out
+                # 兼容顶层 contents（复数）：如 result.contents[0].parts
+                contents_list = obj.get("contents") or []
+                if isinstance(contents_list, list) and contents_list:
+                    first_content = contents_list[0] if isinstance(contents_list[0], dict) else {}
+                    parts = first_content.get("parts") or []
+                    if parts:
+                        out = _parts_to_image(parts)
+                        if out:
+                            return out
+                # OpenAI 风格：choices[0].message.content
                 choices = obj.get("choices", [])
                 if choices and len(choices) > 0:
-                    message = choices[0].get("message", {})
+                    message = choices[0].get("message", {}) or {}
                     content = message.get("content", "")
-                    if isinstance(content, str) and content.strip():
-                        # 检查是否是 base64 或 URL
+                    if isinstance(content, list):
+                        for part in content:
+                            if not isinstance(part, dict):
+                                continue
+                            if part.get("type") == "image_url":
+                                url = (part.get("image_url") or {}).get("url")
+                                if url:
+                                    return url
+                            text = part.get("text", "")
+                            if isinstance(text, str) and text.strip():
+                                if text.strip().startswith("data:image") or text.strip().startswith("http"):
+                                    return text.strip()
+                                base64_match = re.search(r"data:image/[^;]+;base64,[A-Za-z0-9+/=\s]+", text)
+                                if base64_match:
+                                    return base64_match.group(0).strip()
+                    elif isinstance(content, str) and content.strip():
                         if content.startswith("data:image") or content.startswith("http"):
                             return content.strip()
-                        # 尝试从文本中提取 base64
-                        import re
                         base64_match = re.search(r'data:image/[^;]+;base64,([A-Za-z0-9+/=\s]+)', content)
                         if base64_match:
                             return f"data:image/png;base64,{base64_match.group(1).strip()}"
@@ -1651,8 +1736,11 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
             except Exception as e:
                 print(f"⚠️ 解析响应时出错: {str(e)}")
                 return ""
-        
+
+        # 先尝试直接解析；若代理把真实响应放在 result["data"] 下，再试一次
         image_result = _extract_image_from_response(result)
+        if not image_result and isinstance(result.get("data"), dict):
+            image_result = _extract_image_from_response(result["data"])
         if image_result:
             # 如果是 base64，保存到本地缓存（cache_key_suffix 用于主角侧/背图按游戏区分）
             if image_result.startswith("data:image"):
@@ -1661,19 +1749,19 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
                     return saved_path
             return image_result
         
-        print(f"⚠️ gemini-2.5-flash-image 图生图响应中未找到图片数据")
+        print(f"⚠️ Gemini 图生图响应中未找到图片数据")
         return None
         
     except requests.exceptions.ConnectTimeout as e:
-        print(f"❌ gemini-2.5-flash-image 图生图连接超时：无法在 {request_timeout} 秒内连上 yunwu.ai")
+        print(f"❌ Gemini 图生图连接超时：无法在 {request_timeout} 秒内连上 yunwu.ai")
         print(f"   可能原因：1) 本机网络无法访问 yunwu.ai  2) 需代理时请设置环境变量 HTTPS_PROXY  3) 防火墙/地区限制")
         return None
     except requests.exceptions.ConnectionError as e:
-        print(f"❌ gemini-2.5-flash-image 图生图连接失败：无法连接 yunwu.ai（{e})")
+        print(f"❌ Gemini 图生图连接失败：无法连接 yunwu.ai（{e})")
         print(f"   请检查网络或设置 HTTPS_PROXY 后再试")
         return None
     except Exception as e:
-        print(f"❌ gemini-2.5-flash-image 图生图调用异常: {str(e)}")
+        print(f"❌ Gemini 图生图调用异常: {str(e)}")
         import traceback
         traceback.print_exc()
         return None
@@ -1682,34 +1770,39 @@ def call_gemini_img2img(prompt: str, reference_image_path, additional_reference_
 def call_yunwu_image_api(prompt: str, style: str) -> str:
     """调用yunwu.ai图片生成API（带重试机制处理速率限制）"""
     import time
-    
+
+    # 确保 content 不为 None/空，避免 API 报错「缺少 content」或无效描述
+    prompt = (prompt or "").strip() if prompt is not None else ""
+    if not prompt:
+        print("⚠️ 文生图 prompt 为空，使用默认描述避免 content 缺失")
+        prompt = "a detailed scene, high quality, 4k, no text"
+
     api_key = IMAGE_GENERATION_CONFIG.get("yunwu_api_key")
     base_url = IMAGE_GENERATION_CONFIG.get("yunwu_base_url", "https://yunwu.ai/v1")
     model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "sora_image")
-    
+
     if not api_key:
         raise ValueError("yunwu.ai API Key未配置")
-    
+
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
-    
+
     # 调用yunwu.ai的图片生成API（使用chat/completions接口）
-    # 注意：gemini-2.5-flash-image 模型可能不支持 response_format 参数
+    # 注意：Gemini 图生模型可能不支持 response_format 参数
     # 注意：不同模型可能有不同的返回格式，需要兼容处理
-    
+
     # 根据模型类型调整提示词
+    # 服务端报错 "contents is required" 时需传 Gemini 原生格式的 contents
     if "gemini" in model.lower() and "image" in model.lower():
         # Gemini 图片生成模型：尝试使用英文提示词（模型可能是英文训练的）
-        # 尝试不使用 system message，只使用 user message，更简洁直接
+        user_text = f"Generate an image based on this description: {prompt}\n\nReturn only the image as base64 data (data:image/png;base64,...) or image URL (https://...). Do not include any text, code blocks, or explanations."
         request_body = {
             "model": model,
+            "contents": [{"role": "user", "parts": [{"text": user_text}]}],
             "messages": [
-                {
-                    "role": "user",
-                    "content": f"Generate an image based on this description: {prompt}\n\nReturn only the image as base64 data (data:image/png;base64,...) or image URL (https://...). Do not include any text, code blocks, or explanations."
-                }
+                {"role": "user", "content": user_text}
             ],
             "temperature": 0.1,
             "max_tokens": 4000
@@ -1720,15 +1813,12 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
         user_content = f"生成图片：{prompt}\n\n返回格式：data:image/png;base64,<base64数据> 或 https://图片URL"
         request_body = {
             "model": model,
+            "contents": [
+                {"role": "user", "parts": [{"text": system_content + "\n\n" + user_content}]}
+            ],
             "messages": [
-                {
-                    "role": "system",
-                    "content": system_content
-                },
-                {
-                    "role": "user",
-                    "content": user_content
-                }
+                {"role": "system", "content": system_content},
+                {"role": "user", "content": user_content}
             ],
             "temperature": 0.1,
             "max_tokens": 4000
@@ -1753,9 +1843,8 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
             "max_tokens": 2000
         }
     
-    # 注意：gemini-2.5-flash-image 模型不支持 response_format 参数，不要添加
-    # 如果模型是 sora_image 或其他支持JSON模式的模型，可以尝试添加
-    # 但 gemini-2.5-flash-image 不支持，会导致400错误
+    # 注意：Gemini 图生模型不支持 response_format 参数，不要添加
+    # 如果模型是 sora_image 或其他支持 JSON 模式的模型，可以尝试添加
     
     # 可配置：超时/最小间隔/重试次数（避免长时间卡住 + 降低 429 概率）
     # 🔧 修复：增加默认超时时间到180秒，因为图片生成通常需要较长时间
@@ -1851,11 +1940,43 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                 except Exception as parse_error:
                     print(f"❌ 无法解析400错误响应：{str(parse_error)}")
                     response.raise_for_status()
+
+            elif response.status_code == 404:
+                # 404 有时带 body「当前分组上游负载已饱和」：与 429 同理，是服务端/上游容量问题，不是你的请求频率
+                is_404_upstream_saturated = False
+                try:
+                    error_body = response.json()
+                    if isinstance(error_body, dict):
+                        err_obj = error_body.get("error") or {}
+                        if isinstance(err_obj, dict):
+                            err_type = (err_obj.get("type") or "").strip()
+                            err_msg = (err_obj.get("message") or "").strip()
+                            if err_type == "upstream_error" or "上游" in err_msg or "负载" in err_msg:
+                                is_404_upstream_saturated = True
+                except Exception:
+                    err_text = (response.text or "")[:500]
+                    if "上游" in err_text or "负载" in err_text:
+                        is_404_upstream_saturated = True
+                if is_404_upstream_saturated:
+                    print(f"💡 404「上游负载已饱和」：与您隔多久发一次无关，是服务端当前分组的共享上游已满，按长等待重试")
+                    base_wait_404 = int(os.getenv("YUNWU_429_BASE_WAIT_SECONDS", "60"))
+                    base_wait_404 = max(10, min(300, base_wait_404))
+                    wait_404 = base_wait_404 * (2 ** attempt)
+                    wait_404 = min(wait_404, 300)
+                    print(f"⚠️ 等待 {wait_404} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
+                    if attempt < max_retries - 1:
+                        time.sleep(wait_404)
+                        continue
+                    response.raise_for_status()
+                else:
+                    print(f"❌ yunwu.ai 返回 404：{response.text[:300] if response.text else ''}")
+                    response.raise_for_status()
             
             elif response.status_code == 429:
                 # 尝试从响应头获取重试时间和详细信息
                 retry_after = response.headers.get('Retry-After')
                 rate_limit_info = {}
+                is_upstream_saturated = False  # 上游负载已饱和，需更长等待
                 
                 # 尝试解析响应体获取更多信息
                 try:
@@ -1863,10 +1984,20 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                     if isinstance(error_body, dict):
                         rate_limit_info = error_body
                         print(f"🔍 速率限制详细信息：{json.dumps(rate_limit_info, ensure_ascii=False)}")
-                except:
-                    error_text = response.text[:200] if hasattr(response, 'text') else ""
+                        err_obj = error_body.get("error") or {}
+                        if isinstance(err_obj, dict):
+                            err_type = (err_obj.get("type") or "").strip()
+                            err_msg = (err_obj.get("message") or "").strip()
+                            if err_type == "upstream_error" or "上游" in err_msg or "负载" in err_msg:
+                                is_upstream_saturated = True
+                                print(f"💡 检测到「上游负载饱和」，将使用更长等待时间重试（与您请求频率无关，是服务端分组上游容量饱和）")
+                except Exception:
+                    error_text = response.text[:500] if hasattr(response, 'text') else ""
                     if error_text:
                         print(f"🔍 速率限制响应内容：{error_text}")
+                        if "上游" in error_text or "负载" in error_text:
+                            is_upstream_saturated = True
+                            print(f"💡 检测到「上游负载饱和」，将使用更长等待时间重试")
                 
                 # 检查响应头中的速率限制信息
                 rate_limit_headers = {
@@ -1878,18 +2009,22 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                 if any(rate_limit_headers.values()):
                     print(f"🔍 速率限制响应头：{json.dumps({k: v for k, v in rate_limit_headers.items() if v}, ensure_ascii=False)}")
                 
+                # 429 基础等待秒数（上游饱和时默认 60，可设 90～120）
+                base_wait = int(os.getenv("YUNWU_429_BASE_WAIT_SECONDS", "60" if is_upstream_saturated else "10"))
+                base_wait = max(10, min(300, base_wait))
+                
                 # Retry-After 可能是秒数（整数）或 HTTP-date（如 RFC 7231 指定）
                 wait_time = None
                 if retry_after:
                     retry_after_raw = str(retry_after).strip()
-                    # 先尝试按“秒数”解析
                     try:
                         wait_time = int(retry_after_raw)
                         if wait_time < 0:
                             wait_time = 0
+                        if is_upstream_saturated and wait_time < 30:
+                            wait_time = max(wait_time, 30)
                         print(f"⚠️ 遇到速率限制（429），API建议等待 {wait_time} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
                     except (TypeError, ValueError):
-                        # 再尝试按 HTTP-date 解析
                         try:
                             from email.utils import parsedate_to_datetime
                             from datetime import datetime, timezone
@@ -1900,28 +2035,29 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                                 now = datetime.now(timezone.utc)
                                 wait_seconds = int((dt.astimezone(timezone.utc) - now).total_seconds())
                                 wait_time = max(0, wait_seconds)
+                                if is_upstream_saturated and wait_time < 30:
+                                    wait_time = max(wait_time, 30)
                                 print(f"⚠️ 遇到速率限制（429），API建议等待 {wait_time} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
                         except Exception:
                             wait_time = None
                 
                 if wait_time is None:
-                    # 如果 Retry-After 不存在或无法解析，使用指数退避：10s, 20s, 40s
-                    wait_time = 10 * (2 ** attempt)
+                    # 指数退避：base_wait * 2^attempt（上游饱和时 base_wait 默认 30）
+                    wait_time = base_wait * (2 ** attempt)
+                    wait_time = min(wait_time, 300)
                     if retry_after:
                         print(f"⚠️ 遇到速率限制（429），但 Retry-After 无法解析（{retry_after!r}），改用指数退避等待 {wait_time} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
                     else:
                         print(f"⚠️ 遇到速率限制（429），等待 {wait_time} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
                 
                 print(f"💡 可能的原因：")
-                print(f"   1. yunwu.ai 最近调整了速率限制策略")
-                print(f"   2. API配额已用完（免费额度用尽）")
-                print(f"   3. 账户级别变化（可能降级到免费版）")
-                print(f"   4. 使用量增加导致触发限制")
-                print(f"   5. 图片生成API的限制比文本生成更严格")
+                print(f"   1. 当前分组上游负载已饱和（与您隔多久发一次无关，是服务端共享上游容量满）")
+                print(f"   2. yunwu.ai 速率限制或配额用尽")
+                print(f"   3. 图片生成 API 限制比文本更严")
                 print(f"💡 建议：")
-                print(f"   - 检查 yunwu.ai 账户状态和配额")
-                print(f"   - 考虑切换到其他图片生成服务（ComfyUI、Replicate等）")
-                print(f"   - 增加请求间隔时间")
+                print(f"   - .env 增加 YUNWU_429_BASE_WAIT_SECONDS=60 或 90（上游饱和时每次等待更久）")
+                print(f"   - .env 增加 YUNWU_IMAGE_MAX_RETRIES=5 或 6（多试几次）")
+                print(f"   - 换时段再试，或考虑 ComfyUI/Replicate 等其它生图服务")
                 
                 # 如果还有重试机会，等待后继续
                 if attempt < max_retries - 1:
@@ -1931,10 +2067,13 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                     # 最后一次尝试也失败，抛出异常
                     response.raise_for_status()
             
-            elif response.status_code in (502, 503, 504):
-                # 502 Bad Gateway / 503 Service Unavailable / 504 Gateway Timeout：服务端临时故障，可重试
+            elif response.status_code in (500, 502, 503, 504):
+                # 500 Internal Server Error / 502 Bad Gateway / 503 Service Unavailable / 504 Gateway Timeout：服务端临时故障，可重试
                 wait_time = 8 + (attempt * 5)  # 8s, 13s, 18s
-                print(f"⚠️ yunwu.ai 服务暂时不可用（{response.status_code}），{wait_time} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
+                if response.status_code == 500:
+                    print(f"⚠️ yunwu.ai 服务端内部错误（500），{wait_time} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
+                else:
+                    print(f"⚠️ yunwu.ai 服务暂时不可用（{response.status_code}），{wait_time} 秒后重试（尝试 {attempt + 1}/{max_retries}）")
                 if attempt < max_retries - 1:
                     time.sleep(wait_time)
                     continue
@@ -1955,6 +2094,28 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                 return None
 
             # 解析策略0：优先从“结构化字段”提取（避免只依赖 choices[0].message.content）
+            # 可能导致 contents/content 解析不出来的情况：见 call_gemini_img2img 内注释；此处做兼容
+            def _parts_to_image_save(obj_parts) -> str:
+                """从 parts 列表提取图片并保存，返回本地路径或 URL。"""
+                for p in (obj_parts or []):
+                    if not isinstance(p, dict):
+                        continue
+                    inline = p.get("inlineData") or p.get("inline_data")
+                    if isinstance(inline, dict) and inline.get("data"):
+                        mime = inline.get("mimeType") or inline.get("mime_type", "image/png")
+                        data_uri = f"data:{mime};base64,{inline['data']}"
+                        return save_base64_image(data_uri, prompt) or ""
+                    text = p.get("text", "")
+                    if isinstance(text, str) and text.strip():
+                        if text.strip().startswith("data:image"):
+                            return save_base64_image(text.strip(), prompt) or ""
+                        if text.strip().startswith("http"):
+                            return text.strip()
+                        base64_match = re.search(r"data:image/[^;]+;base64,[A-Za-z0-9+/=\s]+", text)
+                        if base64_match:
+                            return save_base64_image(base64_match.group(0).strip(), prompt) or ""
+                return ""
+
             def _extract_from_structured(obj) -> str:
                 try:
                     if not isinstance(obj, dict):
@@ -1964,6 +2125,25 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                         v = obj.get(k)
                         if isinstance(v, str) and v.strip():
                             return v.strip()
+                    # Gemini 原生格式：candidates[0].content.parts（并兼容 parts 在 candidate 下）
+                    candidates = obj.get("candidates") or []
+                    if candidates and len(candidates) > 0:
+                        first = candidates[0] if isinstance(candidates[0], dict) else {}
+                        content = first.get("content")
+                        parts = (content.get("parts") or []) if isinstance(content, dict) else []
+                        if not parts:
+                            parts = first.get("parts") or []
+                        out = _parts_to_image_save(parts)
+                        if out:
+                            return out
+                    # 兼容顶层 contents（复数）
+                    contents_list = obj.get("contents") or []
+                    if isinstance(contents_list, list) and contents_list:
+                        first_content = contents_list[0] if isinstance(contents_list[0], dict) else {}
+                        parts = first_content.get("parts") or []
+                        out = _parts_to_image_save(parts)
+                        if out:
+                            return out
                     # 常见：images: [<base64>, ...]
                     images = obj.get("images")
                     if isinstance(images, list) and images:
@@ -2001,6 +2181,8 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                     return ""
 
             structured = _extract_from_structured(result)
+            if not structured and isinstance(result.get("data"), dict):
+                structured = _extract_from_structured(result["data"])
             if structured:
                 return structured
 
@@ -2258,7 +2440,7 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                 if is_empty_code_block:
                     print(f"⚠️ 检测到空的代码块，说明yunwu.ai API没有生成图片数据")
                     print(f"💡 可能的原因：")
-                    print(f"   1. gemini-2.5-flash-image 模型可能不支持图片生成，或需要不同的调用方式")
+                    print(f"   1. 当前 Gemini 图生模型可能不支持图片生成，或需要不同的调用方式")
                     print(f"   2. API密钥权限不足，无法使用图片生成功能")
                     print(f"   3. 提示词格式不符合模型要求")
                     print(f"   4. 模型可能返回了错误信息，但被包装在空代码块中")
@@ -2300,7 +2482,7 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                     
                     print(f"💡 建议：")
                     print(f"   - 检查.env文件中的yunwu_model配置，尝试切换到其他模型（如 sora_image）")
-                    print(f"   - 检查yunwu.ai API文档，确认gemini-2.5-flash-image模型是否支持图片生成")
+                    print(f"   - 检查 yunwu.ai API 文档，确认当前模型（Image_Generation_MODEL）是否支持图片生成")
                     print(f"   - 如果API不支持图片生成，可以切换到其他图片生成服务")
                     return None
                 
@@ -2455,12 +2637,12 @@ def call_yunwu_image_api(prompt: str, style: str) -> str:
                 print(f"💡 提示：yunwu.ai返回的是文本描述而非图片数据，可能是API生成失败或返回格式异常")
                 print(f"💡 可能的原因：")
                 print(f"   1. yunwu.ai API模型配置不正确（当前模型：{model}）")
-                print(f"   2. gemini-2.5-flash-image 模型可能不支持图片生成，或返回格式不同")
+                print(f"   2. 当前 Gemini 图生模型可能不支持图片生成，或返回格式不同")
                 print(f"   3. API返回格式不符合预期，需要检查yunwu.ai API文档")
                 print(f"   4. API密钥权限不足或配置错误")
                 print(f"   5. 提示词格式不符合模型要求")
                 print(f"💡 建议：")
-                print(f"   - 检查.env文件中的yunwu_api_key和yunwu_model配置")
+                print(f"   - 检查 .env 中的 Image_Generation_API_KEY 和 Image_Generation_MODEL 配置")
                 print(f"   - 尝试切换到其他支持图片生成的模型（如 sora_image）")
                 print(f"   - 确认yunwu.ai API是否支持图片生成功能")
                 print(f"   - 查看yunwu.ai API文档确认正确的调用方式")

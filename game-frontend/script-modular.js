@@ -1725,6 +1725,12 @@ const Game = (() => {
                     '查看周围环境'
                 ];
                 
+                // 首屏：若服务端返回了 sceneId（预生成用），则使用该 ID 与预生成缓存一致
+                if (optionData.sceneId) {
+                    gameState.currentSceneId = optionData.sceneId;
+                    console.log('✅ 首屏使用服务端预生成 sceneId:', optionData.sceneId);
+                }
+                
                 // 限制选项数量为2个
                 if (initialOptions.length > 2) {
                     initialOptions = initialOptions.slice(0, 2);
@@ -1984,8 +1990,7 @@ const Game = (() => {
             imageUrl: imageData ? imageData.url : null
         });
         
-        // 重置预生成触发标志，确保每次新场景显示时都可以触发预生成
-        gameState._pregenerationTriggered = false;
+        // 预生成已改为与首屏一致：由后端在 /generate-option 返回时触发，前端不再调用 /pregenerate-next-layers
         
         // 文本切分：将完整文本切分成段落
         const segments = splitTextIntoSegments(text);
@@ -2275,22 +2280,7 @@ const Game = (() => {
             
             // 等待一帧确保DOM完全更新后再开始新动画
             requestAnimationFrame(() => {
-                // 在开始显示第一段文本时，立即触发预生成（利用用户阅读时间）
-                // 检查是否已经触发过预生成（避免重复触发）
-                if (!gameState._pregenerationTriggered && options && options.length > 0) {
-                    gameState._pregenerationTriggered = true;
-                    
-                    // 生成新的场景ID用于预生成缓存
-                    const newSceneId = generateNewSceneId();
-                    gameState.currentSceneId = newSceneId;
-                    
-                    console.log('🚀 文本开始显示，立即触发预生成（场景ID:', newSceneId, '）');
-                    
-                    // 异步调用预生成接口（不阻塞文本显示）
-                    if (gameState.gameData && options && options.length > 0) {
-                        pregenerateNextLayers(gameState.gameData, options, newSceneId);
-                    }
-                }
+                // 预生成已由后端在 /generate-option 返回时统一触发，与首屏一致，此处不再调用
                 
                 // 再次强制设置样式，确保动画不会覆盖我们的设置
                 sceneTextElement.style.setProperty('transform', 'none', 'important');
@@ -2631,6 +2621,11 @@ const Game = (() => {
                             
                             // 解析生成的剧情和选项
                             const optionData = result.optionData;
+                            // 与首屏一致：后端已在返回时触发下一轮预生成并带上 sceneId，此处统一更新供下次点选项使用
+                            if (optionData && optionData.sceneId) {
+                                gameState.currentSceneId = optionData.sceneId;
+                                console.log('✅ 使用服务端返回的下一轮 sceneId:', optionData.sceneId);
+                            }
                             
                             // 重要：验证场景文本是否有效（不是空字符串或默认值）
                             let nextScene = optionData.scene;
@@ -2805,9 +2800,7 @@ const Game = (() => {
                                 cleanedNextScene = "你仔细观察周围的环境，准备采取行动。";
                             }
                             
-                            // 更新当前场景ID（用于下次清理缓存）
-                            const newSceneId = generateNewSceneId();
-                            gameState.currentSceneId = newSceneId;
+                            // 场景ID 已在上方从 optionData.sceneId 更新，不再用 generateNewSceneId 覆盖，否则会导致下次请求 sceneId 与后端预生成缓存不匹配
                             
                             // 确保加载状态已移除
                             if (loadingIndicator && loadingIndicator.parentNode) {
@@ -4595,17 +4588,7 @@ const Game = (() => {
                     const optionsToShow = gameState.pendingOptions || gameState.currentOptions || [];
                     generateOptions(optionsToShow);
                     
-                    // 注意：预生成已经在文本开始显示时触发，这里不再重复触发
-                    // 如果预生成没有在文本开始显示时触发（例如单段文本的情况），这里作为备用触发
-                    if (!gameState._pregenerationTriggered && optionsToShow && optionsToShow.length > 0) {
-                        const newSceneId = generateNewSceneId();
-                        gameState.currentSceneId = newSceneId;
-                        console.log('🚀 备用触发预生成（场景ID:', newSceneId, '）');
-                        if (gameState.gameData) {
-                            pregenerateNextLayers(gameState.gameData, optionsToShow, newSceneId);
-                        }
-                        gameState._pregenerationTriggered = true;
-                    }
+                    // 预生成由后端在 /generate-option 返回时触发，此处不再备用触发
                     
                     // 重置分段显示状态
                     gameState.isShowingSegments = false;

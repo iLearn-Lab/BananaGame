@@ -1,0 +1,33 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "雷斯垂德探长",
+    "aliases": [
+      "雷斯垂德探长",
+      "雷斯垂德"
+    ],
+    "story_background": "",
+    "first_appear_scene": "艾德里安格雷驾驶着马车穿过伦敦雾霭弥漫的街道，深棕色卷发在微风中轻拂。巴克利议员的住宅坐落在贝尔格莱维亚区的一条安静街道…",
+    "first_img_id": "img_20260306_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772802554_np25iw\\雷斯垂德探长_img_20260306_001.png",
+    "first_prompt": "scene-arrival-barkley-mansion-investigation-begins, victorian-london, detective-thriller, atmospheric-mystery, cinematic, foggy-ambiance, cinematic film photography, rich atmospheric lighting, dramati…",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "scene-arrival-barkley-mansion-investigation-begins, victorian-london, detective-thriller, atmospheric-mystery, cinematic, foggy-ambiance, cinematic film photography, rich atmospheric lighting, dramati…"
+  },
+  "role_002": {
+    "role_id": "role_002",
+    "role_name": "巴克利夫人",
+    "aliases": [
+      "巴克利夫人"
+    ],
+    "story_background": "",
+    "first_appear_scene": "艾德里安格雷驾驶着马车穿过伦敦雾霭弥漫的街道，深棕色卷发在微风中轻拂。巴克利议员的住宅坐落在贝尔格莱维亚区的一条安静街道…",
+    "first_img_id": "img_20260306_002",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772802554_np25iw\\巴克利夫人_img_20260306_002.png",
+    "first_prompt": "scene-arrival-barkley-mansion-investigation-begins, victorian-london, detective-thriller, atmospheric-mystery, cinematic, foggy-ambiance, cinematic film photography, rich atmospheric lighting, dramati…",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "scene-arrival-barkley-mansion-investigation-begins, victorian-london, detective-thriller, atmospheric-mystery, cinematic, foggy-ambiance, cinematic film photography, rich atmospheric lighting, dramati…"
+  }
+}

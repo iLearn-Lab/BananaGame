@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-单独测试 yunwu.ai 上的 gemini-2.5-flash-image-preview 图生图模型。
+单独测试 yunwu.ai 上的 Gemini 图生图模型（模型名由 .env 的 Image_Generation_MODEL 决定）。
 
 用法示例（在 DN-main 根目录下）：
 
-    python scripts/test_gemini_image.py --prompt "a boy standing in a mysterious forest, anime style"
-
+    
+python scripts/test_gemini_image.py --prompt "a boy standing in a mysterious forest, anime style"
 环境依赖：
 - .env / 环境变量中已配置：
     Image_Generation_API_KEY
@@ -17,6 +17,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Optional
@@ -35,7 +36,7 @@ from src.image.storage import save_base64_image
 def _extract_image_from_response(obj: dict) -> Optional[str]:
     """
     从 yunwu /chat/completions 风格响应里尽量抽取图片 URL 或 base64 data URI。
-    逻辑与现有 call_yunwu_image_api / call_gemini_img2img 保持一致风格。
+    兼容：1) OpenAI 风格 choices[0].message.content  2) Gemini 风格 candidates[0].content.parts
     """
     if not isinstance(obj, dict):
         return None
@@ -46,19 +47,55 @@ def _extract_image_from_response(obj: dict) -> Optional[str]:
         if isinstance(v, str) and v.strip():
             return v.strip()
 
-    # choices[0].message.content
+    # Gemini 原生格式：candidates[0].content.parts（部分代理可能直接返回）
+    candidates = obj.get("candidates") or []
+    if candidates:
+        first = candidates[0] if isinstance(candidates[0], dict) else {}
+        content = first.get("content") or {}
+        if isinstance(content, dict):
+            parts = content.get("parts") or []
+            for p in parts:
+                if not isinstance(p, dict):
+                    continue
+                # inlineData: { mimeType, data } -> 转为 data URI
+                inline = p.get("inlineData")
+                if isinstance(inline, dict) and inline.get("data"):
+                    mime = inline.get("mimeType", "image/png")
+                    return f"data:{mime};base64,{inline['data']}"
+                # text 里可能包含 data:image 或 https URL
+                text = p.get("text", "")
+                if isinstance(text, str) and text.strip():
+                    if text.strip().startswith("data:image") or text.strip().startswith("http"):
+                        return text.strip()
+                    m = re.search(r"data:image/[^;]+;base64,[A-Za-z0-9+/=\s]+", text)
+                    if m:
+                        return m.group(0).strip()
+
+    # OpenAI 风格：choices[0].message.content
     choices = obj.get("choices", [])
     if choices:
         message = choices[0].get("message", {}) or {}
         content = message.get("content", "")
-        if isinstance(content, str) and content.strip():
+        # content 可能是字符串，也可能是 parts 数组（多模态）
+        if isinstance(content, list):
+            for part in content:
+                if not isinstance(part, dict):
+                    continue
+                if part.get("type") == "image_url":
+                    url = (part.get("image_url") or {}).get("url")
+                    if url:
+                        return url
+                text = part.get("text", "")
+                if isinstance(text, str) and text.strip():
+                    if text.strip().startswith("data:image") or text.strip().startswith("http"):
+                        return text.strip()
+                    m = re.search(r"data:image/[^;]+;base64,[A-Za-z0-9+/=\s]+", text)
+                    if m:
+                        return m.group(0).strip()
+        elif isinstance(content, str) and content.strip():
             content_str = content.strip()
-            # 直接是 data:image... 或 http(s)...
             if content_str.startswith("data:image") or content_str.startswith("http"):
                 return content_str
-            # 从文本中抓 data:image/...;base64,...
-            import re
-
             m = re.search(r"data:image/[^;]+;base64,[A-Za-z0-9+/=\s]+", content_str)
             if m:
                 return m.group(0).strip()
@@ -70,8 +107,8 @@ def run_test(prompt: str) -> None:
     api_key = IMAGE_GENERATION_CONFIG.get("yunwu_api_key")
     base_url = IMAGE_GENERATION_CONFIG.get("yunwu_base_url", "https://yunwu.ai/v1")
 
-    # 只在这个测试脚本里强制使用 gemini-2.5-flash-image-preview，不影响主流程配置
-    model = "gemini-2.5-flash-image-preview"
+    # 使用 .env 中配置的图生模型（勿用已下线的 gemini-2.5-flash-image-preview）
+    model = IMAGE_GENERATION_CONFIG.get("yunwu_model", "gemini-3-pro-image-preview")
 
     if not api_key:
         print("❌ Image_Generation_API_KEY 未配置，无法调用 yunwu.ai")
@@ -91,13 +128,12 @@ def run_test(prompt: str) -> None:
         "Do NOT include any text, code blocks, or explanations."
     )
 
+    # 服务端要求 "contents is required" 时需传 Gemini 原生格式的 contents
     request_body = {
         "model": model,
+        "contents": [{"role": "user", "parts": [{"text": user_content}]}],
         "messages": [
-            {
-                "role": "user",
-                "content": user_content,
-            }
+            {"role": "user", "content": user_content}
         ],
         "temperature": 0.1,
         "max_tokens": 4000,
@@ -105,7 +141,7 @@ def run_test(prompt: str) -> None:
 
     timeout = int(os.getenv("YUNWU_IMAGE_TIMEOUT_SECONDS", "180"))
 
-    print("🔍 准备调用 gemini-2.5-flash-image-preview 文生图接口：")
+    print("🔍 准备调用 yunwu 文生图接口：")
     print(f"   base_url: {base_url}")
     print(f"   model   : {model}")
     print(f"   timeout : {timeout}s")
@@ -171,7 +207,7 @@ def run_test(prompt: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="测试调用 yunwu.ai 的 gemini-2.5-flash-image-preview 文生图接口"
+        description="测试调用 yunwu.ai 的 Gemini 文生图接口（模型见 .env Image_Generation_MODEL）"
     )
     parser.add_argument(
         "--prompt",
