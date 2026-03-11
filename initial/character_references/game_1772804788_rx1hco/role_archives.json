@@ -1,0 +1,23 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "技术员",
+    "aliases": [
+      "技术员",
+      "田中健二",
+      "佐藤隆（田中健二）",
+      "田中",
+      "田中博士"
+    ],
+    "story_background": "",
+    "first_appear_scene": "神代零快步走向NERV技术部的监控室，银白色长发在走廊灯光下泛着微光。推开监控室的门，她发现里面只有一名值班技术员正在检…",
+    "first_img_id": "img_20260306_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772804788_rx1hco\\技术员_img_20260306_001.png",
+    "first_prompt": "scene-nerv-monitoring-room-investigation-discovery, watercolor, sci-fi-interior, investigation-scene, mysterious, technological, tense-atmosphere, watercolor painting with rich luminous colors, fresh …",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "scene-nerv-monitoring-room-investigation-discovery, watercolor, sci-fi-interior, investigation-scene, mysterious, technological, tense-atmosphere, watercolor painting with rich luminous colors, fresh …",
+    "face_ref_path": "技术员_body_ref.png",
+    "_resolved_face_ref_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772804788_rx1hco\\技术员_body_ref.png"
+  }
+}

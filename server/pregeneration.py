@@ -73,6 +73,99 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
             # 第一层：并行生成所有选项（按优先级顺序提交任务），生成一个立即写入缓存
             print(f"📝 预生成第一层：并行生成 {len(current_options)} 个选项的下一轮剧情...")
             
+            # 流水线：某分支 layer2 文本写完后立即跑该分支 layer2 图片（先文本后图）
+            def run_layer2_for_branch(opt_idx, layer1_option_data):
+                import time
+                next_options = layer1_option_data.get('next_options', [])
+                if not next_options:
+                    return
+                with cache_lock:
+                    if scene_id not in pregeneration_cache:
+                        return
+                    cache_entry = pregeneration_cache[scene_id]
+                    if cache_entry.get('layer2_cancel', False):
+                        return
+                    selected = cache_entry.get('layer2_selected_option')
+                    if selected is not None and selected != opt_idx:
+                        return
+                updated_global_state = global_state.copy()
+                if 'flow_worldline' not in updated_global_state:
+                    updated_global_state['flow_worldline'] = {}
+                flow_update = layer1_option_data.get('flow_update', {})
+                if flow_update:
+                    updated_global_state['flow_worldline'].update(flow_update)
+                next_scene_id = generate_scene_id(str(updated_global_state), str(next_options))
+                try:
+                    layer2_data = generate_all_options(updated_global_state, next_options, skip_images=True)
+                    if not layer2_data:
+                        return
+                    with cache_lock:
+                        if scene_id not in pregeneration_cache:
+                            return
+                        cache_entry = pregeneration_cache[scene_id]
+                        if cache_entry.get('layer2_cancel', False):
+                            return
+                        if next_scene_id not in pregeneration_cache:
+                            pregeneration_cache[next_scene_id] = {
+                                'layer1': {}, 'layer2': {}, 'generation_status': {}, 'generation_events': {},
+                                'should_cancel': False, 'current_generating_index': None, 'layer2_generating': False,
+                                'layer2_cancel': False, 'layer2_selected_option': None, 'layer2_thread': None,
+                                'current_layer2_option': None, 'text_only_mode': True
+                            }
+                        next_cache_entry = pregeneration_cache[next_scene_id]
+                        for next_opt_idx, next_option_data in layer2_data.items():
+                            if 'layer1' not in next_cache_entry:
+                                next_cache_entry['layer1'] = {}
+                            next_cache_entry['layer1'][next_opt_idx] = next_option_data
+                            next_cache_entry['generation_status'][next_opt_idx] = 'text_only'
+                            events = next_cache_entry.setdefault('generation_events', {})
+                            if next_opt_idx not in events:
+                                events[next_opt_idx] = threading.Event()
+                            events[next_opt_idx].set()
+                        if 'layer2' not in cache_entry:
+                            cache_entry['layer2'] = {}
+                        cache_entry['layer2'][opt_idx] = layer2_data
+                        print(f"✅ 选项 {opt_idx} 的 layer2 文本已写入下一层场景 {next_scene_id}，共 {len(layer2_data)} 条")
+                    # 该分支 layer2 文本完成后，立即生成该分支 layer2 图片（图片对应剧情文本）
+                    for next_opt_idx, next_option_data in layer2_data.items():
+                        scene_for_image = (next_option_data.get('scene') or '').strip() or None
+                        if not scene_for_image:
+                            continue
+                        with cache_lock:
+                            ce = pregeneration_cache.get(scene_id)
+                            if ce and ce.get('layer2_cancel', False):
+                                return
+                        if isinstance(updated_global_state, dict):
+                            updated_global_state["_plot_supporting_characters"] = next_option_data.get("plot_supporting_characters", [])
+                        try:
+                            img = generate_scene_image(
+                                scene_for_image, updated_global_state, "default", use_cache=True,
+                                cache_key_suffix=f"{next_scene_id}_opt{next_opt_idx}"
+                            )
+                            if img and isinstance(img, dict) and img.get('url'):
+                                scene_text_hash = hashlib.md5(scene_for_image.encode('utf-8')).hexdigest()
+                                img_data = {
+                                    "url": img.get("url"), "prompt": img.get("prompt", ""), "style": img.get("style", "default"),
+                                    "width": img.get("width", 1024), "height": img.get("height", 1024),
+                                    "cached": img.get("cached", True), "scene_text_hash": scene_text_hash,
+                                }
+                                with cache_lock:
+                                    if next_scene_id in pregeneration_cache:
+                                        ne = pregeneration_cache[next_scene_id]
+                                        if next_opt_idx in ne.get('layer1', {}):
+                                            ne['layer1'][next_opt_idx]['scene_image'] = img_data
+                                            ne['generation_status'][next_opt_idx] = 'completed'
+                                            ev = ne.get('generation_events', {}).get(next_opt_idx)
+                                            if ev:
+                                                ev.set()
+                                print(f"✅ 下一层场景 {next_scene_id} 选项 {next_opt_idx} 图片已预生成")
+                        except Exception as e:
+                            print(f"⚠️ 下一层场景 {next_scene_id} 选项 {next_opt_idx} 图片生成异常: {e}")
+                except Exception as e:
+                    print(f"❌ 选项 {opt_idx} 的 layer2 预生成失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+            
             # 定义单个选项的生成任务函数
             def generate_single_option_task(opt_idx, option):
                 """生成单个选项的任务函数"""
@@ -229,6 +322,14 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                                     print(f"   - 已触发选项 {opt_idx} 的等待事件（文本数据就绪）")
                             else:
                                 print(f"⚠️ [第一层预生成] scene_id {scene_id} 不在缓存中，无法写入选项 {opt_idx} 的数据")
+                    
+                    # 流水线：本层该选项文本一写完，立即启动该分支的 layer2（先文本后图）
+                    if option_data and option_data.get('next_options'):
+                        threading.Thread(
+                            target=run_layer2_for_branch,
+                            args=(opt_idx, option_data.copy()),
+                            daemon=True
+                        ).start()
                     
                     # 为当前场景生成图片（限速由 yunwu 全局限速锁 + IMAGE_SUBMIT_DELAY 控制）
                     # 图片生成完成后更新缓存
@@ -714,15 +815,7 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                             pregeneration_cache[scene_id]['layer2_generating'] = False
                             pregeneration_cache[scene_id]['current_layer2_option'] = None
             
-            # 第二层在后台线程中继续生成（不阻塞）
-            with cache_lock:
-                if scene_id in pregeneration_cache:
-                    cache_entry = pregeneration_cache[scene_id]
-                    cache_entry['layer2_generating'] = True
-                    cache_entry['layer2_cancel'] = False
-                    layer2_thread = threading.Thread(target=generate_layer2, daemon=True)
-                    cache_entry['layer2_thread'] = layer2_thread
-                    layer2_thread.start()
+            # 第二层已由 run_layer2_for_branch 在「第一层某选项文本写完」时按分支流水线触发，此处不再启动统一 layer2 线程
                 
         except Exception as e:
             print(f"❌ 预生成过程中发生错误：{str(e)}")

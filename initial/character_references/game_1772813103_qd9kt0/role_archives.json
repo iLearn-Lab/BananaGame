@@ -1,0 +1,17 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "葛城美里",
+    "aliases": [
+      "葛城美里"
+    ],
+    "story_background": "",
+    "first_appear_scene": "真嗣驾驶着调查车快速穿过新东京市的主干道，车载导航显示距离中央图书馆还有十分钟车程。他一边开车一边在脑海中回顾着刚才推导…",
+    "first_img_id": "img_20260307_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1772813103_qd9kt0\\葛城美里_img_20260307_001.png",
+    "first_prompt": "scene-urgent-drive-central-library-mission, cyberpunk, mystery, psychological-thriller, investigation, tense-atmosphere, anime art style, Japanese manga aesthetics, soft line art with moderate line width, halftone dot shadows, high contrast dramatic lighting, young adult male protagonist with invest…",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "scene-urgent-drive-central-library-mission, cyberpunk, mystery, psychological-thriller, investigation, tense-atmosphere, anime art style, Japanese manga aesthetics, soft line art with moderate line wi…"
+  }
+}

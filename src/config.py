@@ -32,11 +32,12 @@ CHAIRMAN_MODEL = os.getenv("CHAIRMAN_MODEL") or os.getenv("Camera_Analyst_MODEL"
 # ------------------------------
 # 视觉内容生成API配置
 # ------------------------------
+_image_model = os.getenv("Image_Generation_MODEL", "sora_image")
 IMAGE_GENERATION_CONFIG = {
     "provider": os.getenv("IMAGE_GENERATION_PROVIDER", "yunwu"),
     "yunwu_api_key": os.getenv("Image_Generation_API_KEY", ""),
     "yunwu_base_url": os.getenv("Image_Generation_BASE_URL", "https://yunwu.ai/v1"),
-    "yunwu_model": os.getenv("Image_Generation_MODEL", "sora_image"),
+    "yunwu_model": _image_model,
     "replicate_api_token": os.getenv("REPLICATE_API_TOKEN", ""),
     "openai_api_key": os.getenv("OPENAI_API_KEY", ""),
     "stable_diffusion_base_url": os.getenv("STABLE_DIFFUSION_BASE_URL", ""),
@@ -49,6 +50,9 @@ IMAGE_GENERATION_CONFIG = {
     # 质感/风格参考图目录：放入你喜欢的漫画图，动漫风格生图时会作为「仅参考线条、网点、阴影质感」传入，不抄人物
     "style_reference_dir": os.getenv("STYLE_REFERENCE_DIR", "initial/style_references"),
 }
+# 启动时打印当前图生模型，便于确认未再用 gemini-2.5-flash-image-preview（需重启进程后生效）
+if IMAGE_GENERATION_CONFIG.get("yunwu_api_key"):
+    print(f"[config] 当前图生模型 Image_Generation_MODEL = {_image_model}")
 
 # ------------------------------
 # 视觉模型（初登场图里标出配角位置并裁成单人参考图）

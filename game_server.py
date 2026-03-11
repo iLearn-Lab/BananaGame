@@ -280,12 +280,19 @@ def generate_worldview():
                     initial_cache['generation_status'] = {i: 'pending' for i in range(len(initial_options))}
                     initial_cache['completed'] = True
                     
+                    # 首屏预生成：生成 scene_id 并写入缓存，供前端与预生成共用
+                    server_scene_id = generate_scene_id(str(global_state), str(initial_options))
+                    initial_cache['pregeneration_scene_id'] = server_scene_id
+                    
                     # 触发等待事件（如果有线程在等待）
                     events = initial_cache.get('generation_events', {})
                     if 'main' in events:
                         events['main'].set()
 
-                print(f"✅ 第一次选项生成完成（仅初始场景+选项，未预生成选项剧情/图片），选项数：{len(initial_options)}")
+                # 首屏预生成：立即在后台启动首屏选项的预生成（与后续轮同一套逻辑）
+                _pregenerate_next_layers_logic(global_state, initial_options, server_scene_id)
+
+                print(f"✅ 第一次选项生成完成（含首屏预生成），选项数：{len(initial_options)}，预生成 scene_id：{server_scene_id}")
                 
             except Exception as e:
                 print(f"❌ 生成第一次选项失败：{str(e)}")
@@ -961,738 +968,49 @@ def generate_option():
             traceback.print_exc()
         
         # 建档改为前端展示剧情图后由前端调用 /notify-scene-displayed 触发，此处不再建档
-        # 返回结果
-        return jsonify({
+        # 与首屏一致：后端在返回时带 sceneId，且由后端触发下一轮预生成（首屏在 generate_initial_options 已触发，此处处理非首屏）
+        response = {
             "status": "success",
             "message": "选项剧情生成成功！",
             "optionData": option_data
-        })
+        }
+        if isinstance(option_data, dict):
+            if not scene_id or scene_id == 'initial':
+                # 首屏：从 initial 缓存取已写入的 pregeneration_scene_id（预生成已在 generate_initial_options 中触发）
+                with cache_lock:
+                    if 'initial' in pregeneration_cache:
+                        sid = pregeneration_cache['initial'].get('pregeneration_scene_id')
+                        if sid:
+                            response["optionData"] = dict(option_data)
+                            response["optionData"]["sceneId"] = sid
+            else:
+                # 非首屏：与首屏一样由后端在返回时触发下一轮预生成，并带上新 sceneId
+                next_options = option_data.get('next_options', [])
+                if next_options:
+                    updated_global_state = global_state.copy()
+                    if 'flow_worldline' not in updated_global_state:
+                        updated_global_state['flow_worldline'] = {}
+                    flow_update = option_data.get('flow_update') or {}
+                    if flow_update:
+                        updated_global_state['flow_worldline'].update(flow_update)
+                    new_scene_id = generate_scene_id(str(updated_global_state), str(next_options))
+                    _pregenerate_next_layers_logic(updated_global_state, next_options, new_scene_id)
+                    response["optionData"] = dict(option_data)
+                    response["optionData"]["sceneId"] = new_scene_id
+                    print(f"✅ [generate-option] 已触发下一轮预生成，sceneId={new_scene_id}，选项数={len(next_options)}")
+        return jsonify(response)
     except Exception as e:
-        # 详细记录错误信息
         print(f"🔴 服务器错误：{str(e)}")
         import traceback
         traceback.print_exc()
         error_msg = clean_error_message(str(e))
         return jsonify({"status": "error", "message": f"选项剧情生成失败：{error_msg}"})
 
-# 预生成两层内容的核心逻辑（提取为独立函数，可被其他函数调用）
-def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
-    """
-    预生成两层内容的核心逻辑（优先级策略 + 渐进式缓存）
-    可以被接口函数或其他函数调用
-    """
-    # 🔍 调试日志：显示 scene_id 的处理
-    print(f"🔍 [_pregenerate_next_layers_logic] scene_id 处理：")
-    print(f"   - 传入的 scene_id：{scene_id}")
-    
-    # 如果没有提供scene_id，生成一个新的
-    if not scene_id:
-        scene_id = generate_scene_id(str(global_state), str(current_options))
-        print(f"   - 未提供 scene_id，已生成新的：{scene_id}")
-    else:
-        print(f"   - 使用传入的 scene_id：{scene_id}")
-    
-    print(f"🔄 开始预生成场景 {scene_id} 的两层内容（优先级策略）...")
-    
-    # 在后台线程中异步执行预生成，不阻塞响应
-    def async_pregenerate():
-        try:
-            # 初始化缓存条目（需要先加锁检查，避免重复初始化）
-            with cache_lock:
-                if scene_id not in pregeneration_cache:
-                    pregeneration_cache[scene_id] = {
-                        'layer1': {},
-                        'layer2': {},
-                        'generation_status': {},
-                        'generation_events': {},
-                        'should_cancel': False,
-                        'current_generating_index': None,
-                        'layer2_generating': False,
-                        'layer2_cancel': False,
-                        'layer2_selected_option': None,
-                        'layer2_thread': None,
-                        'current_layer2_option': None
-                    }
-                
-                cache_entry = pregeneration_cache[scene_id]
-                
-                # 初始化所有选项的状态为 'pending'
-                generation_status = cache_entry['generation_status']
-                for i in range(len(current_options)):
-                    if i not in generation_status:
-                        generation_status[i] = 'pending'
-                        # 创建事件对象
-                        if 'generation_events' not in cache_entry:
-                            cache_entry['generation_events'] = {}
-                        if i not in cache_entry['generation_events']:
-                            cache_entry['generation_events'][i] = threading.Event()
-            
-            # 第一层：并行生成所有选项（按优先级顺序提交任务），生成一个立即写入缓存
-            print(f"📝 预生成第一层：并行生成 {len(current_options)} 个选项的下一轮剧情...")
-            
-            # 定义单个选项的生成任务函数
-            def generate_single_option_task(opt_idx, option):
-                """生成单个选项的任务函数"""
-                # 在设置状态为 'generating' 之前就检查取消标志和状态
-                with cache_lock:
-                    if scene_id not in pregeneration_cache:
-                        return
-                    cache_entry = pregeneration_cache[scene_id]
-                    generation_status = cache_entry.get('generation_status', {})
-                    current_status = generation_status.get(opt_idx, 'pending')
-                    
-                    # 🆕 若该选项已被标记为取消（例如用户已做出选择并清理其他选项），直接退出
-                    if current_status == 'cancelled':
-                        return
-                    
-                    # 如果已经完成，不需要再生成
-                    if current_status == 'completed':
-                        return
-                    
-                    # 如果正在生成中，可能是用户选择的优先生成任务，避免重复生成
-                    if current_status == 'generating':
-                        # 检查缓存中是否已有数据（可能是优先生成任务已经完成）
-                        if 'layer1' in cache_entry and opt_idx in cache_entry['layer1']:
-                            return  # 已有数据，不需要重复生成
-                        # 否则继续等待或生成（这里选择继续，因为可能是正常的并行生成）
-                    
-                    # 检查取消标志（只取消 'pending' 状态的选项）
-                    if cache_entry.get('should_cancel', False):
-                        if current_status == 'pending':
-                            # 如果该选项还未开始生成，取消它
-                            print(f"⏭️ 选项 {opt_idx} 被取消生成（用户选择了其他选项）")
-                            return
-                    
-                    # 更新状态为 'generating'（只有在 pending 状态时才设置）
-                    if current_status == 'pending':
-                        generation_status[opt_idx] = 'generating'
-                        cache_entry['current_generating_index'] = opt_idx
-                
-                print(f"📝 开始并行生成选项 {opt_idx + 1}/{len(current_options)}: {option[:30]}...")
-                
-                # 🆕 优化：检查是否已有文本数据（来自上一层的第二层预生成）
-                try:
-                    option_data = None
-                    scene_for_image = None
-                    text_already_exists = False
-                    need_wait_for_text = False
-                    text_wait_event = None
-                    
-                    with cache_lock:
-                        if scene_id in pregeneration_cache:
-                            cache_entry = pregeneration_cache[scene_id]
-                            generation_status = cache_entry.get('generation_status', {})
-                            status = generation_status.get(opt_idx, 'pending')
-                            
-                            if 'layer1' in cache_entry and opt_idx in cache_entry['layer1']:
-                                existing_data = cache_entry['layer1'][opt_idx]
-                                # 检查是否只有文本（没有图片或图片无效）
-                                if existing_data and isinstance(existing_data, dict):
-                                    existing_image = existing_data.get('scene_image')
-                                    if not existing_image or not existing_image.get('url'):
-                                        # 已有文本但缺少图片，复用文本，只生成图片
-                                        option_data = existing_data.copy()
-                                        scene_for_image = (option_data.get('scene') or '').strip() or None
-                                        text_already_exists = True
-                                        print(f"🔄 选项 {opt_idx} 已有文本数据，将只生成图片")
-                            elif status == 'text_only':
-                                # 🆕 优化：文本正在生成中（来自上一层的第二层预生成），等待完成
-                                print(f"⏳ 选项 {opt_idx} 的文本正在生成中（来自上一层的第二层预生成），等待完成...")
-                                need_wait_for_text = True
-                                events = cache_entry.setdefault('generation_events', {})
-                                if opt_idx not in events:
-                                    events[opt_idx] = threading.Event()
-                                text_wait_event = events[opt_idx]
-                    
-                    # 🆕 优化：如果文本正在生成中，等待完成
-                    if need_wait_for_text and text_wait_event:
-                        wait_timeout = 180  # 最多等待180秒
-                        print(f"⏳ [第一层预生成] 等待选项 {opt_idx} 的文本生成完成（超时：{wait_timeout}秒）...")
-                        event_triggered = text_wait_event.wait(timeout=wait_timeout)
-                        
-                        if event_triggered:
-                            print(f"✅ [第一层预生成] 选项 {opt_idx} 的文本生成完成")
-                            # 再次检查缓存，获取文本数据
-                            with cache_lock:
-                                if scene_id in pregeneration_cache:
-                                    cache_entry = pregeneration_cache[scene_id]
-                                    if 'layer1' in cache_entry and opt_idx in cache_entry['layer1']:
-                                        existing_data = cache_entry['layer1'][opt_idx]
-                                        if existing_data and isinstance(existing_data, dict):
-                                            existing_image = existing_data.get('scene_image')
-                                            if not existing_image or not existing_image.get('url'):
-                                                option_data = existing_data.copy()
-                                                scene_for_image = (option_data.get('scene') or '').strip() or None
-                                                text_already_exists = True
-                                                print(f"🔄 选项 {opt_idx} 文本生成完成，将只生成图片")
-                        else:
-                            print(f"⚠️ [第一层预生成] 等待选项 {opt_idx} 的文本生成超时，将正常生成（文本+图片）")
-                    
-                    # 如果没有文本数据，正常生成文本+图片
-                    if not text_already_exists:
-                        result = _generate_single_option_text_only(opt_idx, option, global_state)
-                        if result is None:
-                            print(f"⚠️ [第一层预生成] 选项 {opt_idx} 的文本生成返回 None")
-                            option_data = None
-                            scene_for_image = None
-                        elif isinstance(result, dict):
-                            option_data = result.get('data', result)
-                            scene_for_image = result.get('scene_for_image')
-                            if option_data is None:
-                                print(f"⚠️ [第一层预生成] 选项 {opt_idx} 的 result['data'] 为 None")
-                        else:
-                            option_data = result
-                            scene_for_image = (option_data.get('scene') if option_data else '').strip() or None if option_data else None
-                        
-                        # 🔍 调试日志：检查生成结果
-                        if option_data:
-                            print(f"✅ [第一层预生成] 选项 {opt_idx} 文本生成成功，scene_for_image: {bool(scene_for_image)}")
-                        else:
-                            print(f"⚠️ [第一层预生成] 选项 {opt_idx} 文本生成失败，option_data 为 None")
-                    
-                    # 🔧 优化：文本生成完成后立即写入缓存（让第二层预生成可以立即开始）
-                    # 然后再生成图片并更新缓存
-                    if option_data:  # 确保有数据才写入
-                        # 🔧 使用带追踪的 cache_lock（可定位持锁线程）
-                        with cache_lock:
-                            # 🔍 再次检查 scene_id 是否在缓存中（在锁内）
-                            if scene_id in pregeneration_cache:
-                                cache_entry = pregeneration_cache[scene_id]
-                                # 🆕 若该选项已被取消，则不再写入缓存（避免被清理后又“复活”）
-                                if cache_entry.get('generation_status', {}).get(opt_idx) == 'cancelled':
-                                    events = cache_entry.get('generation_events', {})
-                                    if opt_idx in events:
-                                        events[opt_idx].set()
-                                    print(f"⏭️ [第一层预生成] 选项 {opt_idx} 已取消，跳过写入缓存")
-                                    return
-                                if 'layer1' not in cache_entry:
-                                    cache_entry['layer1'] = {}
-                                
-                                # 🔍 写入前检查：是否已经有数据
-                                if opt_idx in cache_entry['layer1']:
-                                    print(f"⚠️ [第一层预生成] 选项 {opt_idx} 的数据已存在，将被覆盖")
-                                
-                                # 先写入文本数据（让第二层预生成可以立即开始）
-                                cache_entry['layer1'][opt_idx] = option_data.copy()  # 复制，避免后续修改影响
-                                cache_entry['generation_status'][opt_idx] = 'text_completed'  # 标记为文本已完成
-                                
-                                # 🔍 调试日志：显示写入缓存后的状态（简化日志，减少锁持有时间）
-                                print(f"✅ 选项 {opt_idx} 文本已写入缓存（等待图片生成），scene_id: {scene_id}")
-                                
-                                # 触发等待事件（如果有线程在等待文本数据）
-                                events = cache_entry.get('generation_events', {})
-                                if opt_idx in events:
-                                    events[opt_idx].set()
-                                    print(f"   - 已触发选项 {opt_idx} 的等待事件（文本数据就绪）")
-                            else:
-                                print(f"⚠️ [第一层预生成] scene_id {scene_id} 不在缓存中，无法写入选项 {opt_idx} 的数据")
-                    
-                    # 为当前场景生成图片（限速由 yunwu 全局限速锁 + IMAGE_SUBMIT_DELAY 控制）
-                    # 图片生成完成后更新缓存
-                    if scene_for_image and option_data:
-                        try:
-                            print(f"🎨 [第一层预生成] 开始为选项 {opt_idx + 1} 生成图片...")
-                            # 传入剧情模型输出的本段出场配角（有则名单，无则[]），图片流程以剧情为准不推断
-                            if isinstance(global_state, dict):
-                                global_state["_plot_supporting_characters"] = option_data.get("plot_supporting_characters", [])
-                            # 传入选项级缓存后缀，避免多选项共用同一缓存键导致两张图相同
-                            img = generate_scene_image(
-                                scene_for_image, global_state, "default", use_cache=True,
-                                cache_key_suffix=f"{scene_id}_opt{opt_idx}"
-                            )
-                            print(f"🎨 [第一层预生成] generate_scene_image 返回：img={img is not None}, type={type(img)}")
-                            
-                            if img and isinstance(img, dict) and img.get('url'):
-                                print(f"🎨 [第一层预生成] 图片生成成功，URL: {img.get('url', 'N/A')[:80]}...")
-                                scene_text_hash = hashlib.md5(scene_for_image.encode('utf-8')).hexdigest()
-                                option_data['scene_image'] = {
-                                    "url": img.get("url"),
-                                    "prompt": img.get("prompt", ""),
-                                    "style": img.get("style", "default"),
-                                    "width": img.get("width", 1024),
-                                    "height": img.get("height", 1024),
-                                    "cached": img.get("cached", True),
-                                    "scene_text_hash": scene_text_hash,
-                                }
-                                
-                                print(f"🎨 [第一层预生成] 准备更新缓存中的图片数据...")
-                                # 🔧 修复：添加超时机制，避免无限等待锁
-                                import time
-                                import threading as th
-                                lock_acquired = False
-                                lock_start_time = time.time()
-                                max_lock_wait = 10  # 最多等待10秒获取锁
-                                current_thread_name = th.current_thread().name
-                                
-                                print(f"🔍 [第一层预生成] 当前线程：{current_thread_name}，尝试获取缓存锁...")
-                                
-                                while not lock_acquired and (time.time() - lock_start_time) < max_lock_wait:
-                                    try:
-                                        # 尝试非阻塞获取锁
-                                        if cache_lock.acquire(blocking=False):
-                                            lock_acquired = True
-                                            elapsed_wait = time.time() - lock_start_time
-                                            print(f"🎨 [第一层预生成] 已获取缓存锁，开始更新...（等待时间：{elapsed_wait:.2f}秒，线程：{current_thread_name}）")
-                                            try:
-                                                if scene_id in pregeneration_cache:
-                                                    cache_entry = pregeneration_cache[scene_id]
-                                                    if opt_idx in cache_entry.get('layer1', {}):
-                                                        cache_entry['layer1'][opt_idx]['scene_image'] = option_data['scene_image']
-                                                        cache_entry['generation_status'][opt_idx] = 'completed'  # 标记为完全完成
-                                                        print(f"🎨 [第一层预生成] 缓存更新完成，状态已设置为 completed")
-                                                    else:
-                                                        # ✅ 优化：即使 layer1 被清理，如果图片已生成，也应该写入缓存
-                                                        # 原因：图片生成成本高，即使选项被取消，也应该保存以备后用
-                                                        generation_status = cache_entry.get('generation_status', {})
-                                                        current_status = generation_status.get(opt_idx, 'pending')
-                                                        
-                                                        # 如果状态是 generating、text_completed 或 cancelled，但图片已生成，都应该写入缓存
-                                                        # cancelled 状态可能是因为用户选择了其他选项，但图片可能仍然有用
-                                                        if current_status in ['generating', 'text_completed'] or (current_status == 'cancelled' and option_data.get('scene_image')):
-                                                            # 重新创建 layer1 数据并写入图片
-                                                            if 'layer1' not in cache_entry:
-                                                                cache_entry['layer1'] = {}
-                                                            cache_entry['layer1'][opt_idx] = option_data
-                                                            # 如果之前是 cancelled，现在图片生成了，可以标记为 completed（图片已就绪）
-                                                            if current_status == 'cancelled':
-                                                                cache_entry['generation_status'][opt_idx] = 'completed'
-                                                                print(f"✅ [第一层预生成] 选项 {opt_idx} 的 layer1 被清理且状态为 cancelled，但图片已生成，已重新写入缓存并标记为 completed")
-                                                            else:
-                                                                cache_entry['generation_status'][opt_idx] = 'completed'
-                                                                print(f"✅ [第一层预生成] 选项 {opt_idx} 的 layer1 被清理但正在生成中，已重新写入缓存并完成")
-                                                            events = cache_entry.get('generation_events', {})
-                                                            if opt_idx in events:
-                                                                events[opt_idx].set()
-                                                        else:
-                                                            # 确实是被取消的选项且没有图片，标记为 cancelled
-                                                            cache_entry['generation_status'][opt_idx] = 'cancelled'
-                                                            events = cache_entry.get('generation_events', {})
-                                                            if opt_idx in events:
-                                                                events[opt_idx].set()
-                                                            print(f"⏭️ [第一层预生成] 选项 {opt_idx} 的 layer1 已被清理，标记为 cancelled（跳过图片回填）")
-                                                else:
-                                                    print(f"⚠️ [第一层预生成] 缓存中找不到 scene_id: {scene_id}")
-                                            finally:
-                                                cache_lock.release()
-                                                print(f"🎨 [第一层预生成] 已释放缓存锁（线程：{current_thread_name}）")
-                                        else:
-                                            # 锁被其他线程持有，等待一小段时间后重试
-                                            elapsed = time.time() - lock_start_time
-                                            if elapsed < max_lock_wait:
-                                                if int(elapsed * 2) % 2 == 0:  # 每0.5秒打印一次
-                                                    # 🔧 调试：显示当前持有锁的线程信息
-                                                    import threading as th
-                                                    if _cache_lock_holder:
-                                                        holder_name = _cache_lock_holder.name if hasattr(_cache_lock_holder, 'name') else str(_cache_lock_holder)
-                                                        holder_time = time.time() - _cache_lock_acquire_time if _cache_lock_acquire_time else 0
-                                                        print(f"⏳ [第一层预生成] 等待获取缓存锁...（已等待 {elapsed:.1f}秒，最多等待 {max_lock_wait}秒，线程：{current_thread_name}）")
-                                                        print(f"   🔍 锁被线程持有：{holder_name}，已持有 {holder_time:.1f}秒")
-                                                        if holder_time > 5:
-                                                            print(f"   ⚠️ 警告：锁被持有超过5秒，可能存在死锁或耗时操作！")
-                                                    # 🔧 关键：打印持锁线程的“实时堆栈”，定位卡在哪一行
-                                                    stack = cache_lock.dump_holder_stack()
-                                                    if stack:
-                                                        print(f"   🧵 持锁线程实时堆栈（{holder_name}）:\n{stack}")
-                                                    else:
-                                                        print(f"⏳ [第一层预生成] 等待获取缓存锁...（已等待 {elapsed:.1f}秒，最多等待 {max_lock_wait}秒，线程：{current_thread_name}）")
-                                                time.sleep(0.5)  # 等待0.5秒后重试
-                                            else:
-                                                break
-                                    except Exception as lock_err:
-                                        print(f"⚠️ [第一层预生成] 获取缓存锁时发生错误：{lock_err}")
-                                        import traceback
-                                        traceback.print_exc()
-                                        break
-                                
-                                if not lock_acquired:
-                                    print(f"❌ [第一层预生成] 获取缓存锁超时（{max_lock_wait}秒），跳过缓存更新")
-                                    print(f"   💡 提示：图片数据已生成，但无法更新缓存，可能稍后会被其他线程更新")
-                                    print(f"   🔍 调试：scene_id={scene_id}, opt_idx={opt_idx}, 线程：{current_thread_name}")
-                                    # 🔧 修复：即使无法更新缓存，也尝试触发等待事件，避免其他线程无限等待
-                                    try:
-                                        if cache_lock.acquire(blocking=False):
-                                            try:
-                                                if scene_id in pregeneration_cache:
-                                                    cache_entry = pregeneration_cache[scene_id]
-                                                    events = cache_entry.get('generation_events', {})
-                                                    if opt_idx in events:
-                                                        events[opt_idx].set()
-                                                        print(f"   ✅ 已触发等待事件，通知其他线程图片数据已就绪")
-                                            finally:
-                                                cache_lock.release()
-                                    except:
-                                        pass
-                                
-                                if text_already_exists:
-                                    print(f"✅ 选项 {opt_idx + 1} 图片已生成（复用文本）")
-                                else:
-                                    print(f"✅ 选项 {opt_idx + 1} 场景图片已预生成并更新缓存")
-                            else:
-                                print(f"⚠️ 选项 {opt_idx + 1} 场景图片生成失败，将按需补图（img={img}, url={img.get('url') if img else 'N/A'}）")
-                        except Exception as img_err:
-                            print(f"⚠️ 选项 {opt_idx + 1} 场景图片生成异常：{img_err}，将按需补图")
-                            import traceback
-                            traceback.print_exc()
-                    elif not option_data:
-                        print(f"⚠️ [第一层预生成] 选项 {opt_idx} 的 option_data 为空，无法写入缓存")
-                        # 即使 option_data 为空，也要更新状态，避免一直处于 generating
-                        with cache_lock:
-                            if scene_id in pregeneration_cache:
-                                cache_entry = pregeneration_cache[scene_id]
-                                cache_entry['generation_status'][opt_idx] = 'failed'
-                                events = cache_entry.get('generation_events', {})
-                                if opt_idx in events:
-                                    events[opt_idx].set()
-                                    print(f"   - 已触发选项 {opt_idx} 的等待事件（失败状态）")
-                except Exception as e:
-                    print(f"❌ 生成选项 {opt_idx} 失败：{str(e)}")
-                    print(f"   - scene_id: {scene_id}")
-                    import traceback
-                    traceback.print_exc()
-                    with cache_lock:
-                        if scene_id in pregeneration_cache:
-                            cache_entry = pregeneration_cache[scene_id]
-                            cache_entry['generation_status'][opt_idx] = 'failed'
-                            events = cache_entry.get('generation_events', {})
-                            if opt_idx in events:
-                                events[opt_idx].set()
-                        else:
-                            print(f"⚠️ [异常处理] scene_id {scene_id} 不在缓存中，无法更新状态")
-            
-            # 使用线程池并行生成所有选项（按优先级顺序提交任务）
-            # 限制并发，避免同时触发过多 LLM/下游调用导致排队或限流
-            max_workers = min(len(current_options), int(os.getenv("PREGEN_MAX_WORKERS", "2")))
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                # 按优先级顺序（0→1→2→3）提交所有任务
-                futures = []
-                for opt_idx in range(len(current_options)):
-                    option = current_options[opt_idx]
-                    future = executor.submit(generate_single_option_task, opt_idx, option)
-                    futures.append((opt_idx, future))
-                
-                # 等待所有任务完成（可选，但保留以便跟踪完成状态）
-                print(f"🔍 [第一层预生成] 开始等待所有任务完成，共 {len(futures)} 个任务")
-                for opt_idx, future in futures:
-                    try:
-                        future.result()  # 等待任务完成，如果有异常会抛出
-                        print(f"✅ [第一层预生成] 选项 {opt_idx} 的任务已完成")
-                        # 🔍 立即检查缓存状态
-                        with cache_lock:
-                            if scene_id in pregeneration_cache:
-                                cache_entry = pregeneration_cache[scene_id]
-                                status = cache_entry.get('generation_status', {}).get(opt_idx, 'unknown')
-                                if opt_idx in cache_entry.get('layer1', {}):
-                                    print(f"   ✅ 选项 {opt_idx} 的数据已在缓存中")
-                                elif status == 'cancelled':
-                                    print(f"   ℹ️ 选项 {opt_idx} 已被取消（用户已选择其他选项），数据已清理，属正常情况")
-                                else:
-                                    print(f"   ⚠️ 选项 {opt_idx} 的数据不在缓存中！")
-                                print(f"   - 选项 {opt_idx} 的状态: {status}")
-                    except Exception as e:
-                        print(f"❌ 选项 {opt_idx} 的任务执行异常：{str(e)}")
-                        import traceback
-                        traceback.print_exc()
-            
-            # 清理当前生成索引
-            with cache_lock:
-                if scene_id in pregeneration_cache:
-                    pregeneration_cache[scene_id]['current_generating_index'] = None
-            
-            # 🔍 调试日志：检查第一层预生成完成后的缓存状态
-            with cache_lock:
-                if scene_id in pregeneration_cache:
-                    cache_entry = pregeneration_cache[scene_id]
-                    layer1_count = len(cache_entry.get('layer1', {}))
-                    generation_status = cache_entry.get('generation_status', {})
-                    print(f"✅ 第一层预生成完成，共生成 {layer1_count} 个选项的剧情+图片")
-                    print(f"   - scene_id: {scene_id}")
-                    print(f"   - layer1 选项索引：{list(cache_entry.get('layer1', {}).keys())}")
-                    print(f"   - 生成状态：{generation_status}")
-                    if layer1_count == 0:
-                        cancelled_count = sum(1 for s in generation_status.values() if s == 'cancelled')
-                        if cancelled_count > 0:
-                            print(f"ℹ️ 第一层预生成完成但 layer1 为空：可能因为用户已选择选项，未使用的 layer1 被清理（cancelled={cancelled_count}）")
-                        else:
-                            print(f"⚠️ [警告] 第一层预生成完成，但 layer1 为空！")
-                            print(f"   - 可能的原因：所有选项生成失败，或 scene_id 不匹配")
-                else:
-                    print(f"⚠️ [警告] scene_id {scene_id} 不在缓存中！")
-            print("---------------------------------------------- 第一层预生成完成 ----------------------------------------------")
-            
-            # 第二层：为第一层的每个选项的next_options预生成再下一层剧情（继续在后台异步生成）
-            print(f"📝 预生成第二层：为下一轮选项生成再下一层剧情...")
-            print("---------------------------------------------- 开始第二层预生成 ----------------------------------------------")
-            
-            def generate_layer2():
-                try:
-                    # 🔧 优化：等待第一层文本数据写入缓存（文本生成完成后立即写入，所以等待时间很短）
-                    import time
-                    max_wait_attempts = 10  # 最多等待10次（文本生成很快）
-                    wait_interval = 0.3  # 每次等待0.3秒
-                    layer1_data = {}
-                    selected_option = None
-                    
-                    for attempt in range(max_wait_attempts):
-                        # 🔧 修复：在锁外检查，避免长时间持有锁
-                        should_continue = False
-                        with cache_lock:
-                            if scene_id not in pregeneration_cache:
-                                if attempt < max_wait_attempts - 1:
-                                    should_continue = True
-                                else:
-                                    return
-                            
-                            if should_continue:
-                                # 释放锁后再 sleep
-                                pass
-                            else:
-                                cache_entry = pregeneration_cache[scene_id]
-                                layer1_data_temp = cache_entry.get('layer1', {})
-                                expected_count = len(current_options)
-                                
-                                # 检查是否所有选项的文本数据都已写入缓存（只需要文本数据，不需要图片）
-                                text_completed_count = 0
-                                for opt_idx in range(expected_count):
-                                    status = cache_entry.get('generation_status', {}).get(opt_idx, 'pending')
-                                    if status in ['text_completed', 'completed'] and opt_idx in layer1_data_temp:
-                                        text_completed_count += 1
-                                
-                                if text_completed_count >= expected_count:
-                                    layer1_data = layer1_data_temp.copy()  # 复制数据，避免长时间持有锁
-                                    selected_option = cache_entry.get('layer2_selected_option', None)
-                                    print(f"✅ [第二层预生成] 第一层文本数据已就绪，共 {text_completed_count} 个选项")
-                                    break
-                                elif attempt < max_wait_attempts - 1:
-                                    print(f"⏳ [第二层预生成] 等待第一层文本数据... ({text_completed_count}/{expected_count}，尝试 {attempt+1}/{max_wait_attempts})")
-                                    should_continue = True
-                                else:
-                                    # 最后一次尝试，即使数据不完整也继续
-                                    layer1_data = layer1_data_temp.copy()
-                                    selected_option = cache_entry.get('layer2_selected_option', None)
-                                    print(f"⚠️ [第二层预生成] 等待超时，当前只有 {text_completed_count}/{expected_count} 个选项的文本数据，继续生成")
-                        
-                        # 🔧 修复：在锁外 sleep，避免阻塞其他线程
-                        if should_continue:
-                            time.sleep(wait_interval)
-                    
-                    need_process_options = []
-                    
-                    # 检查是否有用户选择的选项（如果用户在选择时设置了）
-                    # 如果用户已经选择了选项，只生成该选项的第二层
-                    if selected_option is not None:
-                        print(f"📝 只为用户选择的选项 {selected_option} 生成第二层")
-                        if selected_option not in layer1_data:
-                            print(f"⚠️ 用户选择的选项 {selected_option} 不在第一层数据中")
-                            return
-                        
-                        # 只处理用户选择的选项
-                        opt_idx = selected_option
-                        layer1_option_data = layer1_data[opt_idx]
-                        next_options = layer1_option_data.get('next_options', [])
-                        
-                        if next_options:
-                            # 检查取消标志（在锁外快速检查）
-                            with cache_lock:
-                                if scene_id not in pregeneration_cache:
-                                    return
-                                cache_entry = pregeneration_cache[scene_id]
-                                if cache_entry.get('layer2_cancel', False):
-                                    print(f"⏹️ 选项 {opt_idx} 的第二层生成被取消")
-                                    return
-                                # 标记当前正在生成的选项
-                                cache_entry['current_layer2_option'] = opt_idx
-                            
-                            # 更新global_state（应用第一层的flow_update）
-                            updated_global_state = global_state.copy()
-                            if 'flow_worldline' not in updated_global_state:
-                                updated_global_state['flow_worldline'] = {}
-                            flow_update = layer1_option_data.get('flow_update', {})
-                            if flow_update:
-                                updated_global_state['flow_worldline'].update(flow_update)
-                            
-                            # 计算下一层场景的 scene_id（用于存储第二层预生成的数据）
-                            next_scene_id = generate_scene_id(str(updated_global_state), str(next_options))
-                            print(f"🔍 [第二层预生成] 计算下一层场景ID：{next_scene_id}")
-                            
-                            # 为下一轮的每个选项生成再下一层剧情（在锁外执行，避免长时间持有锁）
-                            try:
-                                layer2_data = generate_all_options(updated_global_state, next_options, skip_images=False)
-                                
-                                # 再次检查取消标志并写入缓存（生成过程中可能被取消）
-                                with cache_lock:
-                                    if scene_id in pregeneration_cache:
-                                        cache_entry = pregeneration_cache[scene_id]
-                                        if cache_entry.get('layer2_cancel', False):
-                                            print(f"⏹️ 选项 {opt_idx} 的第二层生成在生成过程中被取消")
-                                            return
-                                    
-                                    # 🆕 优化：将第二层预生成的数据存储到下一层场景的 layer1（只有文本）
-                                    # 初始化下一层场景的缓存结构
-                                    if next_scene_id not in pregeneration_cache:
-                                        pregeneration_cache[next_scene_id] = {
-                                            'layer1': {},
-                                            'layer2': {},
-                                            'generation_status': {},
-                                            'generation_events': {},
-                                            'should_cancel': False,
-                                            'current_generating_index': None,
-                                            'layer2_generating': False,
-                                            'layer2_cancel': False,
-                                            'layer2_selected_option': None,
-                                            'layer2_thread': None,
-                                            'current_layer2_option': None,
-                                            'text_only_mode': True  # 标记：只有文本，需要后续生成图片
-                                        }
-                                    
-                                    next_cache_entry = pregeneration_cache[next_scene_id]
-                                    
-                                    # 将第二层预生成的数据存储到下一层场景的 layer1（只有文本）
-                                    # layer2_data 格式：{option_index: option_data}
-                                    for next_opt_idx, next_option_data in layer2_data.items():
-                                        if 'layer1' not in next_cache_entry:
-                                            next_cache_entry['layer1'] = {}
-                                        next_cache_entry['layer1'][next_opt_idx] = next_option_data
-                                        # 标记为只有文本，需要后续生成图片
-                                        next_cache_entry['generation_status'][next_opt_idx] = 'text_only'
-                                        
-                                        # 🆕 创建等待事件，用于通知第一层预生成文本已完成
-                                        events = next_cache_entry.setdefault('generation_events', {})
-                                        if next_opt_idx not in events:
-                                            events[next_opt_idx] = threading.Event()
-                                        
-                                        # 触发等待事件，通知第一层预生成可以开始生成图片了
-                                        events[next_opt_idx].set()
-                                        print(f"✅ 选项 {opt_idx} 的第二层数据已存储到下一层场景 {next_scene_id} 的 layer1[{next_opt_idx}]（只有文本），已触发等待事件")
-                                    
-                                    # 保留原有的 layer2 存储（向后兼容）
-                                    if 'layer2' not in cache_entry:
-                                        cache_entry['layer2'] = {}
-                                    cache_entry['layer2'][opt_idx] = layer2_data
-                                    print(f"✅ 选项 {opt_idx} 的第二层生成完成，共生成 {len(layer2_data)} 个选项的剧情（已存储到下一层场景 {next_scene_id}）")
-                            except Exception as e:
-                                print(f"❌ 生成选项 {opt_idx} 的第二层失败：{str(e)}")
-                        
-                        print(f"✅ 第二层预生成完成（仅生成用户选择的选项）")
-                        print("---------------------------------------------- 第二层预生成完成（用户选择模式） ----------------------------------------------")
-                    else:
-                        # 用户还未选择，为所有第一层选项生成第二层
-                        layer2_count = 0
-                        for opt_idx, layer1_option_data in layer1_data.items():
-                            # 检查取消标志（在锁外快速检查）
-                            with cache_lock:
-                                if scene_id not in pregeneration_cache:
-                                    return
-                                cache_entry = pregeneration_cache[scene_id]
-                                if cache_entry.get('layer2_cancel', False):
-                                    print(f"⏹️ 第二层生成被取消（用户选择了其他选项）")
-                                    return
-                                # 标记当前正在生成的选项
-                                cache_entry['current_layer2_option'] = opt_idx
-                            
-                            next_options = layer1_option_data.get('next_options', [])
-                            if next_options:
-                                # 更新global_state（应用第一层的flow_update）
-                                updated_global_state = global_state.copy()
-                                if 'flow_worldline' not in updated_global_state:
-                                    updated_global_state['flow_worldline'] = {}
-                                flow_update = layer1_option_data.get('flow_update', {})
-                                if flow_update:
-                                    updated_global_state['flow_worldline'].update(flow_update)
-                                
-                                # 计算下一层场景的 scene_id（用于存储第二层预生成的数据）
-                                next_scene_id = generate_scene_id(str(updated_global_state), str(next_options))
-                                
-                                # 为下一轮的每个选项生成再下一层剧情（在锁外执行，避免长时间持有锁）
-                                try:
-                                    layer2_data = generate_all_options(updated_global_state, next_options, skip_images=False)
-                                    
-                                    # 再次检查取消标志并写入缓存（生成过程中可能被取消）
-                                    with cache_lock:
-                                        if scene_id in pregeneration_cache:
-                                            cache_entry = pregeneration_cache[scene_id]
-                                            if cache_entry.get('layer2_cancel', False):
-                                                print(f"⏹️ 选项 {opt_idx} 的第二层生成在生成过程中被取消")
-                                                return
-                                        
-                                        # 🆕 优化：将第二层预生成的数据存储到下一层场景的 layer1（只有文本）
-                                        # 初始化下一层场景的缓存结构
-                                        if next_scene_id not in pregeneration_cache:
-                                            pregeneration_cache[next_scene_id] = {
-                                                'layer1': {},
-                                                'layer2': {},
-                                                'generation_status': {},
-                                                'generation_events': {},
-                                                'should_cancel': False,
-                                                'current_generating_index': None,
-                                                'layer2_generating': False,
-                                                'layer2_cancel': False,
-                                                'layer2_selected_option': None,
-                                                'layer2_thread': None,
-                                                'current_layer2_option': None,
-                                                'text_only_mode': True  # 标记：只有文本，需要后续生成图片
-                                            }
-                                        
-                                        next_cache_entry = pregeneration_cache[next_scene_id]
-                                        
-                                        # 将第二层预生成的数据存储到下一层场景的 layer1（只有文本）
-                                        # layer2_data 格式：{option_index: option_data}
-                                        for next_opt_idx, next_option_data in layer2_data.items():
-                                            if 'layer1' not in next_cache_entry:
-                                                next_cache_entry['layer1'] = {}
-                                            next_cache_entry['layer1'][next_opt_idx] = next_option_data
-                                            # 标记为只有文本，需要后续生成图片
-                                            next_cache_entry['generation_status'][next_opt_idx] = 'text_only'
-                                            
-                                            # 🆕 创建等待事件，用于通知第一层预生成文本已完成
-                                            events = next_cache_entry.setdefault('generation_events', {})
-                                            if next_opt_idx not in events:
-                                                events[next_opt_idx] = threading.Event()
-                                            
-                                            # 触发等待事件，通知第一层预生成可以开始生成图片了
-                                            events[next_opt_idx].set()
-                                        
-                                        # 保留原有的 layer2 存储（向后兼容）
-                                        if 'layer2' not in cache_entry:
-                                            cache_entry['layer2'] = {}
-                                        cache_entry['layer2'][opt_idx] = layer2_data
-                                        layer2_count += len(layer2_data)
-                                except Exception as e:
-                                    print(f"❌ 生成选项 {opt_idx} 的第二层失败：{str(e)}")
-                        
-                        print(f"✅ 第二层预生成完成，共生成 {layer2_count} 个选项的剧情")
-                        print(f"✅ 场景 {scene_id} 的两层内容预生成全部完成")
-                        print("---------------------------------------------- 第二层预生成完成（全量模式） ----------------------------------------------")
-                except Exception as e:
-                    print(f"❌ 生成第二层时发生错误：{str(e)}")
-                    import traceback
-                    traceback.print_exc()
-                finally:
-                    # 标记第二层生成完成
-                    with cache_lock:
-                        if scene_id in pregeneration_cache:
-                            pregeneration_cache[scene_id]['layer2_generating'] = False
-                            pregeneration_cache[scene_id]['current_layer2_option'] = None
-            
-            # 第二层在后台线程中继续生成（不阻塞）
-            with cache_lock:
-                if scene_id in pregeneration_cache:
-                    cache_entry = pregeneration_cache[scene_id]
-                    cache_entry['layer2_generating'] = True
-                    cache_entry['layer2_cancel'] = False
-                    layer2_thread = threading.Thread(target=generate_layer2, daemon=True)
-                    cache_entry['layer2_thread'] = layer2_thread
-                    layer2_thread.start()
-                
-        except Exception as e:
-            print(f"❌ 预生成过程中发生错误：{str(e)}")
-            import traceback
-            traceback.print_exc()
-    
-    # 启动后台线程执行预生成
-    thread = threading.Thread(target=async_pregenerate, daemon=True)
-    thread.start()
-    
-    return scene_id
+# 预生成两层内容的核心逻辑（委托 server.pregeneration，流水线版）
+def _pregenerate_next_layers_logic(global_state, current_options, scene_id=None):
+    """委托 server.pregeneration（流水线版：本层文本完→layer2 文本；layer2 文本完→layer2 图片）。"""
+    from server.pregeneration import _pregenerate_next_layers_logic as _impl
+    return _impl(global_state, current_options, scene_id)
 
 # 新增接口：预生成两层内容（优先级策略 + 渐进式缓存）
 @app.route('/pregenerate-next-layers', methods=['POST'])
@@ -1703,364 +1021,136 @@ def pregenerate_next_layers():
     - 第二层：第一层完成后，继续在后台生成第二层
     """
     try:
-        # 获取前端传的参数
         data = request.json
         global_state = data.get('globalState', {})
         current_options = data.get('currentOptions', [])
-        scene_id = data.get('sceneId', None)  # 当前场景ID
-        
-        # 新增：图片依赖生成（用于预生成时也带上“上一剧情图片参考”）
-        current_scene_image = data.get('currentSceneImage', None)  # {url,prompt,...}（可选）
-        current_scene_text = data.get('currentSceneText', '')  # 可选：当前剧情文本（作为连续性信息）
+        scene_id = data.get('sceneId', None)
+        current_scene_image = data.get('currentSceneImage', None)
+        current_scene_text = data.get('currentSceneText', '')
         if isinstance(global_state, dict) and (current_scene_image or current_scene_text):
             global_state['_visual_context'] = {
                 "sceneId": scene_id,
                 "currentSceneImage": current_scene_image,
                 "currentSceneText": current_scene_text
             }
-            # 尝试写入缓存条目（若已存在）
             if scene_id:
                 with cache_lock:
                     if scene_id in pregeneration_cache:
                         pregeneration_cache[scene_id]['visual_context'] = global_state['_visual_context']
-        
-        # 基础校验
         if not global_state:
             return jsonify({"status": "error", "message": "全局状态不能为空！"})
         if not current_options:
             return jsonify({"status": "error", "message": "当前选项列表不能为空！"})
-        
-        # 🔍 调试日志：显示预生成使用的 scene_id
-        print(f"🔍 [pregenerate-next-layers] 预生成参数：")
-        print(f"   - 前端传入的 sceneId：{scene_id}")
-        print(f"   - 当前选项数量：{len(current_options)}")
-        
-        # 调用预生成核心逻辑
+        print(f"🔍 [pregenerate-next-layers] 预生成参数：sceneId={scene_id}, 选项数={len(current_options)}")
         scene_id = _pregenerate_next_layers_logic(global_state, current_options, scene_id)
-        
-        # 🔍 调试日志：显示预生成返回的 scene_id
-        print(f"🔍 [pregenerate-next-layers] 预生成返回的 sceneId：{scene_id}")
-        print(f"   - 返回给前端的 sceneId：{scene_id}")
-        
-        # 立即返回，告知前端预生成已启动
-        return jsonify({
-            "status": "success",
-            "message": "预生成任务已启动！",
-            "sceneId": scene_id
-        })
-        
+        return jsonify({"status": "success", "message": "预生成任务已启动！", "sceneId": scene_id})
     except Exception as e:
         print(f"🔴 预生成接口错误：{str(e)}")
         import traceback
         traceback.print_exc()
-        error_msg = clean_error_message(str(e))
-        return jsonify({"status": "error", "message": f"预生成任务启动失败：{error_msg}"})
+        return jsonify({"status": "error", "message": f"预生成任务启动失败：{clean_error_message(str(e))}"})
 
-# 新增接口：获取预生成的第二层内容
 @app.route('/get-pregenerated-layer2', methods=['POST'])
 def get_pregenerated_layer2():
-    """获取预生成的第二层内容（当用户选择了第一层的某个选项后，可以立即获取第二层）"""
+    """获取预生成的第二层内容"""
     try:
         data = request.json or {}
         scene_id = data.get('sceneId', None)
         layer1_option_index = data.get('layer1OptionIndex', None)
         layer2_option_index = data.get('layer2OptionIndex', None)
         global_state = data.get('globalState', {})
-        
-        if not scene_id or layer1_option_index is None or layer2_option_index is None:
-            return jsonify({"status": "error", "message": "参数不完整！"})
-        
-        option_data = None
         with cache_lock:
-            if scene_id in pregeneration_cache:
-                cache_entry = pregeneration_cache[scene_id]
-                if 'layer2' in cache_entry and layer1_option_index in cache_entry['layer2']:
-                    layer2_data = cache_entry['layer2'][layer1_option_index]
-                    if layer2_option_index in layer2_data:
-                        option_data = layer2_data[layer2_option_index]
-        
-        if option_data is not None:
-            # 建档改为前端展示剧情图后由前端调用 /notify-scene-displayed 触发
-            return jsonify({
-                "status": "success",
-                "optionData": option_data
-            })
-        
+            if not scene_id or scene_id not in pregeneration_cache:
+                return jsonify({"status": "error", "message": "未找到预生成的第二层内容！"})
+            cache_entry = pregeneration_cache[scene_id]
+            layer2_data = cache_entry.get('layer2', {}).get(layer1_option_index) if layer1_option_index is not None else None
+            if layer2_data and layer2_option_index is not None:
+                option_data = layer2_data.get(layer2_option_index)
+                if option_data:
+                    return jsonify({"status": "success", "optionData": option_data})
         return jsonify({"status": "error", "message": "未找到预生成的第二层内容！"})
-        
     except Exception as e:
-        print(f"🔴 获取预生成内容错误：{str(e)}")
-        error_msg = clean_error_message(str(e))
-        return jsonify({"status": "error", "message": f"获取失败：{error_msg}"})
+        return jsonify({"status": "error", "message": f"获取失败：{clean_error_message(str(e))}"})
 
-# 新增接口：保存游戏
 @app.route('/save-game', methods=['POST'])
 def save_game():
-    """
-    保存游戏状态到文件
-    接收前端传来的游戏状态数据，保存为JSON文件
-    """
     try:
-        data = request.json
-        save_name = data.get('saveName', '').strip()
-        global_state = data.get('globalState', {})
-        protagonist_attr = data.get('protagonistAttr', {})
-        difficulty = data.get('difficulty', '')
-        last_options = data.get('lastOptions', [])
-        
-        # 基础校验
+        data = request.json or {}
+        save_name = (data.get('saveName') or '').strip()
         if not save_name:
             return jsonify({"status": "error", "message": "存档名称不能为空！"})
-        # 允许空的global_state（可能是游戏刚开始还没有生成世界观）
-        if global_state is None:
-            global_state = {}
-        
-        # 构造存档数据（与main2.py中的格式保持一致）
-        save_data = {
-            "global_state": global_state,
-            "protagonist_attr": protagonist_attr,
-            "difficulty": difficulty,
-            "last_options": last_options,
-            "timestamp": str(datetime.now())
-        }
-        
-        # 生成存档文件名
-        save_filename = f"{save_name}.json"
-        save_path = os.path.join(SAVE_DIR, save_filename)
-        
-        # 保存到文件（带重试机制）
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                with open(save_path, 'w', encoding='utf-8') as f:
-                    json.dump(save_data, f, ensure_ascii=False, indent=2)
-                print(f"✅ 游戏已保存到：{save_path}")
-                return jsonify({
-                    "status": "success",
-                    "message": "游戏已成功保存！",
-                    "savePath": save_path
-                })
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    print(f"⚠️ 保存失败（尝试 {attempt + 1}/{max_retries}），重试中...")
-                    import time
-                    time.sleep(0.5)  # 等待0.5秒后重试
-                else:
-                    raise e
-        
+        game_data = data.get('gameData', {})
+        global_state = data.get('globalState', {})
+        from server.config import SAVE_DIR
+        import json as _json
+        path = Path(SAVE_DIR) / f"{save_name}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, 'w', encoding='utf-8') as f:
+            _json.dump({"gameData": game_data, "globalState": global_state}, f, ensure_ascii=False, indent=2)
+        return jsonify({"status": "success", "message": "保存成功"})
     except Exception as e:
-        print(f"🔴 保存游戏错误：{str(e)}")
-        import traceback
-        traceback.print_exc()
-        error_msg = clean_error_message(str(e))
-        return jsonify({"status": "error", "message": f"保存失败，请重试：{error_msg}"})
+        return jsonify({"status": "error", "message": f"保存失败，请重试：{clean_error_message(str(e))}"})
 
-# 新增接口：列出所有存档
 @app.route('/list-saves', methods=['GET'])
 def list_saves():
-    """
-    列出所有存档文件
-    返回存档名称列表和基本信息
-    """
     try:
+        from server.config import SAVE_DIR
         saves = []
-        if os.path.exists(SAVE_DIR):
-            for file in os.listdir(SAVE_DIR):
-                if file.endswith('.json'):
-                    save_name = file[:-5]  # 去掉.json后缀
-                    save_path = os.path.join(SAVE_DIR, file)
-                    
-                    # 读取存档基本信息（不加载完整数据）
-                    try:
-                        with open(save_path, 'r', encoding='utf-8') as f:
-                            save_data = json.load(f)
-                        
-                        # 获取存档时间
-                        timestamp = save_data.get('timestamp', '')
-                        
-                        # 计算进度信息
-                        global_state = save_data.get('global_state', {})
-                        flow_worldline = global_state.get('flow_worldline', {})
-                        current_chapter = flow_worldline.get('current_chapter', 'chapter1')
-                        chapter_name = '第一章' if current_chapter == 'chapter1' else ('第二章' if current_chapter == 'chapter2' else '第三章')
-                        
-                        saves.append({
-                            "name": save_name,
-                            "timestamp": timestamp,
-                            "chapter": chapter_name
-                        })
-                    except Exception as e:
-                        print(f"⚠️ 读取存档 {save_name} 信息失败：{str(e)}")
-                        saves.append({
-                            "name": save_name,
-                            "timestamp": "",
-                            "chapter": "未知"
-                        })
-        
-        return jsonify({
-            "status": "success",
-            "saves": saves
-        })
-        
+        if Path(SAVE_DIR).exists():
+            for f in Path(SAVE_DIR).glob("*.json"):
+                saves.append(f.stem)
+        return jsonify({"status": "success", "saves": saves})
     except Exception as e:
-        print(f"🔴 列出存档错误：{str(e)}")
-        import traceback
-        traceback.print_exc()
-        error_msg = clean_error_message(str(e))
-        return jsonify({"status": "error", "message": f"列出存档失败：{error_msg}", "saves": []})
+        return jsonify({"status": "error", "message": f"列出存档失败：{clean_error_message(str(e))}", "saves": []})
 
-# 新增接口：加载游戏
 @app.route('/load-game', methods=['POST'])
 def load_game():
-    """
-    加载指定存档
-    接收存档名称，返回完整的游戏状态数据
-    """
     try:
-        data = request.json
-        save_name = data.get('saveName', '').strip()
-        
+        data = request.json or {}
+        save_name = (data.get('saveName') or '').strip()
         if not save_name:
             return jsonify({"status": "error", "message": "存档名称不能为空！"})
-        
-        # 生成存档文件名
-        save_filename = f"{save_name}.json"
-        save_path = os.path.join(SAVE_DIR, save_filename)
-        
-        # 检查文件是否存在
-        if not os.path.exists(save_path):
-            return jsonify({"status": "error", "message": f"存档文件不存在：{save_name}"})
-        
-        # 读取存档数据（带重试机制）
-        max_retries = 3
-        save_data = None
-        for attempt in range(max_retries):
-            try:
-                with open(save_path, 'r', encoding='utf-8') as f:
-                    save_data = json.load(f)
-                break  # 成功读取，退出重试循环
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    print(f"⚠️ 加载失败（尝试 {attempt + 1}/{max_retries}），重试中...")
-                    import time
-                    time.sleep(0.5)  # 等待0.5秒后重试
-                else:
-                    raise e
-        
-        if not save_data:
-            return jsonify({"status": "error", "message": "加载失败，请重试"})
-        
-        print(f"✅ 游戏已从：{save_path} 加载")
-        
-        # 返回完整的存档数据
-        return jsonify({
-            "status": "success",
-            "message": "游戏加载成功！",
-            "saveData": save_data
-        })
-        
+        from server.config import SAVE_DIR
+        import json as _json
+        path = Path(SAVE_DIR) / f"{save_name}.json"
+        if not path.exists():
+            return jsonify({"status": "error", "message": "存档文件不存在"})
+        with open(path, 'r', encoding='utf-8') as f:
+            loaded = _json.load(f)
+        return jsonify({"status": "success", "gameData": loaded.get("gameData", {}), "globalState": loaded.get("globalState", {})})
     except Exception as e:
-        print(f"🔴 加载游戏错误：{str(e)}")
-        import traceback
-        traceback.print_exc()
-        error_msg = clean_error_message(str(e))
-        return jsonify({"status": "error", "message": f"加载失败，请重试：{error_msg}"})
+        return jsonify({"status": "error", "message": f"加载失败，请重试：{clean_error_message(str(e))}"})
 
-# 新增接口：删除存档
 @app.route('/delete-save', methods=['POST'])
 def delete_save():
-    """
-    删除指定存档文件
-    """
     try:
-        data = request.json
-        save_name = data.get('saveName', '').strip()
-        
+        data = request.json or {}
+        save_name = (data.get('saveName') or '').strip()
         if not save_name:
             return jsonify({"status": "error", "message": "存档名称不能为空！"})
-        
-        # 生成存档文件名
-        save_filename = f"{save_name}.json"
-        save_path = os.path.join(SAVE_DIR, save_filename)
-        
-        # 检查文件是否存在
-        if not os.path.exists(save_path):
-            return jsonify({"status": "error", "message": f"存档文件不存在：{save_name}"})
-        
-        # 删除文件
-        os.remove(save_path)
-        print(f"✅ 已删除存档：{save_path}")
-        
-        return jsonify({
-            "status": "success",
-            "message": "存档已成功删除！"
-        })
-        
+        from server.config import SAVE_DIR
+        path = Path(SAVE_DIR) / f"{save_name}.json"
+        if not path.exists():
+            return jsonify({"status": "error", "message": "存档文件不存在"})
+        path.unlink()
+        return jsonify({"status": "success", "message": "删除成功"})
     except Exception as e:
-        print(f"🔴 删除存档错误：{str(e)}")
-        import traceback
-        traceback.print_exc()
-        error_msg = clean_error_message(str(e))
-        return jsonify({"status": "error", "message": f"删除存档失败：{error_msg}"})
+        return jsonify({"status": "error", "message": f"删除存档失败：{clean_error_message(str(e))}"})
 
-# 新增接口：生成游戏结局
 @app.route('/generate-ending', methods=['POST'])
 def generate_ending():
-    """
-    生成游戏结局（基于当前游戏状态）
-    当用户主动选择结束游戏时调用此接口
-    """
     try:
-        # 获取前端传的参数
-        data = request.json
+        data = request.json or {}
         global_state = data.get('globalState', {})
-        
-        # 基础校验
         if not global_state:
             return jsonify({"status": "error", "message": "全局状态不能为空！"})
-        
-        print(f"🔄 开始生成游戏结局...")
-        
-        # 确保隐藏结局预测存在
-        if 'hidden_ending_prediction' not in global_state:
-            print(f"📝 生成初始结局预测...")
-            global_state['hidden_ending_prediction'] = generate_ending_prediction(global_state)
-        
-        # 基于当前游戏进度修改结局内容（生成最终结局）
-        print(f"📝 基于当前游戏进度生成最终结局...")
-        modify_ending_content(global_state)
-        
-        # 获取最终的结局预测
-        ending_prediction = global_state.get('hidden_ending_prediction', {})
-        main_tone = ending_prediction.get('main_tone', 'NE')
-        content = ending_prediction.get('content', '主角完成了主要任务，虽然过程中经历了许多困难，但最终达成了预期目标')
-        
-        print(f"✅ 游戏结局生成完成，主基调：{main_tone}")
-        
-        # 返回结果
-        return jsonify({
-            "status": "success",
-            "message": "游戏结局生成成功！",
-            "ending": {
-                "main_tone": main_tone,
-                "content": content
-            }
-        })
-        
+        ending_content = generate_ending_prediction(global_state)
+        return jsonify({"status": "success", "endingContent": ending_content or ""})
     except Exception as e:
-        print(f"🔴 生成游戏结局错误：{str(e)}")
-        import traceback
-        traceback.print_exc()
-        error_msg = clean_error_message(str(e))
-        return jsonify({"status": "error", "message": f"生成游戏结局失败：{error_msg}"})
+        return jsonify({"status": "error", "message": f"生成游戏结局失败：{clean_error_message(str(e))}"})
 
-# ------------------------------ 前端展示后建档（方案1） ------------------------------
 @app.route('/notify-scene-displayed', methods=['POST'])
 def notify_scene_displayed():
-    """
-    前端在展示某选项的剧情图后调用，后端据此判断本段首次出场的配角并建档。
-    请求体：{ "game_id": "...", "option_data": { "scene", "scene_image": { "url", "prompt" }, "plot_supporting_characters": [[display_name, slot], ...] } }
-    """
     try:
         data = request.json or {}
         game_id = (data.get("game_id") or "").strip()
@@ -2069,21 +1159,11 @@ def notify_scene_displayed():
             return jsonify({"status": "error", "message": "game_id 不能为空"})
         if not option_data or not isinstance(option_data, dict):
             return jsonify({"status": "error", "message": "option_data 不能为空"})
-        scene_image = option_data.get("scene_image") or {}
-        scene_url = (scene_image.get("url") or "").strip()
-        image_display = Path(scene_url).name if scene_url else "(无图)"
-        protagonist_names = data.get("protagonist_names")  # 前端传入主角姓名/别名，用于排除主角误建档
-        print(f"📤 notify已传送 | game_id={game_id} | 本段图片={image_display}")
-        _archive_supporting_roles_on_option_shown(game_id, option_data, None, protagonist_names=protagonist_names)
+        _archive_supporting_roles_on_option_shown(game_id, option_data, None, data.get("protagonist_names"))
         return jsonify({"status": "success", "message": "已处理"})
     except Exception as e:
-        print(f"⚠️ notify-scene-displayed 处理失败：{e}")
-        import traceback
-        traceback.print_exc()
         return jsonify({"status": "error", "message": str(e)})
 
-
-# ------------------------------ 视觉内容生成API接口 ------------------------------
 @app.route('/generate-scene-image', methods=['POST'])
 def generate_scene_image_api():
     """单独生成场景图片的接口"""
@@ -2094,11 +1174,6 @@ def generate_scene_image_api():
         style = data.get('style', 'default')
         viewport_width = data.get('viewportWidth', None)
         viewport_height = data.get('viewportHeight', None)
-        
-        if not scene_description:
-            return jsonify({"status": "error", "message": "场景描述不能为空"})
-        
-        # 转换视口尺寸为整数（如果提供）
         if viewport_width is not None:
             try:
                 viewport_width = int(viewport_width)
@@ -2119,10 +1194,11 @@ def generate_scene_image_api():
         )
         
         if image_data:
-            return jsonify({
-                "status": "success",
-                "image": image_data
-            })
+            resp = {"status": "success", "image": image_data}
+            # 将本次剧情图提示词 JSON 一并返回，便于后端/前端查看
+            if isinstance(global_state, dict) and "_last_scene_prompt_json" in global_state:
+                resp["prompt_json"] = global_state["_last_scene_prompt_json"]
+            return jsonify(resp)
         else:
             return jsonify({
                 "status": "error",

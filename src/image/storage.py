@@ -23,8 +23,10 @@ def save_base64_image(data_uri: str, prompt: str, cache_key_suffix: str = None) 
 
         if not data_uri.startswith("data:image"):
             return None
+        if "," not in data_uri:
+            return None
 
-        header, encoded = data_uri.split(',', 1)
+        header, encoded = data_uri.split(",", 1)
         mime_match = re.search(r'data:image/([^;]+)', header)
         if not mime_match:
             return None
