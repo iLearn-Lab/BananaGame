@@ -1,0 +1,17 @@
+{
+  "role_001": {
+    "role_id": "role_001",
+    "role_name": "助手分析师",
+    "aliases": [
+      "助手分析师"
+    ],
+    "story_background": "",
+    "first_appear_scene": "秦凌坐在光线昏暗的临时数据分析工作台前，屏幕上是死者脑机接口采集的原始数据流。细微的波动与断层引起他的注意某些数据片段被…",
+    "first_img_id": "img_20260312_001",
+    "first_img_path": "C:\\Users\\User\\Desktop\\DN-main\\initial\\character_references\\game_1773306956_kuyf0a\\助手分析师_img_20260312_001.png",
+    "first_prompt": "”这时身后传来助手分析师的声音：“秦先生，这些加密信号的风格与你之前提取的那个‘暗码’很相似，可能是同一人操控",
+    "img_model": "gemini-3-pro-image-preview",
+    "update_log": [],
+    "core_features": "”这时身后传来助手分析师的声音：“秦先生，这些加密信号的风格与你之前提取的那个‘暗码’很相似，可能是同一人操控"
+  }
+}

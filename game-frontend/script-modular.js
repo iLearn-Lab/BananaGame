@@ -2273,6 +2273,11 @@ const Game = (() => {
             if (nextSegmentBtn) {
                 nextSegmentBtn.classList.add('hidden');
             }
+            // 新场景第一句时，隐藏回到上一句按钮
+            const prevSegmentBtn = document.getElementById('prev-segment-btn');
+            if (prevSegmentBtn) {
+                prevSegmentBtn.classList.add('hidden');
+            }
             
             // 获取要显示的文本段落
             const currentSegment = segments.length > 0 ? segments[0] : text;
@@ -2429,6 +2434,11 @@ const Game = (() => {
                             nextSegmentBtn.classList.remove('hidden');
                             nextSegmentBtn.dataset.showOptions = 'false';
                         }
+                        // 当前不在第一段时，允许回到上一句
+                        const prevBtn = document.getElementById('prev-segment-btn');
+                        if (prevBtn && gameState.currentTextSegmentIndex > 0) {
+                            prevBtn.classList.remove('hidden');
+                        }
                     } else {
                         // 所有段落都显示完了，显示"->"按钮等待用户点击后再显示选项
                         console.log('✅ 所有段落显示完成，显示"->"按钮等待用户点击显示选项');
@@ -2442,6 +2452,11 @@ const Game = (() => {
                             btn.classList.remove('hidden');
                             btn.dataset.showOptions = 'true';
                         }
+                        // 最后一段时仍然允许回到上一句
+                        const prevBtn = document.getElementById('prev-segment-btn');
+                        if (prevBtn && gameState.currentTextSegmentIndex > 0) {
+                            prevBtn.classList.remove('hidden');
+                        }
                     }
                 }
             }, 30);
@@ -2451,16 +2466,128 @@ const Game = (() => {
         });
     }
     
+    // 回到上一句文本（当前场景内的上一段）
+    function showPreviousTextSegment() {
+        if (!gameState.isShowingSegments || gameState.currentTextSegmentIndex <= 0) {
+            console.warn('⚠️ 没有上一段可以返回');
+            return;
+        }
+        
+        const prevSegmentBtn = document.getElementById('prev-segment-btn');
+        const nextSegmentBtn = document.getElementById('next-segment-btn');
+        
+        // 隐藏"->"按钮，等待本段打完后再决定是否显示
+        if (nextSegmentBtn) {
+            nextSegmentBtn.classList.add('hidden');
+            nextSegmentBtn.dataset.showOptions = 'false';
+        }
+        
+        // 移动到上一段
+        gameState.currentTextSegmentIndex--;
+        const prevSegment = gameState.textSegments[gameState.currentTextSegmentIndex];
+        
+        if (!prevSegment) {
+            console.warn('⚠️ 上一段文本为空');
+            return;
+        }
+        
+        const sceneTextElement = elements.content.sceneText || document.getElementById('scene-text');
+        if (!sceneTextElement) {
+            console.error('❌ 找不到sceneText元素');
+            return;
+        }
+        
+        // 清理旧打字机动画
+        if (gameState.currentTypeInterval) {
+            clearInterval(gameState.currentTypeInterval);
+            gameState.currentTypeInterval = null;
+        }
+        
+        // 清理旧文本
+        sceneTextElement.classList.remove('typewriter');
+        sceneTextElement.textContent = '';
+        sceneTextElement.innerHTML = '';
+        
+        // 重新以打字机效果显示上一段
+        requestAnimationFrame(() => {
+            sceneTextElement.style.setProperty('transform', 'none', 'important');
+            sceneTextElement.style.setProperty('scale', '1', 'important');
+            sceneTextElement.style.setProperty('transition', 'none', 'important');
+            
+            sceneTextElement.classList.add('typewriter');
+            let index = 0;
+            
+            const typeInterval = setInterval(() => {
+                if (index < prevSegment.length) {
+                    sceneTextElement.textContent += prevSegment.charAt(index);
+                    index++;
+                    const highlightedText = escapeHtml(sceneTextElement.textContent)
+                        .replace(/迷雾森林/g, '<span class="text-[#3498DB] font-bold">迷雾森林</span>')
+                        .replace(/上古神器/g, '<span class="text-[#3498DB] font-bold">上古神器</span>')
+                        .replace(/古老神庙/g, '<span class="text-[#3498DB] font-bold">古老神庙</span>')
+                        .replace(/怪异/g, '<span class="text-[#3498DB] font-bold">怪异</span>');
+                    sceneTextElement.innerHTML = highlightedText;
+                } else {
+                    clearInterval(typeInterval);
+                    gameState.currentTypeInterval = null;
+                    sceneTextElement.classList.remove('typewriter');
+                    
+                    sceneTextElement.style.setProperty('transform', 'none', 'important');
+                    sceneTextElement.style.setProperty('scale', '1', 'important');
+                    sceneTextElement.style.setProperty('transition', 'none', 'important');
+                    sceneTextElement.style.setProperty('animation', 'none', 'important');
+                    
+                    playSound('typeend');
+                    
+                    // 第一段时不再显示回退按钮
+                    if (prevSegmentBtn) {
+                        if (gameState.currentTextSegmentIndex <= 0) {
+                            prevSegmentBtn.classList.add('hidden');
+                        } else {
+                            prevSegmentBtn.classList.remove('hidden');
+                        }
+                    }
+                    
+                    // 如果当前不是最后一段，仅允许继续向后
+                    if (gameState.currentTextSegmentIndex < gameState.textSegments.length - 1) {
+                        if (nextSegmentBtn) {
+                            nextSegmentBtn.classList.remove('hidden');
+                            nextSegmentBtn.dataset.showOptions = 'false';
+                        }
+                    } else {
+                        // 当前已经是最后一段，点击"->"后应直接显示选项
+                        if (nextSegmentBtn) {
+                            nextSegmentBtn.classList.remove('hidden');
+                            nextSegmentBtn.dataset.showOptions = 'true';
+                        }
+                    }
+                }
+            }, 30);
+            
+            gameState.currentTypeInterval = typeInterval;
+        });
+    }
+    
     // 生成选项列表
     function generateOptions(options) {
         // 确保选项区域是显示的，文本区域是隐藏的
         const textDisplayArea = document.getElementById('text-display-area');
         const optionsListArea = document.getElementById('options-list-area');
+        const prevSegmentBtn = document.getElementById('prev-segment-btn');
+        const nextSegmentBtn = document.getElementById('next-segment-btn');
         if (textDisplayArea) {
             textDisplayArea.classList.add('hidden');
         }
         if (optionsListArea) {
             optionsListArea.classList.remove('hidden');
+        }
+        // 进入选项阶段后，不再允许回到上一句，同时隐藏"->"按钮
+        if (prevSegmentBtn) {
+            prevSegmentBtn.classList.add('hidden');
+        }
+        if (nextSegmentBtn) {
+            nextSegmentBtn.classList.add('hidden');
+            nextSegmentBtn.dataset.showOptions = 'false';
         }
         
         // 清空现有选项列表
@@ -4599,6 +4726,15 @@ const Game = (() => {
                     // 不是最后一段，显示下一段文本
                     showNextTextSegment();
                 }
+            });
+        }
+
+        // 回到上一句按钮事件（左下角"<-"按钮）
+        const prevSegmentBtn = document.getElementById('prev-segment-btn');
+        if (prevSegmentBtn) {
+            prevSegmentBtn.addEventListener('click', () => {
+                playSound('click');
+                showPreviousTextSegment();
             });
         }
     }
