@@ -967,3 +967,9 @@ p#scene-text:focus {
 .scene-arrow.hidden {
     display: none !important;
 }
+
+/* 顶部不展示游戏矛盾/结束条件等文字 */
+/* 顶部进度条整块隐藏（章节名 / 进度 / 矛盾提示统统不显示） */
+.progress-bar-container {
+    display: none !important;
+}

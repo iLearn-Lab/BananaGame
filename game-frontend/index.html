@@ -471,6 +471,16 @@
                 <div class="options-list flex flex-col gap-[20px] w-60%" id="options-list" role="list"></div>
             </div>
             
+            <!-- 回到上一句按钮（左下角） -->
+            <button
+                id="prev-segment-btn"
+                class="scene-arrow fixed bottom-8 left-8 w-[60px] h-[60px] bg-[rgba(26,188,156,0.8)] hover:bg-[rgba(26,188,156,1)] rounded-full flex items-center justify-center z-50 transition-all duration-300 shadow-lg hover:scale-110 active:scale-95 hidden"
+                title="上一句"
+                aria-label="回到上一句文本"
+            >
+                <i class="fa fa-arrow-left text-white text-2xl"></i>
+            </button>
+
             <!-- 下一段文本按钮（右下角） -->
             <button 
                 id="next-segment-btn" 
