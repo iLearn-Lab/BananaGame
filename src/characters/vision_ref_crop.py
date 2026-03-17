@@ -504,16 +504,22 @@ def crop_image_by_bbox(
     if x2 <= x1 or y2 <= y1:
         return None
     crop_w, crop_h = x2 - x1, y2 - y1
-    # 全身参考图：裁剪区域过小或过扁/过窄视为无效，不保存废图，由调用方回退到整张初登场图
-    if crop_h < 50 or crop_h < 0.08 * H:
+    # 全身参考图：组合阈值（像素 + 相对比例 + 面积）避免远景小人被误杀，同时挡住极小垃圾框
+    min_h_px, min_h_ratio = 50, 0.08
+    min_w_px, min_w_ratio = 72, 0.06
+    min_area = max(5000, int(W * H * 0.004))
+    if crop_h < min_h_px or crop_h < min_h_ratio * H:
         print(f"   ⚠️ [vision] 裁剪区域高度过小（{crop_h}px），跳过保存，将使用整张初登场图")
         return None
-    if crop_w < 80 or crop_w < 0.1 * W:
+    if crop_w < min_w_px or crop_w < min_w_ratio * W:
         print(f"   ⚠️ [vision] 裁剪区域宽度过小（{crop_w}px），跳过保存，将使用整张初登场图")
         return None
-    # 拒绝明显异常的宽高比（竖条/横条），全身人像宽高比一般在约 0.25～2 之间
+    if crop_w * crop_h < min_area:
+        print(f"   ⚠️ [vision] 裁剪区域面积过小（{crop_w}x{crop_h}），跳过保存，将使用整张初登场图")
+        return None
+    # 拒绝明显异常的宽高比（竖条/横条）
     aspect = crop_w / crop_h if crop_h else 0
-    if aspect < 0.22 or aspect > 3.5:
+    if aspect < 0.18 or aspect > 4.0:
         print(f"   ⚠️ [vision] 裁剪宽高比异常（{crop_w}×{crop_h}，比例 {aspect:.2f}），跳过保存，将使用整张初登场图")
         return None
 

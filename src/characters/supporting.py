@@ -104,11 +104,11 @@ def get_or_create_supporting_role_archive(
     found = _find_archive_by_name_or_alias(archives, display_name)
     if found:
         role_id, arch = found
+        arch = dict(arch)
         rn = _safe_str(arch.get("role_name", "")).strip()
         aliases = list(arch.get("aliases") or [])
         if display_name != rn and display_name not in aliases:
             aliases.append(display_name)
-            arch = dict(arch)
             arch["aliases"] = aliases
             archives[role_id] = arch
             _save_role_archives(game_id, archives)
@@ -128,6 +128,25 @@ def get_or_create_supporting_role_archive(
                     fp = ref_dir / Path(face_ref).name
                     if fp.exists():
                         arch["_resolved_face_ref_path"] = str(fp.resolve())
+                        # 兼容旧档案：历史数据可能没有 reference_ready/reference_status
+                        if not arch.get("reference_ready"):
+                            arch["reference_ready"] = True
+                            arch["reference_status"] = "ready"
+                            archives[role_id] = arch
+                            _save_role_archives(game_id, archives)
+                    elif arch.get("reference_ready"):
+                        # face_ref 缺失时防止误判为“可用”
+                        arch["reference_ready"] = False
+                        if not _safe_str(arch.get("reference_status", "")).strip():
+                            arch["reference_status"] = "face_ref_missing"
+                        archives[role_id] = arch
+                        _save_role_archives(game_id, archives)
+                elif "reference_ready" not in arch:
+                    # 兼容旧档案：没有单人参考图则默认待补齐
+                    arch["reference_ready"] = False
+                    arch["reference_status"] = "pending_retry"
+                    archives[role_id] = arch
+                    _save_role_archives(game_id, archives)
                 return arch
         print(f"⚠️ 配角 {display_name} 档案存在但首图路径无效")
     # 正式出场时：若该角色曾为预配角，取出积累的碎片化特征并合并进待建档项，后续写入正式档案
@@ -265,7 +284,9 @@ def archive_supporting_role_first_appearance(
         main_dir = Path("initial") / "main_character" / game_id
         if (main_dir / "main_character.png").exists():
             protagonist_ref = main_dir / "main_character.png"
-    face_ref_path_value = None
+    reference_ready = False
+    reference_status = "pending_retry"
+    reference_last_error = ""
     appearance_base = f"{first_appear_scene}\n{first_prompt}\n{core_features}".strip() or ""
     position_hint = _extract_position_hint(first_prompt, first_appear_scene)
     appearance_hints = (appearance_base + ("\n" + position_hint if position_hint else "")).strip()
@@ -288,19 +309,33 @@ def archive_supporting_role_first_appearance(
             and abs((_bbox.get("height") or 0) - 1) < 0.01
         )
         if _cropped_path and _cropped_path.exists() and not _is_full_image_bbox:
-            face_ref_path_value = _cropped_path.name
-            archive["face_ref_path"] = face_ref_path_value
+            archive["face_ref_path"] = _cropped_path.name
             archive["_resolved_face_ref_path"] = str(_cropped_path.resolve())
+            reference_ready = True
+            reference_status = "ready"
             print(f"✅ 配角 {display_name} 已裁出单人全身参考图：{_cropped_path.name}")
             print(f"   📁 保存位置：{_cropped_path.resolve()}")
         elif _is_full_image_bbox:
-            print(f"   ⏭️ 视觉模型返回整图 bbox（未找到该角色），跳过 body_ref，将使用整张初登场图作参考")
+            reference_status = "not_in_scene"
+            reference_last_error = "vision_returned_full_image_bbox"
+            print(f"   ⏭️ 视觉模型返回整图 bbox（未找到该角色），本轮不写入配角参考图，待后续出场补齐")
         elif _bbox is None:
-            print(f"   📌 未配置视觉模型，或调用失败（如 503/超时/不支持的请求），跳过单人参考图裁剪（将使用整张初登场图作参考）")
+            reference_status = "vision_unavailable"
+            reference_last_error = "vision_bbox_none"
+            print(f"   📌 未配置视觉模型，或调用失败（如 503/超时/不支持的请求），本轮不写入配角参考图")
         else:
-            print(f"   ⚠️ 视觉模型未返回有效 bbox 或裁剪失败，将使用整张初登场图作参考")
+            reference_status = "crop_invalid"
+            reference_last_error = "vision_bbox_or_crop_invalid"
+            print(f"   ⚠️ 视觉模型未返回有效 bbox 或裁剪失败，本轮不写入配角参考图")
     except Exception as e:
-        print(f"⚠️ 配角 {display_name} 单人参考图裁剪失败（将使用整张初登场图）：{e}")
+        reference_status = "crop_exception"
+        reference_last_error = str(e)
+        print(f"⚠️ 配角 {display_name} 单人参考图裁剪失败（本轮不写入配角参考图）：{e}")
+
+    archive["reference_ready"] = reference_ready
+    archive["reference_status"] = reference_status
+    if reference_last_error:
+        archive["reference_last_error"] = _clip_text(reference_last_error, 180)
 
     archives[role_id] = archive
     _save_role_archives(game_id, archives)
@@ -308,6 +343,98 @@ def archive_supporting_role_first_appearance(
     print(f"✅ 配角 {display_name} 初登场图已保存（来自当前剧情图）：{first_img_path}")
     print(f"   📋 新建配角信息：role_id={role_id}, role_name={display_name}, aliases={archive.get('aliases',[])}, first_img={first_img_path.name}")
     return archive
+
+
+def retry_supporting_role_reference_crop(
+    game_id: str,
+    display_name: str,
+    scene_image_path: str,
+    prompt: str,
+    first_appear_scene: str = "",
+) -> bool:
+    """
+    已有档案但 reference_ready=False 时，用当前剧情图重试裁剪单人参考图。
+    返回是否补齐成功。
+    """
+    if not game_id or not display_name or not scene_image_path:
+        return False
+    src = Path(scene_image_path)
+    if not src.exists():
+        return False
+
+    archives = _load_role_archives(game_id)
+    found = _find_archive_by_name_or_alias(archives, display_name)
+    if not found:
+        return False
+    role_id, arch = found
+    if not isinstance(arch, dict):
+        return False
+    if arch.get("reference_ready"):
+        return True
+
+    ref_dir = ensure_character_references_dir(game_id)
+    role_prefix = _sanitize_filename_for_role(_safe_str(arch.get("role_name", display_name)) or display_name)
+    body_ref_basename = _safe_str(arch.get("face_ref_path", "")).strip() or f"{role_prefix}_body_ref.png"
+
+    protagonist_ref = None
+    main_dir = Path("initial") / "main_character" / game_id
+    if (main_dir / "main_character.png").exists():
+        protagonist_ref = main_dir / "main_character.png"
+
+    first_prompt = _safe_str(arch.get("first_prompt", "")).strip()
+    core_features = _safe_str(arch.get("core_features", "")).strip()
+    prompt_core = _extract_character_core_from_prompt(prompt, display_name)
+    scene_hint = _safe_str(first_appear_scene).strip() or _safe_str(arch.get("first_appear_scene", "")).strip()
+    appearance_base = "\n".join([x for x in [scene_hint, first_prompt, prompt_core, core_features] if x]).strip()
+    position_hint = _extract_position_hint(prompt_core or first_prompt, scene_hint)
+    appearance_hints = (appearance_base + ("\n" + position_hint if position_hint else "")).strip()
+
+    reference_ready = False
+    reference_status = "pending_retry"
+    reference_last_error = ""
+    try:
+        _bbox, _cropped_path = get_character_bbox_and_crop(
+            src,
+            ref_dir,
+            character_name=display_name,
+            appearance_hints=appearance_hints,
+            body_ref_filename=body_ref_basename,
+            protagonist_ref_path=protagonist_ref,
+        )
+        _is_full_image_bbox = (
+            _bbox
+            and abs((_bbox.get("x") or 0)) < 0.01
+            and abs((_bbox.get("y") or 0)) < 0.01
+            and abs((_bbox.get("width") or 0) - 1) < 0.01
+            and abs((_bbox.get("height") or 0) - 1) < 0.01
+        )
+        if _cropped_path and _cropped_path.exists() and not _is_full_image_bbox:
+            arch["face_ref_path"] = _cropped_path.name
+            arch["_resolved_face_ref_path"] = str(_cropped_path.resolve())
+            reference_ready = True
+            reference_status = "ready"
+            print(f"✅ 配角 {display_name} 已补齐单人全身参考图：{_cropped_path.name}")
+        elif _is_full_image_bbox:
+            reference_status = "not_in_scene"
+            reference_last_error = "vision_returned_full_image_bbox"
+        elif _bbox is None:
+            reference_status = "vision_unavailable"
+            reference_last_error = "vision_bbox_none"
+        else:
+            reference_status = "crop_invalid"
+            reference_last_error = "vision_bbox_or_crop_invalid"
+    except Exception as e:
+        reference_status = "crop_exception"
+        reference_last_error = str(e)
+        print(f"⚠️ 配角 {display_name} 补齐单人参考图失败：{e}")
+
+    arch["reference_ready"] = reference_ready
+    arch["reference_status"] = reference_status
+    if reference_last_error:
+        arch["reference_last_error"] = _clip_text(reference_last_error, 180)
+    archives[role_id] = arch
+    _save_role_archives(game_id, archives)
+    return reference_ready
 
 
 def update_supporting_role_aliases_from_plot(

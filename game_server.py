@@ -40,6 +40,7 @@ from server.config import IMAGE_CACHE_DIR
 from src.characters.supporting import (
     get_or_create_supporting_role_archive,
     archive_supporting_role_first_appearance,
+    retry_supporting_role_reference_crop,
 )
 from src.characters.archives import _load_role_archives
 from src.utils.text_utils import _clip_text, get_protagonist_names
@@ -102,6 +103,18 @@ def _archive_supporting_roles_on_option_shown(game_id, option_data, global_state
                 archive_supporting_role_first_appearance(game_id, arch, str(local_path), prompt)
             except Exception as e:
                 print(f"⚠️ 配角初登场建档失败：{e}")
+        elif not arch.get("reference_ready"):
+            # 旧档案/误建档场景：当本次展示图里真正出现该角色时自动补齐单人参考图
+            try:
+                retry_supporting_role_reference_crop(
+                    game_id=game_id,
+                    display_name=dn,
+                    scene_image_path=str(local_path),
+                    prompt=prompt,
+                    first_appear_scene=first_appear_scene,
+                )
+            except Exception as e:
+                print(f"⚠️ 配角参考图补齐失败：{e}")
 
 
 # 允许前端跨域访问

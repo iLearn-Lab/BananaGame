@@ -1130,8 +1130,9 @@ def generate_scene_image(
                 first_appearance_pending.append(arch)
                 # 首次出场判断与建档改为前端展示剧情图后由 /notify-scene-displayed 触发，此处仅不传参考图
             else:
-                # 优先使用视觉裁剪的单人全身参考图，避免多人同框时用错人
-                img_path = arch.get("_resolved_face_ref_path") or arch.get("_resolved_first_img_path") or arch.get("first_img_path", "")
+                # 仅当视觉裁剪确认成功时才使用配角参考图，避免“未出现在图里”时误用整图污染后续生成
+                reference_ready = bool(arch.get("reference_ready"))
+                img_path = arch.get("_resolved_face_ref_path") if reference_ready else ""
                 if img_path:
                     supporting_role_images.append(img_path)
                     supporting_role_references.append({
@@ -1143,7 +1144,9 @@ def generate_scene_image(
                     })
                     image_index += 1
                     print(f"✅ 配角 {display_name}-{slot} 将作为参考图 Image {image_index - 1} 传递")
-                    print(f"   📋 配角信息：role_id={arch.get('_role_id','')}, role_name={arch.get('role_name','')}, aliases={arch.get('aliases',[])}, first_img={Path(img_path).name if img_path else ''}")
+                    print(f"   📋 配角信息：role_id={arch.get('_role_id','')}, role_name={arch.get('role_name','')}, aliases={arch.get('aliases',[])}, face_ref={Path(img_path).name if img_path else ''}")
+                else:
+                    print(f"⏭️ 配角 {display_name}-{slot} 暂不传参考图（reference_ready={reference_ready}, status={arch.get('reference_status','') or 'unknown'}）")
     
     # 打印当前游戏所有配角档案摘要
     if game_id:
