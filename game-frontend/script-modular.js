@@ -18,6 +18,7 @@ const Game = (() => {
     let selectedStyle = null;
     let selectedSubStyle = null;
     let customStyleText = '';
+    const PENDING_MODAL_THRESHOLD_MS = 1000;
     
     // 初始化函数
     function init() {
@@ -786,6 +787,12 @@ const Game = (() => {
             isShowingSegments: false, // 是否处于分段显示状态
             pendingOptions: null, // 待显示的选项（在所有段落显示完成后显示）
             pendingImageData: null, // 待显示的图片数据（在分段显示过程中保持不变）
+            checkpointMemory: [],
+            pendingRequest: {
+                requestId: null,
+                timerId: null,
+                modalVisible: false
+            },
             gameData: {
                 core_worldview: {}, // 与后端一致的命名
                 flow_worldline: {}, // 与后端一致的命名
@@ -1497,7 +1504,9 @@ const Game = (() => {
             document.body.appendChild(loadingIndicator);
         }
         
+        let pendingRequestId = null;
         try {
+            pendingRequestId = beginPendingRequest('开始游戏');
             // 调用后端API生成初始场景和选项（初始场景不需要sceneId，因为没有缓存）
             // 添加超时控制（5分钟超时，因为图片生成最多需要6分钟）
             const controller = new AbortController();
@@ -1529,6 +1538,11 @@ const Game = (() => {
             clearTimeout(timeoutId);
             
             const result = await response.json();
+            if (result.status === 'success') {
+                resolvePendingRequest(pendingRequestId, 'success');
+            } else {
+                resolvePendingRequest(pendingRequestId, 'error');
+            }
             
             if (result.status === 'success') {
                 const optionData = result.optionData;
@@ -1853,6 +1867,7 @@ const Game = (() => {
                 displayScene(fallbackScene, initialOptions);
             }
         } catch (error) {
+            resolvePendingRequest(pendingRequestId, 'error');
             console.error('❌ API调用异常:', error);
             loadingIndicator.remove();
             // 如果API调用异常，使用默认场景和选项
@@ -2645,6 +2660,7 @@ const Game = (() => {
                         showEndingScreen();
                         return;
                     }
+                    const pendingRequestId = beginPendingRequest(selectedOption);
                     
                     // 隐藏选项区域，清空选项列表
                     const optionsListArea = document.getElementById('options-list-area');
@@ -2737,6 +2753,11 @@ const Game = (() => {
                         }
                         
                         const result = await response.json();
+                        if (result.status === 'success') {
+                            resolvePendingRequest(pendingRequestId, 'success');
+                        } else {
+                            resolvePendingRequest(pendingRequestId, 'error');
+                        }
                         
                         // 移除加载状态
                         if (loadingIndicator && loadingIndicator.parentNode) {
@@ -2748,6 +2769,15 @@ const Game = (() => {
                             
                             // 解析生成的剧情和选项
                             const optionData = result.optionData;
+                            if (optionData && optionData.checkpoint_packet) {
+                                appendCheckpointEntry({
+                                    source: 'backend_packet',
+                                    chapter: optionData.checkpoint_packet.chapter,
+                                    recap: optionData.checkpoint_packet.recap_text,
+                                    keywords: optionData.checkpoint_packet.keywords || [],
+                                    selectedOption: selectedOption
+                                });
+                            }
                             // 与首屏一致：后端已在返回时触发下一轮预生成并带上 sceneId，此处统一更新供下次点选项使用
                             if (optionData && optionData.sceneId) {
                                 gameState.currentSceneId = optionData.sceneId;
@@ -2781,7 +2811,7 @@ const Game = (() => {
                             }
                             
                             // 提取视觉内容数据
-                            const sceneImage = optionData.scene_image || null;
+                            let sceneImage = optionData.scene_image || null;
                             // const sceneVideo = optionData.scene_video || null;  // 视频功能已禁用
                             
                             // 调试：检查选项数据
@@ -3006,6 +3036,7 @@ const Game = (() => {
                             displayScene(errorMessage, ['继续游戏', '返回主菜单'], null, null);
                         }
                     } catch (error) {
+                        resolvePendingRequest(pendingRequestId, 'error');
                         console.error('❌ API调用异常:', error);
                         console.error('❌ 错误详情:', error.stack);
                         console.error('❌ 错误类型:', error.name);
@@ -3379,6 +3410,173 @@ const Game = (() => {
             elements.content.conflictStatusText.className = `conflict-status text-[14px] ${statusColor}`;
         }
     }
+
+    function ensureCheckpointMemoryState() {
+        if (!gameState.checkpointMemory || !Array.isArray(gameState.checkpointMemory)) {
+            gameState.checkpointMemory = [];
+        }
+        if (!gameState.gameData) {
+            gameState.gameData = {};
+        }
+        if (!gameState.gameData.flow_worldline) {
+            gameState.gameData.flow_worldline = {};
+        }
+        if (!Array.isArray(gameState.gameData.flow_worldline.checkpoint_memory)) {
+            gameState.gameData.flow_worldline.checkpoint_memory = [];
+        }
+        if (!Array.isArray(gameState.gameData.checkpoint_memory)) {
+            gameState.gameData.checkpoint_memory = [];
+        }
+    }
+
+    function normalizeKeywordsInput(rawKeywords) {
+        return String(rawKeywords || '')
+            .split(/[，,]/)
+            .map(item => item.trim())
+            .filter(Boolean)
+            .slice(0, 3);
+    }
+
+    function buildWaitingRecap() {
+        const flow = gameState.gameData?.flow_worldline || {};
+        const chapter = flow.current_chapter || 'chapter1';
+        const quest = flow.quest_progress || '你正在推进当前主线。';
+        const scene = (gameState.currentScene || '').trim();
+        const sceneSnippet = scene || '你刚刚做出了新的选择，剧情正在推进。';
+        return `当前章节：${chapter}\n主线进展：${quest}\n最近剧情：${sceneSnippet}`;
+    }
+
+    function appendCheckpointEntry(entry) {
+        ensureCheckpointMemoryState();
+        const normalized = {
+            id: entry.id || `cp_${Date.now()}`,
+            source: entry.source || 'pending_modal',
+            chapter: entry.chapter || (gameState.gameData?.flow_worldline?.current_chapter || 'chapter1'),
+            recap: entry.recap || '',
+            keywords: Array.isArray(entry.keywords) ? entry.keywords.slice(0, 3) : [],
+            selectedOption: entry.selectedOption || '',
+            timestamp: entry.timestamp || new Date().toISOString()
+        };
+        gameState.checkpointMemory.push(normalized);
+        if (gameState.checkpointMemory.length > 30) {
+            gameState.checkpointMemory = gameState.checkpointMemory.slice(-30);
+        }
+        gameState.gameData.flow_worldline.checkpoint_memory = [...gameState.checkpointMemory];
+        gameState.gameData.checkpoint_memory = [...gameState.checkpointMemory];
+    }
+
+    function showPendingCheckpointModal({ recapText, selectedOption, requestId }) {
+        if (gameState.pendingRequest.requestId !== requestId) {
+            return;
+        }
+        let modal = document.getElementById('pending-checkpoint-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'pending-checkpoint-modal';
+            modal.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-[70]';
+            modal.innerHTML = `
+                <div class="bg-[rgba(0,0,0,0.88)] backdrop-blur-sm rounded-[12px] p-6 w-[min(680px,92vw)] max-h-[70vh] overflow-y-auto border border-[rgba(255,255,255,0.15)]">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-[20px] font-bold text-white">剧情临界点整理</h3>
+                        <button id="pending-close-btn" class="text-white/80 hover:text-white text-[18px]">×</button>
+                    </div>
+                    <p id="pending-status-text" class="text-[#1ABC9C] text-[14px] mb-3">正在生成下一幕和画面，请稍候...</p>
+                    <div class="bg-[rgba(255,255,255,0.06)] rounded-[8px] p-3 mb-3">
+                        <div class="text-[13px] text-[#AAAAAA] mb-2">系统回顾</div>
+                        <div id="pending-recap-text" class="text-[15px] text-white leading-[1.7] whitespace-pre-wrap max-h-[36vh] overflow-y-auto pr-1"></div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="text-[13px] text-[#AAAAAA] mb-2">输入 1-3 个关键词（逗号分隔）</div>
+                        <input id="pending-keywords-input" type="text" maxlength="80" class="w-full h-[42px] bg-[rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.25)] rounded-[8px] text-white px-3 outline-none" placeholder="例如：线索，怀疑对象，下一步目标" />
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button id="pending-save-keywords-btn" class="h-[40px] px-4 rounded-[6px] bg-[#1ABC9C] text-white font-bold">保存关键词并继续等待</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        } else {
+            modal.classList.remove('hidden');
+        }
+
+        const recapEl = modal.querySelector('#pending-recap-text');
+        const statusEl = modal.querySelector('#pending-status-text');
+        const inputEl = modal.querySelector('#pending-keywords-input');
+        const closeBtn = modal.querySelector('#pending-close-btn');
+        const saveBtn = modal.querySelector('#pending-save-keywords-btn');
+
+        if (recapEl) recapEl.textContent = recapText || buildWaitingRecap();
+        if (statusEl) statusEl.textContent = '正在生成下一幕和画面，请稍候...';
+        if (inputEl) inputEl.value = '';
+
+        const hide = () => {
+            modal.classList.add('hidden');
+            gameState.pendingRequest.modalVisible = false;
+        };
+
+        if (closeBtn) {
+            closeBtn.onclick = hide;
+        }
+        if (saveBtn) {
+            saveBtn.onclick = () => {
+                const keywords = normalizeKeywordsInput(inputEl ? inputEl.value : '');
+                if (keywords.length === 0) {
+                    return;
+                }
+                appendCheckpointEntry({
+                    source: 'pending_modal',
+                    recap: recapText,
+                    keywords,
+                    selectedOption
+                });
+                playSound('save');
+                if (statusEl) {
+                    statusEl.textContent = '关键词已保存，剧情生成中...';
+                }
+                if (inputEl) {
+                    inputEl.value = '';
+                }
+            };
+        }
+        gameState.pendingRequest.modalVisible = true;
+    }
+
+    function beginPendingRequest(selectedOption) {
+        if (gameState.pendingRequest.timerId) {
+            clearTimeout(gameState.pendingRequest.timerId);
+        }
+        const requestId = `req_${Date.now()}_${Math.random().toString(16).slice(2, 8)}`;
+        const recapText = buildWaitingRecap();
+        gameState.pendingRequest.requestId = requestId;
+        gameState.pendingRequest.modalVisible = false;
+        gameState.pendingRequest.timerId = setTimeout(() => {
+            showPendingCheckpointModal({ recapText, selectedOption, requestId });
+        }, PENDING_MODAL_THRESHOLD_MS);
+        return requestId;
+    }
+
+    function resolvePendingRequest(requestId, status = 'success') {
+        if (!gameState.pendingRequest || gameState.pendingRequest.requestId !== requestId) {
+            return;
+        }
+        if (gameState.pendingRequest.timerId) {
+            clearTimeout(gameState.pendingRequest.timerId);
+            gameState.pendingRequest.timerId = null;
+        }
+        const modal = document.getElementById('pending-checkpoint-modal');
+        if (modal && gameState.pendingRequest.modalVisible) {
+            if (status === 'error') {
+                const statusEl = modal.querySelector('#pending-status-text');
+                if (statusEl) {
+                    statusEl.textContent = '生成失败，请重试或返回主菜单。';
+                }
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+        gameState.pendingRequest.modalVisible = false;
+        gameState.pendingRequest.requestId = null;
+    }
     
     // 保存游戏状态（调用后端API，同时保留localStorage缓存）
     // isUpdate: 如果为true，表示更新原存档；如果为false，表示保存为新存档
@@ -3386,17 +3584,22 @@ const Game = (() => {
         // 准备发送给后端的数据（与main2.py中的格式保持一致）
         // 将当前场景保存到 flow_worldline 中
         const gameDataCopy = JSON.parse(JSON.stringify(gameState.gameData || {}));
+        ensureCheckpointMemoryState();
         if (!gameDataCopy.flow_worldline) {
             gameDataCopy.flow_worldline = {};
         }
         gameDataCopy.flow_worldline.current_scene = gameState.currentScene || '';
+        gameDataCopy.flow_worldline.checkpoint_memory = [...gameState.checkpointMemory];
+        gameDataCopy.checkpoint_memory = [...gameState.checkpointMemory];
         
         const saveData = {
             saveName: saveName || `存档${(JSON.parse(localStorage.getItem('gameSaves')) || []).length + 1}`,
-            globalState: gameDataCopy, // 完整的后端数据结构（包含当前场景）
+            gameData: gameDataCopy,
+            globalState: gameDataCopy, // 兼容旧后端
             protagonistAttr: {...gameState.protagonistAttr},
             difficulty: gameState.selectedDifficulty || '',
-            lastOptions: [...gameState.currentOptions]
+            lastOptions: [...gameState.currentOptions],
+            checkpointMemory: [...gameState.checkpointMemory]
         };
         
         console.log('准备保存游戏，存档名称:', saveData.saveName, '是否更新:', isUpdate);
@@ -3433,6 +3636,7 @@ const Game = (() => {
                         chapterProgress: gameState.chapterProgress,
                         unlockedDeepBackgrounds: [...gameState.unlockedDeepBackgrounds],
                         currentTone: gameState.currentTone,
+                        checkpointMemory: [...gameState.checkpointMemory],
                         gameData: JSON.parse(JSON.stringify(gameState.gameData || {}))
                     }
                 };
@@ -3725,16 +3929,32 @@ const Game = (() => {
             
             const result = await response.json();
             
-            if (result.status === 'success' && result.saveData) {
-                const saveData = result.saveData;
-                
-                // 恢复游戏状态（从后端数据格式转换）
-                gameState.gameData = JSON.parse(JSON.stringify(saveData.global_state || {}));
-                gameState.protagonistAttr = {...(saveData.protagonist_attr || {})};
-                gameState.selectedDifficulty = saveData.difficulty || '';
-                
+            if (result.status === 'success') {
+                const saveData = result.saveData || {};
+                const normalizedGlobalState = result.globalState || result.gameData || saveData.global_state || saveData.globalState || {};
+                const normalizedProtagonistAttr = result.meta?.protagonistAttr || saveData.protagonist_attr || saveData.protagonistAttr || {};
+                const normalizedDifficulty = result.meta?.difficulty || saveData.difficulty || '';
+                const normalizedLastOptions = result.meta?.lastOptions || saveData.last_options || saveData.lastOptions || [];
+                const normalizedCheckpointMemory =
+                    result.meta?.checkpointMemory ||
+                    saveData.checkpoint_memory ||
+                    saveData.checkpointMemory ||
+                    normalizedGlobalState?.flow_worldline?.checkpoint_memory ||
+                    normalizedGlobalState?.checkpoint_memory ||
+                    [];
+
+                // 恢复游戏状态（兼容新旧后端返回格式）
+                gameState.gameData = JSON.parse(JSON.stringify(normalizedGlobalState || {}));
+                gameState.protagonistAttr = {...normalizedProtagonistAttr};
+                gameState.selectedDifficulty = normalizedDifficulty;
+
+                ensureCheckpointMemoryState();
+                gameState.checkpointMemory = Array.isArray(normalizedCheckpointMemory) ? [...normalizedCheckpointMemory] : [];
+                gameState.gameData.flow_worldline.checkpoint_memory = [...gameState.checkpointMemory];
+                gameState.gameData.checkpoint_memory = [...gameState.checkpointMemory];
+
                 // 恢复当前场景和选项
-                const lastOptions = saveData.last_options || [];
+                const lastOptions = normalizedLastOptions || [];
                 gameState.currentOptions = [...lastOptions];
                 
                 // 从flow_worldline中提取当前场景（如果有）
@@ -3756,7 +3976,7 @@ const Game = (() => {
                 // 同步更新localStorage缓存
                 const gameSave = {
                     name: saveName,
-                    time: saveData.timestamp || new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                    time: saveData.timestamp || result.meta?.timestamp || new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
                     progress: `${currentChapter === 'chapter1' ? '第一章' : currentChapter === 'chapter2' ? '第二章' : '第三章'} ${gameState.chapterProgress}%`,
                     gameState: {
                         protagonistAttr: {...gameState.protagonistAttr},
@@ -3766,6 +3986,7 @@ const Game = (() => {
                         chapterProgress: gameState.chapterProgress,
                         unlockedDeepBackgrounds: [...gameState.unlockedDeepBackgrounds],
                         currentTone: gameState.currentTone,
+                        checkpointMemory: [...gameState.checkpointMemory],
                         gameData: JSON.parse(JSON.stringify(gameState.gameData))
                     }
                 };
@@ -3815,6 +4036,12 @@ const Game = (() => {
                     gameState.unlockedDeepBackgrounds = [...save.gameState.unlockedDeepBackgrounds];
                     gameState.currentTone = save.gameState.currentTone;
                     gameState.gameData = JSON.parse(JSON.stringify(save.gameState.gameData));
+                    gameState.checkpointMemory = Array.isArray(save.gameState.checkpointMemory)
+                        ? [...save.gameState.checkpointMemory]
+                        : [...(gameState.gameData?.flow_worldline?.checkpoint_memory || [])];
+                    ensureCheckpointMemoryState();
+                    gameState.gameData.flow_worldline.checkpoint_memory = [...gameState.checkpointMemory];
+                    gameState.gameData.checkpoint_memory = [...gameState.checkpointMemory];
                     
                     // 标记这是从加载开始的游戏
                     gameState.isLoadedGame = true;

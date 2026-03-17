@@ -61,6 +61,41 @@ def prune_options(options: List[str]) -> List[str]:
     
     return pruned[:2]  # 最多保留2个选项
 
+
+def _build_checkpoint_keyword_prompt(global_state: Dict) -> str:
+    """将最近的关键词记忆作为软提示注入剧情生成（可开关）。"""
+    enabled = os.getenv("ENABLE_CHECKPOINT_KEYWORDS", "0").strip() == "1"
+    if not enabled or not isinstance(global_state, dict):
+        return ""
+    flow = global_state.get("flow_worldline", {}) or {}
+    raw_memory = flow.get("checkpoint_memory") or global_state.get("checkpoint_memory") or []
+    if not isinstance(raw_memory, list) or not raw_memory:
+        return ""
+    limit = max(1, int(os.getenv("CHECKPOINT_KEYWORDS_LIMIT", "3")))
+    selected = raw_memory[-limit:]
+    lines = []
+    for item in selected:
+        if not isinstance(item, dict):
+            continue
+        recap = str(item.get("recap", "")).strip()
+        keywords = item.get("keywords", [])
+        if not isinstance(keywords, list):
+            keywords = []
+        normalized_keywords = [str(k).strip() for k in keywords if str(k).strip()][:3]
+        if not recap and not normalized_keywords:
+            continue
+        line = f"- 关键词：{'、'.join(normalized_keywords) if normalized_keywords else '无'}"
+        if recap:
+            line += f"；回顾：{recap[:80]}"
+        lines.append(line)
+    if not lines:
+        return ""
+    return (
+        "\n## 【玩家临界点关键词记忆（软约束，可参考不可强绑）】：\n"
+        + "\n".join(lines)
+        + "\n### 要求：在不破坏主线与逻辑的前提下，适度呼应这些关键词；若冲突，以当前用户选择和主线推进为最高优先级。"
+    )
+
 # 重构：生成单个选项剧情的独立函数
 def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
     """
@@ -95,6 +130,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                 unlocked_deep_bgs.append(f"{char_name}的深层背景：{deep_bg}")
         if unlocked_deep_bgs:
             deep_bg_prompt = f"\n## 【已解锁深层背景】：\n{chr(10).join(unlocked_deep_bgs)}\n### 【重要要求】：后续剧情必须围绕已解锁的深层背景展开，将深层背景信息自然融入主线剧情中，不要直接向玩家显示深层背景内容！"
+    checkpoint_keyword_prompt = _build_checkpoint_keyword_prompt(global_state)
     
     # 添加调试信息：打印输入数据
     print(f"🔍 调试信息：输入参数")
@@ -155,6 +191,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
        - 必须**明确推进主线任务**，每个选项都应该让主角离主线目标更近一步
        - **部分选项必须关联角色深层背景**：生成2个选项，其中0-1个选项应直接关联到某个角色的深层背景，选择这类选项会触发该角色深层背景的解锁
     {deep_bg_prompt}
+    {checkpoint_keyword_prompt}
     
     ## 【主线推进要求】：
     1. 必须**明确推进主线任务**，每个选择都应该带来主线进度的实质性变化
@@ -783,6 +820,7 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
                 unlocked_deep_bgs.append(f"{char_name}的深层背景：{deep_bg}")
         if unlocked_deep_bgs:
             deep_bg_prompt = f"\n## 【已解锁深层背景】：\n{chr(10).join(unlocked_deep_bgs)}\n### 【重要要求】：后续剧情必须围绕已解锁的深层背景展开，将深层背景信息自然融入主线剧情中，不要直接向玩家显示深层背景内容！"
+    checkpoint_keyword_prompt = _build_checkpoint_keyword_prompt(global_state)
     
     # 确保core_worldview和flow_worldline存在
     core_worldview = global_state.get('core_worldview', {})
@@ -835,6 +873,7 @@ def _generate_single_option_text_only(i: int, option: str, global_state: Dict) -
        - 必须**明确推进主线任务**，每个选项都应该让主角离主线目标更近一步
        - **部分选项必须关联角色深层背景**：生成2个选项，其中0-1个选项应直接关联到某个角色的深层背景，选择这类选项会触发该角色深层背景的解锁
     {deep_bg_prompt}
+    {checkpoint_keyword_prompt}
     
     ## 【主线推进要求】：
     1. 必须**明确推进主线任务**，每个选择都应该带来主线进度的实质性变化
