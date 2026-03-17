@@ -305,6 +305,49 @@ const Game = (() => {
     function playSound(soundName) {
         soundManager.play(soundName);
     }
+
+    // 仅允许“剧情图”进入全屏背景，避免主角图/其他图片串入剧情层
+    function normalizeStorySceneImageData(imageData) {
+        if (!imageData) return null;
+
+        let normalized = imageData;
+        if (typeof normalized === 'string') {
+            normalized = { url: normalized };
+        }
+        if (typeof normalized !== 'object' || normalized === null) {
+            return null;
+        }
+
+        const rawUrl = normalized.url || normalized.image_url || normalized.src || null;
+        if (typeof rawUrl !== 'string' || rawUrl.trim() === '') {
+            return null;
+        }
+
+        const url = rawUrl.trim();
+        const lowerUrl = url.toLowerCase();
+        const imageType = typeof normalized.image_type === 'string' ? normalized.image_type.trim().toLowerCase() : '';
+
+        const isMainCharacterPath = lowerUrl.includes('/initial/main_character/');
+        const isSceneCachePath = lowerUrl.startsWith('/image_cache/')
+            || lowerUrl.startsWith('image_cache/')
+            || lowerUrl.includes('/image_cache/');
+
+        if (isMainCharacterPath) {
+            return null;
+        }
+        if (imageType && imageType !== 'story_scene') {
+            return null;
+        }
+        if (!imageType && !isSceneCachePath) {
+            return null;
+        }
+
+        return {
+            ...normalized,
+            url,
+            image_type: 'story_scene'
+        };
+    }
     
     // ------------------------------
     // 视觉内容管理模块
@@ -372,6 +415,14 @@ const Game = (() => {
                 // 如果没有图片数据，保持当前背景（不清除，以便保留之前的背景图片）
                 return;
             }
+
+            const normalizedImageData = normalizeStorySceneImageData(imageData);
+            if (!normalizedImageData) {
+                console.warn('⚠️ 当前图片不是合法剧情图，跳过背景更新:', imageData);
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                return;
+            }
+            imageData = normalizedImageData;
             
             // 验证URL字段（支持多种可能的字段名）
             let rawImageUrl = imageData.url || imageData.image_url || imageData.src || null;
@@ -486,7 +537,7 @@ const Game = (() => {
                     // ========== 只设置全屏背景图片（已移除场景图片层） ==========
                     if (globalBg) {
                         globalBg.style.backgroundImage = `url(${imageUrl})`;
-                        globalBg.style.backgroundSize = 'cover';
+                        globalBg.style.backgroundSize = 'contain';
                         globalBg.style.backgroundPosition = 'center';
                         globalBg.style.backgroundRepeat = 'no-repeat';
                         globalBg.style.opacity = '1';
@@ -702,7 +753,7 @@ const Game = (() => {
                     // 可选：也设置全屏背景（用于选项区域等其他地方）
                     if (globalBg) {
                         globalBg.style.backgroundImage = `url(${imageUrl})`;
-                        globalBg.style.backgroundSize = 'cover';
+                        globalBg.style.backgroundSize = 'contain';
                         globalBg.style.backgroundPosition = 'center';
                         globalBg.style.backgroundRepeat = 'no-repeat';
                         globalBg.style.opacity = '1';
@@ -2033,26 +2084,12 @@ const Game = (() => {
         // 注意：只在第一次调用displayScene时设置图片，分段显示过程中保持同一张图片
         // 重要：先验证图片数据格式，确保数据有效
         if (imageData) {
-            // 验证图片数据格式
-            if (typeof imageData === 'string') {
-                // 如果imageData是字符串，转换为对象格式
-                console.warn('⚠️ imageData是字符串，转换为对象格式');
-                imageData = { url: imageData };
-            } else if (typeof imageData !== 'object' || imageData === null) {
-                console.error('❌ imageData格式无效:', typeof imageData, imageData);
+            const normalizedImageData = normalizeStorySceneImageData(imageData);
+            if (!normalizedImageData) {
+                console.warn('⚠️ 收到非剧情图数据，已忽略，不更新背景与lastSceneImage:', imageData);
                 imageData = null;
-            } else if (!imageData.url) {
-                // 尝试从其他字段获取URL
-                if (imageData.image_url) {
-                    console.warn('⚠️ 使用image_url字段');
-                    imageData.url = imageData.image_url;
-                } else if (imageData.src) {
-                    console.warn('⚠️ 使用src字段');
-                    imageData.url = imageData.src;
-                } else {
-                    console.error('❌ imageData对象缺少url字段:', imageData);
-                    imageData = null;
-                }
+            } else {
+                imageData = normalizedImageData;
             }
         }
         
@@ -2136,7 +2173,11 @@ const Game = (() => {
                             if (gameState._sceneImageRequestKey !== requestKey) return;
                             if (sceneTextForRequest !== (gameState.currentScene || '').trim()) return;
                             if (result && result.status === 'success' && result.image && result.image.url) {
-                                const img = result.image;
+                                const img = normalizeStorySceneImageData(result.image);
+                                if (!img) {
+                                    console.warn('⚠️ 异步补图返回了非剧情图数据，已忽略:', result.image);
+                                    return;
+                                }
                                 console.log('✅ 异步补图成功:', img.url);
                                 try {
                                     // 传递 optionDataForArchive，确保配角首次出场建档能正确触发

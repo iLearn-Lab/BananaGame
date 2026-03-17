@@ -147,7 +147,7 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                                 img_data = {
                                     "url": img.get("url"), "prompt": img.get("prompt", ""), "style": img.get("style", "default"),
                                     "width": img.get("width", 1024), "height": img.get("height", 1024),
-                                    "cached": img.get("cached", True), "scene_text_hash": scene_text_hash,
+                                    "cached": img.get("cached", True), "image_type": "story_scene", "scene_text_hash": scene_text_hash,
                                 }
                                 with cache_lock:
                                     if next_scene_id in pregeneration_cache:
@@ -339,7 +339,13 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                             # 传入剧情模型输出的本段出场配角（有则名单，无则[]），图片流程以剧情为准不推断
                             if isinstance(global_state, dict):
                                 global_state["_plot_supporting_characters"] = option_data.get("plot_supporting_characters", [])
-                            img = generate_scene_image(scene_for_image, global_state, "default", use_cache=True)
+                            img = generate_scene_image(
+                                scene_for_image,
+                                global_state,
+                                "default",
+                                use_cache=True,
+                                cache_key_suffix=f"{scene_id}_opt{opt_idx}",
+                            )
                             print(f"🎨 [第一层预生成] generate_scene_image 返回：img={img is not None}, type={type(img)}")
                             
                             if img and isinstance(img, dict) and img.get('url'):
@@ -352,6 +358,7 @@ def _pregenerate_next_layers_logic(global_state, current_options, scene_id):
                                     "width": img.get("width", 1024),
                                     "height": img.get("height", 1024),
                                     "cached": img.get("cached", True),
+                                    "image_type": "story_scene",
                                     "scene_text_hash": scene_text_hash,
                                 }
                                 

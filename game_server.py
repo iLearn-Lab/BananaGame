@@ -290,6 +290,9 @@ def generate_worldview():
                     # 修复：提取并保存初始场景的图片数据（含 scene_text_hash，避免 /generate-option 误判文本变化而重复生成）
                     initial_scene_image = initial_option_data.get('scene_image', None)
                     if initial_scene_image:
+                        if not initial_scene_image.get("image_type"):
+                            initial_scene_image = dict(initial_scene_image)
+                            initial_scene_image["image_type"] = "story_scene"
                         if not initial_scene_image.get('scene_text_hash') and initial_scene and initial_scene.strip():
                             initial_scene_image = dict(initial_scene_image)
                             initial_scene_image['scene_text_hash'] = hashlib.md5(initial_scene.encode('utf-8')).hexdigest()
@@ -302,6 +305,7 @@ def generate_worldview():
                                 img = generate_scene_image(initial_scene, global_state, "default", use_cache=True)
                                 if img and img.get("url"):
                                     initial_scene_image = dict(img)
+                                    initial_scene_image["image_type"] = "story_scene"
                                     initial_scene_image["scene_text_hash"] = hashlib.md5(initial_scene.encode("utf-8")).hexdigest()
                                     print(f"✅ 已为默认剧情补生成初始场景图: {initial_scene_image.get('url', '')[:80]}...")
                             except Exception as img_e:
@@ -980,7 +984,9 @@ def generate_option():
                     # 补图时不查缓存复用旧图，但仍保存到本地（skip_cache_lookup=True）
                     img = generate_scene_image(
                         scene_text, global_state, "default",
-                        use_cache=True, skip_cache_lookup=True
+                        use_cache=True,
+                        skip_cache_lookup=True,
+                        cache_key_suffix=f"{scene_id or 'initial'}_opt{option_index}"
                     )
                     if img and isinstance(img, dict) and img.get("url"):
                         # 计算并存储场景文本哈希，用于后续匹配检查
@@ -992,6 +998,7 @@ def generate_option():
                             "width": img.get("width", 1024),
                             "height": img.get("height", 1024),
                             "cached": img.get("cached", True),
+                            "image_type": "story_scene",
                             "scene_text_hash": scene_text_hash  # 存储场景文本哈希，用于匹配检查
                         }
                         print("✅ 已生成场景图片（确保图片和文本匹配）")

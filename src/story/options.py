@@ -672,6 +672,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                                 "height": scene_image.get("height", 1024),
                                 # 本地路径表示已缓存；远程URL默认视为未缓存（除非上游明确标记）
                                 "cached": True if is_local_path else scene_image.get("cached", False),
+                                "image_type": "story_scene",
                                 "scene_text_hash": scene_text_hash,
                             }
                             if isinstance(global_state, dict) and "_last_scene_prompt_json" in global_state:
@@ -696,6 +697,7 @@ def _generate_single_option(i: int, option: str, global_state: Dict) -> Dict:
                                         "width": scene_image.get("width", 1024),
                                         "height": scene_image.get("height", 1024),
                                         "cached": scene_image.get("cached", False),
+                                        "image_type": "story_scene",
                                         "scene_text_hash": scene_text_hash,
                                     }
                                     if isinstance(global_state, dict) and "_last_scene_prompt_json" in global_state:
@@ -1562,6 +1564,7 @@ def generate_all_options(global_state: Dict, current_options: List[str], skip_im
                             "width": image_data.get("width", 1024),
                             "height": image_data.get("height", 1024),
                             "cached": image_data.get("cached", True),
+                            "image_type": "story_scene",
                             "scene_text_hash": scene_text_hash,
                         }
                         print(f"✅ 选项 {option_index+1} 图片已合并到选项数据")
