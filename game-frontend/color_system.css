@@ -1,0 +1,442 @@
+/* ========================================
+   第四项：色彩系统 (Color System)
+   ======================================== */
+
+/* ---- CSS 颜色变量定义 ---- */
+
+:root {
+    /* ===== 主色系 (Primary Colors) ===== */
+    /* 品牌主色：青色 */
+    --color-primary: #1ABC9C;
+    --color-primary-dark: #16A085;
+    --color-primary-light: #2ED8B6;
+    --color-primary-rgb: 26, 188, 156;
+    
+    /* 主色透明度变体 */
+    --color-primary-10: rgba(26, 188, 156, 0.1);
+    --color-primary-20: rgba(26, 188, 156, 0.2);
+    --color-primary-30: rgba(26, 188, 156, 0.3);
+    --color-primary-50: rgba(26, 188, 156, 0.5);
+    --color-primary-70: rgba(26, 188, 156, 0.7);
+    
+    /* ===== 中性色系 (Neutral Colors) ===== */
+    /* 背景色 */
+    --color-bg-primary: #0a0a0f;
+    --color-bg-secondary: #12121a;
+    --color-bg-tertiary: #1a1a25;
+    --color-bg-card: rgba(255, 255, 255, 0.06);
+    --color-bg-card-hover: rgba(255, 255, 255, 0.1);
+    
+    /* 文字色 */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #bdc3c7;
+    --color-text-tertiary: #7f8c8d;
+    --color-text-disabled: #5a6366;
+    
+    /* 边框色 */
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-border-light: rgba(255, 255, 255, 0.05);
+    --color-border-dark: rgba(255, 255, 255, 0.2);
+    
+    /* ===== 辅助色系 (Accent Colors) ===== */
+    /* 蓝色 */
+    --color-info: #3498db;
+    --color-info-dark: #2980b9;
+    --color-info-light: #5dade2;
+    --color-info-rgb: 52, 152, 219;
+    --color-info-10: rgba(52, 152, 219, 0.1);
+    --color-info-20: rgba(52, 152, 219, 0.2);
+    
+    /* 绿色 */
+    --color-success: #2ecc71;
+    --color-success-dark: #27ae60;
+    --color-success-light: #58d68d;
+    --color-success-rgb: 46, 204, 113;
+    --color-success-10: rgba(46, 204, 113, 0.1);
+    --color-success-20: rgba(46, 204, 113, 0.2);
+    
+    /* 黄色/警告 */
+    --color-warning: #f39c12;
+    --color-warning-dark: #d68910;
+    --color-warning-light: #f5b041;
+    --color-warning-rgb: 243, 156, 18;
+    --color-warning-10: rgba(243, 156, 18, 0.1);
+    --color-warning-20: rgba(243, 156, 18, 0.2);
+    
+    /* 橙色 */
+    --color-orange: #e67e22;
+    --color-orange-dark: #d35400;
+    --color-orange-light: #eb984e;
+    --color-orange-rgb: 230, 126, 34;
+    --color-orange-10: rgba(230, 126, 34, 0.1);
+    --color-orange-20: rgba(230, 126, 34, 0.2);
+    
+    /* 红色/错误 */
+    --color-danger: #e74c3c;
+    --color-danger-dark: #c0392b;
+    --color-danger-light: #ec7063;
+    --color-danger-rgb: 231, 76, 60;
+    --color-danger-10: rgba(231, 76, 60, 0.1);
+    --color-danger-20: rgba(231, 76, 60, 0.2);
+    
+    /* 紫色 */
+    --color-purple: #9b59b6;
+    --color-purple-dark: #8e44ad;
+    --color-purple-light: #af7ac5;
+    --color-purple-rgb: 155, 89, 182;
+    --color-purple-10: rgba(155, 89, 182, 0.1);
+    --color-purple-20: rgba(155, 89, 182, 0.2);
+    
+    /* 粉色 */
+    --color-pink: #e91e63;
+    --color-pink-dark: #c2185b;
+    --color-pink-light: #f48fb1;
+    --color-pink-rgb: 233, 30, 99;
+    --color-pink-10: rgba(233, 30, 99, 0.1);
+    --color-pink-20: rgba(233, 30, 99, 0.2);
+    
+    /* ===== 结局基调色系 (Tone Colors) ===== */
+    /* 每个结局基调有对应的颜色 */
+    --color-tone-he: #2ecc71;      /* 圆满结局 - 绿色 */
+    --color-tone-be: #9b59b6;     /* 悲剧结局 - 紫色 */
+    --color-tone-ne: #3498db;      /* 普通结局 - 蓝色 */
+    --color-tone-dark: #34495e;    /* 黑暗宿命 - 深灰 */
+    --color-tone-humor: #f1c40f;   /* 幽默 - 黄色 */
+    --color-tone-abstract: #e67e22; /* 抽象哲学 - 橙色 */
+    --color-tone-aesthetic: #1abc9c; /* 唯美 - 青色 */
+    --color-tone-logical: #7f8c8d;  /* 逻辑推理 - 灰色 */
+    --color-tone-mystery: #2c3e50;  /* 神秘克苏鲁 - 深蓝灰 */
+    --color-tone-stream: #e74c3c;   /* 意识流 - 红色 */
+    
+    /* ===== 功能性颜色 ---- */
+    /* 阴影颜色 */
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-color-light: rgba(0, 0, 0, 0.15);
+    --shadow-color-dark: rgba(0, 0, 0, 0.5);
+    
+    /* 遮罩颜色 */
+    --overlay-light: rgba(0, 0, 0, 0.3);
+    --overlay-medium: rgba(0, 0, 0, 0.6);
+    --overlay-heavy: rgba(0, 0, 0, 0.8);
+    
+    /* 发光效果颜色 */
+    --glow-primary: rgba(26, 188, 156, 0.5);
+    --glow-info: rgba(52, 152, 219, 0.5);
+    --glow-success: rgba(46, 204, 113, 0.5);
+    --glow-warning: rgba(243, 156, 18, 0.5);
+    --glow-danger: rgba(231, 76, 60, 0.5);
+    
+    /* ===== 渐变色预设 ---- */
+    --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    --gradient-info: linear-gradient(135deg, var(--color-info) 0%, var(--color-info-dark) 100%);
+    --gradient-success: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+    --gradient-danger: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-dark) 100%);
+    --gradient-warning: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-dark) 100%);
+    --gradient-dark: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%);
+    --gradient-radial: radial-gradient(ellipse at center, rgba(26,188,156,0.1) 0%, transparent 70%);
+}
+
+/* ---- 语义化色彩类 ---- */
+
+/* 背景色 */
+.bg-primary { background-color: var(--color-bg-primary); }
+.bg-secondary { background-color: var(--color-bg-secondary); }
+.bg-tertiary { background-color: var(--color-bg-tertiary); }
+.bg-card { background-color: var(--color-bg-card); }
+.bg-gradient { background: var(--gradient-primary); }
+
+/* 文字色 */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-tertiary { color: var(--color-text-tertiary); }
+.text-disabled { color: var(--color-text-disabled); }
+.text-accent { color: var(--color-primary); }
+
+/* 边框色 */
+.border-default { border-color: var(--color-border); }
+.border-light { border-color: var(--color-border-light); }
+.border-dark { border-color: var(--color-border-dark); }
+.border-accent { border-color: var(--color-primary); }
+
+/* 功能色 */
+.text-info { color: var(--color-info); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-danger); }
+.text-purple { color: var(--color-purple); }
+
+.bg-info { background-color: var(--color-info); }
+.bg-success { background-color: var(--color-success); }
+.bg-warning { background-color: var(--color-warning); }
+.bg-danger { background-color: var(--color-danger); }
+.bg-purple { background-color: var(--color-purple); }
+
+/* 结局基调色 */
+.text-tone-he { color: var(--color-tone-he); }
+.text-tone-be { color: var(--color-tone-be); }
+.text-tone-ne { color: var(--color-tone-ne); }
+.text-tone-dark { color: var(--color-tone-dark); }
+.text-tone-humor { color: var(--color-tone-humor); }
+.text-tone-abstract { color: var(--color-tone-abstract); }
+.text-tone-aesthetic { color: var(--color-tone-aesthetic); }
+.text-tone-logical { color: var(--color-tone-logical); }
+.text-tone-mystery { color: var(--color-tone-mystery); }
+.text-tone-stream { color: var(--color-tone-stream); }
+
+.bg-tone-he { background-color: var(--color-tone-he); }
+.bg-tone-be { background-color: var(--color-tone-be); }
+.bg-tone-ne { background-color: var(--color-tone-ne); }
+.bg-tone-dark { background-color: var(--color-tone-dark); }
+.bg-tone-humor { background-color: var(--color-tone-humor); }
+.bg-tone-abstract { background-color: var(--color-tone-abstract); }
+.bg-tone-aesthetic { background-color: var(--color-tone-aesthetic); }
+.bg-tone-logical { background-color: var(--color-tone-logical); }
+.bg-tone-mystery { background-color: var(--color-tone-mystery); }
+.bg-tone-stream { background-color: var(--color-tone-stream); }
+
+/* 带透明度的背景 */
+.bg-primary-10 { background-color: var(--color-primary-10); }
+.bg-primary-20 { background-color: var(--color-primary-20); }
+.bg-primary-30 { background-color: var(--color-primary-30); }
+
+.bg-info-10 { background-color: var(--color-info-10); }
+.bg-info-20 { background-color: var(--color-info-20); }
+
+.bg-success-10 { background-color: var(--color-success-10); }
+.bg-success-20 { background-color: var(--color-success-20); }
+
+.bg-warning-10 { background-color: var(--color-warning-10); }
+.bg-warning-20 { background-color: var(--color-warning-20); }
+
+.bg-danger-10 { background-color: var(--color-danger-10); }
+.bg-danger-20 { background-color: var(--color-danger-20); }
+
+.bg-purple-10 { background-color: var(--color-purple-10); }
+.bg-purple-20 { background-color: var(--color-purple-20); }
+
+/* ---- 阴影色彩 ---- */
+
+.shadow-primary {
+    box-shadow: 0 4px 16px var(--color-primary-30),
+                0 2px 8px var(--color-primary-20);
+}
+
+.shadow-info {
+    box-shadow: 0 4px 16px var(--color-info-20),
+                0 2px 8px var(--color-info-10);
+}
+
+.shadow-success {
+    box-shadow: 0 4px 16px var(--color-success-20),
+                0 2px 8px var(--color-success-10);
+}
+
+.shadow-warning {
+    box-shadow: 0 4px 16px var(--color-warning-20),
+                0 2px 8px var(--color-warning-10);
+}
+
+.shadow-danger {
+    box-shadow: 0 4px 16px var(--color-danger-20),
+                0 2px 8px var(--color-danger-10);
+}
+
+.shadow-purple {
+    box-shadow: 0 4px 16px var(--color-purple-20),
+                0 2px 8px var(--color-purple-10);
+}
+
+/* ---- 发光效果 ---- */
+
+.glow-primary {
+    box-shadow: 0 0 20px var(--glow-primary),
+                0 0 40px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.glow-info {
+    box-shadow: 0 0 20px var(--glow-info),
+                0 0 40px rgba(var(--color-info-rgb), 0.3);
+}
+
+.glow-success {
+    box-shadow: 0 0 20px var(--glow-success),
+                0 0 40px rgba(var(--color-success-rgb), 0.3);
+}
+
+.glow-warning {
+    box-shadow: 0 0 20px var(--glow-warning),
+                0 0 40px rgba(var(--color-warning-rgb), 0.3);
+}
+
+.glow-danger {
+    box-shadow: 0 0 20px var(--glow-danger),
+                0 0 40px rgba(var(--color-danger-rgb), 0.3);
+}
+
+/* ---- 边框颜色类 ---- */
+
+.border-info { border-color: var(--color-info); }
+.border-success { border-color: var(--color-success); }
+.border-warning { border-color: var(--color-warning); }
+.border-danger { border-color: var(--color-danger); }
+.border-purple { border-color: var(--color-purple); }
+
+.border-info-20 { border-color: var(--color-info-20); }
+.border-success-20 { border-color: var(--color-success-20); }
+.border-warning-20 { border-color: var(--color-warning-20); }
+.border-danger-20 { border-color: var(--color-danger-20); }
+.border-purple-20 { border-color: var(--color-purple-20); }
+
+/* ---- 悬停颜色变化 ---- */
+
+/* 主色悬停 */
+.hover\:text-primary:hover { color: var(--color-primary); }
+.hover\:bg-primary:hover { background-color: var(--color-primary); }
+.hover\:border-primary:hover { border-color: var(--color-primary); }
+
+/* 信息色悬停 */
+.hover\:text-info:hover { color: var(--color-info); }
+.hover\:bg-info:hover { background-color: var(--color-info); }
+.hover\:border-info:hover { border-color: var(--color-info); }
+
+/* 成功色悬停 */
+.hover\:text-success:hover { color: var(--color-success); }
+.hover\:bg-success:hover { background-color: var(--color-success); }
+.hover\:border-success:hover { border-color: var(--color-success); }
+
+/* 警告色悬停 */
+.hover\:text-warning:hover { color: var(--color-warning); }
+.hover\:bg-warning:hover { background-color: var(--color-warning); }
+.hover\:border-warning:hover { border-color: var(--color-warning); }
+
+/* 危险色悬停 */
+.hover\:text-danger:hover { color: var(--color-danger); }
+.hover\:bg-danger:hover { background-color: var(--color-danger); }
+.hover\:border-danger:hover { border-color: var(--color-danger); }
+
+/* ---- 渐变背景类 ---- */
+
+.bg-gradient-primary { background: var(--gradient-primary); }
+.bg-gradient-info { background: var(--gradient-info); }
+.bg-gradient-success { background: var(--gradient-success); }
+.bg-gradient-danger { background: var(--gradient-danger); }
+.bg-gradient-warning { background: var(--gradient-warning); }
+.bg-gradient-radial { background: var(--gradient-radial); }
+
+/* 多色渐变背景 */
+.bg-gradient-rainbow {
+    background: linear-gradient(
+        135deg,
+        var(--color-primary) 0%,
+        var(--color-info) 25%,
+        var(--color-success) 50%,
+        var(--color-warning) 75%,
+        var(--color-danger) 100%
+    );
+    background-size: 200% 200%;
+    animation: gradientFlow 8s ease infinite;
+}
+
+.bg-gradient-sunset {
+    background: linear-gradient(
+        135deg,
+        #ee7752 0%,
+        #e73c7e 50%,
+        #9b59b6 100%
+    );
+}
+
+.bg-gradient-ocean {
+    background: linear-gradient(
+        135deg,
+        #23a6d5 0%,
+        #1abc9c 50%,
+        #23d5ab 100%
+    );
+}
+
+/* ---- 暗黑主题优化 ---- */
+
+/* 确保深色背景的一致性 */
+body,
+#gameplay-screen,
+.screen {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+}
+
+/* 确保半透明背景也使用一致的颜色 */
+.glass,
+.glass-dark,
+.glass-primary,
+.glass-light,
+.glass-strong {
+    background-color: var(--color-bg-card);
+}
+
+/* ---- 覆盖原有的硬编码颜色 ---- */
+
+/* 按钮颜色 */
+.btn-main,
+.btn-primary {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+}
+
+.btn-main:hover,
+.btn-primary:hover {
+    background-color: var(--color-primary-light) !important;
+    border-color: var(--color-primary-light) !important;
+    box-shadow: 0 0 20px var(--color-primary-30) !important;
+}
+
+/* 选项编号颜色 */
+.option-number {
+    background-color: var(--color-primary) !important;
+}
+
+.option-card.selected .option-number {
+    background-color: white !important;
+    color: var(--color-primary) !important;
+}
+
+/* 进度条颜色 */
+.progress-fill {
+    background: linear-gradient(
+        90deg,
+        var(--color-primary),
+        var(--color-primary-light),
+        var(--color-primary)
+    ) !important;
+    background-size: 200% 100% !important;
+}
+
+/* 打字机光标颜色 */
+.typewriter {
+    border-right-color: var(--color-primary) !important;
+}
+
+@keyframes blink-caret {
+    from, to { border-color: var(--color-primary); }
+    50% { border-color: transparent; }
+}
+
+/* 链接颜色 */
+a {
+    color: var(--color-primary);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--color-primary-light);
+}
+
+/* 焦点轮廓 - 无障碍 */
+*:focus {
+    outline-color: var(--color-primary-50);
+}
+
+*:focus-visible {
+    outline-color: var(--color-primary);
+    outline-offset: 2px;
+}

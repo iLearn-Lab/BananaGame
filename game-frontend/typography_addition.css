@@ -1,0 +1,280 @@
+
+
+/* ========================================
+   第三项：排版优化 (Typography Enhancement)
+   ======================================== */
+
+/* ---- 基础排版系统 ---- */
+
+:root {
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+    --font-size-3xl: 30px;
+    --font-size-4xl: 36px;
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    --line-height-loose: 2;
+    --letter-spacing-tight: -0.02em;
+    --letter-spacing-normal: 0;
+    --letter-spacing-wide: 0.05em;
+    --letter-spacing-wider: 0.1em;
+}
+
+/* ---- 文字层次系统 ---- */
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    margin-bottom: 0.5em;
+    color: #fff;
+}
+
+h2 {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.02em;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ---- 旁白文本样式（优化版）---- */
+
+.scene-text,
+.scene-text *,
+#scene-text,
+#scene-text *,
+p.scene-text,
+p#scene-text {
+    position: relative !important;
+    z-index: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    font-size: 20px !important;
+    line-height: 1.8 !important;
+    letter-spacing: 0.02em !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    box-sizing: border-box !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 8px rgba(0, 0, 0, 0.4) !important;
+    transition: font-family 0.3s ease, font-weight 0.3s ease !important;
+    background: none !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    background-clip: border-box !important;
+    background-origin: padding-box !important;
+    background-size: auto !important;
+    background-position: 0% 0% !important;
+    background-repeat: repeat !important;
+    background-attachment: scroll !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    display: block !important;
+    margin: 0 0 1em 0 !important;
+    -webkit-margin-before: 0 !important;
+    -webkit-margin-after: 0 !important;
+    -webkit-margin-start: 0 !important;
+    -webkit-margin-end: 0 !important;
+    animation: fadeInUpText 0.5s ease-out !important;
+    user-select: none !important;
+    outline: none !important;
+    pointer-events: auto !important;
+    touch-action: pan-y !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    tap-highlight-color: transparent !important;
+    transform: none !important;
+    scale: 1 !important;
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -o-transform: none !important;
+    will-change: auto !important;
+}
+
+.scene-text:last-child,
+#scene-text:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* ---- 选项文字样式（优化）---- */
+
+.option-text {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+    font-size: 17px !important;
+    line-height: 1.6 !important;
+    letter-spacing: 0.01em !important;
+    font-weight: 400;
+}
+
+/* ---- 高亮样式优化 ---- */
+
+.highlight {
+    background: linear-gradient(120deg, rgba(243, 156, 18, 0.25) 0%, rgba(243, 156, 18, 0.35) 100%);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: 500;
+}
+
+.highlight-blue {
+    background: linear-gradient(120deg, rgba(52, 152, 219, 0.25) 0%, rgba(52, 152, 219, 0.35) 100%);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: 500;
+}
+
+/* ---- 响应式排版 ---- */
+
+@media (min-width: 1200px) {
+    .scene-text, #scene-text {
+        font-size: 22px !important;
+        line-height: 1.85 !important;
+    }
+    .option-text {
+        font-size: 18px !important;
+    }
+    h2 {
+        font-size: var(--font-size-4xl);
+    }
+}
+
+@media (max-width: 992px) and (min-width: 769px) {
+    .scene-text, #scene-text {
+        font-size: 19px !important;
+        line-height: 1.75 !important;
+    }
+    .option-text {
+        font-size: 16px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .scene-text, #scene-text {
+        font-size: 17px !important;
+        line-height: 1.8 !important;
+        padding: 15px 20px !important;
+        text-align: left !important;
+    }
+    .option-text {
+        font-size: 16px !important;
+    }
+    h2 {
+        font-size: 28px !important;
+        padding: 0 20px !important;
+    }
+    .title {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .scene-text, #scene-text {
+        font-size: 16px !important;
+        line-height: 1.75 !important;
+        padding: 12px 16px !important;
+    }
+    .option-text {
+        font-size: 15px !important;
+    }
+    h2 {
+        font-size: 24px !important;
+    }
+}
+
+/* ---- 辅助类 ---- */
+
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-justify { text-align: justify; }
+
+.font-thin { font-weight: 100; }
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+.text-white { color: #fff; }
+.text-gray { color: #bdc3c7; }
+.text-primary { color: #1ABC9C; }
+.text-warning { color: #f39c12; }
+.text-danger { color: #e74c3c; }
+.text-success { color: #2ecc71; }
+
+.leading-tight { line-height: var(--line-height-tight); }
+.leading-normal { line-height: var(--line-height-normal); }
+.leading-relaxed { line-height: var(--line-height-relaxed); }
+.leading-loose { line-height: var(--line-height-loose); }
+
+.tracking-tight { letter-spacing: var(--letter-spacing-tight); }
+.tracking-normal { letter-spacing: var(--letter-spacing-normal); }
+.tracking-wide { letter-spacing: var(--letter-spacing-wide); }
+.tracking-wider { letter-spacing: var(--letter-spacing-wider); }
+
+/* ---- 间距系统 ---- */
+
+.space-y-1 > * + * { margin-top: 0.25rem; }
+.space-y-2 > * + * { margin-top: 0.5rem; }
+.space-y-3 > * + * { margin-top: 0.75rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+.space-y-8 > * + * { margin-top: 2rem; }
+
+/* ---- 段落排版优化 ---- */
+
+p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+/* ---- 列表排版优化 ---- */
+
+ul, ol {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+li {
+    margin-bottom: 0.5em;
+    line-height: 1.6;
+}
+
+/* ---- 引用块样式 ---- */
+
+blockquote {
+    border-left: 4px solid rgba(26, 188, 156, 0.5);
+    padding-left: 1em;
+    margin: 1em 0;
+    color: #bdc3c7;
+    font-style: italic;
+}
