@@ -1,0 +1,711 @@
+/* ========================================
+   第六项：响应式设计增强 (Responsive Design)
+   ======================================== */
+
+/* ---- 断点系统 ---- */
+
+/* 
+   超小屏幕    : < 480px  (手机竖屏)
+   小屏幕      : 480px - 768px (手机横屏/小平板)
+   中等屏幕    : 768px - 992px (平板)
+   大屏幕      : 992px - 1200px (小笔记本)
+   超大屏幕    : 1200px - 1440px (桌面)
+   特大屏幕    : > 1440px (大桌面/电视)
+*/
+
+/* ---- 响应式容器 ---- */
+
+.container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 0 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        padding: 0 48px;
+    }
+}
+
+/* ---- 响应式间距 ---- */
+
+/* 响应式 padding */
+.p-responsive {
+    padding: 16px;
+}
+
+@media (min-width: 768px) {
+    .p-responsive {
+        padding: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .p-responsive {
+        padding: 32px 48px;
+    }
+}
+
+/* 响应式 margin */
+.m-responsive {
+    margin: 16px;
+}
+
+@media (min-width: 768px) {
+    .m-responsive {
+        margin: 24px;
+    }
+}
+
+/* ---- 响应式字体 ---- */
+
+/* 响应式标题 */
+.heading-responsive {
+    font-size: 24px;
+    line-height: 1.3;
+}
+
+@media (min-width: 768px) {
+    .heading-responsive {
+        font-size: 32px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .heading-responsive {
+        font-size: 40px;
+    }
+}
+
+/* 响应式正文 */
+.text-responsive {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+    .text-responsive {
+        font-size: 18px;
+        line-height: 1.7;
+    }
+}
+
+@media (min-width: 1200px) {
+    .text-responsive {
+        font-size: 20px;
+        line-height: 1.8;
+    }
+}
+
+/* ---- 响应式网格 ---- */
+
+/* 自动响应式列数 */
+.grid-auto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* 响应式列 */
+.col-1 { grid-column: span 1; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-full { grid-column: span 12; }
+
+@media (max-width: 768px) {
+    .col-2, .col-3, .col-4 {
+        grid-column: span 1;
+    }
+}
+
+/* ---- 响应式 Flexbox ---- */
+
+/* 响应式 flex 方向 */
+.flex-responsive {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .flex-responsive {
+        flex-direction: row;
+    }
+}
+
+/* 响应式对齐 */
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+
+/* ---- 响应式卡片 ---- */
+
+/* 响应式卡片 */
+.card-responsive {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+}
+
+@media (min-width: 768px) {
+    .card-responsive {
+        padding: 24px;
+        border-radius: 16px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .card-responsive {
+        padding: 32px;
+    }
+}
+
+/* ---- 响应式按钮 ---- */
+
+/* 响应式按钮尺寸 */
+.btn-responsive {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 14px;
+}
+
+@media (min-width: 480px) {
+    .btn-responsive {
+        width: auto;
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+}
+
+/* ---- 响应式间距系统 ---- */
+
+/* 响应式 gap */
+.gap-responsive {
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .gap-responsive {
+        gap: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .gap-responsive {
+        gap: 32px;
+    }
+}
+
+/* ---- 响应式隐藏/显示 ---- */
+
+/* 移动端隐藏 */
+.hide-mobile {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .hide-mobile {
+        display: block;
+    }
+}
+
+/* 桌面端隐藏 */
+.hide-desktop {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .hide-desktop {
+        display: none;
+    }
+}
+
+/* 移动端仅显示 */
+.show-mobile-only {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .show-mobile-only {
+        display: none;
+    }
+}
+
+/* ---- 响应式布局组件 ---- */
+
+/* 响应式两栏布局 */
+.layout-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+@media (min-width: 992px) {
+    .layout-sidebar {
+        flex-direction: row;
+    }
+    
+    .layout-sidebar-main {
+        flex: 1;
+    }
+    
+    .layout-sidebar-aside {
+        width: 300px;
+        flex-shrink: 0;
+    }
+}
+
+/* 响应式三栏布局 */
+.layout-three-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+@media (min-width: 992px) {
+    .layout-three-col {
+        flex-direction: row;
+    }
+    
+    .layout-three-col-main {
+        flex: 1;
+        order: 2;
+    }
+    
+    .layout-three-col-left {
+        width: 250px;
+        flex-shrink: 0;
+        order: 1;
+    }
+    
+    .layout-three-col-right {
+        width: 250px;
+        flex-shrink: 0;
+        order: 3;
+    }
+}
+
+/* ---- 触摸友好设计 ---- */
+
+/* 触摸目标最小尺寸 - 符合 WCAG 2.5.5 */
+.touch-target {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* 触摸友好的间距 */
+.touch-spacing > * + * {
+    margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+    .touch-spacing > * + * {
+        margin-top: 16px;
+    }
+}
+
+/* 触摸友好的内边距 */
+.touch-padding {
+    padding: 12px 16px;
+}
+
+@media (min-width: 768px) {
+    .touch-padding {
+        padding: 16px 24px;
+    }
+}
+
+/* ---- 移动端安全区域 ---- */
+
+/* iOS 刘海屏安全区域 */
+.safe-area-top {
+    padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+    padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+    padding-right: env(safe-area-inset-right);
+}
+
+/* ---- 响应式动画优化 ---- */
+
+/* 移动端减少动画 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 移动端简化动画 */
+@media (max-width: 768px) {
+    .animate-slideUp {
+        animation-duration: 0.3s !important;
+    }
+    
+    .animate-float {
+        animation: none !important;
+    }
+    
+    .animate-glowPulse {
+        animation: none !important;
+    }
+}
+
+/* ---- 响应式图片 ---- */
+
+.img-responsive {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ---- 响应式视频容器 ---- */
+
+.video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 比例 */
+    height: 0;
+    overflow: hidden;
+}
+
+.video-container iframe,
+.video-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* ---- 响应式表格 ---- */
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+    min-width: 600px;
+}
+
+/* ---- 高 DPI 屏幕优化 ---- */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* 高 DPI 屏幕的额外样式 */
+    .high-dpi-only {
+        /* 高分辨率图标等 */
+    }
+}
+
+/* ---- 深色模式响应式 ---- */
+
+@media (prefers-color-scheme: dark) {
+    /* 系统深色模式的响应式调整 */
+    .auto-dark {
+        /* 自动应用深色样式 */
+    }
+}
+
+/* ---- 打印样式 ---- */
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+    }
+}
+
+/* ---- 响应式 z-index 层 ---- */
+
+.z-responsive {
+    z-index: 1;
+}
+
+@media (min-width: 768px) {
+    .z-responsive {
+        z-index: 10;
+    }
+}
+
+@media (min-width: 1200px) {
+    .z-responsive {
+        z-index: 20;
+    }
+}
+
+/* ---- 响应式定位 ---- */
+
+.pos-responsive {
+    position: relative;
+}
+
+@media (min-width: 768px) {
+    .pos-responsive {
+        position: fixed;
+    }
+}
+
+/* ---- 响应式文字溢出处理 ---- */
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ---- 响应式滚动 ---- */
+
+/* 移动端惯性滚动 */
+.scroll-touch {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+}
+
+/* 隐藏滚动条但保持功能 */
+.scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+/* ---- 响应式字体粗细 ---- */
+
+.font-responsive {
+    font-weight: 400;
+}
+
+@media (min-width: 768px) {
+    .font-responsive {
+        font-weight: 500;
+    }
+}
+
+@media (min-width: 1200px) {
+    .font-responsive {
+        font-weight: 600;
+    }
+}
+
+/* ---- 响应式透明度 ---- */
+
+.opacity-responsive {
+    opacity: 0.8;
+}
+
+@media (min-width: 768px) {
+    .opacity-responsive {
+        opacity: 0.9;
+    }
+}
+
+@media (min-width: 1200px) {
+    .opacity-responsive {
+        opacity: 1;
+    }
+}
+
+/* ---- 响应式圆角 ---- */
+
+.radius-responsive {
+    border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+    .radius-responsive {
+        border-radius: 12px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .radius-responsive {
+        border-radius: 16px;
+    }
+}
+
+/* ---- 响应式阴影 ---- */
+
+.shadow-responsive {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+@media (min-width: 768px) {
+    .shadow-responsive {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+}
+
+@media (min-width: 1200px) {
+    .shadow-responsive {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+}
+
+/* ---- 游戏界面专用响应式 ---- */
+
+/* 游戏界面响应式容器 */
+.game-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .game-container {
+        /* 平板以上保持原有布局 */
+    }
+}
+
+/* 游戏选项响应式 */
+.game-options {
+    width: 100%;
+    padding: 16px;
+}
+
+@media (min-width: 768px) {
+    .game-options {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .game-options {
+        max-width: 900px;
+        padding: 32px;
+    }
+}
+
+/* 角色面板响应式 */
+.character-panel {
+    width: 100%;
+    height: auto;
+    min-height: 150px;
+}
+
+@media (min-width: 768px) {
+    .character-panel {
+        width: 280px;
+        height: 400px;
+        position: fixed;
+        right: 20px;
+        bottom: auto;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+/* 剧情文本响应式 */
+.scene-content {
+    padding: 16px;
+    font-size: 16px;
+}
+
+@media (min-width: 480px) {
+    .scene-content {
+        padding: 20px;
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 768px) {
+    .scene-content {
+        padding: 24px 32px;
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .scene-content {
+        padding: 32px 48px;
+        font-size: 22px;
+    }
+}
+
+/* 加载界面响应式 */
+.loading-screen {
+    padding: 24px;
+}
+
+@media (min-width: 768px) {
+    .loading-screen {
+        padding: 48px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .loading-screen {
+        padding: 64px;
+    }
+}
+
+/* 设置界面响应式 */
+.setting-panel {
+    flex-direction: column;
+    padding: 16px;
+}
+
+@media (min-width: 768px) {
+    .setting-panel {
+        flex-direction: row;
+        padding: 24px;
+        gap: 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .setting-panel {
+        padding: 32px;
+        gap: 32px;
+    }
+}
