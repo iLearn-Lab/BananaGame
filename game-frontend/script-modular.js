@@ -8,6 +8,49 @@
 // ====================================
 console.log('🚀 [代码版本] 使用同一定位上下文方案已加载');
 
+// ========== 无障碍功能初始化 ==========
+// 检测用户是否偏好减少动画
+const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+).matches;
+
+if (prefersReducedMotion) {
+    document.body.classList.add('reduce-motion');
+    console.log('♿ [无障碍] 用户偏好减少动画，已应用降级样式');
+}
+
+// 监听系统偏好变化
+window.matchMedia('(prefers-reduced-motion: reduce)')
+    .addEventListener('change', (e) => {
+        if (e.matches) {
+            document.body.classList.add('reduce-motion');
+            console.log('♿ [无障碍] 已启用减少动画模式');
+        } else {
+            document.body.classList.remove('reduce-motion');
+            console.log('♿ [无障碍] 已恢复正常动画模式');
+        }
+    });
+
+// ========== 性能监控 ==========
+const enablePerformanceMonitor = false; // 生产环境建议关闭
+
+if (enablePerformanceMonitor) {
+    const performanceObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+            if (entry.duration > 16.67) {
+                console.warn(`⚠️ [性能] 检测到动画掉帧: ${entry.duration.toFixed(2)}ms`);
+            }
+        }
+    });
+    
+    try {
+        performanceObserver.observe({ entryTypes: ['animation'] });
+        console.log('📊 [性能监控] 已启动');
+    } catch (e) {
+        console.log('📊 [性能监控] 当前环境不支持');
+    }
+}
+
 // 游戏主模块
 const Game = (() => {
     // 私有变量

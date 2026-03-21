@@ -1,0 +1,68 @@
+
+
+/* ========================================
+   无障碍：尊重用户减少动画偏好
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transform: none !important;
+    }
+
+    .animate-slideUp,
+    .animate-float,
+    .animate-glowPulse,
+    .animate-bounce,
+    .skeleton,
+    .loading-pulse::before,
+    .loading-pulse::after {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+
+    .skeleton-shimmer {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+}
+
+/* ========================================
+   无障碍：键盘导航焦点样式
+   ======================================== */
+
+*:focus-visible {
+    outline: 2px solid #1ABC9C;
+    outline-offset: 2px;
+}
+
+/* 键盘导航替代悬停效果 */
+@media (hover: none) and (pointer: coarse) {
+    .option-card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ========================================
+   GPU 加速优化
+   ======================================== */
+
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* 动画元素 GPU 加速 */
+.option-card,
+.btn-main,
+.character-panel,
+.difficulty-card,
+.tone-card {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
