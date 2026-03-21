@@ -1,0 +1,212 @@
+/* ========================================
+   增强打字机效果 (Enhanced Typewriter Effect)
+   ======================================== */
+
+/* ---- 基础打字机样式 ---- */
+
+.typewriter {
+    overflow: hidden;
+    white-space: pre-wrap;
+    margin: 0 auto;
+}
+
+/* 打字光标 */
+.typewriter::after {
+    content: '|';
+    animation: blink 0.7s step-end infinite;
+}
+
+/* 光标动画 */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ---- 流畅打字机效果 ---- */
+
+/* 使用 CSS 实现的流畅打字效果 */
+.typewriter-smooth {
+    overflow: hidden;
+    white-space: pre-wrap;
+    border-right: 3px solid var(--color-primary, #1ABC9C);
+    animation: 
+        typing 2s steps(40, end),
+        blink-caret 0.75s step-end infinite;
+    animation-fill-mode: forwards;
+}
+
+.typewriter-smooth::after {
+    content: none;
+}
+
+/* 从0到完整 */
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* 光标闪烁 */
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: var(--color-primary, #1ABC9C); }
+}
+
+/* ---- 逐字显示动画 ---- */
+
+/* 字符逐个出现 */
+.typewriter-char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: charReveal 0.1s ease forwards;
+}
+
+@keyframes charReveal {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---- 渐变打字效果 ---- */
+
+/* 文字颜色渐变出现 */
+.typewriter-gradient {
+    background: linear-gradient(
+        to right,
+        var(--color-primary, #1ABC9C) 0%,
+        #fff 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientReveal 3s linear forwards;
+}
+
+@keyframes gradientReveal {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+/* ---- 呼吸光标效果 ---- */
+
+/* 柔和的呼吸光标 */
+.typewriter-breath::after {
+    content: '|';
+    animation: breath 1.5s ease-in-out infinite;
+    color: var(--color-primary, #1ABC9C);
+    font-weight: bold;
+}
+
+@keyframes breath {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.5; 
+        transform: scale(1.2);
+    }
+}
+
+/* ---- 打字完成状态 ---- */
+
+/* 打字完成移除光标 */
+.typewriter-done::after {
+    content: none;
+}
+
+.typewriter-done {
+    border-right: none;
+    animation: none !important;
+}
+
+/* ---- 打字过程状态 ---- */
+
+.typewriter-active {
+    border-right: 3px solid var(--color-primary, #1ABC9C);
+    animation: blink-caret 0.75s step-end infinite !important;
+}
+
+.typewriter-active::after {
+    content: none !important;
+}
+
+/* ---- 快速打字效果 ---- */
+
+/* 更快的打字速度 */
+.typewriter-fast.typewriter-smooth {
+    animation: 
+        typing 1s steps(40, end),
+        blink-caret 0.75s step-end infinite;
+}
+
+/* 慢速打字效果 */
+.typewriter-slow.typewriter-smooth {
+    animation: 
+        typing 4s steps(40, end),
+        blink-caret 0.75s step-end infinite;
+}
+
+/* ---- 段落打字效果 ---- */
+
+/* 段落间有停顿 */
+.typewriter-paragraph {
+    overflow: hidden;
+}
+
+.typewriter-paragraph span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(5px);
+}
+
+.typewriter-paragraph span.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.05s ease, transform 0.05s ease;
+}
+
+/* 段落间隔 */
+.typewriter-paragraph .paragraph-end {
+    margin-bottom: 0.5em;
+}
+
+/* ---- 响应式 ---- */
+
+@media (max-width: 768px) {
+    .typewriter-smooth {
+        animation: 
+            typing 3s steps(30, end),
+            blink-caret 0.75s step-end infinite;
+    }
+    
+    .typewriter::after {
+        font-size: 1.2em;
+    }
+}
+
+/* ---- 减少动画偏好 ---- */
+
+@media (prefers-reduced-motion: reduce) {
+    .typewriter,
+    .typewriter-smooth,
+    .typewriter-char,
+    .typewriter-gradient,
+    .typewriter-breath::after {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        border-right: none !important;
+    }
+    
+    .typewriter::after,
+    .typewriter-smooth::after {
+        content: none !important;
+    }
+}
