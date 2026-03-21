@@ -1549,12 +1549,15 @@ p#scene-text:focus {
     }
 }
 
-/* 下一段文本按钮样式（右下角"->"按钮） */
+/* ========================================
+   下一段文本按钮样式
+   ======================================== */
 .scene-arrow {
     cursor: pointer;
     border: none;
     outline: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .scene-arrow:hover {
@@ -1569,8 +1572,327 @@ p#scene-text:focus {
     display: none !important;
 }
 
-/* 顶部不展示游戏矛盾/结束条件等文字 */
-/* 顶部进度条整块隐藏（章节名 / 进度 / 矛盾提示统统不显示） */
+/* ========================================
+   第二项：视觉层次增强
+   ======================================== */
+
+/* ---- 毛玻璃效果 (Glassmorphism) ---- */
+
+/* 基础毛玻璃卡片 */
+.glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+}
+
+/* 深色毛玻璃 */
+.glass-dark {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+}
+
+/* 浅色毛玻璃 */
+.glass-light {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+}
+
+/* 青色毛玻璃 */
+.glass-primary {
+    background: rgba(26, 188, 156, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(26, 188, 156, 0.3);
+    border-radius: 16px;
+}
+
+/* 强模糊毛玻璃 - 用于模态框背景 */
+.glass-strong {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+}
+
+/* ---- 阴影层次系统 ---- */
+
+/* 基础阴影 */
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-md {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2),
+                0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-lg {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25),
+                0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-xl {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3),
+                0 8px 24px rgba(0, 0, 0, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 彩色阴影 - 青色 */
+.shadow-primary {
+    box-shadow: 0 8px 32px rgba(26, 188, 156, 0.25),
+                0 4px 16px rgba(26, 188, 156, 0.15);
+}
+
+/* 内阴影 - 凹陷效果 */
+.shadow-inner {
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3),
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
+}
+
+/* 多层阴影 - 浮空感 */
+.shadow-float {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.1),
+                0 16px 32px rgba(0, 0, 0, 0.15),
+                0 32px 64px rgba(0, 0, 0, 0.1);
+}
+
+/* ---- 边框系统 ---- */
+
+/* 渐变边框 */
+.border-gradient {
+    position: relative;
+    border: none;
+}
+
+.border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        rgba(26, 188, 156, 0.8),
+        rgba(22, 160, 133, 0.6),
+        rgba(26, 188, 156, 0.4)
+    );
+    background-size: 200% 200%;
+    animation: gradientBorder 3s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+/* 微光边框 */
+.border-glow {
+    border: 1px solid rgba(26, 188, 156, 0.3);
+    box-shadow: 0 0 10px rgba(26, 188, 156, 0.15),
+                inset 0 0 10px rgba(26, 188, 156, 0.05);
+    transition: all 0.3s ease;
+}
+
+.border-glow:hover {
+    border-color: rgba(26, 188, 156, 0.6);
+    box-shadow: 0 0 20px rgba(26, 188, 156, 0.3),
+                inset 0 0 15px rgba(26, 188, 156, 0.1);
+}
+
+/* ---- 背景层次 ---- */
+
+/* 渐变背景 - 从上到下 */
+.bg-gradient-top {
+    background: linear-gradient(
+        180deg,
+        rgba(26, 188, 156, 0.1) 0%,
+        transparent 50%
+    );
+}
+
+/* 渐变背景 - 径向光晕 */
+.bg-gradient-radial {
+    background: radial-gradient(
+        ellipse at center,
+        rgba(26, 188, 156, 0.08) 0%,
+        transparent 70%
+    );
+}
+
+/* 网格背景 */
+.bg-grid {
+    background-image: 
+        linear-gradient(rgba(26, 188, 156, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26, 188, 156, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* 点阵背景 */
+.bg-dots {
+    background-image: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.08) 1px,
+        transparent 1px
+    );
+    background-size: 20px 20px;
+}
+
+/* 噪点纹理叠加 */
+.bg-noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+}
+
+/* ---- 视觉层次深度 ---- */
+
+/* 前景层 */
+.layer-foreground {
+    position: relative;
+    z-index: 100;
+}
+
+/* 中景层 */
+.layer-middle {
+    position: relative;
+    z-index: 50;
+}
+
+/* 背景层 */
+.layer-background {
+    position: relative;
+    z-index: 1;
+}
+
+/* 全屏背景 */
+.layer-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+
+/* ---- 卡片视觉增强 ---- */
+
+/* 悬浮卡片效果 */
+.card-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(26, 188, 156, 0.1);
+}
+
+/* 玻璃态卡片 */
+.card-glass {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.card-glass:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(26, 188, 156, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+                0 0 20px rgba(26, 188, 156, 0.1);
+}
+
+/* 选中状态卡片 */
+.card-selected {
+    background: rgba(26, 188, 156, 0.15);
+    border: 2px solid rgba(26, 188, 156, 0.5);
+    box-shadow: 0 0 20px rgba(26, 188, 156, 0.2),
+                inset 0 0 20px rgba(26, 188, 156, 0.05);
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* ---- 顶部进度条样式 ---- */
 .progress-bar-container {
     display: none !important;
+}
+
+/* ========================================
+   应用视觉层次到游戏界面
+   ======================================== */
+
+/* 游戏界面容器 - 玻璃态 */
+#gameplay-screen {
+    background: transparent;
+}
+
+/* 选项容器 - 玻璃态背景 */
+.options-container {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 文本显示区域 */
+.text-display-area {
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.4) 0%,
+        transparent 30%,
+        transparent 70%,
+        rgba(0, 0, 0, 0.4) 100%
+    );
+}
+
+/* 角色面板 - 玻璃态 */
+.character-panel {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* 设置界面 - 玻璃态 */
+#setting-screen .setting-content {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+}
+
+/* 加载界面 */
+#loading-screen {
+    background: radial-gradient(
+        ellipse at center,
+        rgba(26, 188, 156, 0.1) 0%,
+        rgba(0, 0, 0, 0.8) 70%
+    );
+}
+
+/* 模态框背景 */
+#modal {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+#modal-content {
+    background: rgba(20, 20, 25, 0.95);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(26, 188, 156, 0.1);
 }
