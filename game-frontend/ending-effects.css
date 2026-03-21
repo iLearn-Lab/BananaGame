@@ -1,0 +1,482 @@
+/* ========================================
+   结局光效 (Ending Effects)
+   ======================================== */
+
+/* ---- 结局界面基础样式 ---- */
+
+#ending-screen {
+    position: relative;
+    overflow: hidden;
+}
+
+/* 结局容器 */
+.ending-container {
+    position: relative;
+    z-index: 10;
+    transition: all 0.5s ease;
+}
+
+/* ---- 结局类型光效 ---- */
+
+/* 圆满结局 (HE) - 绿色温暖光 */
+.ending-container[data-tone="he"],
+.ending-container[data-tone="happy_ending"] {
+    box-shadow: 
+        0 0 60px rgba(46, 204, 113, 0.3),
+        0 0 120px rgba(46, 204, 113, 0.1),
+        inset 0 0 60px rgba(46, 204, 113, 0.05);
+}
+
+.ending-container[data-tone="he"]::before,
+.ending-container[data-tone="happy_ending"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(46, 204, 113, 0.15) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 3s ease-in-out infinite;
+}
+
+/* 悲剧结局 (BE) - 紫色忧郁光 */
+.ending-container[data-tone="be"],
+.ending-container[data-tone="bad_ending"] {
+    box-shadow: 
+        0 0 60px rgba(155, 89, 182, 0.3),
+        0 0 120px rgba(155, 89, 182, 0.1),
+        inset 0 0 60px rgba(155, 89, 182, 0.05);
+}
+
+.ending-container[data-tone="be"]::before,
+.ending-container[data-tone="bad_ending"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(155, 89, 182, 0.15) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 4s ease-in-out infinite;
+}
+
+/* 普通结局 (NE) - 蓝色平静光 */
+.ending-container[data-tone="ne"],
+.ending-container[data-tone="normal_ending"] {
+    box-shadow: 
+        0 0 60px rgba(52, 152, 219, 0.3),
+        0 0 120px rgba(52, 152, 219, 0.1),
+        inset 0 0 60px rgba(52, 152, 219, 0.05);
+}
+
+.ending-container[data-tone="ne"]::before,
+.ending-container[data-tone="normal_ending"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(52, 152, 219, 0.15) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 5s ease-in-out infinite;
+}
+
+/* 黑深残 - 深灰压抑光 */
+.ending-container[data-tone="dark"],
+.ending-container[data-tone="dark_depressing"] {
+    box-shadow: 
+        0 0 60px rgba(52, 73, 94, 0.4),
+        0 0 120px rgba(52, 73, 94, 0.2),
+        inset 0 0 60px rgba(52, 73, 94, 0.05);
+    filter: saturate(0.8);
+}
+
+.ending-container[data-tone="dark"]::before,
+.ending-container[data-tone="dark_depressing"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(52, 73, 94, 0.2) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 6s ease-in-out infinite;
+}
+
+/* 幽默结局 - 黄色欢快光 */
+.ending-container[data-tone="humor"],
+.ending-container[data-tone="humorous"] {
+    box-shadow: 
+        0 0 60px rgba(241, 196, 15, 0.3),
+        0 0 120px rgba(241, 196, 15, 0.1),
+        inset 0 0 60px rgba(241, 196, 15, 0.05);
+}
+
+.ending-container[data-tone="humor"]::before,
+.ending-container[data-tone="humorous"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(241, 196, 15, 0.15) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 2s ease-in-out infinite;
+}
+
+/* 抽象结局 - 橙色神秘光 */
+.ending-container[data-tone="abstract"],
+.ending-container[data-tone="abstract_philosophy"] {
+    box-shadow: 
+        0 0 60px rgba(230, 126, 34, 0.3),
+        0 0 120px rgba(230, 126, 34, 0.1),
+        inset 0 0 60px rgba(230, 126, 34, 0.05);
+}
+
+.ending-container[data-tone="abstract"]::before,
+.ending-container[data-tone="abstract_philosophy"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(230, 126, 34, 0.15) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 4s ease-in-out infinite;
+}
+
+/* 唯美结局 - 粉色浪漫光 */
+.ending-container[data-tone="aesthetic"],
+.ending-container[data-tone="aesthetic_beauty"] {
+    box-shadow: 
+        0 0 60px rgba(233, 30, 99, 0.3),
+        0 0 120px rgba(233, 30, 99, 0.1),
+        inset 0 0 60px rgba(233, 30, 99, 0.05);
+}
+
+.ending-container[data-tone="aesthetic"]::before,
+.ending-container[data-tone="aesthetic_beauty"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(233, 30, 99, 0.15) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 3s ease-in-out infinite;
+}
+
+/* 逻辑推理结局 - 青色理性光 */
+.ending-container[data-tone="logical"],
+.ending-container[data-tone="logical_reasoning"] {
+    box-shadow: 
+        0 0 60px rgba(26, 188, 156, 0.3),
+        0 0 120px rgba(26, 188, 156, 0.1),
+        inset 0 0 60px rgba(26, 188, 156, 0.05);
+}
+
+.ending-container[data-tone="logical"]::before,
+.ending-container[data-tone="logical_reasoning"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(26, 188, 156, 0.15) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 3.5s ease-in-out infinite;
+}
+
+/* 神秘结局 - 深蓝灰神秘光 */
+.ending-container[data-tone="mystery"],
+.ending-container[data-tone="mysterious"] {
+    box-shadow: 
+        0 0 60px rgba(44, 62, 80, 0.4),
+        0 0 120px rgba(44, 62, 80, 0.2),
+        inset 0 0 60px rgba(44, 62, 80, 0.05);
+}
+
+.ending-container[data-tone="mystery"]::before,
+.ending-container[data-tone="mysterious"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(44, 62, 80, 0.2) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 5s ease-in-out infinite;
+}
+
+/* 意识流结局 - 红色炽热光 */
+.ending-container[data-tone="stream"],
+.ending-container[data-tone="stream_of_consciousness"] {
+    box-shadow: 
+        0 0 60px rgba(231, 76, 60, 0.3),
+        0 0 120px rgba(231, 76, 60, 0.1),
+        inset 0 0 60px rgba(231, 76, 60, 0.05);
+}
+
+.ending-container[data-tone="stream"]::before,
+.ending-container[data-tone="stream_of_consciousness"]::before {
+    content: '';
+    position: absolute;
+    inset: -100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(231, 76, 60, 0.15) 0%,
+        transparent 60%
+    );
+    animation: endingGlowPulse 2.5s ease-in-out infinite;
+}
+
+/* ---- 动画定义 ---- */
+
+@keyframes endingGlowPulse {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* ---- 结局标题样式 ---- */
+
+#ending-title {
+    position: relative;
+    z-index: 10;
+    text-shadow: 0 0 30px currentColor;
+    transition: all 0.5s ease;
+}
+
+/* 圆满结局标题 - 绿色 */
+#ending-title[data-tone="he"],
+#ending-title[data-tone="happy_ending"] {
+    color: #2ecc71 !important;
+    text-shadow: 0 0 40px rgba(46, 204, 113, 0.8);
+}
+
+/* 悲剧结局标题 - 紫色 */
+#ending-title[data-tone="be"],
+#ending-title[data-tone="bad_ending"] {
+    color: #9b59b6 !important;
+    text-shadow: 0 0 40px rgba(155, 89, 182, 0.8);
+}
+
+/* 普通结局标题 - 蓝色 */
+#ending-title[data-tone="ne"],
+#ending-title[data-tone="normal_ending"] {
+    color: #3498db !important;
+    text-shadow: 0 0 40px rgba(52, 152, 219, 0.8);
+}
+
+/* 黑深残标题 - 深灰 */
+#ending-title[data-tone="dark"],
+#ending-title[data-tone="dark_depressing"] {
+    color: #7f8c8d !important;
+    text-shadow: 0 0 40px rgba(127, 140, 141, 0.8);
+}
+
+/* 幽默标题 - 黄色 */
+#ending-title[data-tone="humor"],
+#ending-title[data-tone="humorous"] {
+    color: #f1c40f !important;
+    text-shadow: 0 0 40px rgba(241, 196, 15, 0.8);
+}
+
+/* 抽象标题 - 橙色 */
+#ending-title[data-tone="abstract"],
+#ending-title[data-tone="abstract_philosophy"] {
+    color: #e67e22 !important;
+    text-shadow: 0 0 40px rgba(230, 126, 34, 0.8);
+}
+
+/* 唯美标题 - 粉色 */
+#ending-title[data-tone="aesthetic"],
+#ending-title[data-tone="aesthetic_beauty"] {
+    color: #e91e63 !important;
+    text-shadow: 0 0 40px rgba(233, 30, 99, 0.8);
+}
+
+/* 逻辑标题 - 青色 */
+#ending-title[data-tone="logical"],
+#ending-title[data-tone="logical_reasoning"] {
+    color: #1abc9c !important;
+    text-shadow: 0 0 40px rgba(26, 188, 156, 0.8);
+}
+
+/* 神秘标题 - 深蓝灰 */
+#ending-title[data-tone="mystery"],
+#ending-title[data-tone="mysterious"] {
+    color: #34495e !important;
+    text-shadow: 0 0 40px rgba(52, 73, 94, 0.8);
+}
+
+/* 意识流标题 - 红色 */
+#ending-title[data-tone="stream"],
+#ending-title[data-tone="stream_of_consciousness"] {
+    color: #e74c3c !important;
+    text-shadow: 0 0 40px rgba(231, 76, 60, 0.8);
+}
+
+/* ---- 结局粒子效果 ---- */
+
+.ending-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.ending-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    opacity: 0;
+    animation: endingParticleFloat 8s ease-in-out infinite;
+}
+
+@keyframes endingParticleFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(100vh) scale(0);
+    }
+    10% {
+        opacity: 0.8;
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100vh) scale(1);
+    }
+}
+
+/* ---- 结局入场动画 ---- */
+
+#ending-screen.active .ending-container {
+    animation: endingAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes endingAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#ending-title {
+    animation: titleReveal 0.6s ease forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
+}
+
+@keyframes titleReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#ending-content {
+    animation: contentReveal 0.6s ease forwards;
+    animation-delay: 0.5s;
+    opacity: 0;
+}
+
+@keyframes contentReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---- 结局按钮样式 ---- */
+
+.ending-buttons .btn-ending {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.ending-buttons .btn-ending::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+
+.ending-buttons .btn-ending:hover::before {
+    transform: translateX(100%);
+}
+
+/* ---- 响应式 ---- */
+
+@media (max-width: 768px) {
+    .ending-container {
+        padding: 30px !important;
+    }
+    
+    #ending-title {
+        font-size: 32px !important;
+    }
+    
+    .ending-container::before {
+        inset: -50px !important;
+    }
+}
+
+/* ---- 减少动画偏好 ---- */
+
+@media (prefers-reduced-motion: reduce) {
+    .ending-container::before,
+    .ending-particle,
+    #ending-screen.active .ending-container,
+    #ending-title,
+    #ending-content {
+        animation: none !important;
+    }
+    
+    .ending-container::before {
+        opacity: 0.5;
+    }
+    
+    #ending-title,
+    #ending-content {
+        opacity: 1;
+    }
+}
