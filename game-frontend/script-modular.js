@@ -977,22 +977,21 @@ const Game = (() => {
             return;
         }
         
-        // 隐藏所有屏幕（淡出）
+        // 隐藏所有屏幕（淡出）- 使用 CSS 类控制
         Object.values(elements.screens).forEach(screen => {
             if (screen && screen.classList) {
+                screen.classList.remove('active');
                 screen.classList.add('hidden');
-                screen.style.opacity = '0';
-                screen.style.transition = 'opacity 300ms ease';
             }
         });
         
-        // 显示目标屏幕（淡入）
+        // 显示目标屏幕（淡入）- 先移除 hidden，再添加 active
         const targetScreen = elements.screens[screenName];
         if (targetScreen && targetScreen.classList) {
             targetScreen.classList.remove('hidden');
-            setTimeout(() => {
-                targetScreen.style.opacity = '1';
-            }, 50);
+            // 强制重排以确保过渡动画生效
+            void targetScreen.offsetWidth;
+            targetScreen.classList.add('active');
             gameState.currentScreen = screenName;
             
             // 特殊处理：主题输入屏清空输入
@@ -1546,7 +1545,7 @@ const Game = (() => {
             elements.content.loadingPercent.textContent = `${progress}%`;
             elements.content.progressFill.style.width = `${progress}%`;
             
-            if (progress === 100) {
+            if (progress >= 100) {
                 clearInterval(loadingInterval);
                 setTimeout(async () => {
                     // 先检查并展示主角形象（如果已生成）
@@ -1556,7 +1555,7 @@ const Game = (() => {
                     });
                 }, 500);
             }
-        });
+        }, 30);
     }
     
     // 继续到第一次场景的流程

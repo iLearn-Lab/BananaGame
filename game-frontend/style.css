@@ -610,14 +610,23 @@
 /* ========================================
    基础样式覆盖 + 动效增强
    ======================================== */
-.screen {
-    animation: fadeIn 0.3s ease-in-out;
-}
 
 /* 屏幕切换动效增强 */
 .screen {
     opacity: 0;
-    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 主菜单默认显示 */
+#menu-screen {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* 主菜单按钮入场动画 */
@@ -1832,7 +1841,7 @@ p#scene-text:focus {
 
 /* 游戏界面容器 - 玻璃态 */
 #gameplay-screen {
-    background: transparent;
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
 }
 
 /* 选项容器 - 玻璃态背景 */

@@ -173,6 +173,10 @@
     color: white;
     font-size: 18px;
     text-align: center;
+}
+
+/* 加载界面显示时的动画 */
+#loading-screen.active .loading-status-text {
     animation: fadeInUp 0.5s ease forwards;
     animation-delay: 0.2s;
     opacity: 0;
