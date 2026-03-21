@@ -1,0 +1,431 @@
+/* ========================================
+   加载光效增强 (Enhanced Loading Effects)
+   ======================================== */
+
+/* ---- 加载界面基础样式 ---- */
+
+#loading-screen {
+    position: relative;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(26, 188, 156, 0.05) 0%,
+        rgba(0, 0, 0, 0.8) 70%
+    );
+}
+
+/* 动态光晕背景 */
+#loading-screen::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: radial-gradient(
+        circle at center,
+        rgba(26, 188, 156, 0.15) 0%,
+        transparent 50%
+    );
+    animation: loadingGlow 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes loadingGlow {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+/* ---- 加载指示器容器 ---- */
+
+.loading-indicator {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* ---- 旋转圆环 ---- */
+
+.loading-ring {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.loading-ring-spinner {
+    position: absolute;
+    inset: 0;
+    border: 4px solid rgba(26, 188, 156, 0.2);
+    border-top-color: #1ABC9C;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-ring-inner {
+    position: absolute;
+    inset: 8px;
+    border: 3px solid rgba(26, 188, 156, 0.15);
+    border-bottom-color: #16A085;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite reverse;
+}
+
+.loading-ring-center {
+    position: absolute;
+    inset: 16px;
+    background: radial-gradient(
+        circle,
+        rgba(26, 188, 156, 0.3) 0%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ---- 脉冲点加载 ---- */
+
+.loading-dots-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.loading-dot {
+    width: 12px;
+    height: 12px;
+    background: #1ABC9C;
+    border-radius: 50%;
+    animation: dotBounce 1.4s ease-in-out infinite;
+}
+
+.loading-dot:nth-child(1) { animation-delay: 0s; }
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotBounce {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ---- 进度条样式 ---- */
+
+.loading-progress-container {
+    width: 300px;
+    max-width: 80%;
+}
+
+.loading-progress-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-progress-fill {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        #1ABC9C,
+        #2ED8B6,
+        #1ABC9C
+    );
+    background-size: 200% 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    position: relative;
+    animation: progressShimmer 2s linear infinite;
+}
+
+@keyframes progressShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.loading-progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: #1ABC9C;
+    border-radius: 50%;
+    box-shadow: 
+        0 0 10px #1ABC9C,
+        0 0 20px rgba(26, 188, 156, 0.5);
+}
+
+/* ---- 加载文字样式 ---- */
+
+.loading-status-text {
+    color: white;
+    font-size: 18px;
+    text-align: center;
+    animation: fadeInUp 0.5s ease forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.loading-percent-text {
+    color: #1ABC9C;
+    font-size: 24px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 20px rgba(26, 188, 156, 0.5);
+}
+
+/* ---- 步骤指示器 ---- */
+
+.loading-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 250px;
+}
+
+.loading-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.loading-step.active {
+    opacity: 1;
+}
+
+.loading-step.completed {
+    opacity: 1;
+}
+
+.loading-step-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.loading-step.pending .loading-step-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.loading-step.active .loading-step-icon {
+    background: #1ABC9C;
+    color: white;
+    animation: stepPulse 1s ease-in-out infinite;
+}
+
+.loading-step.completed .loading-step-icon {
+    background: #2ecc71;
+    color: white;
+}
+
+@keyframes stepPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(26, 188, 156, 0.5); }
+    50% { box-shadow: 0 0 0 8px rgba(26, 188, 156, 0); }
+}
+
+.loading-step-text {
+    color: white;
+    font-size: 14px;
+}
+
+.loading-step.active .loading-step-text {
+    color: #1ABC9C;
+}
+
+/* ---- 旋转指针效果 ---- */
+
+.loading-orbit {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.loading-orbit-center {
+    position: absolute;
+    inset: 30px;
+    background: #1ABC9C;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(26, 188, 156, 0.5);
+}
+
+.loading-orbit-ring {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(26, 188, 156, 0.2);
+    border-radius: 50%;
+}
+
+.loading-orbit-ring:nth-child(2) {
+    inset: 10px;
+    animation: orbitSpin 3s linear infinite;
+}
+
+.loading-orbit-ring:nth-child(3) {
+    inset: 20px;
+    animation: orbitSpin 2s linear infinite reverse;
+}
+
+.loading-orbit-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #1ABC9C;
+    border-radius: 50%;
+    top: -5px;
+    left: 50%;
+    margin-left: -5px;
+    box-shadow: 0 0 10px rgba(26, 188, 156, 0.8);
+}
+
+@keyframes orbitSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ---- 波浪效果 ---- */
+
+.loading-wave-container {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 40px;
+}
+
+.loading-wave-bar {
+    width: 6px;
+    background: linear-gradient(to top, #1ABC9C, #16A085);
+    border-radius: 3px;
+    animation: wave 1s ease-in-out infinite;
+}
+
+.loading-wave-bar:nth-child(1) { animation-delay: 0s; height: 20px; }
+.loading-wave-bar:nth-child(2) { animation-delay: 0.1s; height: 30px; }
+.loading-wave-bar:nth-child(3) { animation-delay: 0.2s; height: 25px; }
+.loading-wave-bar:nth-child(4) { animation-delay: 0.3s; height: 35px; }
+.loading-wave-bar:nth-child(5) { animation-delay: 0.4s; height: 20px; }
+
+@keyframes wave {
+    0%, 100% { transform: scaleY(0.5); }
+    50% { transform: scaleY(1); }
+}
+
+/* ---- 文字打字效果 ---- */
+
+.loading-text-typing {
+    position: relative;
+    display: inline-block;
+}
+
+.loading-text-typing::after {
+    content: '|';
+    animation: loadingBlink 0.7s step-end infinite;
+    color: #1ABC9C;
+}
+
+@keyframes loadingBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ---- 完成状态 ---- */
+
+.loading-complete {
+    animation: completeZoom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes completeZoom {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.loading-complete-icon {
+    width: 80px;
+    height: 80px;
+    background: #2ecc71;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px rgba(46, 204, 113, 0.5);
+}
+
+.loading-complete-icon::after {
+    content: '';
+    width: 30px;
+    height: 15px;
+    border-left: 4px solid white;
+    border-bottom: 4px solid white;
+    transform: rotate(-45deg) translateY(-3px);
+}
+
+/* ---- 响应式 ---- */
+
+@media (max-width: 768px) {
+    .loading-ring {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .loading-progress-container {
+        width: 80%;
+    }
+    
+    .loading-status-text {
+        font-size: 16px;
+    }
+    
+    .loading-percent-text {
+        font-size: 20px;
+    }
+}
+
+/* ---- 减少动画偏好 ---- */
+
+@media (prefers-reduced-motion: reduce) {
+    #loading-screen::before,
+    .loading-ring-spinner,
+    .loading-ring-inner,
+    .loading-ring-center,
+    .loading-dot,
+    .loading-progress-fill::after,
+    .loading-step.active .loading-step-icon,
+    .loading-orbit-ring:nth-child(2),
+    .loading-orbit-ring:nth-child(3),
+    .loading-wave-bar {
+        animation: none !important;
+    }
+    
+    .loading-ring-spinner {
+        border-top-color: #1ABC9C;
+    }
+    
+    .loading-dot {
+        opacity: 1;
+        transform: none;
+    }
+    
+    .loading-step.active .loading-step-icon {
+        box-shadow: none;
+    }
+}
