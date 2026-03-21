@@ -1,0 +1,549 @@
+/* ========================================
+   移动端优化 (Mobile Optimization)
+   ======================================== */
+
+/* ---- 触摸友好设计 ---- */
+
+/* 触摸目标最小尺寸 - 符合 WCAG 2.5.5 */
+.btn-main,
+.btn-attr,
+.btn-confirm,
+.option-card,
+.difficulty-card,
+.tone-card,
+.attr-option-btn {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* 触摸友好的内边距 */
+.touch-friendly {
+    touch-action: manipulation; /* 消除双击缩放 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+/* ---- 触摸反馈 ---- */
+
+/* 按下效果 */
+.touch-active {
+    transform: scale(0.97) !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* 点击涟漪效果 */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.4) 0%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+}
+
+.ripple:active::after {
+    animation: rippleEffect 0.6s ease-out;
+}
+
+@keyframes rippleEffect {
+    to {
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+    }
+}
+
+/* ---- 手势支持 ---- */
+
+/* 滑动删除手势提示 */
+.swipe-hint {
+    background: linear-gradient(
+        to right,
+        rgba(231, 76, 60, 0.1),
+        transparent
+    );
+    border-left: 4px solid #e74c3c;
+}
+
+/* ---- 移动端布局优化 ---- */
+
+/* 手机竖屏 */
+@media (max-width: 480px) {
+    /* 主菜单 */
+    #menu-screen .button-group {
+        gap: 20px !important;
+    }
+    
+    #menu-screen .btn-main {
+        width: 180px !important;
+        height: 50px !important;
+        font-size: 16px !important;
+    }
+    
+    #menu-screen .game-logo {
+        margin-bottom: 40px !important;
+    }
+    
+    /* 属性选择 */
+    #attr-selection-screen {
+        padding: 16px !important;
+    }
+    
+    #attr-selection-screen .attr-container {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+    
+    #attr-selection-screen .attr-desc,
+    #attr-selection-screen .attr-controls {
+        width: 100% !important;
+    }
+    
+    #attr-selection-screen .attr-controls {
+        gap: 30px !important;
+    }
+    
+    #attr-selection-screen .attr-options {
+        flex-wrap: wrap !important;
+        justify-content: center;
+    }
+    
+    #attr-selection-screen .attr-option-btn {
+        padding: 8px 12px !important;
+        font-size: 14px !important;
+    }
+    
+    /* 固定底部按钮 */
+    #attr-selection-screen .fixed {
+        position: fixed !important;
+        bottom: 16px !important;
+        right: 16px !important;
+        flex-direction: row !important;
+        gap: 12px !important;
+    }
+    
+    /* 难度选择 */
+    #difficulty-selection-screen .difficulty-cards {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 16px !important;
+    }
+    
+    #difficulty-selection-screen .difficulty-card {
+        width: 90% !important;
+        max-width: 280px !important;
+        height: auto !important;
+        padding: 20px !important;
+    }
+    
+    /* 基调选择 */
+    #tone-selection-screen .tone-scroll-container {
+        padding-bottom: 20px !important;
+    }
+    
+    #tone-selection-screen .tone-cards {
+        gap: 16px !important;
+    }
+    
+    #tone-selection-screen .tone-card {
+        width: 200px !important;
+        height: auto !important;
+        min-height: 250px !important;
+        flex-shrink: 0;
+    }
+    
+    /* 主题输入 */
+    #theme-input-screen .theme-input-container {
+        width: 100% !important;
+        padding: 0 16px !important;
+    }
+    
+    #theme-input-screen .theme-input {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* 图片风格 */
+    #image-style-selection-screen .style-buttons-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    
+    #image-style-selection-screen .style-btn {
+        height: 70px !important;
+        font-size: 14px !important;
+    }
+    
+    /* 游戏界面 */
+    #gameplay-screen {
+        overflow: hidden;
+    }
+    
+    /* 隐藏角色面板 */
+    #gameplay-screen .character-panel {
+        display: none !important;
+    }
+    
+    /* 进度条简化 */
+    #gameplay-screen .progress-bar-container {
+        height: 50px !important;
+        padding: 0 12px !important;
+        flex-wrap: wrap !important;
+        justify-content: center;
+    }
+    
+    #gameplay-screen .progress-bar {
+        width: 100% !important;
+        order: -1;
+        margin-bottom: 8px !important;
+    }
+    
+    #gameplay-screen .current-chapter,
+    #gameplay-screen .core-conflict {
+        font-size: 12px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 45%;
+    }
+    
+    /* 选项容器 */
+    #gameplay-screen .options-container {
+        padding: 16px !important;
+        height: calc(100% - 80px) !important;
+    }
+    
+    /* 选项卡片 */
+    #gameplay-screen .option-card {
+        height: 70px !important;
+        padding-left: 20px !important;
+        font-size: 14px !important;
+    }
+    
+    /* 导航按钮 */
+    #gameplay-screen .scene-arrow {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    /* 存档管理 */
+    #save-management-screen .save-cards {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* 结局界面 */
+    #ending-screen .ending-container {
+        padding: 24px !important;
+        margin: 16px !important;
+    }
+    
+    #ending-screen .ending-buttons {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    
+    #ending-screen .btn-ending {
+        width: 100% !important;
+    }
+}
+
+/* 手机横屏 / 小平板 */
+@media (min-width: 481px) and (max-width: 768px) {
+    /* 游戏界面优化 */
+    #gameplay-screen .character-panel {
+        width: 220px !important;
+        height: 350px !important;
+    }
+    
+    /* 选项 */
+    #gameplay-screen .options-container {
+        padding: 24px !important;
+    }
+    
+    #gameplay-screen .option-card {
+        height: 75px !important;
+    }
+}
+
+/* ---- 安全区域适配 (iPhone X 及以上) ---- */
+
+@supports (padding: max(0px)) {
+    .safe-area-inset-bottom {
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+    
+    .safe-area-inset-top {
+        padding-top: max(16px, env(safe-area-inset-top));
+    }
+    
+    /* 游戏界面底部安全区 */
+    #gameplay-screen .options-container {
+        padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+    }
+    
+    /* 导航按钮底部安全区 */
+    #gameplay-screen .scene-arrow {
+        bottom: max(24px, env(safe-area-inset-bottom)) !important;
+    }
+    
+    /* 结束游戏按钮顶部安全区 */
+    #gameplay-screen #end-game-btn {
+        top: max(16px, env(safe-area-inset-top)) !important;
+    }
+}
+
+/* ---- 平板横屏优化 ---- */
+
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+    /* 游戏界面 */
+    #gameplay-screen .character-panel {
+        width: 250px !important;
+    }
+    
+    /* 选项布局 */
+    #gameplay-screen .options-container {
+        padding: 24px 40px !important;
+    }
+    
+    /* 基调选择横向滚动 */
+    #tone-selection-screen .tone-scroll-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ---- 性能优化 ---- */
+
+/* 移动端减少动画 */
+@media (max-width: 768px) {
+    /* 禁用复杂动画 */
+    .animate-float {
+        animation: none !important;
+    }
+    
+    /* 简化过渡 */
+    * {
+        transition-duration: 0.15s !important;
+    }
+    
+    /* 禁用背景模糊（性能差） */
+    .backdrop-blur-sm,
+    .backdrop-blur {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    
+    /* 简化阴影 */
+    .shadow-lg,
+    .shadow-xl {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* 简化粒子效果 */
+    #particle-canvas {
+        display: none !important;
+    }
+}
+
+/* ---- 触摸手势 ---- */
+
+/* 下拉刷新区域提示 */
+.pull-to-refresh {
+    background: linear-gradient(
+        to bottom,
+        rgba(26, 188, 156, 0.1),
+        transparent
+    );
+    border-bottom: 2px dashed rgba(26, 188, 156, 0.3);
+}
+
+/* 长按菜单 */
+.long-press-menu {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 12px;
+    padding: 8px 0;
+    min-width: 150px;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.long-press-menu-item {
+    padding: 12px 20px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.long-press-menu-item:hover {
+    background: rgba(26, 188, 156, 0.2);
+}
+
+.long-press-menu-item:active {
+    background: rgba(26, 188, 156, 0.4);
+}
+
+/* ---- 键盘弹出适配 ---- */
+
+/* 输入框获得焦点时上移 */
+@media (max-width: 768px) {
+    input:focus,
+    textarea:focus {
+        position: relative;
+        z-index: 100;
+    }
+    
+    /* 游戏主题输入框 */
+    #theme-input-screen input:focus {
+        transform: translateY(-20px);
+    }
+    
+    /* 自定义风格输入 */
+    #custom-style-input input:focus {
+        transform: translateY(-20px);
+    }
+}
+
+/* ---- 减少动画偏好 ---- */
+
+@media (prefers-reduced-motion: reduce) {
+    /* 移动端也完全禁用动画 */
+    * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    /* 禁用触摸反馈 */
+    .ripple::after {
+        display: none !important;
+    }
+    
+    .touch-active:active {
+        transform: none !important;
+    }
+}
+
+/* ---- 暗黑模式适配 ---- */
+
+/* 移动端暗黑模式优化 */
+@media (max-width: 768px) and (prefers-color-scheme: dark) {
+    /* 确保背景足够黑 */
+    body {
+        background-color: #000 !important;
+    }
+    
+    /* 减少白色元素 */
+    .bg-white\/10 {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+}
+
+/* ---- 方向锁定提示 ---- */
+
+@media (orientation: portrait) and (max-width: 768px) {
+    .landscape-hint {
+        display: flex;
+    }
+}
+
+@media (orientation: landscape) and (max-width: 768px) {
+    .landscape-hint {
+        display: none;
+    }
+}
+
+.landscape-hint {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.landscape-hint-icon {
+    font-size: 48px;
+    animation: rotatePhone 1s ease-in-out infinite;
+}
+
+@keyframes rotatePhone {
+    0%, 100% { transform: rotate(-90deg); }
+    50% { transform: rotate(-90deg) scale(1.1); }
+}
+
+.landscape-hint-text {
+    font-size: 18px;
+    max-width: 300px;
+}
+
+/* ---- 高刷新率优化 ---- */
+
+@media (min-resolution: 120dpi) {
+    /* 高 DPI 屏幕 */
+    .btn-main,
+    .option-card {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* ---- 网络状态提示 ---- */
+
+.offline-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #e74c3c;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 14px;
+    z-index: 9999;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+}
+
+.offline-indicator.show {
+    transform: translateY(0);
+}
+
+.online-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #2ecc71;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 14px;
+    z-index: 9999;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+}
+
+.online-indicator.show {
+    transform: translateY(0);
+}
