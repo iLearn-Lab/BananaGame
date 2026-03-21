@@ -1,0 +1,121 @@
+/* ========================================
+   粒子效果样式 (Particle Effect Styles)
+   ======================================== */
+
+/* 粒子画布默认样式 */
+#particle-canvas {
+    opacity: 0.6;
+    transition: opacity 0.5s ease;
+}
+
+/* 粒子效果启用状态 */
+.particle-enabled #particle-canvas {
+    opacity: 0.6;
+}
+
+/* 粒子效果禁用状态 */
+.particle-disabled #particle-canvas {
+    opacity: 0;
+}
+
+/* 全屏粒子背景 */
+.particle-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 0 !important;
+}
+
+/* 粒子在游戏界面中的样式 */
+#gameplay-screen ~ #particle-canvas {
+    z-index: 0 !important;
+}
+
+/* 隐藏粒子（切换效果用） */
+.particle-hidden #particle-canvas {
+    display: none;
+}
+
+/* 粒子效果叠加层 */
+.particle-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 0%,
+        rgba(0, 0, 0, 0.3) 100%
+    );
+}
+
+/* 剧情界面粒子样式 */
+#gameplay-screen #particle-canvas {
+    opacity: 0.4;
+}
+
+/* 菜单界面粒子样式 */
+#menu-screen #particle-canvas {
+    opacity: 0.7;
+    animation: particlePulse 4s ease-in-out infinite;
+}
+
+@keyframes particlePulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0.9; }
+}
+
+/* 加载界面粒子样式 */
+#loading-screen #particle-canvas {
+    opacity: 0.3;
+}
+
+/* 结局界面粒子样式 */
+#ending-screen #particle-canvas {
+    opacity: 0.8;
+}
+
+/* 移动端减少粒子 */
+@media (max-width: 768px) {
+    #particle-canvas {
+        opacity: 0.3 !important;
+    }
+    
+    .particle-overlay {
+        display: none;
+    }
+}
+
+/* 减少动画偏好时减少粒子 */
+@media (prefers-reduced-motion: reduce) {
+    #particle-canvas {
+        display: none !important;
+    }
+    
+    .particle-overlay {
+        display: none !important;
+    }
+}
+
+/* 深色/浅色主题切换时的粒子调整 */
+@media (prefers-color-scheme: dark) {
+    .particle-overlay {
+        background: radial-gradient(
+            ellipse at center,
+            transparent 0%,
+            rgba(0, 0, 0, 0.2) 100%
+        );
+    }
+}
+
+/* 高性能模式 - 减少粒子数量 */
+@media (prefers-reduced-motion: reduce) {
+    #particle-canvas {
+        display: none;
+    }
+}
