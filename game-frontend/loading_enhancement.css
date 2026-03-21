@@ -1,0 +1,581 @@
+/* ========================================
+   第五项：加载体验优化 (Loading Experience)
+   ======================================== */
+
+/* ---- 骨架屏 (Skeleton Screen) ---- */
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.05) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* 骨架屏元素 */
+.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.skeleton-text-short {
+    width: 60%;
+}
+
+.skeleton-text-medium {
+    width: 80%;
+}
+
+.skeleton-text-full {
+    width: 100%;
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 50%;
+    margin-bottom: 16px;
+    border-radius: 4px;
+}
+
+.skeleton-button {
+    height: 44px;
+    width: 120px;
+    border-radius: 8px;
+}
+
+.skeleton-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.skeleton-card {
+    height: 120px;
+    border-radius: 12px;
+}
+
+/* 骨架屏容器 */
+.skeleton-container {
+    padding: 20px;
+}
+
+.skeleton-line {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ---- 加载状态指示器 ---- */
+
+/* 加载点动画 */
+.loading-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.loading-dots span {
+    width: 10px;
+    height: 10px;
+    background-color: var(--color-primary);
+    border-radius: 50%;
+    animation: loading-bounce 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: 0s; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes loading-bounce {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 加载脉冲动画 */
+.loading-pulse {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.loading-pulse::before,
+.loading-pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    animation: pulse-ring 2s ease-out infinite;
+}
+
+.loading-pulse::after {
+    animation-delay: 1s;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* 加载进度环 */
+.loading-ring {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(26, 188, 156, 0.2);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* ---- 加载提示框 ---- */
+
+/* 加载提示背景 */
+.loading-hint {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    border: 1px solid rgba(26, 188, 156, 0.3);
+    color: white;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    animation: slideUp 0.3s ease;
+}
+
+.loading-hint-icon {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* 加载状态文字 */
+.loading-status {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+
+/* 加载进度百分比 */
+.loading-percent {
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- 进度条增强 ---- */
+
+/* 渐变进度条 */
+.progress-gradient {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-gradient .progress-fill {
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--color-primary),
+        var(--color-info),
+        var(--color-primary)
+    );
+    background-size: 200% 100%;
+    animation: gradientFlow 2s linear infinite;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 发光进度条 */
+.progress-glow {
+    height: 4px;
+    background: rgba(26, 188, 156, 0.2);
+    border-radius: 2px;
+    position: relative;
+    overflow: visible;
+}
+
+.progress-glow .progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 2px;
+    position: relative;
+    transition: width 0.3s ease;
+}
+
+.progress-glow .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--color-primary),
+                0 0 20px var(--color-primary);
+    animation: glowPulse 1s ease-in-out infinite;
+}
+
+/* 步骤进度指示器 */
+.step-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+.step-progress-item {
+    display: flex;
+    align-items: center;
+}
+
+.step-progress-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    transition: all 0.3s ease;
+}
+
+.step-progress-item.active .step-progress-circle {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    box-shadow: 0 0 15px var(--color-primary);
+}
+
+.step-progress-item.completed .step-progress-circle {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    color: white;
+}
+
+.step-progress-line {
+    width: 60px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    transition: background 0.3s ease;
+}
+
+.step-progress-item.completed + .step-progress-line,
+.step-progress-line.active {
+    background: var(--color-success);
+}
+
+/* ---- 异步状态提示 ---- */
+
+/* 加载中文案 */
+.loading-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+}
+
+.loading-text-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(26, 188, 156, 0.2);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text-message {
+    color: var(--color-text-secondary);
+    font-size: 16px;
+    text-align: center;
+}
+
+/* 加载完成勾选动画 */
+.loading-complete {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.loading-complete::after {
+    content: '';
+    width: 20px;
+    height: 10px;
+    border-left: 3px solid white;
+    border-bottom: 3px solid white;
+    transform: rotate(-45deg) translateY(-2px);
+    animation: checkDraw 0.3s ease 0.2s both;
+}
+
+@keyframes checkDraw {
+    from {
+        clip-path: inset(0 100% 0 0);
+    }
+    to {
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+/* ---- 图片加载占位 ---- */
+
+/* 图片加载占位符 */
+.image-placeholder {
+    background: linear-gradient(
+        135deg,
+        rgba(26, 188, 156, 0.1) 0%,
+        rgba(26, 188, 156, 0.05) 100%
+    );
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.image-placeholder-icon {
+    width: 48px;
+    height: 48px;
+    opacity: 0.3;
+}
+
+/* 图片加载动画 */
+.image-loading-container {
+    position: relative;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+}
+
+.image-loading-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+    animation: shimmer-slide 1.5s infinite;
+}
+
+@keyframes shimmer-slide {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ---- 按钮加载状态 ---- */
+
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    border-radius: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    z-index: 1;
+}
+
+/* ---- 防抖动处理 ---- */
+
+/* 加载闪烁防止 */
+.content-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.content-loaded {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ---- 懒加载效果 ---- */
+
+.lazy-load {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.lazy-load.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ---- 加载超时提示 ---- */
+
+.loading-timeout {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: rgba(243, 156, 18, 0.9);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    animation: slideDown 0.3s ease;
+}
+
+.loading-timeout-icon {
+    font-size: 18px;
+}
+
+/* ---- 全屏加载覆盖 ---- */
+
+.fullscreen-loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    gap: 24px;
+}
+
+.fullscreen-loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(26, 188, 156, 0.2);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.fullscreen-loading-text {
+    color: white;
+    font-size: 18px;
+}
+
+.fullscreen-loading-subtext {
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/* ---- 增强加载动画类 ---- */
+
+/* 旋转 + 脉冲 */
+.spin-pulse {
+    animation: spinAndPulse 1.5s ease-in-out infinite;
+}
+
+/* 渐变边框旋转 */
+.border-spin {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+.border-spin::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(
+        var(--rotation, 0deg),
+        var(--color-primary),
+        transparent,
+        var(--color-primary)
+    );
+    animation: rotate 2s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+@keyframes rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---- 加载结束动画 ---- */
+
+.loading-finish {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+.loading-finish-smooth {
+    animation: fadeOut 0.5s ease 0.3s forwards;
+}
