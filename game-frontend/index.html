@@ -28,6 +28,22 @@
 <body class="bg-black text-white overflow-hidden font-sans app-shell">
     <!-- 全局背景（各阶段动态切换） -->
     <div id="global-bg" class="fixed inset-0 bg-contain bg-center opacity-60 z-0"></div>
+    <div id="tone-ornament-layer" class="tone-graphic-layer tone-ornament-layer" aria-hidden="true">
+        <span class="tone-ornament-piece ornament-a"></span>
+        <span class="tone-ornament-piece ornament-b"></span>
+        <span class="tone-ornament-piece ornament-c"></span>
+    </div>
+    <div id="tone-ribbon-layer" class="tone-graphic-layer tone-ribbon-layer" aria-hidden="true">
+        <span class="tone-ribbon-band ribbon-a"></span>
+        <span class="tone-ribbon-band ribbon-b"></span>
+        <span class="tone-ribbon-band ribbon-c"></span>
+    </div>
+    <div id="tone-symbol-layer" class="tone-graphic-layer tone-symbol-layer" aria-hidden="true">
+        <span class="tone-symbol-glyph glyph-a"></span>
+        <span class="tone-symbol-glyph glyph-b"></span>
+        <span class="tone-symbol-glyph glyph-c"></span>
+    </div>
+    <div id="tone-grid-layer" class="tone-graphic-layer tone-grid-layer" aria-hidden="true"></div>
     
     <!-- 主菜单界面（默认显示） -->
     <div id="menu-screen" class="screen flex flex-col items-center justify-center h-screen relative z-10" data-screen-theme="menu" role="main" aria-labelledby="game-logo">
@@ -247,14 +263,14 @@
                     </div>
                     <div class="tone-tip text-[12px] text-[#999999] mt-auto">影响剧情分支走向、结局呈现风格</div>
                 </div>
-                <!-- 抽象 -->
-                <div class="tone-card w-[240px] h-[320px] rounded-[12px] bg-[rgba(0,0,0,0.6)] backdrop-blur-sm p-6 flex flex-col transition-all duration-300 cursor-pointer" data-tone="abstract">
-                    <div class="tone-name text-[20px] font-bold text-[#9B59B6] mb-4">抽象</div>
+                <!-- 意识流 -->
+                <div class="tone-card w-[240px] h-[320px] rounded-[12px] bg-[rgba(0,0,0,0.6)] backdrop-blur-sm p-6 flex flex-col transition-all duration-300 cursor-pointer" data-tone="stream_of_consciousness">
+                    <div class="tone-name text-[20px] font-bold text-[#9B59B6] mb-4">意识流</div>
                     <div class="tone-icon w-[40px] h-[40px] bg-purple-500/30 rounded-full flex items-center justify-center mb-6">
                         <i class="fa fa-cubes text-[#9B59B6] text-xl"></i>
                     </div>
                     <div class="tone-desc h-[180px] text-[14px] text-white leading-[1.5] text-left indent-4">
-                        故事结构松散，情节跳跃，充满象征和隐喻，结局可能开放，强调思考和感受
+                        故事以主角的意识流动为线索，情节跳跃，注重内心描写，结局可能开放，强调内心变化
                     </div>
                     <div class="tone-tip text-[12px] text-[#999999] mt-auto">影响剧情分支走向、结局呈现风格</div>
                 </div>
@@ -288,17 +304,6 @@
                     </div>
                     <div class="tone-desc h-[180px] text-[14px] text-white leading-[1.5] text-left indent-4">
                         故事充满神秘色彩，情节扑朔迷离，悬念丛生，结局可能保留悬念，强调神秘和未知
-                    </div>
-                    <div class="tone-tip text-[12px] text-[#999999] mt-auto">影响剧情分支走向、结局呈现风格</div>
-                </div>
-                <!-- 意识流 -->
-                <div class="tone-card w-[240px] h-[320px] rounded-[12px] bg-[rgba(0,0,0,0.6)] backdrop-blur-sm p-6 flex flex-col transition-all duration-300 cursor-pointer" data-tone="stream_of_consciousness">
-                    <div class="tone-name text-[20px] font-bold text-[#673AB7] mb-4">意识流</div>
-                    <div class="tone-icon w-[40px] h-[40px] bg-indigo-500/30 rounded-full flex items-center justify-center mb-6">
-                        <i class="fa fa-mind text-[#673AB7] text-xl"></i>
-                    </div>
-                    <div class="tone-desc h-[180px] text-[14px] text-white leading-[1.5] text-left indent-4">
-                        故事以主角的意识流动为线索，情节跳跃，注重内心描写，结局可能开放，强调内心变化
                     </div>
                     <div class="tone-tip text-[12px] text-[#999999] mt-auto">影响剧情分支走向、结局呈现风格</div>
                 </div>

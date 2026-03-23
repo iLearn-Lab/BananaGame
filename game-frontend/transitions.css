@@ -367,6 +367,41 @@
     transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
+/* 基调切换时的平滑遮罩，避免闪切 */
+body.tone-switching #global-bg {
+    animation: toneSwitchBackdrop 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+body.tone-switching .tone-graphic-layer {
+    animation: toneSwitchGraphics 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes toneSwitchBackdrop {
+    from {
+        opacity: 0.34;
+        filter: blur(6px);
+        transform: scale(1.04);
+    }
+    to {
+        opacity: 0.86;
+        filter: blur(0);
+        transform: scale(1);
+    }
+}
+
+@keyframes toneSwitchGraphics {
+    from {
+        opacity: 0.14;
+        filter: blur(10px);
+        transform: scale(1.06);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(1);
+    }
+}
+
 .bg-change {
     animation: bgFade 0.8s ease forwards;
 }
@@ -475,7 +510,6 @@
 #tone-selection-screen.active .tone-card:nth-child(7) { animation-delay: 0.35s; }
 #tone-selection-screen.active .tone-card:nth-child(8) { animation-delay: 0.4s; }
 #tone-selection-screen.active .tone-card:nth-child(9) { animation-delay: 0.45s; }
-#tone-selection-screen.active .tone-card:nth-child(10) { animation-delay: 0.5s; }
 
 @keyframes toneCardSlide {
     to {

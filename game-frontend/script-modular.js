@@ -945,56 +945,151 @@ const Game = (() => {
         }
     }
 
+    const TONE_PRESET_ALIASES = {
+        abstract: 'stream_of_consciousness',
+        tragic_ending: 'bad_ending',
+        dark_deep: 'dark_depressing',
+        humor: 'humorous',
+        he: 'happy_ending',
+        be: 'bad_ending',
+        ne: 'normal_ending',
+        dd: 'dark_depressing',
+        hm: 'humorous',
+        ae: 'aesthetic',
+        sc: 'stream_of_consciousness',
+        lg: 'logical',
+        ms: 'mysterious'
+    };
+    const TONE_SWITCH_CLASS = 'tone-switching';
+    const TONE_GRAPHICS_ACTIVE_CLASS = 'tone-graphics-active';
+    let toneSwitchTimer = null;
+
     const TONE_VISUAL_PRESETS = {
         happy_ending: {
-            base: 'radial-gradient(circle at 18% 18%, rgba(255, 214, 249, 0.58), rgba(130, 224, 255, 0.28) 36%, rgba(14, 20, 38, 0.96) 72%)',
-            overlay: 'linear-gradient(135deg, rgba(255, 179, 225, 0.18), rgba(124, 255, 231, 0.2), rgba(133, 164, 255, 0.16))',
-            particle: { particleCount: 48, particleColor: '255, 206, 245', connectDistance: 180, connectOpacity: 0.24 }
+            base: 'radial-gradient(circle at 18% 16%, rgba(255, 227, 249, 0.64), rgba(142, 236, 255, 0.32) 34%, rgba(10, 21, 42, 0.96) 72%)',
+            overlay: 'linear-gradient(132deg, rgba(255, 191, 232, 0.22), rgba(123, 255, 232, 0.2), rgba(147, 181, 255, 0.17))',
+            particle: { particleCount: 54, particleColor: '255, 224, 248', connectDistance: 196, connectOpacity: 0.27 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(255, 255, 246, 0.86), rgba(255, 195, 241, 0.22) 62%, transparent 74%)',
+                ribbonGradient: 'linear-gradient(110deg, rgba(255, 182, 224, 0.35), rgba(138, 244, 255, 0.3), rgba(170, 198, 255, 0.24))',
+                symbolGradient: 'linear-gradient(140deg, rgba(255, 252, 184, 0.7), rgba(255, 194, 233, 0.45), rgba(167, 245, 255, 0.42))',
+                gridColor: 'rgba(255, 226, 242, 0.22)',
+                gridAccent: 'rgba(148, 220, 255, 0.34)',
+                shimmerDuration: '16s',
+                driftDuration: '12s'
+            }
         },
         bad_ending: {
-            base: 'radial-gradient(circle at 72% 12%, rgba(138, 97, 213, 0.4), rgba(38, 18, 66, 0.45) 38%, rgba(9, 9, 18, 0.98) 74%)',
-            overlay: 'linear-gradient(145deg, rgba(70, 56, 132, 0.26), rgba(20, 14, 38, 0.42))',
-            particle: { particleCount: 28, particleColor: '145, 112, 212', connectDistance: 120, connectOpacity: 0.1 }
+            base: 'radial-gradient(circle at 74% 12%, rgba(139, 97, 210, 0.44), rgba(40, 22, 66, 0.46) 36%, rgba(8, 8, 19, 0.98) 74%)',
+            overlay: 'linear-gradient(150deg, rgba(79, 64, 146, 0.28), rgba(18, 11, 36, 0.45), rgba(10, 12, 22, 0.32))',
+            particle: { particleCount: 32, particleColor: '159, 121, 226', connectDistance: 128, connectOpacity: 0.1 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(165, 124, 233, 0.62), rgba(90, 66, 157, 0.26) 55%, transparent 76%)',
+                ribbonGradient: 'linear-gradient(108deg, rgba(125, 95, 193, 0.3), rgba(74, 55, 137, 0.28), rgba(28, 21, 54, 0.24))',
+                symbolGradient: 'linear-gradient(145deg, rgba(195, 174, 255, 0.6), rgba(129, 105, 213, 0.42), rgba(60, 47, 114, 0.36))',
+                gridColor: 'rgba(139, 117, 205, 0.18)',
+                gridAccent: 'rgba(190, 168, 255, 0.24)',
+                shimmerDuration: '18s',
+                driftDuration: '14s'
+            }
         },
         normal_ending: {
-            base: 'radial-gradient(circle at 58% 20%, rgba(130, 176, 255, 0.42), rgba(38, 62, 102, 0.36) 40%, rgba(8, 13, 26, 0.96) 74%)',
-            overlay: 'linear-gradient(160deg, rgba(162, 206, 255, 0.14), rgba(14, 27, 48, 0.28))',
-            particle: { particleCount: 34, particleColor: '120, 172, 255', connectDistance: 140, connectOpacity: 0.14 }
+            base: 'radial-gradient(circle at 56% 20%, rgba(134, 184, 255, 0.46), rgba(42, 67, 112, 0.37) 40%, rgba(7, 13, 30, 0.96) 74%)',
+            overlay: 'linear-gradient(160deg, rgba(172, 214, 255, 0.16), rgba(13, 32, 57, 0.28), rgba(13, 20, 34, 0.3))',
+            particle: { particleCount: 38, particleColor: '129, 183, 255', connectDistance: 148, connectOpacity: 0.14 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(193, 226, 255, 0.7), rgba(122, 167, 255, 0.24) 56%, transparent 74%)',
+                ribbonGradient: 'linear-gradient(108deg, rgba(158, 200, 255, 0.3), rgba(110, 157, 233, 0.26), rgba(63, 106, 180, 0.24))',
+                symbolGradient: 'linear-gradient(145deg, rgba(214, 234, 255, 0.62), rgba(148, 192, 255, 0.45), rgba(103, 137, 207, 0.32))',
+                gridColor: 'rgba(143, 183, 255, 0.2)',
+                gridAccent: 'rgba(214, 234, 255, 0.3)',
+                shimmerDuration: '15s',
+                driftDuration: '11s'
+            }
         },
         dark_depressing: {
-            base: 'radial-gradient(circle at 50% 8%, rgba(92, 100, 129, 0.3), rgba(25, 31, 45, 0.45) 30%, rgba(6, 7, 12, 0.99) 75%)',
-            overlay: 'linear-gradient(180deg, rgba(14, 16, 23, 0.35), rgba(5, 5, 8, 0.58))',
-            particle: { particleCount: 22, particleColor: '98, 106, 124', connectDistance: 100, connectOpacity: 0.08 }
+            base: 'radial-gradient(circle at 50% 8%, rgba(98, 106, 130, 0.32), rgba(24, 29, 43, 0.48) 30%, rgba(4, 5, 11, 0.99) 75%)',
+            overlay: 'linear-gradient(178deg, rgba(12, 16, 24, 0.42), rgba(5, 6, 10, 0.62), rgba(13, 18, 29, 0.3))',
+            particle: { particleCount: 24, particleColor: '104, 114, 138', connectDistance: 102, connectOpacity: 0.08 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(133, 141, 176, 0.48), rgba(69, 75, 104, 0.24) 55%, transparent 75%)',
+                ribbonGradient: 'linear-gradient(115deg, rgba(97, 108, 143, 0.26), rgba(53, 62, 88, 0.24), rgba(28, 35, 56, 0.24))',
+                symbolGradient: 'linear-gradient(148deg, rgba(165, 177, 209, 0.52), rgba(104, 115, 146, 0.38), rgba(59, 67, 90, 0.3))',
+                gridColor: 'rgba(110, 124, 158, 0.14)',
+                gridAccent: 'rgba(164, 178, 209, 0.2)',
+                shimmerDuration: '20s',
+                driftDuration: '16s'
+            }
         },
         humorous: {
-            base: 'radial-gradient(circle at 22% 22%, rgba(255, 238, 138, 0.45), rgba(255, 171, 103, 0.27) 34%, rgba(21, 18, 30, 0.95) 74%)',
-            overlay: 'linear-gradient(125deg, rgba(255, 214, 91, 0.2), rgba(255, 129, 195, 0.16), rgba(113, 203, 255, 0.18))',
-            particle: { particleCount: 44, particleColor: '255, 208, 112', connectDistance: 170, connectOpacity: 0.2 }
-        },
-        abstract: {
-            base: 'radial-gradient(circle at 68% 24%, rgba(216, 112, 255, 0.4), rgba(124, 71, 255, 0.22) 35%, rgba(11, 12, 28, 0.96) 74%)',
-            overlay: 'linear-gradient(145deg, rgba(96, 255, 242, 0.12), rgba(237, 109, 255, 0.18), rgba(84, 121, 255, 0.12))',
-            particle: { particleCount: 38, particleColor: '197, 140, 255', connectDistance: 160, connectOpacity: 0.18 }
+            base: 'radial-gradient(circle at 22% 18%, rgba(255, 240, 136, 0.52), rgba(255, 171, 104, 0.32) 35%, rgba(21, 16, 31, 0.95) 74%)',
+            overlay: 'linear-gradient(123deg, rgba(255, 216, 98, 0.24), rgba(255, 130, 195, 0.2), rgba(117, 211, 255, 0.21))',
+            particle: { particleCount: 50, particleColor: '255, 213, 121', connectDistance: 176, connectOpacity: 0.21 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(255, 244, 180, 0.78), rgba(255, 197, 116, 0.28) 60%, transparent 78%)',
+                ribbonGradient: 'linear-gradient(106deg, rgba(255, 228, 110, 0.35), rgba(255, 151, 206, 0.3), rgba(127, 223, 255, 0.3))',
+                symbolGradient: 'linear-gradient(150deg, rgba(255, 251, 190, 0.72), rgba(255, 192, 221, 0.48), rgba(163, 238, 255, 0.44))',
+                gridColor: 'rgba(255, 214, 118, 0.22)',
+                gridAccent: 'rgba(255, 255, 197, 0.33)',
+                shimmerDuration: '12s',
+                driftDuration: '9s'
+            }
         },
         aesthetic: {
-            base: 'radial-gradient(circle at 36% 15%, rgba(255, 173, 223, 0.48), rgba(255, 137, 174, 0.22) 34%, rgba(17, 14, 30, 0.95) 73%)',
-            overlay: 'linear-gradient(150deg, rgba(255, 188, 241, 0.17), rgba(153, 112, 255, 0.16), rgba(84, 180, 255, 0.11))',
-            particle: { particleCount: 40, particleColor: '255, 168, 219', connectDistance: 175, connectOpacity: 0.22 }
-        },
-        logical: {
-            base: 'radial-gradient(circle at 58% 15%, rgba(113, 255, 184, 0.35), rgba(56, 125, 121, 0.22) 33%, rgba(8, 18, 25, 0.96) 74%)',
-            overlay: 'linear-gradient(135deg, rgba(132, 236, 210, 0.16), rgba(91, 143, 209, 0.12), rgba(10, 26, 35, 0.34))',
-            particle: { particleCount: 32, particleColor: '116, 232, 190', connectDistance: 130, connectOpacity: 0.12 }
-        },
-        mysterious: {
-            base: 'radial-gradient(circle at 74% 18%, rgba(255, 172, 88, 0.3), rgba(74, 96, 136, 0.24) 32%, rgba(9, 15, 27, 0.97) 76%)',
-            overlay: 'linear-gradient(150deg, rgba(165, 198, 255, 0.13), rgba(255, 143, 89, 0.14), rgba(19, 29, 47, 0.34))',
-            particle: { particleCount: 30, particleColor: '255, 182, 122', connectDistance: 120, connectOpacity: 0.11 }
+            base: 'radial-gradient(circle at 36% 14%, rgba(255, 177, 228, 0.5), rgba(255, 142, 189, 0.24) 34%, rgba(18, 12, 30, 0.95) 73%)',
+            overlay: 'linear-gradient(148deg, rgba(255, 192, 242, 0.2), rgba(167, 120, 255, 0.18), rgba(98, 185, 255, 0.14))',
+            particle: { particleCount: 46, particleColor: '255, 179, 229', connectDistance: 182, connectOpacity: 0.23 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(255, 224, 247, 0.8), rgba(255, 176, 225, 0.3) 60%, transparent 76%)',
+                ribbonGradient: 'linear-gradient(110deg, rgba(255, 186, 236, 0.34), rgba(195, 156, 255, 0.3), rgba(133, 196, 255, 0.28))',
+                symbolGradient: 'linear-gradient(140deg, rgba(255, 236, 252, 0.74), rgba(224, 178, 255, 0.48), rgba(165, 217, 255, 0.42))',
+                gridColor: 'rgba(255, 196, 234, 0.22)',
+                gridAccent: 'rgba(198, 225, 255, 0.32)',
+                shimmerDuration: '14s',
+                driftDuration: '11s'
+            }
         },
         stream_of_consciousness: {
-            base: 'radial-gradient(circle at 20% 20%, rgba(190, 123, 255, 0.42), rgba(255, 111, 180, 0.24) 34%, rgba(24, 10, 33, 0.95) 74%)',
-            overlay: 'linear-gradient(138deg, rgba(255, 104, 165, 0.2), rgba(119, 163, 255, 0.14), rgba(245, 123, 255, 0.16))',
-            particle: { particleCount: 42, particleColor: '215, 134, 255', connectDistance: 165, connectOpacity: 0.2 }
+            base: 'radial-gradient(circle at 20% 20%, rgba(191, 126, 255, 0.44), rgba(255, 112, 182, 0.26) 34%, rgba(22, 9, 33, 0.95) 74%)',
+            overlay: 'linear-gradient(138deg, rgba(255, 107, 171, 0.22), rgba(123, 169, 255, 0.16), rgba(247, 126, 255, 0.18))',
+            particle: { particleCount: 45, particleColor: '220, 146, 255', connectDistance: 166, connectOpacity: 0.21 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(228, 176, 255, 0.68), rgba(177, 119, 255, 0.3) 58%, transparent 76%)',
+                ribbonGradient: 'linear-gradient(104deg, rgba(255, 124, 189, 0.32), rgba(163, 126, 255, 0.3), rgba(119, 190, 255, 0.28))',
+                symbolGradient: 'linear-gradient(150deg, rgba(255, 203, 239, 0.68), rgba(190, 146, 255, 0.46), rgba(132, 183, 255, 0.42))',
+                gridColor: 'rgba(217, 158, 255, 0.22)',
+                gridAccent: 'rgba(255, 189, 234, 0.32)',
+                shimmerDuration: '10s',
+                driftDuration: '8s'
+            }
+        },
+        logical: {
+            base: 'radial-gradient(circle at 58% 15%, rgba(117, 255, 187, 0.38), rgba(57, 128, 124, 0.23) 34%, rgba(7, 20, 27, 0.97) 74%)',
+            overlay: 'linear-gradient(135deg, rgba(136, 240, 214, 0.16), rgba(95, 149, 214, 0.13), rgba(10, 27, 38, 0.36))',
+            particle: { particleCount: 34, particleColor: '123, 236, 194', connectDistance: 132, connectOpacity: 0.12 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(176, 255, 226, 0.64), rgba(106, 209, 185, 0.26) 56%, transparent 76%)',
+                ribbonGradient: 'linear-gradient(102deg, rgba(141, 243, 213, 0.3), rgba(112, 186, 229, 0.28), rgba(79, 138, 179, 0.24))',
+                symbolGradient: 'linear-gradient(145deg, rgba(205, 255, 239, 0.62), rgba(150, 230, 210, 0.44), rgba(122, 187, 223, 0.34))',
+                gridColor: 'rgba(128, 224, 198, 0.22)',
+                gridAccent: 'rgba(196, 255, 236, 0.3)',
+                shimmerDuration: '13s',
+                driftDuration: '10s'
+            }
+        },
+        mysterious: {
+            base: 'radial-gradient(circle at 74% 18%, rgba(255, 175, 93, 0.34), rgba(74, 97, 137, 0.25) 32%, rgba(8, 14, 27, 0.97) 76%)',
+            overlay: 'linear-gradient(150deg, rgba(171, 202, 255, 0.15), rgba(255, 145, 92, 0.16), rgba(17, 28, 47, 0.35))',
+            particle: { particleCount: 33, particleColor: '255, 188, 129', connectDistance: 122, connectOpacity: 0.11 },
+            graphics: {
+                ornamentGradient: 'radial-gradient(circle, rgba(255, 211, 157, 0.68), rgba(164, 129, 90, 0.24) 56%, transparent 75%)',
+                ribbonGradient: 'linear-gradient(112deg, rgba(255, 188, 120, 0.3), rgba(166, 184, 255, 0.26), rgba(89, 108, 170, 0.24))',
+                symbolGradient: 'linear-gradient(144deg, rgba(255, 230, 189, 0.66), rgba(255, 185, 129, 0.44), rgba(147, 171, 242, 0.36))',
+                gridColor: 'rgba(245, 189, 130, 0.2)',
+                gridAccent: 'rgba(193, 211, 255, 0.3)',
+                shimmerDuration: '17s',
+                driftDuration: '13s'
+            }
         }
     };
 
@@ -1012,9 +1107,15 @@ const Game = (() => {
     };
 
     const SETTING_TONE_VISUAL_PRESETS = {
-        happy_ending: { base: 'radial-gradient(circle at 20% 20%, rgba(255, 235, 180, 0.42), rgba(168, 255, 227, 0.28) 34%, rgba(14, 24, 40, 0.92) 78%)', overlay: 'linear-gradient(120deg, rgba(255, 212, 242, 0.22), rgba(149, 239, 255, 0.2), rgba(180, 202, 255, 0.16))', particle: { particleCount: 55, particleColor: '255, 220, 196', connectDistance: 190, connectOpacity: 0.24 } },
-        bad_ending: { base: 'radial-gradient(circle at 70% 15%, rgba(123, 86, 181, 0.44), rgba(48, 34, 78, 0.36) 35%, rgba(8, 9, 16, 0.95) 76%)', overlay: 'linear-gradient(160deg, rgba(111, 98, 171, 0.2), rgba(25, 18, 42, 0.4))', particle: { particleCount: 24, particleColor: '136, 112, 192', connectDistance: 110, connectOpacity: 0.09 } },
-        normal_ending: { base: 'radial-gradient(circle at 62% 18%, rgba(143, 180, 233, 0.4), rgba(71, 98, 143, 0.28) 34%, rgba(9, 16, 28, 0.94) 76%)', overlay: 'linear-gradient(130deg, rgba(198, 218, 245, 0.16), rgba(18, 30, 53, 0.34))', particle: { particleCount: 30, particleColor: '148, 186, 238', connectDistance: 125, connectOpacity: 0.11 } }
+        happy_ending: { base: 'radial-gradient(circle at 20% 20%, rgba(255, 240, 192, 0.46), rgba(170, 255, 229, 0.3) 35%, rgba(14, 24, 40, 0.92) 78%)', overlay: 'linear-gradient(122deg, rgba(255, 215, 244, 0.24), rgba(152, 240, 255, 0.22), rgba(184, 205, 255, 0.16))', particle: { particleCount: 52, particleColor: '255, 223, 199', connectDistance: 190, connectOpacity: 0.23 } },
+        bad_ending: { base: 'radial-gradient(circle at 70% 15%, rgba(126, 88, 186, 0.46), rgba(50, 35, 80, 0.38) 35%, rgba(8, 9, 16, 0.95) 76%)', overlay: 'linear-gradient(160deg, rgba(115, 102, 178, 0.22), rgba(25, 18, 42, 0.42))', particle: { particleCount: 26, particleColor: '142, 116, 198', connectDistance: 112, connectOpacity: 0.09 } },
+        normal_ending: { base: 'radial-gradient(circle at 62% 18%, rgba(145, 184, 238, 0.42), rgba(72, 100, 147, 0.3) 34%, rgba(9, 16, 28, 0.94) 76%)', overlay: 'linear-gradient(130deg, rgba(200, 220, 247, 0.16), rgba(18, 30, 53, 0.35))', particle: { particleCount: 33, particleColor: '152, 190, 242', connectDistance: 128, connectOpacity: 0.11 } },
+        dark_depressing: { base: 'radial-gradient(circle at 48% 12%, rgba(94, 103, 128, 0.33), rgba(34, 40, 59, 0.35) 34%, rgba(8, 10, 17, 0.97) 78%)', overlay: 'linear-gradient(175deg, rgba(18, 21, 31, 0.3), rgba(8, 8, 12, 0.52))', particle: { particleCount: 20, particleColor: '110, 118, 141', connectDistance: 96, connectOpacity: 0.07 } },
+        humorous: { base: 'radial-gradient(circle at 18% 20%, rgba(255, 236, 151, 0.44), rgba(255, 176, 108, 0.28) 34%, rgba(19, 19, 33, 0.94) 76%)', overlay: 'linear-gradient(130deg, rgba(255, 217, 104, 0.24), rgba(255, 136, 198, 0.2), rgba(120, 214, 255, 0.18))', particle: { particleCount: 46, particleColor: '255, 214, 124', connectDistance: 172, connectOpacity: 0.2 } },
+        aesthetic: { base: 'radial-gradient(circle at 30% 16%, rgba(255, 184, 231, 0.44), rgba(255, 144, 195, 0.24) 34%, rgba(21, 16, 36, 0.94) 76%)', overlay: 'linear-gradient(136deg, rgba(255, 203, 245, 0.22), rgba(184, 136, 255, 0.17), rgba(121, 190, 255, 0.15))', particle: { particleCount: 42, particleColor: '255, 186, 232', connectDistance: 178, connectOpacity: 0.21 } },
+        stream_of_consciousness: { base: 'radial-gradient(circle at 24% 24%, rgba(196, 135, 255, 0.42), rgba(255, 116, 186, 0.24) 36%, rgba(24, 11, 36, 0.95) 76%)', overlay: 'linear-gradient(135deg, rgba(255, 112, 176, 0.22), rgba(129, 173, 255, 0.16), rgba(247, 133, 255, 0.18))', particle: { particleCount: 40, particleColor: '219, 150, 255', connectDistance: 162, connectOpacity: 0.19 } },
+        logical: { base: 'radial-gradient(circle at 58% 14%, rgba(118, 255, 191, 0.36), rgba(58, 126, 123, 0.23) 34%, rgba(8, 20, 28, 0.95) 76%)', overlay: 'linear-gradient(135deg, rgba(137, 238, 215, 0.18), rgba(101, 151, 217, 0.13), rgba(12, 27, 38, 0.35))', particle: { particleCount: 30, particleColor: '126, 236, 198', connectDistance: 132, connectOpacity: 0.11 } },
+        mysterious: { base: 'radial-gradient(circle at 74% 16%, rgba(255, 176, 94, 0.34), rgba(76, 100, 138, 0.24) 34%, rgba(9, 16, 29, 0.96) 76%)', overlay: 'linear-gradient(146deg, rgba(171, 204, 255, 0.16), rgba(255, 147, 95, 0.16), rgba(18, 29, 48, 0.36))', particle: { particleCount: 29, particleColor: '255, 190, 132', connectDistance: 122, connectOpacity: 0.1 } }
     };
 
     function sanitizeVisualKey(value) {
@@ -1022,6 +1123,21 @@ const Game = (() => {
             .trim()
             .toLowerCase()
             .replace(/[^a-z0-9_-]/g, '-');
+    }
+
+    function normalizeToneKey(tone) {
+        const normalized = sanitizeVisualKey(tone || gameState.currentTone || 'normal_ending');
+        return TONE_PRESET_ALIASES[normalized] || normalized;
+    }
+
+    function getActiveToneKey(preferredTone = null) {
+        return normalizeToneKey(
+            preferredTone
+            || gameState.selectedTone
+            || gameState.visualTone
+            || gameState.currentTone
+            || 'normal_ending'
+        );
     }
 
     function clearBodyClassesByPrefix(prefix) {
@@ -1039,7 +1155,8 @@ const Game = (() => {
     }
 
     function getTonePreset(tone) {
-        return TONE_VISUAL_PRESETS[tone] || TONE_VISUAL_PRESETS.normal_ending;
+        const toneKey = normalizeToneKey(tone);
+        return TONE_VISUAL_PRESETS[toneKey] || TONE_VISUAL_PRESETS.normal_ending;
     }
 
     function getStylePreset(styleType, styleSubType) {
@@ -1060,24 +1177,75 @@ const Game = (() => {
         bg.style.backgroundRepeat = 'no-repeat';
         bg.style.opacity = backdrop.opacity || '0.82';
         bg.style.transition = backdrop.transition || 'background-image 420ms ease, opacity 420ms ease, transform 900ms ease';
-        if (backdrop.blendMode) bg.style.mixBlendMode = backdrop.blendMode;
+        bg.style.mixBlendMode = backdrop.blendMode || 'normal';
+    }
+
+    function setToneGraphicLayerVisibility(visible) {
+        document.body.classList.toggle(TONE_GRAPHICS_ACTIVE_CLASS, !!visible);
+    }
+
+    function triggerToneTransition() {
+        document.body.classList.add(TONE_SWITCH_CLASS);
+        if (toneSwitchTimer) {
+            clearTimeout(toneSwitchTimer);
+        }
+        toneSwitchTimer = window.setTimeout(() => {
+            document.body.classList.remove(TONE_SWITCH_CLASS);
+        }, 520);
+    }
+
+    function applyToneGraphicPreset(tone, preset) {
+        const toneKey = normalizeToneKey(tone);
+        setBodyClassByPrefix('tone-graphic-', toneKey);
+        const graphics = (preset && preset.graphics) || {};
+        document.body.style.setProperty('--tone-ornament-gradient', graphics.ornamentGradient || 'radial-gradient(circle, rgba(206, 223, 255, 0.62), rgba(126, 172, 245, 0.22) 58%, transparent 76%)');
+        document.body.style.setProperty('--tone-ribbon-gradient', graphics.ribbonGradient || 'linear-gradient(110deg, rgba(158, 200, 255, 0.3), rgba(122, 164, 238, 0.24), rgba(84, 110, 186, 0.22))');
+        document.body.style.setProperty('--tone-symbol-gradient', graphics.symbolGradient || 'linear-gradient(145deg, rgba(218, 233, 255, 0.64), rgba(165, 196, 255, 0.42), rgba(111, 153, 227, 0.34))');
+        document.body.style.setProperty('--tone-grid-color', graphics.gridColor || 'rgba(153, 188, 255, 0.2)');
+        document.body.style.setProperty('--tone-grid-accent', graphics.gridAccent || 'rgba(212, 231, 255, 0.3)');
+        document.body.style.setProperty('--tone-shimmer-duration', graphics.shimmerDuration || '15s');
+        document.body.style.setProperty('--tone-drift-duration', graphics.driftDuration || '11s');
+    }
+
+    function adjustParticleConfigForDevice(config) {
+        const base = { ...config };
+        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isLowPerf = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+            || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+
+        if (prefersReducedMotion) {
+            base.particleCount = Math.max(8, Math.round((base.particleCount || 20) * 0.3));
+            base.connectDistance = Math.max(84, Math.round((base.connectDistance || 120) * 0.72));
+            base.connectOpacity = Math.min(base.connectOpacity || 0.1, 0.08);
+            return base;
+        }
+        if (isLowPerf) {
+            base.particleCount = Math.max(14, Math.round((base.particleCount || 22) * 0.65));
+            base.connectDistance = Math.max(96, Math.round((base.connectDistance || 130) * 0.84));
+            base.connectOpacity = Math.min(base.connectOpacity || 0.12, 0.16);
+        }
+        return base;
     }
 
     function applyParticleVisualConfig(config) {
         if (!config) return;
-        window.__visualParticleConfig = config;
+        const tunedConfig = adjustParticleConfigForDevice(config);
+        window.__visualParticleConfig = tunedConfig;
         if (window.ParticleManager && typeof window.ParticleManager.get === 'function') {
             const instance = window.ParticleManager.get('particles');
             if (instance && typeof instance.updateConfig === 'function') {
-                instance.updateConfig(config);
+                instance.updateConfig(tunedConfig);
             }
         }
     }
 
     function applyToneVisualPreset(tone) {
-        const toneKey = tone || gameState.selectedTone || gameState.currentTone || 'normal_ending';
+        const toneKey = getActiveToneKey(tone);
         gameState.visualTone = toneKey;
         setBodyClassByPrefix('tone-', toneKey);
+        applyToneGraphicPreset(toneKey, getTonePreset(toneKey));
+        // 即便重复点击同一基调也给可见反馈，避免“点击无响应”的感知。
+        triggerToneTransition();
         if (gameState.currentScreen === 'setting') {
             applySettingToneBackdrop(toneKey);
         } else {
@@ -1099,8 +1267,9 @@ const Game = (() => {
     }
 
     function applySettingToneBackdrop(tone) {
-        const toneKey = tone || gameState.visualTone || gameState.selectedTone || gameState.currentTone || 'normal_ending';
+        const toneKey = getActiveToneKey(tone);
         const preset = SETTING_TONE_VISUAL_PRESETS[toneKey] || SETTING_TONE_VISUAL_PRESETS.normal_ending;
+        applyToneGraphicPreset(toneKey, getTonePreset(toneKey));
         setBodyClassByPrefix('setting-tone-', toneKey);
         applyBackdropToGlobalBg({
             image: `${preset.overlay}, ${preset.base}`,
@@ -1124,7 +1293,9 @@ const Game = (() => {
     }
 
     function applyToneOnlyBackdrop(tone) {
-        const preset = getTonePreset(tone);
+        const toneKey = normalizeToneKey(tone);
+        const preset = getTonePreset(toneKey);
+        applyToneGraphicPreset(toneKey, preset);
         applyBackdropToGlobalBg({
             image: `${preset.overlay}, ${preset.base}`,
             size: 'cover',
@@ -1135,11 +1306,13 @@ const Game = (() => {
     }
 
     function applyToneAndStyleBackdrop() {
-        const tonePreset = getTonePreset(gameState.visualTone || gameState.selectedTone || gameState.currentTone);
+        const toneKey = getActiveToneKey();
+        const tonePreset = getTonePreset(toneKey);
         const stylePreset = getStylePreset(
             gameState.visualStyle && gameState.visualStyle.type,
             gameState.visualStyle && gameState.visualStyle.subtype
         );
+        applyToneGraphicPreset(toneKey, tonePreset);
         const layers = [stylePreset ? stylePreset.overlay : '', tonePreset.overlay, tonePreset.base].filter(Boolean);
         applyBackdropToGlobalBg({
             image: layers.join(', '),
@@ -1153,9 +1326,12 @@ const Game = (() => {
 
     function updateGlobalBackdropByContext(screenName) {
         const targetScreen = screenName || gameState.currentScreen || 'menu';
+        const resolvedTone = getActiveToneKey();
         if (targetScreen !== 'setting') {
             clearBodyClassesByPrefix('setting-tone-');
         }
+        const showToneGraphics = ['toneSelection', 'themeInput', 'imageStyleSelection', 'setting'].includes(targetScreen);
+        setToneGraphicLayerVisibility(showToneGraphics);
         if (targetScreen === 'gameplay') {
             if (elements && elements.globalBg) {
                 elements.globalBg.style.mixBlendMode = 'normal';
@@ -1163,18 +1339,19 @@ const Game = (() => {
             return;
         }
         if (targetScreen === 'menu') {
+            document.body.classList.remove(TONE_SWITCH_CLASS);
             applyMenuRainbowStageBackdrop();
             return;
         }
         if (targetScreen === 'setting') {
-            applySettingToneBackdrop(gameState.visualTone || gameState.selectedTone || gameState.currentTone);
+            applySettingToneBackdrop(resolvedTone);
             return;
         }
         if (targetScreen === 'imageStyleSelection') {
             applyToneAndStyleBackdrop();
             return;
         }
-        applyToneOnlyBackdrop(gameState.visualTone || gameState.selectedTone || gameState.currentTone);
+        applyToneOnlyBackdrop(resolvedTone);
     }
     
     // 初始化DOM元素
@@ -4371,7 +4548,9 @@ const Game = (() => {
                 
                 // 恢复其他状态
                 gameState.unlockedDeepBackgrounds = flowWorldline.unlocked_deep_backgrounds || [];
-                gameState.currentTone = gameState.gameData.hidden_ending_prediction?.main_tone || 'normal_ending';
+                gameState.currentTone = normalizeToneKey(gameState.gameData.hidden_ending_prediction?.main_tone || 'normal_ending');
+                gameState.visualTone = gameState.currentTone;
+                gameState.selectedTone = gameState.currentTone;
                 
                 // 标记这是从加载开始的游戏
                 gameState.isLoadedGame = true;
@@ -4438,7 +4617,9 @@ const Game = (() => {
                     gameState.currentOptions = [...save.gameState.currentOptions];
                     gameState.chapterProgress = save.gameState.chapterProgress;
                     gameState.unlockedDeepBackgrounds = [...save.gameState.unlockedDeepBackgrounds];
-                    gameState.currentTone = save.gameState.currentTone;
+                    gameState.currentTone = normalizeToneKey(save.gameState.currentTone || 'normal_ending');
+                    gameState.visualTone = gameState.currentTone;
+                    gameState.selectedTone = gameState.currentTone;
                     gameState.gameData = JSON.parse(JSON.stringify(save.gameState.gameData));
                     gameState.checkpointMemory = Array.isArray(save.gameState.checkpointMemory)
                         ? [...save.gameState.checkpointMemory]
@@ -4493,7 +4674,9 @@ const Game = (() => {
                 gameState.currentOptions = [...save.gameState.currentOptions];
                 gameState.chapterProgress = save.gameState.chapterProgress;
                 gameState.unlockedDeepBackgrounds = [...save.gameState.unlockedDeepBackgrounds];
-                gameState.currentTone = save.gameState.currentTone;
+                gameState.currentTone = normalizeToneKey(save.gameState.currentTone || 'normal_ending');
+                gameState.visualTone = gameState.currentTone;
+                gameState.selectedTone = gameState.currentTone;
                 gameState.gameData = JSON.parse(JSON.stringify(save.gameState.gameData));
                 
                 // 标记这是从加载开始的游戏

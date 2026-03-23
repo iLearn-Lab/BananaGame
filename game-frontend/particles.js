@@ -702,20 +702,37 @@
         };
     }
 
-    function initAutoParticles() {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            console.log('✨ [粒子] 检测到减少动画偏好，自动粒子未启用');
-            return;
+    function adjustParticleConfigForRuntime(config) {
+        const next = { ...config };
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const lowPerf = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+            || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+
+        if (reducedMotion) {
+            next.particleCount = Math.max(8, Math.round((next.particleCount || 20) * 0.3));
+            next.connectDistance = Math.max(80, Math.round((next.connectDistance || 120) * 0.72));
+            next.connectOpacity = Math.min(next.connectOpacity || 0.1, 0.07);
+            next.enableMouse = false;
+            return next;
         }
 
-        const initialConfig = resolveMoodParticleConfig();
+        if (lowPerf) {
+            next.particleCount = Math.max(14, Math.round((next.particleCount || 24) * 0.65));
+            next.connectDistance = Math.max(96, Math.round((next.connectDistance || 140) * 0.86));
+            next.connectOpacity = Math.min(next.connectOpacity || 0.12, 0.14);
+        }
+        return next;
+    }
+
+    function initAutoParticles() {
+        const initialConfig = adjustParticleConfigForRuntime(resolveMoodParticleConfig());
         const particleInstance = ParticleManager.get('particles') || ParticleManager.create('particles', initialConfig);
         if (particleInstance) {
             particleInstance.updateConfig(initialConfig);
         }
 
         const classObserver = new MutationObserver(() => {
-            const cfg = resolveMoodParticleConfig();
+            const cfg = adjustParticleConfigForRuntime(resolveMoodParticleConfig());
             const instance = ParticleManager.get('particles');
             if (instance) {
                 instance.updateConfig(cfg);

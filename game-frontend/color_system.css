@@ -582,6 +582,11 @@ a:hover {
     box-shadow: 0 0 26px rgba(231, 76, 60, 0.46), 0 14px 36px rgba(9, 14, 20, 0.5);
 }
 
+/* 基调选择页适度提亮卡片透明度，让背景切换更易感知 */
+.mood-setup #tone-selection-screen .tone-card {
+    background: rgba(8, 12, 24, 0.48);
+}
+
 /* 属性按钮语义色 */
 .attr-option-default {
     background: rgba(127, 140, 141, 0.7);
@@ -820,16 +825,133 @@ a:hover {
     50% { transform: translateY(-8px); }
 }
 
+/* 基调图形主层系统 */
+:root {
+    --tone-ornament-gradient: radial-gradient(circle, rgba(206, 223, 255, 0.62), rgba(126, 172, 245, 0.22) 58%, transparent 76%);
+    --tone-ribbon-gradient: linear-gradient(110deg, rgba(158, 200, 255, 0.3), rgba(122, 164, 238, 0.24), rgba(84, 110, 186, 0.22));
+    --tone-symbol-gradient: linear-gradient(145deg, rgba(218, 233, 255, 0.64), rgba(165, 196, 255, 0.42), rgba(111, 153, 227, 0.34));
+    --tone-grid-color: rgba(153, 188, 255, 0.2);
+    --tone-grid-accent: rgba(212, 231, 255, 0.3);
+    --tone-shimmer-duration: 15s;
+    --tone-drift-duration: 11s;
+}
+
+.tone-graphic-layer {
+    position: fixed;
+    inset: -10%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transform: scale(1.04);
+    transition: opacity 420ms ease, transform 600ms ease, filter 480ms ease;
+}
+
+.tone-graphics-active .tone-graphic-layer {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.tone-ornament-layer,
+.tone-ribbon-layer,
+.tone-symbol-layer {
+    filter: saturate(1.08);
+}
+
+.tone-ornament-piece,
+.tone-ribbon-band,
+.tone-symbol-glyph {
+    position: absolute;
+    display: block;
+}
+
+.tone-ornament-piece {
+    width: 36vmax;
+    height: 36vmax;
+    border-radius: 999px;
+    background: var(--tone-ornament-gradient);
+    filter: blur(18px);
+    mix-blend-mode: screen;
+    animation: toneOrnamentBreath var(--tone-shimmer-duration) ease-in-out infinite alternate;
+}
+
+.tone-ornament-piece.ornament-a { top: -12vmax; left: -6vmax; }
+.tone-ornament-piece.ornament-b { top: 12%; right: -10vmax; animation-delay: -4s; }
+.tone-ornament-piece.ornament-c { bottom: -14vmax; left: 28%; animation-delay: -7s; }
+
+.tone-ribbon-band {
+    width: 160%;
+    height: 20%;
+    left: -30%;
+    border-radius: 999px;
+    background: var(--tone-ribbon-gradient);
+    filter: blur(10px);
+    opacity: 0.66;
+    mix-blend-mode: plus-lighter;
+    animation: toneRibbonSweep var(--tone-drift-duration) linear infinite;
+}
+
+.tone-ribbon-band.ribbon-a { top: 8%; }
+.tone-ribbon-band.ribbon-b { top: 40%; animation-delay: -3s; animation-duration: calc(var(--tone-drift-duration) * 1.18); }
+.tone-ribbon-band.ribbon-c { top: 70%; animation-delay: -6s; animation-duration: calc(var(--tone-drift-duration) * 0.9); }
+
+.tone-symbol-glyph {
+    width: 8.6rem;
+    height: 8.6rem;
+    border-radius: 28%;
+    border: 1px solid var(--tone-grid-accent);
+    background: var(--tone-symbol-gradient);
+    box-shadow: 0 0 24px var(--tone-grid-accent), inset 0 0 20px rgba(255, 255, 255, 0.12);
+    mix-blend-mode: screen;
+    opacity: 0.7;
+    animation: toneGlyphDrift calc(var(--tone-drift-duration) * 1.34) ease-in-out infinite alternate;
+}
+
+.tone-symbol-glyph.glyph-a { left: 16%; top: 18%; transform: rotate(14deg); }
+.tone-symbol-glyph.glyph-b { right: 18%; top: 30%; transform: rotate(-18deg); animation-delay: -4s; }
+.tone-symbol-glyph.glyph-c { left: 46%; bottom: 14%; transform: rotate(34deg); animation-delay: -8s; }
+
+.tone-grid-layer {
+    background-image:
+        linear-gradient(115deg, transparent 0%, var(--tone-grid-accent) 48%, transparent 100%),
+        linear-gradient(var(--tone-grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--tone-grid-color) 1px, transparent 1px);
+    background-size: 240% 240%, 54px 54px, 54px 54px;
+    background-position: 0% 0%, center, center;
+    mix-blend-mode: screen;
+    opacity: 0.34;
+    filter: blur(0.2px);
+    animation: toneGridFlow calc(var(--tone-drift-duration) * 1.22) linear infinite;
+}
+
+@keyframes toneOrnamentBreath {
+    from { transform: translate3d(-1%, 1%, 0) scale(0.94); opacity: 0.38; }
+    to { transform: translate3d(2%, -2%, 0) scale(1.08); opacity: 0.72; }
+}
+
+@keyframes toneRibbonSweep {
+    from { transform: translate3d(-10%, -4%, 0) rotate(-4deg); }
+    to { transform: translate3d(10%, 4%, 0) rotate(5deg); }
+}
+
+@keyframes toneGlyphDrift {
+    from { transform: translate3d(-6px, 6px, 0) rotate(6deg) scale(0.92); opacity: 0.42; }
+    to { transform: translate3d(8px, -10px, 0) rotate(28deg) scale(1.07); opacity: 0.78; }
+}
+
+@keyframes toneGridFlow {
+    from { background-position: 0% 0%, center, center; }
+    to { background-position: 120% 160%, center, center; }
+}
+
 /* 基调与画风语义状态 */
-.tone-happy_ending #global-bg { filter: saturate(1.18) brightness(1.06); }
+.tone-happy_ending #global-bg { filter: saturate(1.2) brightness(1.06); }
 .tone-bad_ending #global-bg { filter: saturate(0.72) brightness(0.88); }
-.tone-normal_ending #global-bg { filter: saturate(0.98) brightness(1); }
-.tone-dark_depressing #global-bg { filter: saturate(0.55) brightness(0.75); }
-.tone-humorous #global-bg { filter: saturate(1.32) brightness(1.08); }
-.tone-abstract #global-bg,
-.tone-stream_of_consciousness #global-bg { filter: saturate(1.26) hue-rotate(8deg); }
-.tone-aesthetic #global-bg { filter: saturate(1.22) brightness(1.04); }
-.tone-logical #global-bg { filter: saturate(0.86) contrast(1.08); }
+.tone-normal_ending #global-bg { filter: saturate(1) brightness(1.01); }
+.tone-dark_depressing #global-bg { filter: saturate(0.52) brightness(0.74); }
+.tone-humorous #global-bg { filter: saturate(1.35) brightness(1.08); }
+.tone-stream_of_consciousness #global-bg { filter: saturate(1.28) hue-rotate(8deg); }
+.tone-aesthetic #global-bg { filter: saturate(1.24) brightness(1.05); }
+.tone-logical #global-bg { filter: saturate(0.86) contrast(1.1); }
 .tone-mysterious #global-bg { filter: saturate(0.84) brightness(0.92); }
 
 .style-preview-realistic #global-bg { filter: contrast(1.2) saturate(0.84) brightness(0.95); }
@@ -879,6 +1001,54 @@ a:hover {
     animation: settingCinematicShift 10s ease-in-out infinite alternate;
 }
 
+.setting-tone-dark_depressing #setting-tone-backdrop {
+    background-image:
+        radial-gradient(circle at 50% 16%, rgba(92, 107, 140, 0.26), transparent 36%),
+        linear-gradient(176deg, rgba(27, 34, 52, 0.26), rgba(8, 10, 16, 0.5));
+    animation: settingNoirDrift 13s ease-in-out infinite alternate;
+}
+
+.setting-tone-humorous #setting-tone-backdrop {
+    background-image:
+        radial-gradient(circle at 20% 18%, rgba(255, 223, 121, 0.3), transparent 34%),
+        radial-gradient(circle at 82% 68%, rgba(255, 155, 209, 0.26), transparent 36%),
+        linear-gradient(128deg, rgba(255, 216, 106, 0.2), rgba(110, 216, 255, 0.18), rgba(51, 74, 130, 0.28));
+    animation: settingJoySpark 8s ease-in-out infinite alternate;
+}
+
+.setting-tone-aesthetic #setting-tone-backdrop {
+    background-image:
+        radial-gradient(circle at 30% 16%, rgba(255, 201, 237, 0.3), transparent 34%),
+        radial-gradient(circle at 78% 24%, rgba(166, 210, 255, 0.22), transparent 38%),
+        linear-gradient(136deg, rgba(255, 192, 240, 0.18), rgba(180, 142, 255, 0.16), rgba(41, 62, 111, 0.3));
+    animation: settingAestheticBloom 10s ease-in-out infinite alternate;
+}
+
+.setting-tone-stream_of_consciousness #setting-tone-backdrop {
+    background-image:
+        radial-gradient(circle at 24% 20%, rgba(215, 149, 255, 0.28), transparent 33%),
+        radial-gradient(circle at 78% 26%, rgba(255, 142, 209, 0.24), transparent 34%),
+        linear-gradient(140deg, rgba(255, 132, 197, 0.18), rgba(136, 177, 255, 0.16), rgba(83, 55, 128, 0.34));
+    animation: settingStreamWarp 9s linear infinite;
+}
+
+.setting-tone-logical #setting-tone-backdrop {
+    background-image:
+        linear-gradient(115deg, rgba(170, 248, 220, 0.18), rgba(102, 166, 210, 0.14), rgba(17, 39, 58, 0.34)),
+        linear-gradient(rgba(129, 223, 198, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(129, 223, 198, 0.12) 1px, transparent 1px);
+    background-size: cover, 58px 58px, 58px 58px;
+    animation: settingLogicScan 11s linear infinite;
+}
+
+.setting-tone-mysterious #setting-tone-backdrop {
+    background-image:
+        radial-gradient(circle at 72% 16%, rgba(255, 194, 124, 0.24), transparent 34%),
+        radial-gradient(circle at 16% 62%, rgba(145, 167, 238, 0.2), transparent 36%),
+        linear-gradient(144deg, rgba(181, 206, 255, 0.15), rgba(255, 154, 104, 0.14), rgba(25, 38, 66, 0.38));
+    animation: settingMysticSway 11s ease-in-out infinite alternate;
+}
+
 @keyframes settingFairyPulse {
     from { transform: scale(1) translateY(0); opacity: 0.66; }
     to { transform: scale(1.03) translateY(-6px); opacity: 0.92; }
@@ -894,14 +1064,55 @@ a:hover {
     to { filter: saturate(1.08); transform: scale(1.02); }
 }
 
+@keyframes settingNoirDrift {
+    from { transform: translate3d(-0.8%, 0, 0) scale(1); opacity: 0.62; }
+    to { transform: translate3d(1%, -1%, 0) scale(1.02); opacity: 0.86; }
+}
+
+@keyframes settingJoySpark {
+    from { filter: saturate(1); transform: scale(1); }
+    to { filter: saturate(1.18); transform: scale(1.03); }
+}
+
+@keyframes settingAestheticBloom {
+    from { opacity: 0.62; transform: translateY(0) scale(1); }
+    to { opacity: 0.9; transform: translateY(-5px) scale(1.03); }
+}
+
+@keyframes settingStreamWarp {
+    from { transform: translate3d(-1%, 0, 0) rotate(-0.6deg); }
+    to { transform: translate3d(1.2%, -1%, 0) rotate(0.8deg); }
+}
+
+@keyframes settingLogicScan {
+    from { background-position: 0% 0%, center, center; }
+    to { background-position: 120% 80%, center, center; }
+}
+
+@keyframes settingMysticSway {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-1.2%, -0.8%, 0) scale(1.02); }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .menu-rainbow-orb,
     .menu-rainbow-wave,
     .menu-rainbow-sparkles span,
     .mood-menu #game-logo,
+    .tone-graphic-layer,
+    .tone-ornament-piece,
+    .tone-ribbon-band,
+    .tone-symbol-glyph,
+    .tone-grid-layer,
     .setting-tone-happy_ending #setting-tone-backdrop,
     .setting-tone-bad_ending #setting-tone-backdrop,
-    .setting-tone-normal_ending #setting-tone-backdrop {
+    .setting-tone-normal_ending #setting-tone-backdrop,
+    .setting-tone-dark_depressing #setting-tone-backdrop,
+    .setting-tone-humorous #setting-tone-backdrop,
+    .setting-tone-aesthetic #setting-tone-backdrop,
+    .setting-tone-stream_of_consciousness #setting-tone-backdrop,
+    .setting-tone-logical #setting-tone-backdrop,
+    .setting-tone-mysterious #setting-tone-backdrop {
         animation: none !important;
     }
 }
