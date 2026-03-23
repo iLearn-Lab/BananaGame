@@ -653,6 +653,88 @@
     window.createStarField = (options) => ParticleManager.create('stars', options);
     window.createBubbles = (options) => ParticleManager.create('bubbles', options);
     window.destroyParticles = () => ParticleManager.destroyAll();
+
+    function resolveMoodParticleConfig() {
+        const body = document.body;
+        if (!body) return {};
+
+        if (window.__visualParticleConfig && typeof window.__visualParticleConfig === 'object') {
+            return window.__visualParticleConfig;
+        }
+
+        if (body.classList.contains('mood-loading')) {
+            return {
+                particleCount: 42,
+                particleColor: '46, 216, 182',
+                connectDistance: 170,
+                connectOpacity: 0.22
+            };
+        }
+        if (body.classList.contains('mood-gameplay')) {
+            return {
+                particleCount: 34,
+                particleColor: '108, 160, 255',
+                connectDistance: 140,
+                connectOpacity: 0.14
+            };
+        }
+        if (body.classList.contains('mood-ending')) {
+            return {
+                particleCount: 30,
+                particleColor: '255, 112, 214',
+                connectDistance: 180,
+                connectOpacity: 0.18
+            };
+        }
+        if (body.classList.contains('mood-menu')) {
+            return {
+                particleCount: 52,
+                particleColor: '255, 183, 239',
+                connectDistance: 190,
+                connectOpacity: 0.23
+            };
+        }
+        return {
+            particleCount: 28,
+            particleColor: '26, 188, 156',
+            connectDistance: 150,
+            connectOpacity: 0.1
+        };
+    }
+
+    function initAutoParticles() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            console.log('✨ [粒子] 检测到减少动画偏好，自动粒子未启用');
+            return;
+        }
+
+        const initialConfig = resolveMoodParticleConfig();
+        const particleInstance = ParticleManager.get('particles') || ParticleManager.create('particles', initialConfig);
+        if (particleInstance) {
+            particleInstance.updateConfig(initialConfig);
+        }
+
+        const classObserver = new MutationObserver(() => {
+            const cfg = resolveMoodParticleConfig();
+            const instance = ParticleManager.get('particles');
+            if (instance) {
+                instance.updateConfig(cfg);
+            }
+        });
+
+        if (document.body) {
+            classObserver.observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAutoParticles, { once: true });
+    } else {
+        initAutoParticles();
+    }
     
     console.log('✨ [粒子] 使用方法:');
     console.log('  createParticles();           // 创建粒子背景');

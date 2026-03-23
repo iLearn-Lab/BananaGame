@@ -76,6 +76,10 @@ const Game = (() => {
         
         // 初始化事件监听
         initEventListeners();
+
+        // 初始化首屏视觉背景
+        applyToneVisualPreset(gameState.currentTone);
+        updateGlobalBackdropByContext('menu');
     }
     
     // 音效管理模块
@@ -872,6 +876,8 @@ const Game = (() => {
             chapterProgress: 0, // 章节进度（0%-100%）
             unlockedDeepBackgrounds: [], // 已解锁的深层背景
             currentTone: 'normal_ending', // 当前结局基调，默认普通结局
+            visualTone: 'normal_ending', // 当前视觉基调（用于前端动态背景）
+            visualStyle: { type: null, subtype: null, customText: '' }, // 当前视觉画风预览
             currentSceneId: null, // 当前场景ID，用于缓存查找
             isLoadedGame: false, // 是否是从加载开始的游戏
             loadedSaveName: null, // 如果是从加载开始的，记录加载的存档名称
@@ -896,6 +902,279 @@ const Game = (() => {
                 }
             }
         };
+    }
+
+    const ATTR_OPTION_BASE_CLASS = 'attr-option-btn px-4 py-2 rounded-lg transition-all';
+    const ATTR_OPTION_DEFAULT_CLASS = `${ATTR_OPTION_BASE_CLASS} attr-option-default`;
+    const ATTR_OPTION_SELECTED_CLASS = `${ATTR_OPTION_BASE_CLASS} attr-option-selected`;
+    const KEYWORD_HIGHLIGHT_CLASS = 'text-keyword font-bold';
+
+    function setAttrOptionState(button, isSelected) {
+        if (!button) return;
+        button.className = isSelected ? ATTR_OPTION_SELECTED_CLASS : ATTR_OPTION_DEFAULT_CLASS;
+    }
+
+    function highlightStoryKeywords(content) {
+        const escaped = escapeHtml(content || '');
+        return escaped
+            .replace(/迷雾森林/g, `<span class="${KEYWORD_HIGHLIGHT_CLASS}">迷雾森林</span>`)
+            .replace(/上古神器/g, `<span class="${KEYWORD_HIGHLIGHT_CLASS}">上古神器</span>`)
+            .replace(/古老神庙/g, `<span class="${KEYWORD_HIGHLIGHT_CLASS}">古老神庙</span>`)
+            .replace(/怪异/g, `<span class="${KEYWORD_HIGHLIGHT_CLASS}">怪异</span>`);
+    }
+
+    function setNextSegmentPromptState(button, showOptions) {
+        if (!button) return;
+        button.dataset.showOptions = showOptions ? 'true' : 'false';
+        button.classList.remove('segment-continue', 'segment-options-ready');
+        button.classList.add(showOptions ? 'segment-options-ready' : 'segment-continue');
+    }
+
+    function animateSegmentStage(options = {}) {
+        const textDisplayArea = document.getElementById('text-display-area');
+        const optionsListArea = document.getElementById('options-list-area');
+        if (textDisplayArea && !options.toOptions) {
+            textDisplayArea.classList.remove('segment-stage-enter');
+            void textDisplayArea.offsetWidth;
+            textDisplayArea.classList.add('segment-stage-enter');
+        }
+        if (optionsListArea && options.toOptions) {
+            optionsListArea.classList.remove('options-stage-enter');
+            void optionsListArea.offsetWidth;
+            optionsListArea.classList.add('options-stage-enter');
+        }
+    }
+
+    const TONE_VISUAL_PRESETS = {
+        happy_ending: {
+            base: 'radial-gradient(circle at 18% 18%, rgba(255, 214, 249, 0.58), rgba(130, 224, 255, 0.28) 36%, rgba(14, 20, 38, 0.96) 72%)',
+            overlay: 'linear-gradient(135deg, rgba(255, 179, 225, 0.18), rgba(124, 255, 231, 0.2), rgba(133, 164, 255, 0.16))',
+            particle: { particleCount: 48, particleColor: '255, 206, 245', connectDistance: 180, connectOpacity: 0.24 }
+        },
+        bad_ending: {
+            base: 'radial-gradient(circle at 72% 12%, rgba(138, 97, 213, 0.4), rgba(38, 18, 66, 0.45) 38%, rgba(9, 9, 18, 0.98) 74%)',
+            overlay: 'linear-gradient(145deg, rgba(70, 56, 132, 0.26), rgba(20, 14, 38, 0.42))',
+            particle: { particleCount: 28, particleColor: '145, 112, 212', connectDistance: 120, connectOpacity: 0.1 }
+        },
+        normal_ending: {
+            base: 'radial-gradient(circle at 58% 20%, rgba(130, 176, 255, 0.42), rgba(38, 62, 102, 0.36) 40%, rgba(8, 13, 26, 0.96) 74%)',
+            overlay: 'linear-gradient(160deg, rgba(162, 206, 255, 0.14), rgba(14, 27, 48, 0.28))',
+            particle: { particleCount: 34, particleColor: '120, 172, 255', connectDistance: 140, connectOpacity: 0.14 }
+        },
+        dark_depressing: {
+            base: 'radial-gradient(circle at 50% 8%, rgba(92, 100, 129, 0.3), rgba(25, 31, 45, 0.45) 30%, rgba(6, 7, 12, 0.99) 75%)',
+            overlay: 'linear-gradient(180deg, rgba(14, 16, 23, 0.35), rgba(5, 5, 8, 0.58))',
+            particle: { particleCount: 22, particleColor: '98, 106, 124', connectDistance: 100, connectOpacity: 0.08 }
+        },
+        humorous: {
+            base: 'radial-gradient(circle at 22% 22%, rgba(255, 238, 138, 0.45), rgba(255, 171, 103, 0.27) 34%, rgba(21, 18, 30, 0.95) 74%)',
+            overlay: 'linear-gradient(125deg, rgba(255, 214, 91, 0.2), rgba(255, 129, 195, 0.16), rgba(113, 203, 255, 0.18))',
+            particle: { particleCount: 44, particleColor: '255, 208, 112', connectDistance: 170, connectOpacity: 0.2 }
+        },
+        abstract: {
+            base: 'radial-gradient(circle at 68% 24%, rgba(216, 112, 255, 0.4), rgba(124, 71, 255, 0.22) 35%, rgba(11, 12, 28, 0.96) 74%)',
+            overlay: 'linear-gradient(145deg, rgba(96, 255, 242, 0.12), rgba(237, 109, 255, 0.18), rgba(84, 121, 255, 0.12))',
+            particle: { particleCount: 38, particleColor: '197, 140, 255', connectDistance: 160, connectOpacity: 0.18 }
+        },
+        aesthetic: {
+            base: 'radial-gradient(circle at 36% 15%, rgba(255, 173, 223, 0.48), rgba(255, 137, 174, 0.22) 34%, rgba(17, 14, 30, 0.95) 73%)',
+            overlay: 'linear-gradient(150deg, rgba(255, 188, 241, 0.17), rgba(153, 112, 255, 0.16), rgba(84, 180, 255, 0.11))',
+            particle: { particleCount: 40, particleColor: '255, 168, 219', connectDistance: 175, connectOpacity: 0.22 }
+        },
+        logical: {
+            base: 'radial-gradient(circle at 58% 15%, rgba(113, 255, 184, 0.35), rgba(56, 125, 121, 0.22) 33%, rgba(8, 18, 25, 0.96) 74%)',
+            overlay: 'linear-gradient(135deg, rgba(132, 236, 210, 0.16), rgba(91, 143, 209, 0.12), rgba(10, 26, 35, 0.34))',
+            particle: { particleCount: 32, particleColor: '116, 232, 190', connectDistance: 130, connectOpacity: 0.12 }
+        },
+        mysterious: {
+            base: 'radial-gradient(circle at 74% 18%, rgba(255, 172, 88, 0.3), rgba(74, 96, 136, 0.24) 32%, rgba(9, 15, 27, 0.97) 76%)',
+            overlay: 'linear-gradient(150deg, rgba(165, 198, 255, 0.13), rgba(255, 143, 89, 0.14), rgba(19, 29, 47, 0.34))',
+            particle: { particleCount: 30, particleColor: '255, 182, 122', connectDistance: 120, connectOpacity: 0.11 }
+        },
+        stream_of_consciousness: {
+            base: 'radial-gradient(circle at 20% 20%, rgba(190, 123, 255, 0.42), rgba(255, 111, 180, 0.24) 34%, rgba(24, 10, 33, 0.95) 74%)',
+            overlay: 'linear-gradient(138deg, rgba(255, 104, 165, 0.2), rgba(119, 163, 255, 0.14), rgba(245, 123, 255, 0.16))',
+            particle: { particleCount: 42, particleColor: '215, 134, 255', connectDistance: 165, connectOpacity: 0.2 }
+        }
+    };
+
+    const STYLE_VISUAL_PRESETS = {
+        realistic: { overlay: 'linear-gradient(180deg, rgba(194, 212, 235, 0.16), rgba(8, 12, 22, 0.44))', blend: 'screen', particle: { particleCount: 20, particleColor: '177, 201, 233', connectDistance: 110, connectOpacity: 0.08 } },
+        anime: { overlay: 'linear-gradient(130deg, rgba(255, 122, 232, 0.2), rgba(87, 203, 255, 0.22), rgba(145, 132, 255, 0.18))', blend: 'lighten', particle: { particleCount: 46, particleColor: '255, 162, 242', connectDistance: 175, connectOpacity: 0.22 } },
+        ink_painting: { overlay: 'linear-gradient(160deg, rgba(224, 229, 245, 0.12), rgba(26, 38, 63, 0.26), rgba(7, 8, 13, 0.35))', blend: 'multiply', particle: { particleCount: 18, particleColor: '176, 185, 206', connectDistance: 90, connectOpacity: 0.06 } },
+        watercolor: { overlay: 'linear-gradient(125deg, rgba(169, 206, 255, 0.2), rgba(255, 175, 216, 0.22), rgba(188, 255, 228, 0.18))', blend: 'screen', particle: { particleCount: 40, particleColor: '177, 213, 255', connectDistance: 168, connectOpacity: 0.2 } },
+        oil_painting: { overlay: 'linear-gradient(140deg, rgba(255, 188, 130, 0.22), rgba(134, 83, 58, 0.18), rgba(24, 20, 19, 0.38))', blend: 'overlay', particle: { particleCount: 24, particleColor: '220, 166, 126', connectDistance: 120, connectOpacity: 0.1 } },
+        oil_painting_impressionist: { overlay: 'linear-gradient(135deg, rgba(255, 225, 168, 0.2), rgba(133, 196, 255, 0.2), rgba(201, 156, 255, 0.16))', blend: 'screen', particle: { particleCount: 35, particleColor: '255, 214, 156', connectDistance: 155, connectOpacity: 0.17 } },
+        oil_painting_rococo: { overlay: 'linear-gradient(140deg, rgba(255, 225, 198, 0.24), rgba(255, 176, 220, 0.19), rgba(163, 181, 255, 0.16))', blend: 'screen', particle: { particleCount: 38, particleColor: '255, 206, 213', connectDistance: 165, connectOpacity: 0.2 } },
+        oil_painting_classic_oil: { overlay: 'linear-gradient(145deg, rgba(227, 180, 124, 0.21), rgba(129, 83, 53, 0.18), rgba(18, 14, 12, 0.34))', blend: 'multiply', particle: { particleCount: 20, particleColor: '196, 151, 109', connectDistance: 105, connectOpacity: 0.08 } },
+        cyberpunk: { overlay: 'linear-gradient(125deg, rgba(255, 57, 182, 0.25), rgba(63, 250, 241, 0.2), rgba(111, 74, 255, 0.22))', blend: 'screen', particle: { particleCount: 52, particleColor: '101, 255, 242', connectDistance: 185, connectOpacity: 0.24 } },
+        custom: { overlay: 'linear-gradient(135deg, rgba(255, 224, 132, 0.2), rgba(136, 255, 228, 0.18), rgba(140, 162, 255, 0.2))', blend: 'screen', particle: { particleCount: 36, particleColor: '190, 228, 255', connectDistance: 160, connectOpacity: 0.2 } }
+    };
+
+    const SETTING_TONE_VISUAL_PRESETS = {
+        happy_ending: { base: 'radial-gradient(circle at 20% 20%, rgba(255, 235, 180, 0.42), rgba(168, 255, 227, 0.28) 34%, rgba(14, 24, 40, 0.92) 78%)', overlay: 'linear-gradient(120deg, rgba(255, 212, 242, 0.22), rgba(149, 239, 255, 0.2), rgba(180, 202, 255, 0.16))', particle: { particleCount: 55, particleColor: '255, 220, 196', connectDistance: 190, connectOpacity: 0.24 } },
+        bad_ending: { base: 'radial-gradient(circle at 70% 15%, rgba(123, 86, 181, 0.44), rgba(48, 34, 78, 0.36) 35%, rgba(8, 9, 16, 0.95) 76%)', overlay: 'linear-gradient(160deg, rgba(111, 98, 171, 0.2), rgba(25, 18, 42, 0.4))', particle: { particleCount: 24, particleColor: '136, 112, 192', connectDistance: 110, connectOpacity: 0.09 } },
+        normal_ending: { base: 'radial-gradient(circle at 62% 18%, rgba(143, 180, 233, 0.4), rgba(71, 98, 143, 0.28) 34%, rgba(9, 16, 28, 0.94) 76%)', overlay: 'linear-gradient(130deg, rgba(198, 218, 245, 0.16), rgba(18, 30, 53, 0.34))', particle: { particleCount: 30, particleColor: '148, 186, 238', connectDistance: 125, connectOpacity: 0.11 } }
+    };
+
+    function sanitizeVisualKey(value) {
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9_-]/g, '-');
+    }
+
+    function clearBodyClassesByPrefix(prefix) {
+        Array.from(document.body.classList).forEach(name => {
+            if (name.startsWith(prefix)) {
+                document.body.classList.remove(name);
+            }
+        });
+    }
+
+    function setBodyClassByPrefix(prefix, value) {
+        clearBodyClassesByPrefix(prefix);
+        if (!value) return;
+        document.body.classList.add(`${prefix}${sanitizeVisualKey(value)}`);
+    }
+
+    function getTonePreset(tone) {
+        return TONE_VISUAL_PRESETS[tone] || TONE_VISUAL_PRESETS.normal_ending;
+    }
+
+    function getStylePreset(styleType, styleSubType) {
+        if (!styleType) return null;
+        if (styleType === 'oil_painting' && styleSubType) {
+            const oilKey = `oil_painting_${styleSubType}`;
+            if (STYLE_VISUAL_PRESETS[oilKey]) return STYLE_VISUAL_PRESETS[oilKey];
+        }
+        return STYLE_VISUAL_PRESETS[styleType] || null;
+    }
+
+    function applyBackdropToGlobalBg(backdrop) {
+        if (!elements || !elements.globalBg || !backdrop) return;
+        const bg = elements.globalBg;
+        if (backdrop.image) bg.style.backgroundImage = backdrop.image;
+        bg.style.backgroundSize = backdrop.size || 'cover';
+        bg.style.backgroundPosition = backdrop.position || 'center';
+        bg.style.backgroundRepeat = 'no-repeat';
+        bg.style.opacity = backdrop.opacity || '0.82';
+        bg.style.transition = backdrop.transition || 'background-image 420ms ease, opacity 420ms ease, transform 900ms ease';
+        if (backdrop.blendMode) bg.style.mixBlendMode = backdrop.blendMode;
+    }
+
+    function applyParticleVisualConfig(config) {
+        if (!config) return;
+        window.__visualParticleConfig = config;
+        if (window.ParticleManager && typeof window.ParticleManager.get === 'function') {
+            const instance = window.ParticleManager.get('particles');
+            if (instance && typeof instance.updateConfig === 'function') {
+                instance.updateConfig(config);
+            }
+        }
+    }
+
+    function applyToneVisualPreset(tone) {
+        const toneKey = tone || gameState.selectedTone || gameState.currentTone || 'normal_ending';
+        gameState.visualTone = toneKey;
+        setBodyClassByPrefix('tone-', toneKey);
+        if (gameState.currentScreen === 'setting') {
+            applySettingToneBackdrop(toneKey);
+        } else {
+            updateGlobalBackdropByContext(gameState.currentScreen);
+        }
+    }
+
+    function applyStyleVisualPreview(styleType, styleSubType = '', customText = '') {
+        gameState.visualStyle = {
+            type: styleType || null,
+            subtype: styleSubType || null,
+            customText: customText || ''
+        };
+        const styleClassKey = styleType
+            ? (styleType === 'oil_painting' && styleSubType ? `oil_painting-${styleSubType}` : styleType)
+            : '';
+        setBodyClassByPrefix('style-preview-', styleClassKey);
+        updateGlobalBackdropByContext(gameState.currentScreen);
+    }
+
+    function applySettingToneBackdrop(tone) {
+        const toneKey = tone || gameState.visualTone || gameState.selectedTone || gameState.currentTone || 'normal_ending';
+        const preset = SETTING_TONE_VISUAL_PRESETS[toneKey] || SETTING_TONE_VISUAL_PRESETS.normal_ending;
+        setBodyClassByPrefix('setting-tone-', toneKey);
+        applyBackdropToGlobalBg({
+            image: `${preset.overlay}, ${preset.base}`,
+            size: 'cover',
+            position: 'center',
+            opacity: '0.86',
+            transition: 'background-image 520ms ease, opacity 520ms ease'
+        });
+        applyParticleVisualConfig(preset.particle);
+    }
+
+    function applyMenuRainbowStageBackdrop() {
+        applyBackdropToGlobalBg({
+            image: 'radial-gradient(circle at 18% 22%, rgba(255, 96, 209, 0.33), transparent 36%), radial-gradient(circle at 82% 18%, rgba(103, 178, 255, 0.3), transparent 35%), radial-gradient(circle at 30% 78%, rgba(255, 213, 98, 0.26), transparent 34%), linear-gradient(135deg, rgba(103, 86, 255, 0.22), rgba(23, 35, 64, 0.54), rgba(37, 92, 116, 0.3))',
+            size: 'cover',
+            position: 'center',
+            opacity: '0.88',
+            transition: 'background-image 600ms ease, opacity 600ms ease'
+        });
+        applyParticleVisualConfig({ particleCount: 58, particleColor: '255, 183, 239', connectDistance: 195, connectOpacity: 0.24 });
+    }
+
+    function applyToneOnlyBackdrop(tone) {
+        const preset = getTonePreset(tone);
+        applyBackdropToGlobalBg({
+            image: `${preset.overlay}, ${preset.base}`,
+            size: 'cover',
+            position: 'center',
+            opacity: '0.8'
+        });
+        applyParticleVisualConfig(preset.particle);
+    }
+
+    function applyToneAndStyleBackdrop() {
+        const tonePreset = getTonePreset(gameState.visualTone || gameState.selectedTone || gameState.currentTone);
+        const stylePreset = getStylePreset(
+            gameState.visualStyle && gameState.visualStyle.type,
+            gameState.visualStyle && gameState.visualStyle.subtype
+        );
+        const layers = [stylePreset ? stylePreset.overlay : '', tonePreset.overlay, tonePreset.base].filter(Boolean);
+        applyBackdropToGlobalBg({
+            image: layers.join(', '),
+            size: 'cover',
+            position: 'center',
+            opacity: '0.86',
+            blendMode: stylePreset ? stylePreset.blend : 'normal'
+        });
+        applyParticleVisualConfig(stylePreset && stylePreset.particle ? stylePreset.particle : tonePreset.particle);
+    }
+
+    function updateGlobalBackdropByContext(screenName) {
+        const targetScreen = screenName || gameState.currentScreen || 'menu';
+        if (targetScreen !== 'setting') {
+            clearBodyClassesByPrefix('setting-tone-');
+        }
+        if (targetScreen === 'gameplay') {
+            if (elements && elements.globalBg) {
+                elements.globalBg.style.mixBlendMode = 'normal';
+            }
+            return;
+        }
+        if (targetScreen === 'menu') {
+            applyMenuRainbowStageBackdrop();
+            return;
+        }
+        if (targetScreen === 'setting') {
+            applySettingToneBackdrop(gameState.visualTone || gameState.selectedTone || gameState.currentTone);
+            return;
+        }
+        if (targetScreen === 'imageStyleSelection') {
+            applyToneAndStyleBackdrop();
+            return;
+        }
+        applyToneOnlyBackdrop(gameState.visualTone || gameState.selectedTone || gameState.currentTone);
     }
     
     // 初始化DOM元素
@@ -928,7 +1207,8 @@ const Game = (() => {
                 startGame: document.getElementById('start-game-btn'),
                 loadSelectedSave: document.getElementById('load-selected-save-btn'),
                 deleteSelectedSave: document.getElementById('delete-selected-save-btn'),
-                backToMenu: document.getElementById('back-to-menu-btn'),
+                saveBackToMenu: document.getElementById('save-back-to-menu-btn'),
+                endingBackToMenu: document.getElementById('ending-back-to-menu-btn'),
                 restartGame: document.getElementById('restart-game-btn')
             },
             inputs: {
@@ -969,7 +1249,49 @@ const Game = (() => {
         };
     }
     
-    // 屏幕切换函数（带淡入淡出动画300ms）
+    const SCREEN_ENTER_CLASS = 'screen-entering';
+    const SCREEN_LEAVE_CLASS = 'screen-leaving';
+    const SCREEN_THEME_CLASS_PREFIX = 'theme-';
+    const SCREEN_MOOD_CLASS_PREFIX = 'mood-';
+    const SCREEN_MOOD_CLASS = {
+        menu: 'mood-menu',
+        attrSelection: 'mood-setup',
+        difficultySelection: 'mood-setup',
+        toneSelection: 'mood-setup',
+        themeInput: 'mood-setup',
+        imageStyleSelection: 'mood-setup',
+        loading: 'mood-loading',
+        setting: 'mood-setting',
+        gameplay: 'mood-gameplay',
+        saveManagement: 'mood-save',
+        ending: 'mood-ending'
+    };
+
+    function applyScreenTheme(screenElement) {
+        if (!screenElement) return;
+        const screenTheme = screenElement.dataset.screenTheme;
+        if (!screenTheme) return;
+
+        const classNames = Array.from(document.body.classList);
+        classNames.forEach(name => {
+            if (name.startsWith(SCREEN_THEME_CLASS_PREFIX)) {
+                document.body.classList.remove(name);
+            }
+        });
+        document.body.classList.add(`${SCREEN_THEME_CLASS_PREFIX}${screenTheme}`);
+    }
+
+    function applyScreenMood(screenName) {
+        const classNames = Array.from(document.body.classList);
+        classNames.forEach(name => {
+            if (name.startsWith(SCREEN_MOOD_CLASS_PREFIX)) {
+                document.body.classList.remove(name);
+            }
+        });
+        document.body.classList.add(SCREEN_MOOD_CLASS[screenName] || 'mood-default');
+    }
+
+    // 屏幕切换函数（带舞台化转场）
     function switchScreen(screenName) {
         // 安全检查
         if (!elements || !elements.screens) {
@@ -980,6 +1302,8 @@ const Game = (() => {
         // 隐藏所有屏幕（淡出）- 使用 CSS 类控制
         Object.values(elements.screens).forEach(screen => {
             if (screen && screen.classList) {
+                screen.classList.remove(SCREEN_ENTER_CLASS);
+                screen.classList.add(SCREEN_LEAVE_CLASS);
                 screen.classList.remove('active');
                 screen.classList.add('hidden');
             }
@@ -992,7 +1316,16 @@ const Game = (() => {
             // 强制重排以确保过渡动画生效
             void targetScreen.offsetWidth;
             targetScreen.classList.add('active');
+            targetScreen.classList.add(SCREEN_ENTER_CLASS);
+            targetScreen.classList.remove(SCREEN_LEAVE_CLASS);
             gameState.currentScreen = screenName;
+            applyScreenTheme(targetScreen);
+            applyScreenMood(screenName);
+            updateGlobalBackdropByContext(screenName);
+
+            window.setTimeout(() => {
+                targetScreen.classList.remove(SCREEN_ENTER_CLASS);
+            }, 700);
             
             // 特殊处理：主题输入屏清空输入
             if (screenName === 'themeInput' && elements.inputs && elements.inputs.theme) {
@@ -1008,6 +1341,7 @@ const Game = (() => {
                 selectedStyle = null;
                 selectedSubStyle = null;
                 customStyleText = '';
+                applyStyleVisualPreview(null);
                 
                 // 重置按钮状态
                 document.querySelectorAll('.style-btn').forEach(b => {
@@ -1081,15 +1415,13 @@ const Game = (() => {
         };
         
         // 重置所有属性选项的样式
-        document.querySelectorAll('.attr-option-btn').forEach(btn => {
-            btn.className = 'attr-option-btn px-4 py-2 rounded-lg bg-[#7F8C8D] text-white transition-all hover:bg-[#95A5A6]';
-        });
+        document.querySelectorAll('.attr-option-btn').forEach(btn => setAttrOptionState(btn, false));
         
         // 设置默认选项为选中状态
         document.querySelectorAll('.attr-options').forEach(options => {
             const defaultOption = options.querySelector('[data-value="普通"]');
             if (defaultOption) {
-                defaultOption.className = 'attr-option-btn px-4 py-2 rounded-lg bg-[#3498DB] text-white transition-all hover:bg-[#2980B9]';
+                setAttrOptionState(defaultOption, true);
             }
         });
         
@@ -2265,6 +2597,7 @@ const Game = (() => {
         const optionsListArea = document.getElementById('options-list-area');
         if (textDisplayArea) {
             textDisplayArea.classList.remove('hidden');
+            animateSegmentStage();
         }
         if (optionsListArea) {
             optionsListArea.classList.add('hidden');
@@ -2399,11 +2732,7 @@ const Game = (() => {
                         index++;
                         // 关键信息高亮
                         // 注意：先做HTML转义，避免原文中的 <、& 等字符导致渲染吞字/吞数字
-                        const highlightedText = escapeHtml(sceneTextElement.textContent)
-                            .replace(/迷雾森林/g, '<span class="text-[#3498DB] font-bold">迷雾森林</span>')
-                            .replace(/上古神器/g, '<span class="text-[#3498DB] font-bold">上古神器</span>')
-                            .replace(/古老神庙/g, '<span class="text-[#3498DB] font-bold">古老神庙</span>')
-                            .replace(/怪异/g, '<span class="text-[#3498DB] font-bold">怪异</span>');
+                        const highlightedText = highlightStoryKeywords(sceneTextElement.textContent);
                         sceneTextElement.innerHTML = highlightedText;
                     } else {
                         clearInterval(typeInterval);
@@ -2424,7 +2753,7 @@ const Game = (() => {
                             console.log('✅ 当前段落显示完成，显示"->"按钮等待用户点击');
                             if (nextSegmentBtn) {
                                 nextSegmentBtn.classList.remove('hidden');
-                                nextSegmentBtn.dataset.showOptions = 'false';
+                                setNextSegmentPromptState(nextSegmentBtn, false);
                             }
                         } else {
                             // 所有段落都显示完了，显示"->"按钮等待用户点击后再显示选项
@@ -2436,8 +2765,7 @@ const Game = (() => {
                             // 显示"->"按钮（点击后显示选项）
                             if (nextSegmentBtn) {
                                 nextSegmentBtn.classList.remove('hidden');
-                                // 标记这是最后一段，点击后应该显示选项
-                                nextSegmentBtn.dataset.showOptions = 'true';
+                                setNextSegmentPromptState(nextSegmentBtn, true);
                             }
                         }
                     }
@@ -2467,7 +2795,7 @@ const Game = (() => {
         const nextSegmentBtn = document.getElementById('next-segment-btn');
         if (nextSegmentBtn) {
             nextSegmentBtn.classList.add('hidden');
-            nextSegmentBtn.dataset.showOptions = 'false'; // 清除显示选项标记
+            setNextSegmentPromptState(nextSegmentBtn, false);
         }
         
         // 移动到下一段
@@ -2505,11 +2833,7 @@ const Game = (() => {
                     index++;
                     // 关键信息高亮
                     // 注意：先做HTML转义，避免原文中的 <、& 等字符导致渲染吞字/吞数字
-                    const highlightedText = escapeHtml(sceneTextElement.textContent)
-                        .replace(/迷雾森林/g, '<span class="text-[#3498DB] font-bold">迷雾森林</span>')
-                        .replace(/上古神器/g, '<span class="text-[#3498DB] font-bold">上古神器</span>')
-                        .replace(/古老神庙/g, '<span class="text-[#3498DB] font-bold">古老神庙</span>')
-                        .replace(/怪异/g, '<span class="text-[#3498DB] font-bold">怪异</span>');
+                    const highlightedText = highlightStoryKeywords(sceneTextElement.textContent);
                     sceneTextElement.innerHTML = highlightedText;
                 } else {
                     clearInterval(typeInterval);
@@ -2530,7 +2854,7 @@ const Game = (() => {
                         console.log('✅ 当前段落显示完成，显示"->"按钮等待用户点击');
                         if (nextSegmentBtn) {
                             nextSegmentBtn.classList.remove('hidden');
-                            nextSegmentBtn.dataset.showOptions = 'false';
+                            setNextSegmentPromptState(nextSegmentBtn, false);
                         }
                         // 当前不在第一段时，允许回到上一句
                         const prevBtn = document.getElementById('prev-segment-btn');
@@ -2548,7 +2872,7 @@ const Game = (() => {
                         const btn = document.getElementById('next-segment-btn');
                         if (btn) {
                             btn.classList.remove('hidden');
-                            btn.dataset.showOptions = 'true';
+                            setNextSegmentPromptState(btn, true);
                         }
                         // 最后一段时仍然允许回到上一句
                         const prevBtn = document.getElementById('prev-segment-btn');
@@ -2577,7 +2901,7 @@ const Game = (() => {
         // 隐藏"->"按钮，等待本段打完后再决定是否显示
         if (nextSegmentBtn) {
             nextSegmentBtn.classList.add('hidden');
-            nextSegmentBtn.dataset.showOptions = 'false';
+            setNextSegmentPromptState(nextSegmentBtn, false);
         }
         
         // 移动到上一段
@@ -2619,11 +2943,7 @@ const Game = (() => {
                 if (index < prevSegment.length) {
                     sceneTextElement.textContent += prevSegment.charAt(index);
                     index++;
-                    const highlightedText = escapeHtml(sceneTextElement.textContent)
-                        .replace(/迷雾森林/g, '<span class="text-[#3498DB] font-bold">迷雾森林</span>')
-                        .replace(/上古神器/g, '<span class="text-[#3498DB] font-bold">上古神器</span>')
-                        .replace(/古老神庙/g, '<span class="text-[#3498DB] font-bold">古老神庙</span>')
-                        .replace(/怪异/g, '<span class="text-[#3498DB] font-bold">怪异</span>');
+                    const highlightedText = highlightStoryKeywords(sceneTextElement.textContent);
                     sceneTextElement.innerHTML = highlightedText;
                 } else {
                     clearInterval(typeInterval);
@@ -2650,13 +2970,13 @@ const Game = (() => {
                     if (gameState.currentTextSegmentIndex < gameState.textSegments.length - 1) {
                         if (nextSegmentBtn) {
                             nextSegmentBtn.classList.remove('hidden');
-                            nextSegmentBtn.dataset.showOptions = 'false';
+                            setNextSegmentPromptState(nextSegmentBtn, false);
                         }
                     } else {
                         // 当前已经是最后一段，点击"->"后应直接显示选项
                         if (nextSegmentBtn) {
                             nextSegmentBtn.classList.remove('hidden');
-                            nextSegmentBtn.dataset.showOptions = 'true';
+                            setNextSegmentPromptState(nextSegmentBtn, true);
                         }
                     }
                 }
@@ -2678,6 +2998,7 @@ const Game = (() => {
         }
         if (optionsListArea) {
             optionsListArea.classList.remove('hidden');
+            animateSegmentStage({ toOptions: true });
         }
         // 进入选项阶段后，不再允许回到上一句，同时隐藏"->"按钮
         if (prevSegmentBtn) {
@@ -2685,7 +3006,7 @@ const Game = (() => {
         }
         if (nextSegmentBtn) {
             nextSegmentBtn.classList.add('hidden');
-            nextSegmentBtn.dataset.showOptions = 'false';
+            setNextSegmentPromptState(nextSegmentBtn, false);
         }
         
         // 清空现有选项列表
@@ -4649,9 +4970,9 @@ const Game = (() => {
                 
                 // 更新UI样式
                 attrOptions.querySelectorAll('.attr-option-btn').forEach(btn => {
-                    btn.className = 'attr-option-btn px-4 py-2 rounded-lg bg-[#7F8C8D] text-white transition-all hover:bg-[#95A5A6]';
+                    setAttrOptionState(btn, false);
                 });
-                optionBtn.className = 'attr-option-btn px-4 py-2 rounded-lg bg-[#3498DB] text-white transition-all hover:bg-[#2980B9]';
+                setAttrOptionState(optionBtn, true);
                 
                 playSound('select');
             }
@@ -4661,24 +4982,23 @@ const Game = (() => {
         document.querySelectorAll('.difficulty-card').forEach(card => {
             card.addEventListener('click', () => {
                 document.querySelectorAll('.difficulty-card').forEach(c => {
-                    c.classList.remove('selected', 'border-3', 'translate-y-[-5px]');
+                    c.classList.remove('selected', 'difficulty-easy', 'difficulty-normal', 'difficulty-hard');
                     c.querySelector('.selected-mark').classList.add('hidden');
                 });
                 // 选中效果
                 const difficulty = card.dataset.difficulty;
-                let borderColor = '';
-                let textColor = '';
-                switch(difficulty) {
-                    case '简单': borderColor = 'border-green-500'; textColor = 'text-green-500'; break;
-                    case '中等': borderColor = 'border-[#F39C12]'; textColor = 'text-[#F39C12]'; break;
-                    case '困难': borderColor = 'border-[#E74C3C]'; textColor = 'text-[#E74C3C]'; break;
-                }
-                card.classList.add('selected', 'border-3', 'translate-y-[-5px]', borderColor, `shadow-[0_0_20px_${borderColor.replace('border-', '')}]`);
+                const difficultyClassMap = {
+                    简单: 'difficulty-easy',
+                    中等: 'difficulty-normal',
+                    困难: 'difficulty-hard'
+                };
+                card.classList.add('selected', difficultyClassMap[difficulty] || 'difficulty-normal');
                 card.querySelector('.selected-mark').classList.remove('hidden');
-                card.querySelector('.selected-mark').className = `selected-mark ${textColor}`;
                 gameState.selectedDifficulty = difficulty;
-                elements.buttons.confirmDifficulty.classList.remove('bg-[#7F8C8D]', 'cursor-not-allowed');
-                elements.buttons.confirmDifficulty.classList.add('bg-[#27AE60]', 'cursor-pointer');
+                elements.buttons.confirmDifficulty.classList.add('is-ready');
+                elements.buttons.confirmDifficulty.disabled = false;
+                elements.buttons.confirmDifficulty.classList.remove('cursor-not-allowed');
+                elements.buttons.confirmDifficulty.classList.add('cursor-pointer');
                 playSound('select');
             });
         });
@@ -4697,23 +5017,7 @@ const Game = (() => {
                 card.classList.add('selected');
                 gameState.selectedTone = card.dataset.tone;
                 gameState.currentTone = card.dataset.tone;
-                
-                // 背景渐变切换
-                let gradient = '';
-                switch(card.dataset.tone) {
-                    case 'happy_ending': gradient = 'linear-gradient(135deg, rgba(46,204,113,0.3), rgba(26,188,156,0.3))'; break;
-                    case 'bad_ending': gradient = 'linear-gradient(135deg, rgba(155,89,182,0.3), rgba(142,68,173,0.3))'; break;
-                    case 'normal_ending': gradient = 'linear-gradient(135deg, rgba(52,152,219,0.3), rgba(41,128,185,0.3))'; break;
-                    case 'dark_depressing': gradient = 'linear-gradient(135deg, rgba(52,73,94,0.5), rgba(44,62,80,0.5))'; break;
-                    case 'humorous': gradient = 'linear-gradient(135deg, rgba(241,196,15,0.3), rgba(243,156,18,0.3))'; break;
-                    case 'abstract': gradient = 'linear-gradient(135deg, rgba(155,89,182,0.3), rgba(142,68,173,0.3))'; break;
-                    case 'aesthetic': gradient = 'linear-gradient(135deg, rgba(233,30,99,0.3), rgba(211,47,47,0.3))'; break;
-                    case 'logical': gradient = 'linear-gradient(135deg, rgba(76,175,80,0.3), rgba(67,160,71,0.3))'; break;
-                    case 'mysterious': gradient = 'linear-gradient(135deg, rgba(255,152,0,0.3), rgba(251,140,0,0.3))'; break;
-                    case 'stream_of_consciousness': gradient = 'linear-gradient(135deg, rgba(103,58,183,0.3), rgba(93,58,183,0.3))'; break;
-                }
-                elements.globalBg.style.background = gradient;
-                elements.globalBg.style.transition = 'background 500ms ease';
+                applyToneVisualPreset(card.dataset.tone);
                 playSound('select');
             });
         });
@@ -4784,12 +5088,14 @@ const Game = (() => {
                     document.getElementById('selected-style-display').textContent = '已选择：油画风格（请选择具体类型）';
                     elements.buttons.confirmStyle.disabled = true;
                     elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
+                    applyStyleVisualPreview('oil_painting');
                 } else if (selectedStyle === 'custom') {
                     // 显示自定义输入框
                     document.getElementById('custom-style-input').classList.remove('hidden');
                     document.getElementById('selected-style-display').textContent = '已选择：自定义（请输入风格）';
                     elements.buttons.confirmStyle.disabled = true;
                     elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
+                    applyStyleVisualPreview('custom');
                 } else {
                     // 其他风格直接显示选择
                     const styleName = btn.dataset.styleName;
@@ -4797,6 +5103,7 @@ const Game = (() => {
                     elements.buttons.confirmStyle.disabled = false;
                     elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
                     elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+                    applyStyleVisualPreview(selectedStyle);
                 }
                 
                 playSound('click');
@@ -4819,6 +5126,7 @@ const Game = (() => {
                 elements.buttons.confirmStyle.disabled = false;
                 elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
                 elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+                applyStyleVisualPreview('oil_painting', selectedSubStyle);
                 
                 playSound('click');
             });
@@ -4833,10 +5141,12 @@ const Game = (() => {
                     elements.buttons.confirmStyle.disabled = false;
                     elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
                     elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+                    applyStyleVisualPreview('custom', '', customStyleText);
                 } else {
                     document.getElementById('selected-style-display').textContent = '已选择：自定义（请输入风格）';
                     elements.buttons.confirmStyle.disabled = true;
                     elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
+                    applyStyleVisualPreview('custom');
                 }
             });
         }
@@ -4909,7 +5219,12 @@ const Game = (() => {
                 showModal('提示', '请选择要删除的存档', () => {});
             }
         });
-        elements.buttons.backToMenu.addEventListener('click', () => switchScreen('menu'));
+        if (elements.buttons.saveBackToMenu) {
+            elements.buttons.saveBackToMenu.addEventListener('click', () => switchScreen('menu'));
+        }
+        if (elements.buttons.endingBackToMenu) {
+            elements.buttons.endingBackToMenu.addEventListener('click', () => switchScreen('menu'));
+        }
         elements.buttons.restartGame.addEventListener('click', () => switchScreen('menu'));
         
         // 示例主题点击填充
@@ -5009,7 +5324,7 @@ const Game = (() => {
                     
                     // 隐藏"->"按钮
                     nextSegmentBtn.classList.add('hidden');
-                    nextSegmentBtn.dataset.showOptions = 'false';
+                    setNextSegmentPromptState(nextSegmentBtn, false);
                     
                     // 隐藏文本显示区域，显示选项区域
                     const textDisplayArea = document.getElementById('text-display-area');
@@ -5019,6 +5334,7 @@ const Game = (() => {
                     }
                     if (optionsListArea) {
                         optionsListArea.classList.remove('hidden');
+                        animateSegmentStage({ toOptions: true });
                     }
                     
                     // 显示选项

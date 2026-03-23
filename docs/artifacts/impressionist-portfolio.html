@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMIÈRE — Impressionist Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #f8f4e8;
+            --bg-ivory: #faf8f0;
+            --gold: #c9a962;
+            --rose-pale: #e8d4c4;
+            --lavender: #c4b7d4;
+            --sage: #9aaf8c;
+            --sky: #a8c4d4;
+            --peach: #e8c4a8;
+            --shadow-soft: rgba(139, 119, 101, 0.15);
+            --shadow-deep: rgba(139, 119, 101, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--bg-cream);
+            color: #4a4035;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Impressionist background layers */
+        .bg-layers {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: breathe 20s ease-in-out infinite;
+        }
+
+        .bg-layer-1 {
+            background: 
+                radial-gradient(ellipse 120% 80% at 20% 20%, rgba(201, 169, 98, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 100% at 80% 80%, rgba(154, 175, 140, 0.15) 0%, transparent 40%);
+            animation-delay: 0s;
+        }
+
+        .bg-layer-2 {
+            background: 
+                radial-gradient(ellipse 80% 60% at 60% 30%, rgba(168, 196, 212, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 80% at 10% 70%, rgba(232, 196, 168, 0.2) 0%, transparent 40%);
+            animation-delay: -5s;
+        }
+
+        .bg-layer-3 {
+            background: 
+                radial-gradient(ellipse 90% 70% at 90% 20%, rgba(196, 183, 212, 0.15) 0%, transparent 40%),
+                radial-gradient(ellipse 70% 90% at 30% 90%, rgba(232, 212, 196, 0.2) 0%, transparent 50%);
+            animation-delay: -10s;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
+        /* Light rays */
+        .light-rays {
+            position: fixed;
+            top: -20%;
+            left: 50%;
+            width: 200%;
+            height: 150%;
+            transform: translateX(-50%);
+            background: 
+                conic-gradient(from 220deg at 50% 50%, 
+                    rgba(255, 248, 230, 0.15) 0deg,
+                    rgba(255, 248, 230, 0.08) 30deg,
+                    transparent 60deg,
+                    rgba(255, 248, 230, 0.05) 90deg,
+                    transparent 120deg,
+                    rgba(201, 169, 98, 0.08) 150deg,
+                    transparent 180deg,
+                    rgba(255, 248, 230, 0.1) 210deg,
+                    transparent 240deg,
+                    rgba(168, 196, 212, 0.06) 280deg,
+                    transparent 320deg,
+                    rgba(255, 248, 230, 0.08) 360deg
+                );
+            z-index: 0;
+            animation: raysRotate 60s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes raysRotate {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* Floating particles (like light dust) */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, rgba(255, 250, 240, 0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatParticle 15s ease-in-out infinite;
+        }
+
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100px) translateX(30px); opacity: 0; }
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 2.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(248, 244, 232, 0.9) 0%, transparent 100%);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            font-style: italic;
+            color: #6b5d4d;
+            letter-spacing: 0.05em;
+        }
+
+        .logo-sub {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.75rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            color: var(--gold);
+            margin-top: 0.2rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 3rem;
+        }
+
+        nav a {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #6b5d4d;
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            position: relative;
+            transition: all 0.4s;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 0;
+            height: 1px;
+            background: var(--gold);
+            transition: all 0.4s;
+            transform: translateX(-50%);
+        }
+
+        nav a:hover {
+            color: #4a4035;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 8rem 4rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero-eyebrow {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            font-weight: 300;
+            letter-spacing: 0.4em;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 7vw, 5.5rem);
+            font-weight: 400;
+            font-style: italic;
+            line-height: 1.15;
+            color: #4a4035;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 span {
+            display: block;
+            background: linear-gradient(135deg, var(--gold), var(--peach), var(--rose-pale));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            font-weight: 300;
+            line-height: 1.9;
+            color: #7a6f63;
+            margin-bottom: 2.5rem;
+            max-width: 480px;
+        }
+
+        /* Art frame */
+        .art-frame {
+            position: absolute;
+            right: 8%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 380px;
+            height: 480px;
+        }
+
+        .frame-outer {
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #d4c4a8 0%, #b8a88a 50%, #d4c4a8 100%);
+            box-shadow: 
+                20px 30px 50px var(--shadow-deep),
+                inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .frame-inner {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-ivory);
+            padding: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .painting {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, 
+                #f8f4e8 0%,
+                #e8dcc8 20%,
+                #d4c4a8 40%,
+                #c4b898 60%,
+                #d4c4a8 80%,
+                #e8dcc8 100%
+            );
+            position: relative;
+            animation: paintingShift 20s ease-in-out infinite;
+        }
+
+        @keyframes paintingShift {
+            0%, 100% { 
+                background: linear-gradient(145deg, 
+                    #f8f4e8 0%,
+                    #e8dcc8 20%,
+                    #d4c4a8 40%,
+                    #c4b898 60%,
+                    #d4c4a8 80%,
+                    #e8dcc8 100%
+                );
+                filter: blur(0px);
+            }
+            25% {
+                background: linear-gradient(145deg, 
+                    #e8dcc8 0%,
+                    #d4c4a8 20%,
+                    #c4b898 40%,
+                    #b8a888 60%,
+                    #c4b898 80%,
+                    #d4c4a8 100%
+                );
+                filter: blur(0.5px);
+            }
+            50% {
+                background: linear-gradient(145deg, 
+                    #d4c4a8 0%,
+                    #c4b898 20%,
+                    #b8a888 40%,
+                    #a89878 60%,
+                    #b8a888 80%,
+                    #c4b898 100%
+                );
+                filter: blur(1px);
+            }
+            75% {
+                background: linear-gradient(145deg, 
+                    #c4b898 0%,
+                    #b8a888 20%,
+                    #a89878 40%,
+                    #c4b898 60%,
+                    #d4c4a8 80%,
+                    #e8dcc8 100%
+                );
+                filter: blur(0.5px);
+            }
+        }
+
+        /* Impressionist brush strokes */
+        .brush {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(8px);
+            opacity: 0.7;
+            animation: brushFloat 8s ease-in-out infinite;
+        }
+
+        .brush-1 {
+            width: 120px;
+            height: 80px;
+            background: radial-gradient(ellipse, rgba(201, 169, 98, 0.6) 0%, transparent 70%);
+            top: 10%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .brush-2 {
+            width: 150px;
+            height: 100px;
+            background: radial-gradient(ellipse, rgba(232, 212, 196, 0.7) 0%, transparent 70%);
+            top: 30%;
+            right: 10%;
+            animation-delay: -2s;
+        }
+
+        .brush-3 {
+            width: 100px;
+            height: 140px;
+            background: radial-gradient(ellipse, rgba(154, 175, 140, 0.5) 0%, transparent 70%);
+            bottom: 20%;
+            left: 30%;
+            animation-delay: -4s;
+        }
+
+        .brush-4 {
+            width: 130px;
+            height: 90px;
+            background: radial-gradient(ellipse, rgba(168, 196, 212, 0.5) 0%, transparent 70%);
+            bottom: 10%;
+            right: 25%;
+            animation-delay: -6s;
+        }
+
+        .brush-5 {
+            width: 80px;
+            height: 120px;
+            background: radial-gradient(ellipse, rgba(232, 196, 168, 0.6) 0%, transparent 70%);
+            top: 50%;
+            left: 45%;
+            animation-delay: -3s;
+        }
+
+        @keyframes brushFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(10px, -10px) scale(1.05); }
+            66% { transform: translate(-5px, 5px) scale(0.98); }
+        }
+
+        /* Light spot on painting */
+        .light-spot {
+            position: absolute;
+            top: 15%;
+            left: 25%;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(255, 255, 240, 0.9) 0%, rgba(255, 250, 230, 0.3) 50%, transparent 70%);
+            border-radius: 50%;
+            animation: lightPulse 6s ease-in-out infinite;
+        }
+
+        @keyframes lightPulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            padding: 1rem 2.5rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s;
+        }
+
+        .btn-primary {
+            background: #4a4035;
+            color: var(--bg-ivory);
+        }
+
+        .btn-primary:hover {
+            background: #6b5d4d;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--shadow-soft);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #6b5d4d;
+            border: 1px solid #b8a88a;
+        }
+
+        .btn-outline:hover {
+            border-color: #4a4035;
+            background: rgba(74, 64, 53, 0.05);
+        }
+
+        /* Section */
+        .section {
+            padding: 6rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            font-style: italic;
+            color: #4a4035;
+            margin-bottom: 1rem;
+        }
+
+        .section-line {
+            width: 60px;
+            height: 1px;
+            background: var(--gold);
+            margin: 0 auto;
+        }
+
+        /* Gallery */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 4/5;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .gallery-item:nth-child(2) {
+            transform: translateY(3rem);
+        }
+
+        .gallery-item:nth-child(3) {
+            transform: translateY(-1rem);
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            transition: all 0.8s;
+        }
+
+        .gallery-item:hover .gallery-img {
+            transform: scale(1.08);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            background: linear-gradient(transparent, rgba(74, 64, 53, 0.8));
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s;
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .gallery-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-style: italic;
+            color: #fff;
+            margin-bottom: 0.3rem;
+        }
+
+        .gallery-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Colors as paintings */
+        .painting-1 {
+            background: linear-gradient(160deg,
+                #f8f4e8 0%,
+                #e8dcc8 20%,
+                #d4c4a8 40%,
+                #c4b898 60%,
+                #d4c4a8 80%,
+                #e8dcc8 100%
+            );
+        }
+
+        .painting-2 {
+            background: linear-gradient(160deg,
+                #e8dcc8 0%,
+                #c4b898 30%,
+                #a89878 50%,
+                #c4b898 70%,
+                #d4c4a8 100%
+            );
+        }
+
+        .painting-3 {
+            background: linear-gradient(160deg,
+                #d4c4a8 0%,
+                #b8a888 25%,
+                #9a8878 50%,
+                #b8a888 75%,
+                #c4b898 100%
+            );
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem;
+            text-align: center;
+            background: linear-gradient(180deg, transparent 0%, rgba(232, 220, 200, 0.3) 100%);
+            position: relative;
+            z-index: 1;
+        }
+
+        footer p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-style: italic;
+            color: #7a6f63;
+        }
+
+        footer .hearts {
+            color: var(--rose-pale);
+            margin: 0 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .art-frame { display: none; }
+            .gallery { grid-template-columns: repeat(2, 1fr); }
+            .gallery-item:nth-child(2) { transform: none; }
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 1.5rem 2rem; }
+            .hero { padding: 6rem 2rem 3rem; }
+            .section { padding: 4rem 2rem; }
+            .gallery { grid-template-columns: 1fr; }
+            .gallery-item:nth-child(2),
+            .gallery-item:nth-child(3) { transform: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-layers">
+        <div class="bg-layer bg-layer-1"></div>
+        <div class="bg-layer bg-layer-2"></div>
+        <div class="bg-layer bg-layer-3"></div>
+    </div>
+    <div class="light-rays"></div>
+    <div class="particles">
+        <div class="particle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="top: 40%; left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="top: 60%; left: 70%; animation-delay: 4s;"></div>
+        <div class="particle" style="top: 30%; left: 85%; animation-delay: 6s;"></div>
+        <div class="particle" style="top: 70%; left: 15%; animation-delay: 8s;"></div>
+        <div class="particle" style="top: 50%; left: 50%; animation-delay: 10s;"></div>
+    </div>
+
+    <header>
+        <div>
+            <div class="logo">Lumière</div>
+            <div class="logo-sub">ATELIER D'ART</div>
+        </div>
+        <nav>
+            <a href="#">Gallery</a>
+            <a href="#">About</a>
+            <a href="#">Process</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-eyebrow">Impressionist Digital Studio</div>
+            <h1>Painting with <span>Light & Shadow</span></h1>
+            <p>Capturing the ephemeral dance of sunlight through brushstrokes of code. Every pixel tells a story of morning mist, dappled gardens, and the quiet magic of ordinary moments.</p>
+            
+            <div class="btn-group">
+                <a href="#" class="btn btn-primary">Explore Gallery</a>
+                <a href="#" class="btn btn-outline">Our Philosophy</a>
+            </div>
+        </div>
+
+        <div class="art-frame">
+            <div class="frame-outer">
+                <div class="frame-inner">
+                    <div class="painting">
+                        <div class="brush brush-1"></div>
+                        <div class="brush brush-2"></div>
+                        <div class="brush brush-3"></div>
+                        <div class="brush brush-4"></div>
+                        <div class="brush brush-5"></div>
+                        <div class="light-spot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Recent Works</h2>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="gallery">
+            <div class="gallery-item">
+                <div class="gallery-img painting-1"></div>
+                <div class="gallery-overlay">
+                    <div class="gallery-title">Morning in Giverny</div>
+                    <div class="gallery-desc">Digital interpretation of Monet's garden</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <div class="gallery-img painting-2"></div>
+                <div class="gallery-overlay">
+                    <div class="gallery-title">Sunset at Sainte-Victoire</div>
+                    <div class="gallery-desc">Cézanne's mountain in soft light</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <div class="gallery-img painting-3"></div>
+                <div class="gallery-overlay">
+                    <div class="gallery-title">Ballets Russes</div>
+                    <div class="gallery-desc">Degas meets digital canvas</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Made with <span class="hearts">♥</span> in the spirit of Impressionism</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">© 2026 Lumière Atelier</p>
+    </footer>
+</body>
+</html>

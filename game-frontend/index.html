@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI沉浸式文本冒险游戏</title>
     <!-- 引入Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,26 +25,36 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;500;700&family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&family=ZCOOL+QingKe+HuangYou&family=ZCOOL+XiaoWei&family=Long+Cang&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
 </head>
-<body class="bg-black text-white overflow-hidden font-sans">
+<body class="bg-black text-white overflow-hidden font-sans app-shell">
     <!-- 全局背景（各阶段动态切换） -->
     <div id="global-bg" class="fixed inset-0 bg-contain bg-center opacity-60 z-0"></div>
     
     <!-- 主菜单界面（默认显示） -->
-    <div id="menu-screen" class="screen flex flex-col items-center justify-center h-screen relative z-10" role="main" aria-labelledby="game-logo">
+    <div id="menu-screen" class="screen flex flex-col items-center justify-center h-screen relative z-10" data-screen-theme="menu" role="main" aria-labelledby="game-logo">
+        <div class="menu-rainbow-stage" aria-hidden="true">
+            <div class="menu-rainbow-orb orb-a"></div>
+            <div class="menu-rainbow-orb orb-b"></div>
+            <div class="menu-rainbow-orb orb-c"></div>
+            <div class="menu-rainbow-wave wave-a"></div>
+            <div class="menu-rainbow-wave wave-b"></div>
+            <div class="menu-rainbow-sparkles">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+        </div>
         <div id="game-logo" class="game-logo w-[200px] h-[80px] bg-white/10 rounded-lg flex items-center justify-center mb-16" aria-hidden="true">
             <span class="text-2xl font-bold">文本冒险游戏</span>
         </div>
         <div class="button-group flex flex-col gap-[30px]" role="group" aria-label="游戏主菜单">
-            <button id="start-btn" class="btn-main w-[220px] h-[60px] rounded-[8px] bg-[#2C3E50] text-[18px] font-bold text-white transition-all duration-300 shadow-lg hover:bg-[#34495E] hover:border-2 hover:border-white hover:text-[19px] hover:shadow-xl active:bg-[#1ABC9C] active:border-2 active:border-[#16A085] active:translate-y-1 active:shadow-inner" role="button" aria-label="开始新游戏">
+            <button id="start-btn" class="btn-main ui-btn ui-btn-primary w-[220px] h-[60px] rounded-[8px] text-[18px] font-bold text-white transition-all duration-300 shadow-lg hover:border-2 hover:border-white hover:text-[19px] hover:shadow-xl active:translate-y-1 active:shadow-inner" role="button" aria-label="开始新游戏">
                 开始新游戏
             </button>
-            <button id="load-btn" class="btn-main w-[220px] h-[60px] rounded-[8px] bg-[#2C3E50] text-[18px] font-bold text-white transition-all duration-300 shadow-lg hover:bg-[#34495E] hover:border-2 hover:border-white hover:text-[19px] hover:shadow-xl active:bg-[#1ABC9C] active:border-2 active:border-[#16A085] active:translate-y-1 active:shadow-inner" role="button" aria-label="加载游戏">
+            <button id="load-btn" class="btn-main ui-btn ui-btn-primary w-[220px] h-[60px] rounded-[8px] text-[18px] font-bold text-white transition-all duration-300 shadow-lg hover:border-2 hover:border-white hover:text-[19px] hover:shadow-xl active:translate-y-1 active:shadow-inner" role="button" aria-label="加载游戏">
                 加载游戏
             </button>
-            <button id="save-manage-btn" class="btn-main w-[220px] h-[60px] rounded-[8px] bg-[#2C3E50] text-[18px] font-bold text-white transition-all duration-300 shadow-lg hover:bg-[#34495E] hover:border-2 hover:border-white hover:text-[19px] hover:shadow-xl active:bg-[#1ABC9C] active:border-2 active:border-[#16A085] active:translate-y-1 active:shadow-inner" role="button" aria-label="存档管理">
+            <button id="save-manage-btn" class="btn-main ui-btn ui-btn-primary w-[220px] h-[60px] rounded-[8px] text-[18px] font-bold text-white transition-all duration-300 shadow-lg hover:border-2 hover:border-white hover:text-[19px] hover:shadow-xl active:translate-y-1 active:shadow-inner" role="button" aria-label="存档管理">
                 存档管理
             </button>
-            <button id="exit-btn" class="btn-main w-[220px] h-[60px] rounded-[8px] bg-[#E74C3C] text-[18px] font-bold text-white transition-all duration-300 shadow-lg hover:bg-[#C0392B] hover:border-2 hover:border-white hover:text-[19px] hover:shadow-xl active:bg-[#1ABC9C] active:border-2 active:border-[#16A085] active:translate-y-1 active:shadow-inner" role="button" aria-label="退出游戏">
+            <button id="exit-btn" class="btn-main ui-btn ui-btn-danger w-[220px] h-[60px] rounded-[8px] text-[18px] font-bold text-white transition-all duration-300 shadow-lg hover:border-2 hover:border-white hover:text-[19px] hover:shadow-xl active:translate-y-1 active:shadow-inner" role="button" aria-label="退出游戏">
                 退出游戏
             </button>
         </div>
@@ -52,17 +62,17 @@
     </div>
 
     <!-- 主角属性选择界面 -->
-    <div id="attr-selection-screen" class="screen hidden flex flex-col items-center justify-start h-screen relative z-10 p-8">
-        <div class="title text-[24px] font-bold text-[#ECF0F1] mb-8">塑造你的主角</div>
+    <div id="attr-selection-screen" class="screen hidden flex flex-col items-center justify-start h-screen relative z-10 p-8" data-screen-theme="attribute">
+        <div class="title text-[24px] font-bold text-[#ECF0F1] mb-8 ui-title">塑造你的主角</div>
         <div class="attr-container flex w-full max-w-5xl gap-8">
             <!-- 左侧属性说明区 -->
-            <div class="attr-desc w-[30%] bg-black/30 p-6 rounded-lg">
+            <div class="attr-desc ui-card w-[30%] p-6 rounded-lg">
                 <h3 class="text-xl font-bold mb-4 text-[#1ABC9C]">属性说明</h3>
                 <p class="text-sm leading-relaxed">为你的主角选择各项属性等级</p>
                 <p class="text-sm leading-relaxed mt-4">部分属性组合可解锁特殊剧情</p>
             </div>
             <!-- 右侧属性选择区 -->
-            <div class="attr-controls w-[70%] bg-black/30 p-8 rounded-lg flex flex-col gap-[60px]">
+            <div class="attr-controls ui-card w-[70%] p-8 rounded-lg flex flex-col gap-[60px]">
                 <!-- 颜值属性 -->
                 <div class="attr-item">
                     <div class="attr-label flex items-center gap-4 mb-4">
@@ -137,7 +147,7 @@
     </div>
 
     <!-- 游戏难度选择界面 -->
-    <div id="difficulty-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
+    <div id="difficulty-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" data-screen-theme="difficulty">
         <div class="title text-[24px] font-bold text-[#ECF0F1] mb-12">选择游戏难度</div>
         <div class="difficulty-cards flex gap-[40px] justify-center">
             <!-- 简单难度 -->
@@ -174,11 +184,11 @@
                 <div class="selected-mark hidden absolute bottom-4 text-[14px] text-[#E74C3C]">已选中</div>
             </div>
         </div>
-        <button id="confirm-difficulty-btn" class="btn-confirm-difficulty w-[200px] h-[50px] rounded-[8px] bg-[#7F8C8D] text-[16px] font-bold text-white transition-all mt-12 cursor-not-allowed">确认难度</button>
+        <button id="confirm-difficulty-btn" class="btn-confirm-difficulty ui-btn w-[200px] h-[50px] rounded-[8px] text-[16px] font-bold text-white transition-all mt-12 cursor-not-allowed" disabled>确认难度</button>
     </div>
 
     <!-- 故事基调选择界面 -->
-    <div id="tone-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
+    <div id="tone-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" data-screen-theme="tone">
         <div class="title text-[24px] font-bold text-[#ECF0F1] mb-12">选择故事基调</div>
         <div class="tone-scroll-container w-full max-w-5xl overflow-x-auto pb-8">
             <div class="tone-cards flex gap-[30px]">
@@ -298,18 +308,18 @@
     </div>
 
     <!-- 游戏主题输入界面 -->
-    <div id="theme-input-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" role="region" aria-labelledby="theme-title" aria-describedby="theme-examples">
+    <div id="theme-input-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" data-screen-theme="themeInput" role="region" aria-labelledby="theme-title" aria-describedby="theme-examples">
         <div id="theme-title" class="title text-[24px] font-bold text-[#ECF0F1] mb-12">输入游戏主题</div>
         <div class="theme-input-container flex flex-col items-center gap-6">
             <input type="text" id="theme-input" class="theme-input w-[400px] h-[60px] bg-[rgba(255,255,255,0.1)] border-2 border-[#3498DB] rounded-[8px] text-[18px] text-white px-[20px] outline-none transition-all duration-300 hover:border-[#2980B9]" placeholder="请输入游戏主题，如'古风权谋'、'科幻救赎'" aria-label="游戏主题输入" aria-required="true" aria-describedby="word-count">
             <div id="theme-examples" class="theme-examples text-[14px] text-[#999999]">示例：古风权谋 / 科幻救赎 / 校园悬疑</div>
             <div id="word-count" class="word-count text-[14px] text-white absolute top-[calc(50%+80px)] right-[calc(50%-200px)]">0/20</div>
-            <button id="submit-theme-btn" class="btn-submit-theme w-[180px] h-[50px] rounded-[8px] bg-[#3498DB] text-[16px] font-bold text-white transition-all mt-4 hover:bg-[#2980B9]" role="button" aria-label="提交游戏主题">提交主题</button>
+            <button id="submit-theme-btn" class="btn-submit-theme ui-btn ui-btn-primary w-[180px] h-[50px] rounded-[8px] text-[16px] font-bold text-white transition-all mt-4" role="button" aria-label="提交游戏主题">提交主题</button>
         </div>
     </div>
 
     <!-- 图片风格选择界面 -->
-    <div id="image-style-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" role="region" aria-labelledby="image-style-title">
+    <div id="image-style-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" data-screen-theme="styleSelection" role="region" aria-labelledby="image-style-title">
         <div id="image-style-title" class="title text-[24px] font-bold text-[#ECF0F1] mb-12">选择图片风格</div>
         <div class="image-style-container flex flex-col items-center gap-6 w-full max-w-4xl">
             <!-- 风格选项按钮组 -->
@@ -377,7 +387,8 @@
     </div>
 
     <!-- 核心设定告知界面 -->
-    <div id="setting-screen" class="screen hidden flex flex-col h-screen relative z-10">
+    <div id="setting-screen" class="screen hidden flex flex-col h-screen relative z-10" data-screen-theme="setting">
+        <div id="setting-tone-backdrop" class="setting-tone-backdrop" aria-hidden="true"></div>
         <div class="title text-[24px] font-bold text-white text-center py-6 bg-black/30">游戏核心设定</div>
         <div class="setting-container flex h-[calc(100%-120px)]">
             <!-- 左侧导航 -->
@@ -419,14 +430,14 @@
     </div>
 
     <!-- 剧情加载界面 -->
-    <div id="loading-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10">
+    <div id="loading-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10" data-screen-theme="loading">
         <div class="loading-spinner w-[80px] h-[80px] rounded-full border-[8px] border-[#1ABC9C] border-t-transparent animate-spin mb-6"></div>
         <div class="loading-text text-[18px] text-white mb-2" id="loading-status">生成世界观...</div>
         <div class="loading-percent text-[20px] font-bold text-white" id="loading-percent">0%</div>
     </div>
 
     <!-- 核心剧情交互界面 -->
-    <div id="gameplay-screen" class="screen hidden flex flex-col h-screen relative z-10" role="region" aria-labelledby="current-chapter">
+    <div id="gameplay-screen" class="screen hidden flex flex-col h-screen relative z-10" data-screen-theme="gameplay" role="region" aria-labelledby="current-chapter">
         <!-- 图片/视频加载占位符（全屏显示） -->
         <div id="image-loading" class="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50" style="display: none;">
             <div class="text-center">
@@ -550,7 +561,7 @@
     </div>
 
     <!-- 存档管理界面 -->
-    <div id="save-management-screen" class="screen hidden flex flex-col h-screen relative z-10 p-8 overflow-hidden">
+    <div id="save-management-screen" class="screen hidden flex flex-col h-screen relative z-10 p-8 overflow-hidden" data-screen-theme="saveManagement">
         <div class="title text-[24px] font-bold text-[#ECF0F1] mb-8 flex-shrink-0">存档管理</div>
         <div class="save-cards-container flex-1 overflow-y-auto mb-4">
             <div class="save-cards grid grid-cols-2 gap-[30px] w-full max-w-4xl mx-auto">
@@ -560,12 +571,12 @@
         <div class="btn-group mt-4 flex gap-[20px] justify-center flex-shrink-0">
             <button id="load-selected-save-btn" class="btn-save w-[180px] h-[50px] rounded-[8px] bg-[#27AE60] text-[16px] font-bold text-white transition-all">加载选中存档</button>
             <button id="delete-selected-save-btn" class="btn-save w-[180px] h-[50px] rounded-[8px] bg-[#E74C3C] text-[16px] font-bold text-white transition-all">删除选中存档</button>
-            <button id="back-to-menu-btn" class="btn-save w-[180px] h-[50px] rounded-[8px] bg-[#7F8C8D] text-[16px] font-bold text-white transition-all">返回主菜单</button>
+            <button id="save-back-to-menu-btn" class="btn-save ui-btn w-[180px] h-[50px] rounded-[8px] text-[16px] font-bold text-white transition-all">返回主菜单</button>
         </div>
     </div>
 
     <!-- 结局界面 -->
-    <div id="ending-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
+    <div id="ending-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" data-screen-theme="ending">
         <div class="ending-container w-full max-w-3xl bg-black/30 rounded-[16px] p-[60px] text-center">
             <h2 id="ending-title" class="text-[48px] font-bold text-white mb-12">圆满结局</h2>
             <div class="ending-content-container h-[300px] overflow-y-auto mb-8">
@@ -573,8 +584,8 @@
             </div>
             <div id="ending-summary" class="text-[20px] text-white mb-12"></div>
             <div class="ending-buttons flex gap-[30px] justify-center">
-                <button id="restart-game-btn" class="btn-ending w-[180px] h-[60px] rounded-[8px] bg-[#2C3E50] text-[18px] font-bold text-white transition-all duration-300 hover:bg-[#34495E]">重新开始</button>
-                <button id="back-to-menu-btn" class="btn-ending w-[180px] h-[60px] rounded-[8px] bg-[#3498DB] text-[18px] font-bold text-white transition-all duration-300 hover:bg-[#2980B9]">返回主菜单</button>
+                <button id="restart-game-btn" class="btn-ending ui-btn ui-btn-primary w-[180px] h-[60px] rounded-[8px] text-[18px] font-bold text-white transition-all duration-300">重新开始</button>
+                <button id="ending-back-to-menu-btn" class="btn-ending ui-btn ui-btn-primary w-[180px] h-[60px] rounded-[8px] text-[18px] font-bold text-white transition-all duration-300">返回主菜单</button>
             </div>
         </div>
     </div>
@@ -606,7 +617,13 @@
     <script src="typewriter.js"></script>
     <!-- 粒子背景效果 -->
     <script src="particles.js"></script>
-    <!-- 性能监控（开发时使用） -->
-    <script src="performance-monitor.js"></script>
+    <!-- 性能监控（仅 localhost 开发环境自动启用） -->
+    <script>
+        if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
+            const perfScript = document.createElement('script');
+            perfScript.src = 'performance-monitor.js';
+            document.body.appendChild(perfScript);
+        }
+    </script>
 </body>
 </html>

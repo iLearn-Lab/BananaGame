@@ -615,12 +615,16 @@
 .screen {
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.4s ease, visibility 0.4s ease;
+    transform: translate3d(0, 16px, 0) scale(1.01);
+    filter: blur(8px);
+    transition: opacity 0.45s ease, visibility 0.45s ease, transform 0.45s ease, filter 0.45s ease;
 }
 
 .screen.active {
     opacity: 1;
     visibility: visible;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
 }
 
 /* 主菜单默认显示 */

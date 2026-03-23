@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURUM — Royal Atelier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&display=swap" rel="stylesheet">
+    <script>
+        // Generate particles dynamically
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gold particles
+            for(let i = 0; i < 40; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle p-gold';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.width = (Math.random() * 6 + 2) + 'px';
+                p.style.height = p.style.width;
+                p.style.animationDuration = (Math.random() * 10 + 8) + 's';
+                p.style.animationDelay = (Math.random() * 15) + 's';
+                document.querySelector('.particles').appendChild(p);
+            }
+            // Sparkle particles
+            for(let i = 0; i < 25; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle p-sparkle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.width = (Math.random() * 8 + 3) + 'px';
+                p.style.height = p.style.width;
+                p.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                p.style.animationDelay = (Math.random() * 10) + 's';
+                document.querySelector('.particles').appendChild(p);
+            }
+            // Smoke particles
+            for(let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle p-smoke';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.width = (Math.random() * 100 + 50) + 'px';
+                p.style.height = p.style.width;
+                p.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                p.style.animationDelay = (Math.random() * 20) + 's';
+                document.querySelector('.particles').appendChild(p);
+            }
+            // Diamonds
+            for(let i = 0; i < 30; i++) {
+                const d = document.createElement('div');
+                d.className = 'diamond';
+                d.style.left = Math.random() * 100 + '%';
+                d.style.top = Math.random() * 100 + '%';
+                d.style.animationDuration = (Math.random() * 15 + 8) + 's';
+                d.style.animationDelay = (Math.random() * 15) + 's';
+                d.style.width = (Math.random() * 15 + 8) + 'px';
+                d.style.height = d.style.width;
+                document.querySelector('.diamonds').appendChild(d);
+            }
+            // Floating crowns
+            for(let i = 0; i < 8; i++) {
+                const c = document.createElement('div');
+                c.className = 'floating-crown';
+                c.innerHTML = ['♛','👑','⚜','✦','★'][Math.floor(Math.random() * 5)];
+                c.style.left = (Math.random() * 90 + 5) + '%';
+                c.style.top = (Math.random() * 90 + 5) + '%';
+                c.style.animationDuration = (Math.random() * 20 + 12) + 's';
+                c.style.animationDelay = (Math.random() * 15) + 's';
+                c.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+                document.querySelector('.crowns').appendChild(c);
+            }
+            // Floating rings
+            for(let i = 0; i < 12; i++) {
+                const r = document.createElement('div');
+                r.className = 'float-ring';
+                r.style.left = Math.random() * 100 + '%';
+                r.style.top = Math.random() * 100 + '%';
+                r.style.animationDuration = (Math.random() * 25 + 15) + 's';
+                r.style.animationDelay = (Math.random() * 20) + 's';
+                r.style.width = (Math.random() * 60 + 30) + 'px';
+                r.style.height = r.style.width;
+                document.querySelector('.rings').appendChild(r);
+            }
+        });
+    </script>
+    <style>
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f4e4a6;
+            --gold-dark: #aa8c2c;
+            --burgundy: #6b1c23;
+            --burgundy-light: #8b2c33;
+            --velvet: #1a0a0d;
+            --royal-purple: #2d1b4e;
+            --royal-blue: #1b3a4d;
+            --emerald: #1a4d3a;
+            --sapphire: #1a2a4d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background: var(--velvet);
+            color: #f5f0e6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           COMPLEX MULTI-LAYER DYNAMIC BACKGROUNDS
+           ============================================ */
+
+        /* Layer 0: Base gradient - constantly shifting colors */
+        .bg-base {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            animation: baseShift 30s ease-in-out infinite;
+        }
+
+        @keyframes baseShift {
+            0% { 
+                background: 
+                    radial-gradient(ellipse at 0% 0%, var(--burgundy) 0%, transparent 50%),
+                    radial-gradient(ellipse at 100% 100%, var(--royal-purple) 0%, transparent 50%),
+                    radial-gradient(ellipse at 50% 100%, var(--sapphire) 0%, transparent 40%),
+                    linear-gradient(180deg, #0a0508 0%, var(--velvet) 50%, #0d0608 100%);
+            }
+            25% {
+                background: 
+                    radial-gradient(ellipse at 25% 75%, var(--burgundy-light) 0%, transparent 50%),
+                    radial-gradient(ellipse at 75% 25%, var(--emerald) 0%, transparent 50%),
+                    radial-gradient(ellipse at 50% 50%, var(--royal-purple) 0%, transparent 40%),
+                    linear-gradient(180deg, #080408 0%, #120810 50%, #0a0508 100%);
+            }
+            50% {
+                background: 
+                    radial-gradient(ellipse at 80% 20%, var(--burgundy) 0%, transparent 50%),
+                    radial-gradient(ellipse at 20% 80%, var(--royal-blue) 0%, transparent 50%),
+                    radial-gradient(ellipse at 60% 60%, var(--sapphire) 0%, transparent 40%),
+                    linear-gradient(180deg, #0a060a 0%, #150d15 50%, #0a0508 100%);
+            }
+            75% {
+                background: 
+                    radial-gradient(ellipse at 40% 40%, var(--royal-purple) 0%, transparent 50%),
+                    radial-gradient(ellipse at 60% 80%, var(--burgundy-light) 0%, transparent 50%),
+                    radial-gradient(ellipse at 20% 20%, var(--emerald) 0%, transparent 40%),
+                    linear-gradient(180deg, #080510 0%, #100a15 50%, #0a0510 100%);
+            }
+        }
+
+        /* Layer 1: Giant flowing gold orbs */
+        .gold-river {
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            z-index: 1;
+            animation: riverFlow 60s linear infinite;
+        }
+
+        @keyframes riverFlow {
+            0% { transform: translate(0%, 0%) rotate(0deg); }
+            33% { transform: translate(2%, -2%) rotate(120deg); }
+            66% { transform: translate(-2%, 2%) rotate(240deg); }
+            100% { transform: translate(0%, 0%) rotate(360deg); }
+        }
+
+        .gold-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+
+        .orb1 { width: 900px; height: 900px; top: -20%; left: -10%; background: radial-gradient(circle, rgba(212, 175, 55, 0.5) 0%, rgba(244, 228, 166, 0.2) 40%, transparent 70%); animation-delay: 0s; }
+        .orb2 { width: 1100px; height: 1100px; top: 20%; left: 30%; background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, rgba(212, 175, 55, 0.15) 50%, transparent 80%); animation-delay: -7s; }
+        .orb3 { width: 800px; height: 800px; top: 40%; left: 10%; background: radial-gradient(circle, rgba(212, 175, 55, 0.45) 0%, rgba(170, 140, 44, 0.15) 50%, transparent 70%); animation-delay: -14s; }
+        .orb4 { width: 1000px; height: 1000px; top: -10%; left: 40%; background: radial-gradient(circle, rgba(244, 228, 166, 0.35) 0%, rgba(212, 175, 55, 0.1) 60%, transparent 90%); animation-delay: -4s; }
+        .orb5 { width: 700px; height: 700px; top: 50%; left: 50%; background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(212, 175, 55, 0.08) 50%, transparent 80%); animation-delay: -10s; }
+        .orb6 { width: 1200px; height: 1200px; top: 10%; left: -20%; background: radial-gradient(circle, rgba(212, 175, 55, 0.35) 0%, rgba(244, 228, 166, 0.12) 40%, transparent 70%); animation-delay: -18s; }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: scale(1) translate(0, 0) rotate(0deg); opacity: 0.5; }
+            16% { transform: scale(1.4) translate(100px, -60px) rotate(60deg); opacity: 0.9; }
+            33% { transform: scale(0.8) translate(-50px, 80px) rotate(120deg); opacity: 0.4; }
+            50% { transform: scale(1.3) translate(-80px, -40px) rotate(180deg); opacity: 0.7; }
+            66% { transform: scale(0.9) translate(60px, 60px) rotate(240deg); opacity: 0.5; }
+            83% { transform: scale(1.2) translate(-40px, -80px) rotate(300deg); opacity: 0.8; }
+        }
+
+        /* Layer 2: Aurora borealis - multiple waves */
+        .aurora {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 2;
+            mix-blend-mode: screen;
+            overflow: hidden;
+        }
+
+        .aurora-wave {
+            position: absolute;
+            width: 300%;
+            height: 200px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(212, 175, 55, 0.08) 15%, 
+                rgba(255, 215, 0, 0.2) 30%, 
+                rgba(212, 175, 55, 0.12) 45%, 
+                rgba(244, 228, 166, 0.08) 60%,
+                rgba(212, 175, 55, 0.1) 75%,
+                transparent 100%);
+            animation: auroraWave 25s ease-in-out infinite;
+        }
+
+        .aurora-wave:nth-child(1) { top: 5%; animation-delay: 0s; animation-duration: 28s; opacity: 0.8; }
+        .aurora-wave:nth-child(2) { top: 12%; animation-delay: -5s; animation-duration: 32s; opacity: 0.7; }
+        .aurora-wave:nth-child(3) { top: 20%; animation-delay: -10s; animation-duration: 26s; opacity: 0.6; }
+        .aurora-wave:nth-child(4) { top: 28%; animation-delay: -3s; animation-duration: 35s; opacity: 0.75; }
+        .aurora-wave:nth-child(5) { top: 36%; animation-delay: -8s; animation-duration: 30s; opacity: 0.65; }
+        .aurora-wave:nth-child(6) { top: 44%; animation-delay: -12s; animation-duration: 27s; opacity: 0.7; }
+        .aurora-wave:nth-child(7) { top: 52%; animation-delay: -2s; animation-duration: 33s; opacity: 0.55; }
+        .aurora-wave:nth-child(8) { top: 60%; animation-delay: -7s; animation-duration: 29s; opacity: 0.6; }
+        .aurora-wave:nth-child(9) { top: 68%; animation-delay: -15s; animation-duration: 31s; opacity: 0.5; }
+        .aurora-wave:nth-child(10) { top: 76%; animation-delay: -4s; animation-duration: 24s; opacity: 0.45; }
+
+        @keyframes auroraWave {
+            0%, 100% { 
+                transform: translateX(-40%) scaleY(1) skewX(0deg); 
+                opacity: 0.4;
+                filter: blur(0px);
+            }
+            25% { 
+                transform: translateX(-20%) scaleY(2.2) skewX(5deg); 
+                opacity: 0.8;
+                filter: blur(2px);
+            }
+            50% { 
+                transform: translateX(0%) scaleY(1.5) skewX(-3deg); 
+                opacity: 0.6;
+                filter: blur(1px);
+            }
+            75% { 
+                transform: translateX(10%) scaleY(2.5) skewX(2deg); 
+                opacity: 0.7;
+                filter: blur(3px);
+            }
+        }
+
+        /* Layer 3: Rotating light beams */
+        .light-beams {
+            position: fixed;
+            top: -100%; left: -100%;
+            width: 300%; height: 300%;
+            z-index: 3;
+            background: 
+                conic-gradient(from 0deg at 50% 50%,
+                    transparent 0deg,
+                    rgba(255, 215, 0, 0.03) 15deg,
+                    transparent 30deg,
+                    rgba(212, 175, 55, 0.05) 45deg,
+                    transparent 60deg,
+                    rgba(255, 215, 0, 0.02) 90deg,
+                    transparent 120deg,
+                    rgba(212, 175, 55, 0.04) 150deg,
+                    transparent 180deg,
+                    rgba(255, 215, 0, 0.03) 210deg,
+                    transparent 240deg,
+                    rgba(212, 175, 55, 0.05) 270deg,
+                    transparent 300deg,
+                    rgba(255, 215, 0, 0.02) 330deg,
+                    transparent 360deg
+                );
+            animation: beamsRotate 120s linear infinite, beamsPulse 8s ease-in-out infinite;
+            mix-blend-mode: screen;
+        }
+
+        @keyframes beamsRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes beamsPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Layer 4: Spiral galaxy effect */
+        .spiral {
+            position: fixed;
+            top: 50%; left: 50%;
+            width: 200vmax; height: 200vmax;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            animation: spiralSpin 90s linear infinite;
+            opacity: 0.4;
+        }
+
+        .spiral-arm {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50%; height: 2px;
+            transform-origin: 0 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(212, 175, 55, 0.1) 20%,
+                rgba(255, 215, 0, 0.15) 50%,
+                rgba(212, 175, 55, 0.1) 80%,
+                transparent 100%
+            );
+        }
+
+        .spiral-arm:nth-child(1) { transform: rotate(0deg) scale(1); }
+        .spiral-arm:nth-child(2) { transform: rotate(60deg) scale(1.2); }
+        .spiral-arm:nth-child(3) { transform: rotate(120deg) scale(0.9); }
+        .spiral-arm:nth-child(4) { transform: rotate(180deg) scale(1.1); }
+        .spiral-arm:nth-child(5) { transform: rotate(240deg) scale(1.3); }
+        .spiral-arm:nth-child(6) { transform: rotate(300deg) scale(0.85); }
+
+        @keyframes spiralSpin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Layer 5: Particle system */
+        .particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 4;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: particleDrift linear infinite;
+        }
+
+        .p-gold { 
+            background: radial-gradient(circle, var(--gold-light) 0%, var(--gold) 50%, transparent 70%); 
+            box-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold-light);
+        }
+
+        .p-sparkle { 
+            background: radial-gradient(circle, #fff 0%, var(--gold-light) 30%, transparent 70%); 
+            box-shadow: 0 0 25px #fff, 0 0 50px var(--gold), 0 0 80px var(--gold-light);
+            animation: sparkleDance ease-in-out infinite;
+        }
+
+        .p-smoke { 
+            background: radial-gradient(ellipse, rgba(212, 175, 55, 0.2) 0%, transparent 70%); 
+            filter: blur(20px);
+            animation: smokeRise ease-out infinite;
+        }
+
+        @keyframes particleDrift {
+            0% { transform: translateY(110vh) translateX(0) rotate(0deg); opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { transform: translateY(-150px) translateX(200px) rotate(1080deg); opacity: 0; }
+        }
+
+        @keyframes sparkleDance {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.4; }
+            25% { transform: scale(2.5) rotate(180deg); opacity: 1; }
+            50% { transform: scale(0.6) rotate(360deg); opacity: 0.5; }
+            75% { transform: scale(2) rotate(540deg); opacity: 1; }
+        }
+
+        @keyframes smokeRise {
+            0% { transform: translateY(110vh) scale(0.5); opacity: 0; }
+            10% { opacity: 0.6; }
+            100% { transform: translateY(-150px) scale(3); opacity: 0; }
+        }
+
+        /* Layer 6: Floating diamonds */
+        .diamonds {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .diamond {
+            position: absolute;
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+            transform: rotate(45deg);
+            animation: diamondFloat 15s ease-in-out infinite;
+            box-shadow: 
+                0 0 30px var(--gold), 
+                0 0 60px var(--gold-light),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .diamond::before {
+            content: '';
+            position: absolute;
+            width: 60%; height: 60%;
+            top: 20%; left: 20%;
+            background: linear-gradient(135deg, var(--gold-light) 0%, transparent 60%);
+            animation: diamondShine 2s ease-in-out infinite;
+        }
+
+        @keyframes diamondFloat {
+            0%, 100% { 
+                transform: rotate(45deg) translateY(0) translateX(0) scale(1); 
+                opacity: 0.15;
+            }
+            15% { 
+                transform: rotate(90deg) translateY(-80px) translateX(40px) scale(1.3); 
+                opacity: 1;
+            }
+            30% { 
+                transform: rotate(135deg) translateY(-30px) translateX(100px) scale(0.8); 
+                opacity: 0.3;
+            }
+            45% { 
+                transform: rotate(180deg) translateY(-100px) translateX(50px) scale(1.1); 
+                opacity: 0.9;
+            }
+            60% { 
+                transform: rotate(225deg) translateY(-50px) translateX(80px) scale(0.9); 
+                opacity: 0.5;
+            }
+            75% { 
+                transform: rotate(270deg) translateY(-120px) translateX(30px) scale(1.2); 
+                opacity: 0.8;
+            }
+            90% { opacity: 0.3; }
+        }
+
+        @keyframes diamondShine {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        /* Layer 7: Floating crowns */
+        .crowns {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 6;
+            pointer-events: none;
+        }
+
+        .floating-crown {
+            position: absolute;
+            animation: crownFloat 20s ease-in-out infinite;
+            filter: 
+                drop-shadow(0 0 30px var(--gold))
+                drop-shadow(0 0 60px var(--gold-light))
+                drop-shadow(0 0 90px var(--gold));
+        }
+
+        @keyframes crownFloat {
+            0%, 100% { 
+                transform: translateY(0) rotate(-15deg) scale(1); 
+                opacity: 0;
+                filter: drop-shadow(0 0 20px var(--gold));
+            }
+            10% { opacity: 0.9; }
+            25% { 
+                transform: translateY(-120px) rotate(10deg) scale(1.4); 
+                opacity: 1;
+                filter: drop-shadow(0 0 50px var(--gold)) drop-shadow(0 0 80px var(--gold-light));
+            }
+            40% { 
+                transform: translateY(-60px) rotate(-8deg) scale(0.85); 
+                opacity: 0.4;
+            }
+            55% { 
+                transform: translateY(-150px) rotate(12deg) scale(1.2); 
+                opacity: 1;
+                filter: drop-shadow(0 0 60px var(--gold)) drop-shadow(0 0 100px var(--gold-light));
+            }
+            70% { 
+                transform: translateY(-40px) rotate(-5deg) scale(0.95); 
+                opacity: 0.5;
+            }
+            85% { 
+                transform: translateY(-100px) rotate(8deg) scale(1.1); 
+                opacity: 0.8;
+            }
+            95% { opacity: 0.2; }
+        }
+
+        /* Layer 8: Floating rings */
+        .rings {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 6;
+            pointer-events: none;
+        }
+
+        .float-ring {
+            position: absolute;
+            border: 1px solid var(--gold);
+            border-radius: 50%;
+            animation: ringFloat 25s ease-in-out infinite;
+            opacity: 0.3;
+        }
+
+        .float-ring::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            border: 1px solid var(--gold-light);
+            border-radius: 50%;
+            animation: ringExpand 4s ease-in-out infinite;
+        }
+
+        @keyframes ringFloat {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg) scale(1); 
+                opacity: 0.2;
+            }
+            25% { 
+                transform: translateY(-60px) rotate(90deg) scale(1.5); 
+                opacity: 0.7;
+            }
+            50% { 
+                transform: translateY(-30px) rotate(180deg) scale(0.8); 
+                opacity: 0.4;
+            }
+            75% { 
+                transform: translateY(-80px) rotate(270deg) scale(1.2); 
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes ringExpand {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.4); opacity: 0.1; }
+        }
+
+        /* Layer 9: Vignette */
+        .vignette {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 7;
+            background: radial-gradient(ellipse at center, 
+                transparent 20%, 
+                rgba(0,0,0,0.3) 50%, 
+                rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            animation: vignettePulse 10s ease-in-out infinite;
+        }
+
+        @keyframes vignettePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Layer 10: Texture */
+        .texture {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 8;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+            animation: textureShift 20s ease-in-out infinite;
+        }
+
+        @keyframes textureShift {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* ============================================
+           ORNAMENTAL FRAMES - Animated corners
+           ============================================ */
+        
+        .frame-corner {
+            position: fixed;
+            z-index: 100;
+        }
+
+        .corner-tl { top: 0; left: 0; }
+        .corner-tr { top: 0; right: 0; transform: scaleX(-1); }
+        .corner-bl { bottom: 0; left: 0; transform: scaleY(-1); }
+        .corner-br { bottom: 0; right: 0; transform: scale(-1, -1); }
+
+        .corner-inner {
+            width: 250px; height: 250px;
+            position: relative;
+        }
+
+        .corner-inner::before {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            top: 25px; left: 25px;
+            animation: cornerGlow 4s ease-in-out infinite, cornerSpin 30s linear infinite;
+        }
+
+        .corner-inner::after {
+            content: '';
+            position: absolute;
+            width: 140px; height: 140px;
+            border: 1px solid var(--gold-light);
+            top: 55px; left: 55px;
+            animation: cornerGlow 4s ease-in-out infinite 0.5s, cornerSpinReverse 20s linear infinite;
+        }
+
+        .corner-ornament {
+            position: absolute;
+            width: 50px; height: 50px;
+            border: 2px solid var(--gold);
+            top: 100px; left: 100px;
+            transform: rotate(45deg);
+            animation: ornamentSpin 15s linear infinite;
+        }
+
+        .corner-ornament::before {
+            content: '';
+            position: absolute;
+            width: 15px; height: 15px;
+            background: var(--gold);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 20px var(--gold),
+                0 0 40px var(--gold-light),
+                0 0 60px var(--gold);
+            animation: orbPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes cornerGlow {
+            0%, 100% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.5), inset 0 0 40px rgba(212, 175, 55, 0.15); }
+            50% { box-shadow: 0 0 80px rgba(212, 175, 55, 0.8), inset 0 0 60px rgba(212, 175, 55, 0.25); }
+        }
+
+        @keyframes cornerSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes cornerSpinReverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        @keyframes ornamentSpin {
+            from { transform: rotate(45deg); }
+            to { transform: rotate(405deg); }
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; box-shadow: 0 0 20px var(--gold), 0 0 40px var(--gold-light); }
+            50% { transform: translate(-50%, -50%) scale(1.8); opacity: 1; box-shadow: 0 0 40px var(--gold), 0 0 80px var(--gold_light), 0 0 120px var(--gold); }
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 200;
+            background: linear-gradient(180deg, rgba(10, 5, 8, 0.95) 0%, transparent 100%);
+            animation: headerSlide 1.2s ease-out;
+        }
+
+        @keyframes headerSlide {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 2.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5em;
+            background: linear-gradient(135deg, #fff 0%, var(--gold-light) 30%, var(--gold) 60%, var(--gold-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: logoGlow 3s ease-in-out infinite;
+            text-shadow: 0 0 60px rgba(212, 175, 55, 0.5);
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.6)); }
+            50% { filter: drop-shadow(0 0 60px rgba(212, 175, 55, 1)); }
+        }
+
+        .logo-sub {
+            font-family: 'Great Vibes', cursive;
+            font-size: 1.1rem;
+            color: var(--gold);
+            letter-spacing: 0.4em;
+            margin-top: 0.4rem;
+            text-shadow: 0 0 20px var(--gold);
+        }
+
+        nav {
+            display: flex;
+            gap: 3.5rem;
+        }
+
+        nav a {
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #e8e0d4;
+            text-decoration: none;
+            letter-spacing: 0.25em;
+            position: relative;
+            padding

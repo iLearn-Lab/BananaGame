@@ -16,6 +16,77 @@
     transition: all 0.5s ease;
 }
 
+#ending-screen.active .ending-container {
+    animation: endingContainerRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#ending-screen.active #ending-title {
+    animation: endingTitleFlare 1s ease-out both;
+}
+
+#ending-screen.active #ending-content {
+    animation: endingContentFade 1.1s ease-out both;
+    animation-delay: 0.25s;
+}
+
+#ending-screen.active .ending-buttons .btn-ending {
+    animation: endingButtonLift 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#ending-screen.active .ending-buttons .btn-ending:nth-child(2) {
+    animation-delay: 0.12s;
+}
+
+@keyframes endingContainerRise {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.97);
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes endingTitleFlare {
+    from {
+        opacity: 0;
+        letter-spacing: 0.35em;
+        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        letter-spacing: 0.08em;
+        text-shadow: 0 0 24px rgba(139, 196, 255, 0.55);
+        transform: translateY(0);
+    }
+}
+
+@keyframes endingContentFade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes endingButtonLift {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* ---- 结局类型光效 ---- */
 
 /* 圆满结局 (HE) - 绿色温暖光 */

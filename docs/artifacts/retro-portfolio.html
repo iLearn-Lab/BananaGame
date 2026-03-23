@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RETRO STUDIO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --paper: #f4e4bc;
+            --red: #e63946;
+            --blue: #457b9d;
+            --teal: #1d3557;
+            --orange: #f77f00;
+            --cream: #fefae0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier Prime', monospace;
+            background: var(--bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* CRT Effect */
+        .crt::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%,
+                rgba(0, 0, 0, 0.1) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanlines 0.1s infinite;
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 4px; }
+        }
+
+        /* Retro pattern background */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(255,255,255,0.02) 20px,
+                    rgba(255,255,255,0.02) 40px
+                );
+            z-index: 0;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(26, 26, 46, 0.9);
+            border-bottom: 2px solid var(--orange);
+        }
+
+        .logo {
+            font-family: 'VT323', monospace;
+            font-size: 2rem;
+            color: var(--orange);
+            text-shadow: 2px 2px 0 var(--red);
+            letter-spacing: 0.1em;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            font-family: 'VT323', monospace;
+            font-size: 1.4rem;
+            color: var(--paper);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--orange);
+            text-shadow: 0 0 10px var(--orange);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 3rem 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-box {
+            background: var(--paper);
+            padding: 3rem 4rem;
+            border: 4px solid var(--teal);
+            box-shadow: 
+                8px 8px 0 var(--teal),
+                12px 12px 0 var(--red);
+            max-width: 700px;
+            position: relative;
+        }
+
+        .hero-box::before {
+            content: '★ WELCOME ★';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--orange);
+            padding: 0.3rem 1rem;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--bg);
+        }
+
+        .hero h1 {
+            font-family: 'VT323', monospace;
+            font-size: 4rem;
+            color: var(--teal);
+            line-height: 1;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .hero h1 span {
+            color: var(--red);
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--teal);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            padding: 0.8rem 2rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--bg);
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: var(--paper);
+        }
+
+        .btn-secondary {
+            background: var(--teal);
+            color: var(--paper);
+        }
+
+        /* Decorative elements */
+        .deco-line {
+            width: 100%;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--teal) 0px,
+                var(--teal) 10px,
+                transparent 10px,
+                transparent 20px,
+                var(--orange) 20px,
+                var(--orange) 30px,
+                transparent 30px,
+                transparent 40px
+            );
+            margin: 2rem 0;
+        }
+
+        /* Cards Section */
+        .section {
+            padding: 4rem 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: var(--orange);
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 2px 2px 0 var(--teal);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--paper);
+            border: 3px solid var(--teal);
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 6px 6px 0 var(--orange);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            font-family: 'VT323', monospace;
+            font-size: 1.8rem;
+            color: var(--teal);
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: var(--teal);
+            line-height: 1.6;
+        }
+
+        .card-tag {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: var(--orange);
+            color: var(--bg);
+            font-family: 'VT323', monospace;
+            font-size: 1rem;
+            padding: 0.2rem 0.8rem;
+        }
+
+        /* Stats */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            padding: 3rem;
+            background: var(--teal);
+            margin: 3rem 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2rem;
+            color: var(--orange);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--paper);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--teal);
+            padding: 2rem 3rem;
+            text-align: center;
+            border-top: 4px solid var(--orange);
+        }
+
+        footer p {
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--paper);
+        }
+
+        .hearts {
+            color: var(--red);
+        }
+
+        /* Floating pixels */
+        .pixel {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--orange);
+            z-index: 0;
+            animation: pixelFloat 8s ease-in-out infinite;
+        }
+
+        @keyframes pixelFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 0.8; }
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 1rem 1.5rem; flex-direction: column; gap: 1rem; }
+            .hero { padding: 5rem 1.5rem 2rem; }
+            .hero-box { padding: 2rem; }
+            .hero h1 { font-size: 2.5rem; }
+            .stats-bar { flex-wrap: wrap; gap: 2rem; }
+            .section { padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body class="crt">
+    <div class="bg-pattern"></div>
+    
+    <!-- Floating pixels -->
+    <div class="pixel" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+    <div class="pixel" style="top: 60%; left: 85%; animation-delay: 1s;"></div>
+    <div class="pixel" style="top: 80%; left: 20%; animation-delay: 2s;"></div>
+    <div class="pixel" style="top: 30%; left: 70%; animation-delay: 3s;"></div>
+
+    <header>
+        <div class="logo">◄ RETRO STUDIO ►</div>
+        <nav>
+            <a href="#">[HOME]</a>
+            <a href="#">[WORKS]</a>
+            <a href="#">[ABOUT]</a>
+            <a href="#">[CONTACT]</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-box">
+            <h1>Creative <span>1985</span></h1>
+            <p>> Welcome to the matrix of creativity...<br>
+            > Building retro-futuristic experiences since forever<br>
+            > Pixel art meets modern web tech</p>
+            
+            <div class="btn-group">
+                <a href="#" class="btn btn-primary">>> EXPLORE</a>
+                <a href="#" class="btn btn-secondary">>> HIRE ME</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="deco-line"></div>
+
+    <section class="section">
+        <h2 class="section-title">▸ MY SUPER POWERS ◂</h2>
+        
+        <div class="cards">
+            <div class="card">
+                <span class="card-tag">NEW!</span>
+                <div class="card-icon">🎮</div>
+                <h3>PIXEL ART</h3>
+                <p>Creating retro game assets, sprites, and nostalgic visual elements that bring back the 8-bit era.</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">💾</div>
+                <h3>WEB DEV</h3>
+                <p>Modern websites with retro aesthetics. CSS magic, CRT effects, and pixel-perfect precision.</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">📼</div>
+                <h3>RETRO UI</h3>
+                <p>Vintage-inspired interfaces that feel like using a computer from the 80s/90s.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-number">99+</div>
+            <div class="stat-label">PROJECTS</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">8BIT</div>
+            <div class="stat-label">VIBES</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">CREATIVITY</div>
+        </div>
+    </div>
+
+    <div class="deco-line"></div>
+
+    <footer>
+        <p>© 1985-2026 RETRO STUDIO <span class="hearts">♥♥♥</span></p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">[ PRESS START TO CONTINUE ]</p>
+    </footer>
+</body>
+</html>
