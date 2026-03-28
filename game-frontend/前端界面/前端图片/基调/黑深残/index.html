@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fragment</title>
+    <title>Fragment — House of Broken Light</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&display=swap" rel="stylesheet">
     <style>
         :root {
             --void: #050308;
@@ -91,13 +94,177 @@
             pointer-events: none;
         }
 
+        /* Above photos, below glass seams; blend modes keep subjects readable */
+        .effects-foreground {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* Shallow black-gold ripples (on top of imagery) */
+        .gold-ripple-field {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            mix-blend-mode: soft-light;
+            opacity: 0.92;
+        }
+
+        .gold-ripple-field::before,
+        .gold-ripple-field::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: repeating-radial-gradient(
+                circle at center,
+                transparent 0px,
+                transparent 14px,
+                rgba(40, 32, 18, 0.5) 15px,
+                transparent 18px,
+                transparent 32px,
+                rgba(107, 90, 42, 0.28) 33px,
+                transparent 38px,
+                transparent 52px,
+                rgba(201, 162, 74, 0.16) 53px,
+                transparent 58px
+            );
+        }
+
+        .gold-ripple-field::before {
+            width: 160vmax;
+            height: 160vmax;
+            left: 20%;
+            top: 30%;
+            margin-left: -80vmax;
+            margin-top: -80vmax;
+            animation: goldRippleA 14s ease-in-out infinite;
+        }
+
+        .gold-ripple-field::after {
+            width: 130vmax;
+            height: 130vmax;
+            right: 5%;
+            bottom: 15%;
+            margin-right: -65vmax;
+            margin-bottom: -65vmax;
+            animation: goldRippleB 23s ease-in-out infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes goldRippleA {
+            0%, 100% { transform: scale(0.92) translate(-2%, 1%); opacity: 0.55; }
+            50% { transform: scale(1.08) translate(3%, -2%); opacity: 0.9; }
+        }
+
+        @keyframes goldRippleB {
+            0%, 100% { transform: scale(1.05) translate(2%, -3%); opacity: 0.45; }
+            40% { transform: scale(0.94) translate(-4%, 2%); opacity: 0.8; }
+            70% { transform: scale(1.02) translate(1%, 1%); opacity: 0.6; }
+        }
+
+        /* Drifting violet / gold blobs */
+        .fx-blob {
+            position: absolute;
+            border-radius: 50%;
+            mix-blend-mode: soft-light;
+            filter: blur(38px);
+            pointer-events: none;
+        }
+
+        .fx-blob--1 {
+            width: 55vmin;
+            height: 55vmin;
+            background: radial-gradient(circle, rgba(150, 80, 210, 0.58) 0%, transparent 68%);
+            left: -8%;
+            top: 15%;
+            opacity: 0.52;
+            animation: fxBlobDrift1 23s ease-in-out infinite;
+        }
+
+        .fx-blob--2 {
+            width: 48vmin;
+            height: 48vmin;
+            background: radial-gradient(circle, rgba(201, 162, 74, 0.32) 0%, rgba(90, 50, 140, 0.22) 45%, transparent 70%);
+            right: -5%;
+            bottom: 10%;
+            opacity: 0.58;
+            animation: fxBlobDrift2 19s ease-in-out infinite;
+            animation-delay: -4s;
+        }
+
+        .fx-blob--3 {
+            width: 42vmin;
+            height: 42vmin;
+            background: radial-gradient(circle, rgba(100, 45, 160, 0.5) 0%, transparent 65%);
+            left: 35%;
+            bottom: -12%;
+            opacity: 0.46;
+            animation: fxBlobDrift3 29s ease-in-out infinite;
+            animation-delay: -9s;
+        }
+
+        @keyframes fxBlobDrift1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(35%, 18%) scale(1.12); }
+        }
+
+        @keyframes fxBlobDrift2 {
+            0%, 100% { transform: translate(0, 0) scale(1.05); }
+            45% { transform: translate(-40%, -25%) scale(0.92); }
+        }
+
+        @keyframes fxBlobDrift3 {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-20%, -35%) scale(1.15); }
+            66% { transform: translate(15%, -8%) scale(0.95); }
+        }
+
+        /* Slow rotating conic aurora */
+        .fx-conic {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 240vmax;
+            height: 240vmax;
+            margin-left: -120vmax;
+            margin-top: -120vmax;
+            mix-blend-mode: screen;
+            opacity: 0.42;
+            animation: fxConicRotate 97s linear infinite;
+        }
+
+        .fx-conic__disk {
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(75, 35, 120, 0.55) 42deg,
+                transparent 88deg,
+                rgba(201, 162, 74, 0.24) 128deg,
+                transparent 178deg,
+                rgba(130, 60, 190, 0.52) 238deg,
+                transparent 292deg,
+                rgba(45, 25, 80, 0.38) 334deg,
+                transparent 360deg
+            );
+            filter: blur(48px);
+        }
+
+        @keyframes fxConicRotate {
+            to { transform: rotate(360deg); }
+        }
+
         /* Dark purple flowing light */
         .flow-purple {
             position: absolute;
             pointer-events: none;
             mix-blend-mode: screen;
             filter: blur(42px);
-            opacity: 0.55;
+            opacity: 0.62;
         }
 
         .flow-purple--a {
@@ -109,12 +276,12 @@
                 118deg,
                 transparent 0%,
                 rgba(60, 25, 95, 0) 25%,
-                rgba(110, 50, 160, 0.55) 48%,
-                rgba(140, 70, 200, 0.65) 52%,
-                rgba(90, 40, 130, 0.5) 72%,
+                rgba(110, 50, 160, 0.62) 48%,
+                rgba(140, 70, 200, 0.72) 52%,
+                rgba(90, 40, 130, 0.55) 72%,
                 transparent 100%
             );
-            animation: purpleDriftA 14s ease-in-out infinite;
+            animation: purpleDriftA 13s ease-in-out infinite;
         }
 
         .flow-purple--b {
@@ -125,13 +292,13 @@
             background: linear-gradient(
                 42deg,
                 transparent 0%,
-                rgba(45, 20, 75, 0.4) 35%,
-                rgba(95, 45, 145, 0.7) 50%,
-                rgba(55, 25, 100, 0.45) 65%,
+                rgba(45, 20, 75, 0.48) 35%,
+                rgba(95, 45, 145, 0.78) 50%,
+                rgba(55, 25, 100, 0.52) 65%,
                 transparent 100%
             );
-            animation: purpleDriftB 18s ease-in-out infinite;
-            opacity: 0.45;
+            animation: purpleDriftB 17s ease-in-out infinite;
+            opacity: 0.52;
         }
 
         .flow-purple--c {
@@ -142,15 +309,15 @@
             background: linear-gradient(
                 180deg,
                 transparent 10%,
-                rgba(75, 35, 120, 0.35) 45%,
-                rgba(100, 50, 155, 0.5) 50%,
-                rgba(70, 30, 110, 0.3) 55%,
+                rgba(75, 35, 120, 0.42) 45%,
+                rgba(100, 50, 155, 0.58) 50%,
+                rgba(70, 30, 110, 0.36) 55%,
                 transparent 90%
             );
-            animation: purpleSheen 9s ease-in-out infinite;
+            animation: purpleSheen 11s ease-in-out infinite;
             filter: blur(28px);
             mix-blend-mode: color-dodge;
-            opacity: 0.35;
+            opacity: 0.42;
         }
 
         @keyframes purpleDriftA {
@@ -165,70 +332,72 @@
         }
 
         @keyframes purpleSheen {
-            0%, 100% { transform: translateY(-2%) scale(1.05, 1); opacity: 0.28; }
-            50% { transform: translateY(3%) scale(1.12, 1.02); opacity: 0.5; }
+            0%, 100% { transform: translateY(-2%) scale(1.05, 1); opacity: 0.32; }
+            50% { transform: translateY(3%) scale(1.12, 1.02); opacity: 0.58; }
         }
 
-        /* Shallow black-gold ripples */
-        .gold-ripple-field {
+        /* Sparse sparkle field */
+        .fx-sparkle {
             position: absolute;
             inset: 0;
-            pointer-events: none;
-            overflow: hidden;
-            mix-blend-mode: soft-light;
-            opacity: 0.85;
+            mix-blend-mode: screen;
+            background-image:
+                radial-gradient(circle at 11% 19%, rgba(255, 255, 255, 0.95) 0, rgba(255, 255, 255, 0.95) 0.45px, transparent 1.2px),
+                radial-gradient(circle at 28% 72%, rgba(232, 200, 106, 0.9) 0, rgba(232, 200, 106, 0.9) 0.45px, transparent 1.2px),
+                radial-gradient(circle at 44% 38%, rgba(255, 255, 255, 0.75) 0, rgba(255, 255, 255, 0.75) 0.4px, transparent 1px),
+                radial-gradient(circle at 63% 14%, rgba(200, 160, 255, 0.85) 0, rgba(200, 160, 255, 0.85) 0.45px, transparent 1.2px),
+                radial-gradient(circle at 78% 55%, rgba(255, 250, 220, 0.8) 0, rgba(255, 250, 220, 0.8) 0.4px, transparent 1px),
+                radial-gradient(circle at 19% 48%, rgba(232, 200, 106, 0.7) 0, rgba(232, 200, 106, 0.7) 0.4px, transparent 1px),
+                radial-gradient(circle at 52% 81%, rgba(255, 255, 255, 0.65) 0, rgba(255, 255, 255, 0.65) 0.35px, transparent 1px),
+                radial-gradient(circle at 88% 28%, rgba(180, 140, 220, 0.75) 0, rgba(180, 140, 220, 0.75) 0.4px, transparent 1px),
+                radial-gradient(circle at 7% 88%, rgba(232, 200, 106, 0.65) 0, rgba(232, 200, 106, 0.65) 0.35px, transparent 1px),
+                radial-gradient(circle at 71% 92%, rgba(255, 255, 255, 0.55) 0, rgba(255, 255, 255, 0.55) 0.35px, transparent 1px),
+                radial-gradient(circle at 36% 6%, rgba(220, 190, 255, 0.7) 0, rgba(220, 190, 255, 0.7) 0.4px, transparent 1px),
+                radial-gradient(circle at 91% 71%, rgba(255, 255, 255, 0.6) 0, rgba(255, 255, 255, 0.6) 0.35px, transparent 1px);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            animation: fxSparkleTwinkle 6.7s ease-in-out infinite;
+            opacity: 0.4;
         }
 
-        .gold-ripple-field::before,
-        .gold-ripple-field::after {
+        @keyframes fxSparkleTwinkle {
+            0%, 100% { opacity: 0.2; filter: brightness(0.95); }
+            27% { opacity: 0.5; }
+            48% { opacity: 0.16; filter: brightness(1.15); }
+            71% { opacity: 0.44; }
+        }
+
+        /* Occasional diagonal sweep */
+        .fx-sweep {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+        }
+
+        .fx-sweep::before {
             content: '';
             position: absolute;
-            border-radius: 50%;
-            background: repeating-radial-gradient(
-                circle at center,
-                transparent 0px,
-                transparent 14px,
-                rgba(40, 32, 18, 0.45) 15px,
-                transparent 18px,
-                transparent 32px,
-                rgba(107, 90, 42, 0.22) 33px,
-                transparent 38px,
-                transparent 52px,
-                rgba(201, 162, 74, 0.12) 53px,
-                transparent 58px
+            top: -25%;
+            left: -45%;
+            width: 26%;
+            height: 150%;
+            background: linear-gradient(
+                100deg,
+                transparent 38%,
+                rgba(255, 248, 230, 0.16) 50%,
+                transparent 62%
             );
+            transform: skewX(-14deg) translateX(-130%);
+            animation: fxSweepPass 18s ease-in-out infinite;
         }
 
-        .gold-ripple-field::before {
-            width: 160vmax;
-            height: 160vmax;
-            left: 20%;
-            top: 30%;
-            margin-left: -80vmax;
-            margin-top: -80vmax;
-            animation: goldRippleA 11s ease-in-out infinite;
-        }
-
-        .gold-ripple-field::after {
-            width: 130vmax;
-            height: 130vmax;
-            right: 5%;
-            bottom: 15%;
-            margin-right: -65vmax;
-            margin-bottom: -65vmax;
-            animation: goldRippleB 15s ease-in-out infinite;
-            opacity: 0.75;
-        }
-
-        @keyframes goldRippleA {
-            0%, 100% { transform: scale(0.92) translate(-2%, 1%); opacity: 0.5; }
-            50% { transform: scale(1.08) translate(3%, -2%); opacity: 0.85; }
-        }
-
-        @keyframes goldRippleB {
-            0%, 100% { transform: scale(1.05) translate(2%, -3%); opacity: 0.4; }
-            40% { transform: scale(0.94) translate(-4%, 2%); opacity: 0.75; }
-            70% { transform: scale(1.02) translate(1%, 1%); opacity: 0.55; }
+        @keyframes fxSweepPass {
+            0%, 64% { transform: skewX(-14deg) translateX(-130%); opacity: 0; }
+            67% { opacity: 0.9; }
+            77% { transform: skewX(-14deg) translateX(240%); opacity: 0.38; }
+            81%, 100% { opacity: 0; transform: skewX(-14deg) translateX(240%); }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -236,7 +405,13 @@
             .flow-purple--b,
             .flow-purple--c,
             .gold-ripple-field::before,
-            .gold-ripple-field::after {
+            .gold-ripple-field::after,
+            .fx-conic,
+            .fx-blob--1,
+            .fx-blob--2,
+            .fx-blob--3,
+            .fx-sweep::before,
+            .fx-sparkle {
                 animation: none !important;
             }
             .glass-seam::after {
@@ -244,7 +419,18 @@
             }
             .flow-purple,
             .gold-ripple-field {
-                opacity: 0.3;
+                opacity: 0.22;
+            }
+            .fx-conic {
+                opacity: 0.12;
+            }
+            .fx-blob--1,
+            .fx-blob--2,
+            .fx-blob--3 {
+                opacity: 0.15;
+            }
+            .fx-sparkle {
+                opacity: 0.12;
             }
         }
 
@@ -256,12 +442,14 @@
             align-items: stretch;
             min-height: 100vh;
             width: 100%;
+            isolation: isolate;
         }
 
         .panel {
             flex: 1 1 0;
             min-width: 0;
             position: relative;
+            z-index: 1;
             overflow: hidden;
             margin: 0;
             border: none;
@@ -308,7 +496,7 @@
             width: var(--seam-w);
             min-height: 100vh;
             position: relative;
-            z-index: 3;
+            z-index: 4;
             align-self: stretch;
             background: linear-gradient(
                 90deg,
@@ -453,6 +641,92 @@
                     0% 8%, 100% 0%, 100% 100%, 0% 92%, 15% 85%, 0% 70%, 12% 50%, 0% 30%
                 );
             }
+
+            .literary-epigraph,
+            .literary-coda {
+                max-width: 88%;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                text-align: center;
+            }
+
+            .literary-epigraph {
+                top: 4%;
+            }
+
+            .literary-center {
+                max-width: 88%;
+                padding: 0 1rem;
+            }
+
+            .literary-coda {
+                bottom: 4%;
+            }
+        }
+
+        /* Literary overlay: top of triptych stack (above seams and effects) */
+        .literary-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: italic;
+            font-weight: 400;
+            color: rgba(232, 218, 196, 0.88);
+            text-shadow:
+                0 0 1px rgba(5, 3, 8, 1),
+                0 2px 16px rgba(5, 3, 8, 0.95),
+                0 0 32px rgba(26, 13, 36, 0.85);
+        }
+
+        .literary-epigraph {
+            position: absolute;
+            top: 6%;
+            left: 4%;
+            max-width: min(26rem, 30vw);
+            font-size: clamp(0.95rem, 1.55vw, 1.3rem);
+            line-height: 1.6;
+            letter-spacing: 0.06em;
+            opacity: 0.92;
+        }
+
+        .literary-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            margin: 0;
+            border: none;
+            padding: 0;
+            max-width: min(36rem, 46vw);
+            font-size: clamp(1.05rem, 2.1vw, 1.75rem);
+            line-height: 1.45;
+            letter-spacing: 0.04em;
+            opacity: 0.9;
+        }
+
+        .literary-center cite {
+            display: block;
+            margin-top: 1.1em;
+            font-size: 0.78em;
+            letter-spacing: 0.12em;
+            opacity: 0.72;
+            font-style: italic;
+        }
+
+        .literary-coda {
+            position: absolute;
+            bottom: 7%;
+            right: 4%;
+            max-width: min(22rem, 28vw);
+            font-size: clamp(0.88rem, 1.35vw, 1.12rem);
+            line-height: 1.55;
+            letter-spacing: 0.05em;
+            text-align: right;
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -470,10 +744,6 @@
     </svg>
 
     <div class="ambient" aria-hidden="true">
-        <div class="gold-ripple-field"></div>
-        <div class="flow-purple flow-purple--a"></div>
-        <div class="flow-purple flow-purple--b"></div>
-        <div class="flow-purple flow-purple--c"></div>
         <div class="ambient-tear"></div>
         <div class="ambient-tear ambient-tear--2"></div>
         <div class="noise-overlay"></div>
@@ -483,6 +753,26 @@
     </div>
 
     <main class="triptych">
+        <div class="effects-foreground" aria-hidden="true">
+            <div class="gold-ripple-field"></div>
+            <div class="fx-blob fx-blob--1"></div>
+            <div class="fx-blob fx-blob--2"></div>
+            <div class="fx-blob fx-blob--3"></div>
+            <div class="fx-conic"><div class="fx-conic__disk"></div></div>
+            <div class="flow-purple flow-purple--a"></div>
+            <div class="flow-purple flow-purple--b"></div>
+            <div class="flow-purple flow-purple--c"></div>
+            <div class="fx-sparkle"></div>
+            <div class="fx-sweep"></div>
+        </div>
+        <section class="literary-overlay" aria-label="Literary fragments">
+            <p class="literary-epigraph">In the house of broken light, every shard still remembers the sun—yet none will name it aloud.</p>
+            <blockquote class="literary-center">
+                <span>What the night renames, the dawn does not forgive; we walk the ruins wearing faces we never chose.</span>
+                <cite>— from the dust, unnumbered</cite>
+            </blockquote>
+            <p class="literary-coda">To be whole again would be another kind of loss. The crack is where the truth gets in.</p>
+        </section>
         <figure class="panel panel--1">
             <img src="./微信图片_20260328105239_294_2.jpg" alt="Panel one" width="800" height="1200" decoding="async">
         </figure>
