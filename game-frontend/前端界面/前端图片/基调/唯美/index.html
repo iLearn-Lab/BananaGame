@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereal — 唯美</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #f5f0e6;
+            --sea-mist: #c5dde8;
+            --sun-gold: rgba(255, 190, 120, 0.35);
+            --cobalt-soft: rgba(60, 110, 160, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background:
+                radial-gradient(ellipse 100% 80% at 50% 20%, rgba(255, 228, 200, 0.45) 0%, transparent 55%),
+                radial-gradient(ellipse 80% 60% at 80% 90%, rgba(180, 210, 230, 0.4) 0%, transparent 50%),
+                linear-gradient(165deg, var(--cream) 0%, #e8eef5 50%, var(--sea-mist) 100%);
+            color: #3a3530;
+        }
+
+        .ethereal-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-rows: 1fr 1fr;
+            min-height: 100vh;
+            width: 100%;
+            gap: 0;
+        }
+
+        .cell {
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .cell img {
+            position: relative;
+            z-index: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transform-origin: center center;
+            animation: imgFloat 7s ease-in-out infinite;
+        }
+
+        .cell--cliff img {
+            animation-duration: 8.2s;
+            animation-delay: 0s;
+        }
+
+        .cell--sunset img {
+            animation-duration: 6.4s;
+            animation-delay: -2.1s;
+        }
+
+        .cell--gilded img {
+            animation-duration: 7.1s;
+            animation-delay: -4.3s;
+        }
+
+        .cell--wave img {
+            animation-duration: 8.8s;
+            animation-delay: -1.4s;
+        }
+
+        @keyframes imgFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1.07);
+            }
+            50% {
+                transform: translateY(-14px) scale(1.09);
+            }
+        }
+
+        .cell--cliff {
+            grid-column: 1;
+            grid-row: 1 / -1;
+        }
+
+        .cell--sunset {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .cell--gilded {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        .cell--wave {
+            grid-column: 3;
+            grid-row: 1 / -1;
+        }
+
+        /* ---------- Per-panel verse (italic English) ---------- */
+        .cell-verse {
+            position: absolute;
+            inset: 0;
+            z-index: 24;
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: clamp(0.75rem, 3.5vw, 1.75rem);
+            padding-bottom: clamp(1rem, 6vh, 3rem);
+            font-family: Georgia, 'Times New Roman', serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: clamp(1.02rem, 2.85vw, 1.48rem);
+            line-height: 1.5;
+            letter-spacing: 0.02em;
+            color: rgba(122, 98, 40, 0.78);
+            text-align: center;
+            text-shadow:
+                0 0 3px rgba(255, 243, 210, 0.42),
+                0 0 1px rgba(40, 32, 12, 0.65),
+                0 1px 12px rgba(0, 0, 0, 0.28);
+        }
+
+        .cell--cliff .cell-verse {
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-align: left;
+            width: 100%;
+            max-width: 100%;
+            padding: clamp(1.1rem, 4.5vw, 2.75rem);
+            padding-right: clamp(1rem, 12vw, 3.5rem);
+            font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: clamp(1.2rem, 3.55vw, 1.95rem);
+            line-height: 1.38;
+            letter-spacing: 0.045em;
+            text-shadow:
+                0 0 4px rgba(255, 243, 210, 0.38),
+                0 0 1px rgba(40, 32, 12, 0.55),
+                0 2px 14px rgba(0, 0, 0, 0.22);
+        }
+
+        .cell--wave .cell-verse {
+            align-items: flex-end;
+            justify-content: flex-end;
+            text-align: right;
+            width: 100%;
+            max-width: 100%;
+            padding: clamp(1.1rem, 4.5vw, 2.75rem);
+            padding-top: clamp(1rem, 10vw, 4rem);
+            padding-left: clamp(1rem, 12vw, 3.5rem);
+            font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+            font-style: italic;
+            font-weight: 600;
+            font-size: clamp(1.28rem, 3.85vw, 2.08rem);
+            line-height: 1.38;
+            letter-spacing: 0.045em;
+            text-shadow:
+                0 0 4px rgba(255, 243, 210, 0.38),
+                0 0 1px rgba(40, 32, 12, 0.55),
+                0 2px 14px rgba(0, 0, 0, 0.22);
+        }
+
+        .cell--sunset .cell-verse {
+            align-items: center;
+            padding-bottom: clamp(0.75rem, 3.5vw, 1.75rem);
+        }
+
+        .cell--gilded .cell-verse {
+            align-items: center;
+        }
+
+        /* ---------- Sunset (300): 落日晚霞 ---------- */
+        .fx-sunset-bloom {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 120% 70% at 55% 18%, rgba(255, 95, 60, 0.62) 0%, transparent 52%),
+                radial-gradient(ellipse 80% 50% at 70% 35%, rgba(255, 160, 80, 0.45) 0%, transparent 48%),
+                radial-gradient(ellipse 60% 40% at 40% 45%, rgba(255, 60, 90, 0.32) 0%, transparent 42%),
+                radial-gradient(ellipse 100% 55% at 50% 0%, rgba(255, 200, 140, 0.35) 0%, transparent 40%);
+            mix-blend-mode: screen;
+            animation: sunsetBloom 7.5s ease-in-out infinite;
+        }
+
+        .fx-sunset-mist {
+            position: absolute;
+            inset: -10%;
+            z-index: 3;
+            pointer-events: none;
+            background: linear-gradient(
+                185deg,
+                transparent 12%,
+                rgba(255, 120, 90, 0.28) 38%,
+                rgba(255, 200, 140, 0.38) 62%,
+                transparent 85%
+            );
+            mix-blend-mode: soft-light;
+            animation: sunsetMistDrift 12s ease-in-out infinite;
+        }
+
+        .fx-sunset-dust {
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            opacity: 0.78;
+            mix-blend-mode: screen;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(255, 220, 160, 0.9) 0, rgba(255, 220, 160, 0.9) 0.4px, transparent 1.2px),
+                radial-gradient(circle at 65% 22%, rgba(255, 180, 120, 0.85) 0, rgba(255, 180, 120, 0.85) 0.35px, transparent 1px),
+                radial-gradient(circle at 48% 55%, rgba(255, 235, 200, 0.75) 0, rgba(255, 235, 200, 0.75) 0.3px, transparent 1px),
+                radial-gradient(circle at 82% 40%, rgba(255, 160, 100, 0.7) 0, rgba(255, 160, 100, 0.7) 0.35px, transparent 1px);
+            background-size: 100% 100%;
+            animation: sunsetDust 6s ease-in-out infinite;
+        }
+
+        .fx-sunset-veil {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+            background: linear-gradient(
+                195deg,
+                rgba(255, 140, 90, 0.28) 0%,
+                rgba(255, 85, 70, 0.18) 35%,
+                transparent 52%,
+                rgba(160, 70, 110, 0.14) 100%
+            );
+            mix-blend-mode: multiply;
+            animation: sunsetVeilPulse 9s ease-in-out infinite;
+        }
+
+        .fx-sunset-emberglow {
+            position: absolute;
+            inset: -18%;
+            z-index: 6;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 75% 60% at 42% 38%, rgba(255, 85, 45, 0.42) 0%, transparent 52%),
+                radial-gradient(ellipse 65% 55% at 72% 55%, rgba(255, 55, 75, 0.32) 0%, transparent 48%),
+                radial-gradient(ellipse 55% 45% at 28% 68%, rgba(255, 130, 70, 0.28) 0%, transparent 45%),
+                radial-gradient(ellipse 90% 70% at 55% 22%, rgba(255, 160, 100, 0.22) 0%, transparent 50%);
+            mix-blend-mode: screen;
+            animation: sunsetEmberDrift 8.5s ease-in-out infinite;
+        }
+
+        .fx-sunset-horizon {
+            position: absolute;
+            left: -5%;
+            right: -5%;
+            bottom: -8%;
+            height: 48%;
+            z-index: 7;
+            pointer-events: none;
+            background: linear-gradient(
+                0deg,
+                rgba(200, 50, 90, 0.45) 0%,
+                rgba(255, 95, 55, 0.35) 22%,
+                rgba(255, 180, 90, 0.2) 45%,
+                transparent 72%
+            );
+            mix-blend-mode: screen;
+            animation: sunsetHorizonPulse 5.5s ease-in-out infinite;
+        }
+
+        .fx-sunset-flare {
+            position: absolute;
+            inset: -20%;
+            z-index: 8;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 72% 28%, rgba(255, 255, 220, 0.55) 0%, transparent 0.8%),
+                radial-gradient(circle at 72% 28%, rgba(255, 200, 120, 0.25) 0%, transparent 4%),
+                radial-gradient(ellipse 90% 40% at 68% 32%, rgba(255, 160, 100, 0.2) 0%, transparent 50%);
+            mix-blend-mode: screen;
+            animation: sunsetFlareWander 18s ease-in-out infinite;
+        }
+
+        @keyframes sunsetVeilPulse {
+            0%, 100% { opacity: 0.72; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes sunsetEmberDrift {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.72; }
+            28% { transform: translate(4%, -3%) scale(1.08); opacity: 1; }
+            55% { transform: translate(-3%, 4%) scale(0.94); opacity: 0.88; }
+            78% { transform: translate(2%, 1%) scale(1.04); opacity: 0.95; }
+        }
+
+        @keyframes sunsetHorizonPulse {
+            0%, 100% { opacity: 0.55; transform: translateY(6%) scaleY(1); }
+            50% { opacity: 1; transform: translateY(0) scaleY(1.06); }
+        }
+
+        @keyframes sunsetFlareWander {
+            0%, 100% { transform: translate(-3%, 2%) scale(1); opacity: 0.65; }
+            35% { transform: translate(4%, -1%) scale(1.08); opacity: 1; }
+            70% { transform: translate(1%, 3%) scale(0.95); opacity: 0.75; }
+        }
+
+        @keyframes sunsetBloom {
+            0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.88; }
+            50% { transform: scale(1.1) translate(-1%, -1%); opacity: 1; }
+        }
+
+        @keyframes sunsetMistDrift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.65; }
+            50% { transform: translate(4%, -5%) rotate(2deg); opacity: 1; }
+        }
+
+        @keyframes sunsetDust {
+            0%, 100% { opacity: 0.45; transform: translate(0, 0) scale(1); }
+            50% { opacity: 0.85; transform: translate(2%, -14px) scale(1.02); }
+        }
+
+        /* ---------- Gilded ocean (299): 晨曦波光 ---------- */
+        .fx-gilded-ripple {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0,
+                    transparent 14px,
+                    rgba(100, 160, 210, 0.12) 14px,
+                    rgba(100, 160, 210, 0.12) 15px
+                ),
+                repeating-linear-gradient(
+                    92deg,
+                    transparent 0,
+                    transparent 40px,
+                    rgba(255, 220, 160, 0.06) 40px,
+                    rgba(255, 220, 160, 0.06) 41px
+                );
+            mix-blend-mode: soft-light;
+            animation: gildedRipple 7s linear infinite;
+        }
+
+        .fx-gilded-sweep {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            overflow: hidden;
+            mix-blend-mode: overlay;
+        }
+
+        .fx-gilded-sweep::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -35%;
+            width: 48%;
+            height: 140%;
+            background: linear-gradient(
+                102deg,
+                transparent 28%,
+                rgba(255, 245, 200, 0.62) 50%,
+                rgba(200, 230, 255, 0.35) 58%,
+                transparent 72%
+            );
+            transform: skewX(-8deg);
+            animation: gildedSweep 11s ease-in-out infinite;
+        }
+
+        .fx-gilded-sweep::after {
+            content: '';
+            position: absolute;
+            top: -15%;
+            left: -40%;
+            width: 38%;
+            height: 130%;
+            background: linear-gradient(
+                118deg,
+                transparent 40%,
+                rgba(255, 255, 240, 0.45) 52%,
+                rgba(160, 210, 255, 0.28) 60%,
+                transparent 75%
+            );
+            transform: skewX(12deg);
+            animation: gildedSweepB 15s ease-in-out infinite;
+        }
+
+        .fx-gilded-sparkle {
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            opacity: 0.78;
+            background-image:
+                radial-gradient(circle at 25% 45%, rgba(255, 255, 255, 0.95) 0, rgba(255, 255, 255, 0.95) 0.35px, transparent 1px),
+                radial-gradient(circle at 55% 60%, rgba(255, 230, 160, 0.9) 0, rgba(255, 230, 160, 0.9) 0.3px, transparent 1px),
+                radial-gradient(circle at 78% 35%, rgba(200, 235, 255, 0.85) 0, rgba(200, 235, 255, 0.85) 0.35px, transparent 1px),
+                radial-gradient(circle at 40% 75%, rgba(255, 250, 220, 0.8) 0, rgba(255, 250, 220, 0.8) 0.3px, transparent 1px);
+            background-size: 100% 100%;
+            animation: gildedSparkle 3.2s ease-in-out infinite;
+        }
+
+        .fx-gilded-dawn {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            pointer-events: none;
+            background: linear-gradient(
+                165deg,
+                rgba(255, 248, 220, 0.22) 0%,
+                transparent 38%,
+                rgba(120, 190, 255, 0.16) 68%,
+                rgba(255, 235, 190, 0.18) 100%
+            );
+            mix-blend-mode: soft-light;
+            animation: gildedDawnShift 11s ease-in-out infinite;
+        }
+
+        .fx-gilded-caustics {
+            position: absolute;
+            inset: -8%;
+            z-index: 6;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            opacity: 0.55;
+            background-image:
+                radial-gradient(ellipse 70% 45% at 25% 55%, rgba(255, 230, 150, 0.5) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 40% at 75% 40%, rgba(140, 210, 255, 0.45) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 35% at 48% 70%, rgba(255, 250, 200, 0.35) 0%, transparent 48%);
+            background-size: 100% 100%;
+            animation: gildedCausticsMove 9s ease-in-out infinite alternate;
+        }
+
+        @keyframes gildedDawnShift {
+            0%, 100% { opacity: 0.55; transform: translate(0, 0) scale(1); }
+            50% { opacity: 1; transform: translate(2%, -2%) scale(1.02); }
+        }
+
+        @keyframes gildedCausticsMove {
+            0% { transform: translate(-2%, 1%) scale(1); opacity: 0.4; }
+            100% { transform: translate(3%, -2%) scale(1.08); opacity: 0.75; }
+        }
+
+        @keyframes gildedSweep {
+            0%, 48% { transform: skewX(-8deg) translateX(-30%); opacity: 0; }
+            52% { opacity: 0.95; }
+            65% { transform: skewX(-8deg) translateX(135%); opacity: 0.55; }
+            72%, 100% { opacity: 0; transform: skewX(-8deg) translateX(135%); }
+        }
+
+        @keyframes gildedSweepB {
+            0%, 40% { transform: skewX(12deg) translateX(-40%); opacity: 0; }
+            48% { opacity: 0.75; }
+            62% { transform: skewX(12deg) translateX(120%); opacity: 0.4; }
+            70%, 100% { opacity: 0; transform: skewX(12deg) translateX(120%); }
+        }
+
+        @keyframes gildedSparkle {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            25% { opacity: 0.9; transform: scale(1.02); }
+            55% { opacity: 0.45; transform: scale(1); }
+            80% { opacity: 0.85; transform: scale(1.01); }
+        }
+
+        @keyframes gildedRipple {
+            0% { transform: translateY(0) skewX(0deg); }
+            50% { transform: translateY(16px) skewX(0.6deg); }
+            100% { transform: translateY(32px) skewX(0deg); }
+        }
+
+        /* ---------- Cliff (301): 草地林间 ---------- */
+        .fx-grass-breathe {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 90% 60% at 70% 85%, rgba(180, 220, 120, 0.42) 0%, transparent 52%),
+                radial-gradient(ellipse 70% 50% at 30% 60%, rgba(100, 160, 90, 0.32) 0%, transparent 48%),
+                radial-gradient(ellipse 50% 45% at 55% 40%, rgba(140, 200, 110, 0.2) 0%, transparent 48%);
+            mix-blend-mode: soft-light;
+            animation: grassBreathe 8s ease-in-out infinite;
+        }
+
+        .fx-grass-wind {
+            position: absolute;
+            inset: -12%;
+            z-index: 3;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                88deg,
+                transparent 0 55px,
+                rgba(160, 220, 140, 0.08) 55px 58px,
+                transparent 58px 110px
+            );
+            mix-blend-mode: soft-light;
+            opacity: 0.85;
+            animation: grassWindSweep 5.5s linear infinite;
+        }
+
+        .fx-grass-pollen {
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            opacity: 0.62;
+            background-image:
+                radial-gradient(circle at 15% 70%, rgba(255, 235, 150, 0.9) 0, rgba(255, 235, 150, 0.9) 0.4px, transparent 1.2px),
+                radial-gradient(circle at 42% 82%, rgba(220, 255, 180, 0.75) 0, rgba(220, 255, 180, 0.75) 0.35px, transparent 1px),
+                radial-gradient(circle at 68% 65%, rgba(255, 248, 200, 0.8) 0, rgba(255, 248, 200, 0.8) 0.3px, transparent 1px),
+                radial-gradient(circle at 88% 78%, rgba(240, 220, 100, 0.7) 0, rgba(240, 220, 100, 0.7) 0.35px, transparent 1px);
+            background-size: 100% 100%;
+            animation: grassPollen 11s ease-in-out infinite;
+        }
+
+        .fx-grass-shaft {
+            position: absolute;
+            inset: -15%;
+            z-index: 5;
+            pointer-events: none;
+            background: linear-gradient(
+                118deg,
+                transparent 0%,
+                rgba(255, 252, 220, 0.1) 34%,
+                rgba(255, 245, 180, 0.32) 47%,
+                rgba(200, 235, 160, 0.18) 54%,
+                transparent 66%
+            );
+            mix-blend-mode: overlay;
+            animation: grassShaft 14s ease-in-out infinite;
+        }
+
+        .fx-grass-fireflies {
+            position: absolute;
+            inset: 0;
+            z-index: 6;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            opacity: 0.85;
+            background-image:
+                radial-gradient(circle at 10% 38%, rgba(200, 255, 160, 1) 0, rgba(200, 255, 160, 1) 1.2px, transparent 2.2px),
+                radial-gradient(circle at 88% 22%, rgba(255, 255, 200, 1) 0, rgba(255, 255, 200, 1) 1px, transparent 2px),
+                radial-gradient(circle at 72% 68%, rgba(180, 255, 190, 1) 0, rgba(180, 255, 190, 1) 1px, transparent 2px),
+                radial-gradient(circle at 35% 82%, rgba(240, 255, 150, 1) 0, rgba(240, 255, 150, 1) 1.1px, transparent 2.1px),
+                radial-gradient(circle at 55% 48%, rgba(220, 255, 210, 1) 0, rgba(220, 255, 210, 1) 0.9px, transparent 1.8px),
+                radial-gradient(circle at 22% 62%, rgba(255, 250, 180, 1) 0, rgba(255, 250, 180, 1) 1px, transparent 2px);
+            background-size: 100% 100%;
+            animation:
+                grassFireflyTwinkle 2.8s ease-in-out infinite,
+                grassFireflyDrift 18s ease-in-out infinite;
+        }
+
+        @keyframes grassWindSweep {
+            0% { transform: translateX(-12%); }
+            100% { transform: translateX(12%); }
+        }
+
+        @keyframes grassShaft {
+            0%, 100% { transform: translate(-4%, 0) rotate(-0.3deg); opacity: 0.5; }
+            50% { transform: translate(5%, -2%) rotate(0.8deg); opacity: 1; }
+        }
+
+        @keyframes grassFireflyTwinkle {
+            0%, 100% { opacity: 0.35; filter: brightness(0.9); }
+            20% { opacity: 1; filter: brightness(1.35); }
+            40% { opacity: 0.5; filter: brightness(1); }
+            65% { opacity: 0.9; filter: brightness(1.2); }
+            85% { opacity: 0.4; filter: brightness(0.95); }
+        }
+
+        @keyframes grassFireflyDrift {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(3%, -4%); }
+            66% { transform: translate(-2%, 2%); }
+        }
+
+        @keyframes grassBreathe {
+            0%, 100% { opacity: 0.55; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        @keyframes grassPollen {
+            0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+            50% { transform: translate(6%, -9%); opacity: 0.78; }
+        }
+
+        /* ---------- Wave dress (302): 海浪浪花 ---------- */
+        .fx-wave-deep {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                linear-gradient(
+                    108deg,
+                    transparent 38%,
+                    rgba(60, 200, 255, 0.28) 47%,
+                    rgba(220, 250, 255, 0.48) 50%,
+                    rgba(70, 185, 255, 0.26) 53%,
+                    transparent 62%
+                ),
+                radial-gradient(ellipse 80% 55% at 45% 55%, rgba(100, 210, 255, 0.18) 0%, transparent 58%);
+            background-size: 260% 260%, 100% 100%;
+            mix-blend-mode: soft-light;
+            animation: waveDeepScan 2.9s ease-in-out infinite;
+        }
+
+        .fx-wave-band {
+            position: absolute;
+            inset: -8%;
+            z-index: 2;
+            pointer-events: none;
+            background:
+                linear-gradient(
+                    125deg,
+                    transparent 28%,
+                    rgba(255, 255, 255, 0.32) 44%,
+                    rgba(200, 240, 255, 0.38) 52%,
+                    transparent 68%
+                ),
+                linear-gradient(
+                    55deg,
+                    transparent 52%,
+                    rgba(120, 220, 255, 0.22) 68%,
+                    transparent 88%
+                );
+            mix-blend-mode: soft-light;
+            animation: waveBand 4.8s ease-in-out infinite;
+        }
+
+        .fx-wave-foam {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            opacity: 0.9;
+            background-image:
+                radial-gradient(circle at 22% 55%, rgba(255, 255, 255, 1) 0, rgba(255, 255, 255, 1) 0.42px, transparent 1.15px),
+                radial-gradient(circle at 48% 70%, rgba(200, 245, 255, 0.98) 0, rgba(200, 245, 255, 0.98) 0.36px, transparent 1px),
+                radial-gradient(circle at 75% 45%, rgba(255, 255, 255, 0.92) 0, rgba(255, 255, 255, 0.92) 0.34px, transparent 1px),
+                radial-gradient(circle at 60% 88%, rgba(180, 230, 255, 0.9) 0, rgba(180, 230, 255, 0.9) 0.32px, transparent 0.95px),
+                radial-gradient(circle at 35% 38%, rgba(255, 252, 250, 0.88) 0, rgba(255, 252, 250, 0.88) 0.32px, transparent 0.95px),
+                radial-gradient(circle at 82% 62%, rgba(230, 250, 255, 0.85) 0, rgba(230, 250, 255, 0.85) 0.3px, transparent 0.9px),
+                radial-gradient(circle at 15% 78%, rgba(255, 255, 255, 0.8) 0, rgba(255, 255, 255, 0.8) 0.28px, transparent 0.85px);
+            background-size: 100% 100%;
+            animation: waveFoam 1.9s ease-in-out infinite;
+        }
+
+        .fx-wave-spray {
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            pointer-events: none;
+            mix-blend-mode: normal;
+            opacity: 0.98;
+            background-image:
+                radial-gradient(circle at 28% 62%, rgba(255, 255, 255, 0.48) 0, rgba(255, 255, 255, 0.48) 0.55px, transparent 1.5px),
+                radial-gradient(circle at 52% 48%, rgba(190, 240, 255, 0.52) 0, rgba(190, 240, 255, 0.52) 0.5px, transparent 1.35px),
+                radial-gradient(circle at 72% 72%, rgba(255, 255, 255, 0.42) 0, rgba(255, 255, 255, 0.42) 0.45px, transparent 1.2px),
+                radial-gradient(circle at 45% 82%, rgba(170, 235, 255, 0.48) 0, rgba(170, 235, 255, 0.48) 0.45px, transparent 1.2px),
+                radial-gradient(circle at 63% 28%, rgba(255, 255, 255, 0.4) 0, rgba(255, 255, 255, 0.4) 0.4px, transparent 1.1px);
+            background-size: 100% 100%;
+            animation: waveSpray 1.35s ease-in-out infinite;
+        }
+
+        @keyframes waveDeepScan {
+            0%, 100% { background-position: 5% 35%, 0 0; opacity: 0.62; }
+            50% { background-position: 95% 58%, 0 0; opacity: 1; }
+        }
+
+        @keyframes waveSpray {
+            0%, 100% { opacity: 0.55; transform: translate(0, 0) scale(1); }
+            25% { opacity: 1; transform: translate(3%, -6px) scale(1.04); }
+            50% { opacity: 0.7; transform: translate(-2%, 3px) scale(1); }
+            75% { opacity: 0.95; transform: translate(2%, -3px) scale(1.02); }
+        }
+
+        @keyframes waveFoam {
+            0%, 100% { opacity: 0.5; transform: translate(0, 0) scale(1); }
+            33% { opacity: 1; transform: translate(1%, -5px) scale(1.02); }
+            66% { opacity: 0.58; transform: translate(-1%, 4px) scale(1); }
+        }
+
+        @keyframes waveBand {
+            0%, 100% { transform: translate(-7%, 4%) rotate(-2deg) scale(1); opacity: 0.58; }
+            50% { transform: translate(8%, -6%) rotate(2deg) scale(1.03); opacity: 1; }
+        }
+
+        @media (max-width: 900px) {
+            .ethereal-grid {
+                display: flex;
+                flex-direction: column;
+                min-height: auto;
+                gap: 0;
+            }
+
+            .cell {
+                grid-column: unset;
+                grid-row: unset;
+                min-height: 28vh;
+            }
+
+            .cell--cliff { order: 1; }
+            .cell--sunset { order: 2; }
+            .cell--gilded { order: 3; }
+            .cell--wave { order: 4; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cell img {
+                animation: none !important;
+                transform: none;
+            }
+
+            .fx-sunset-bloom,
+            .fx-sunset-mist,
+            .fx-sunset-dust,
+            .fx-sunset-veil,
+            .fx-sunset-emberglow,
+            .fx-sunset-horizon,
+            .fx-sunset-flare,
+            .fx-gilded-sweep::before,
+            .fx-gilded-sweep::after,
+            .fx-gilded-sparkle,
+            .fx-gilded-ripple,
+            .fx-gilded-dawn,
+            .fx-gilded-caustics,
+            .fx-grass-breathe,
+            .fx-grass-wind,
+            .fx-grass-pollen,
+            .fx-grass-shaft,
+            .fx-grass-fireflies,
+            .fx-wave-deep,
+            .fx-wave-foam,
+            .fx-wave-band,
+            .fx-wave-spray {
+                animation: none !important;
+            }
+
+            .fx-sunset-bloom,
+            .fx-sunset-mist,
+            .fx-sunset-veil,
+            .fx-sunset-emberglow,
+            .fx-sunset-horizon,
+            .fx-sunset-flare,
+            .fx-grass-breathe,
+            .fx-gilded-dawn,
+            .fx-gilded-caustics {
+                opacity: 0.55;
+            }
+
+            .fx-sunset-dust,
+            .fx-gilded-sparkle,
+            .fx-grass-pollen,
+            .fx-wave-foam,
+            .fx-wave-spray,
+            .fx-grass-fireflies {
+                opacity: 0.22;
+            }
+
+            .fx-grass-shaft,
+            .fx-wave-deep {
+                opacity: 0.35;
+            }
+
+            .fx-grass-wind {
+                opacity: 0.25;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="ethereal-grid">
+        <figure class="cell cell--cliff">
+            <img src="./微信图片_20260328111218_301_2.jpg" alt="Cliff and seagulls by the sea" width="900" height="1200" decoding="async">
+            <div class="fx-grass-breathe" aria-hidden="true"></div>
+            <div class="fx-grass-wind" aria-hidden="true"></div>
+            <div class="fx-grass-pollen" aria-hidden="true"></div>
+            <div class="fx-grass-shaft" aria-hidden="true"></div>
+            <div class="fx-grass-fireflies" aria-hidden="true"></div>
+            <p class="cell-verse" lang="en">Stillness at the margin of land and sea is how the world thinks without words.</p>
+        </figure>
+
+        <figure class="cell cell--sunset">
+            <img src="./微信图片_20260328111141_300_2.jpg" alt="Sunset by the sea, oil painting" width="900" height="1200" decoding="async">
+            <div class="fx-sunset-bloom" aria-hidden="true"></div>
+            <div class="fx-sunset-mist" aria-hidden="true"></div>
+            <div class="fx-sunset-dust" aria-hidden="true"></div>
+            <div class="fx-sunset-veil" aria-hidden="true"></div>
+            <div class="fx-sunset-emberglow" aria-hidden="true"></div>
+            <div class="fx-sunset-horizon" aria-hidden="true"></div>
+            <div class="fx-sunset-flare" aria-hidden="true"></div>
+            <p class="cell-verse" lang="en">What must depart with the light was never ours to own—only to behold while it lasts.</p>
+        </figure>
+
+        <figure class="cell cell--gilded">
+            <img src="./微信图片_20260328111141_299_2.jpg" alt="Gilded light on the ocean, oil painting" width="900" height="1200" decoding="async">
+            <div class="fx-gilded-ripple" aria-hidden="true"></div>
+            <div class="fx-gilded-sweep" aria-hidden="true"></div>
+            <div class="fx-gilded-sparkle" aria-hidden="true"></div>
+            <div class="fx-gilded-dawn" aria-hidden="true"></div>
+            <div class="fx-gilded-caustics" aria-hidden="true"></div>
+            <p class="cell-verse" lang="en">The first light does not argue with the dark; it simply reveals what was already there, waiting.</p>
+        </figure>
+
+        <figure class="cell cell--wave">
+            <img src="./微信图片_20260328111219_302_2.jpg" alt="Figure by the shore with wave-like dress" width="900" height="1200" decoding="async">
+            <div class="fx-wave-deep" aria-hidden="true"></div>
+            <div class="fx-wave-band" aria-hidden="true"></div>
+            <div class="fx-wave-foam" aria-hidden="true"></div>
+            <div class="fx-wave-spray" aria-hidden="true"></div>
+            <p class="cell-verse" lang="en">We are the shape water takes for a moment—then releases, unchanged in essence.</p>
+        </figure>
+    </main>
+</body>
+</html>
