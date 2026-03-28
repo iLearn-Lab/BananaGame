@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fulfilled — The Four Seasons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 春季 - 生命觉醒 */
+            --spring-primary: #98FB98;
+            --spring-light: #E0FFE0;
+            --spring-deep: #3CB371;
+            --spring-accent: #FFB6C1;
+            --spring-gold: #FFD700;
+            --spring-white: #FFFAFA;
+            
+            /* 夏季 - 生命盛放 */
+            --summer-primary: #FF6B6B;
+            --summer-light: #FFE4E1;
+            --summer-deep: #DC143C;
+            --summer-accent: #FFA500;
+            --summer-gold: #FFEB3B;
+            --summer-white: #FFF5EE;
+            
+            /* 秋季 - 生命沉思 */
+            --autumn-primary: #D2691E;
+            --autumn-light: #FFE4B5;
+            --autumn-deep: #8B4513;
+            --autumn-accent: #CD853F;
+            --autumn-gold: #B8860B;
+            --autumn-white: #FFFAF0;
+            
+            /* 冬季 - 生命静默 */
+            --winter-primary: #E0FFFF;
+            --winter-light: #F0FFFF;
+            --winter-deep: #4682B4;
+            --winter-accent: #B0E0E6;
+            --winter-gold: #ADD8E6;
+            --winter-white: #F5FFFA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: italic;
+            font-weight: 400;
+            background: #0a0a0f;
+        }
+
+        /* 主容器 - 四角布局 */
+        .seasons-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0;
+        }
+
+        /* 四季面板通用样式 */
+        .season-panel {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .season-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            opacity: 0.9;
+        }
+
+        .season-panel::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.3) 100%);
+        }
+
+        /* Panel copy */
+        .season-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: white;
+            padding: 40px;
+            max-width: 80%;
+            font-style: italic;
+        }
+
+        .season-name {
+            font-size: 3.5rem;
+            font-weight: 400;
+            font-style: italic;
+            letter-spacing: 0.12em;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .season-tagline {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.8rem;
+            font-weight: 400;
+            font-style: italic;
+            letter-spacing: 0.12em;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+
+        .season-philosophy {
+            font-size: 1.1rem;
+            font-style: italic;
+            line-height: 2;
+            opacity: 0.95;
+            max-width: 520px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .season-symbol {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: symbolFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes symbolFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        /* ========== 春季 - 左上角 ========== */
+        .spring {
+            background: linear-gradient(135deg, #a8e6cf 0%, #88d8b0 30%, #5cb85c 70%, #3cb371 100%);
+        }
+
+        .spring .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+            z-index: 0;
+        }
+
+        .spring .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(168,230,207,0.25) 0%, 
+                rgba(136,216,176,0.2) 30%,
+                rgba(92,184,92,0.25) 70%,
+                rgba(60,179,113,0.35) 100%
+            );
+            z-index: 1;
+        }
+
+        .spring::before {
+            background: 
+                radial-gradient(ellipse 200px 150px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 70%),
+                radial-gradient(ellipse 150px 100px at 80% 70%, rgba(255,182,193,0.3) 0%, transparent 60%),
+                radial-gradient(ellipse 100px 80px at 60% 20%, rgba(255,215,0,0.3) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: springGlow 8s ease-in-out infinite;
+        }
+
+        @keyframes springGlow {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* 春季动态元素 - 花瓣纷飞 */
+        .spring-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .petal {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50% 0 50% 50%;
+            opacity: 0.8;
+            animation: petalFall linear infinite;
+        }
+
+        .petal.pink { background: linear-gradient(135deg, #FFB6C1, #FF69B4); }
+        .petal.white { background: linear-gradient(135deg, #FFF, #F0F0F0); }
+        .petal.yellow { background: linear-gradient(135deg, #FFD700, #FFFACD); }
+        .petal.blue { background: linear-gradient(135deg, #87CEEB, #E0FFFF); }
+
+        @keyframes petalFall {
+            0% {
+                transform: translateY(-10vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% {
+                transform: translateY(110vh) translateX(50px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* 春季新芽 */
+        .sprout {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .sprout::before, .sprout::after {
+            content: '🌱';
+            position: absolute;
+            font-size: 2rem;
+            animation: sproutGrow 3s ease-out infinite;
+        }
+
+        .sprout::before {
+            bottom: 10%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .sprout::after {
+            bottom: 15%;
+            right: 25%;
+            animation-delay: 1s;
+        }
+
+        @keyframes sproutGrow {
+            0%, 100% { transform: scale(0.8); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* ========== 夏季 - 右上角 ========== */
+        .summer {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 30%, #feada6 70%, #f5afa6 100%);
+        }
+
+        .summer .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+            z-index: 0;
+        }
+
+        .summer .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                rgba(255,154,158,0.2) 0%,
+                rgba(254,207,239,0.15) 30%,
+                rgba(254,173,166,0.2) 70%,
+                rgba(245,175,166,0.3) 100%
+            );
+            z-index: 1;
+        }
+
+        .summer::before {
+            background: 
+                radial-gradient(circle 150px at 30% 30%, rgba(255,235,59,0.6) 0%, transparent 70%),
+                radial-gradient(circle 100px at 70% 60%, rgba(255,152,0,0.4) 0%, transparent 60%),
+                radial-gradient(ellipse 200px 100px at 50% 100%, rgba(255,107,107,0.3) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+            animation: summerHeat 6s ease-in-out infinite;
+        }
+
+        @keyframes summerHeat {
+            0%, 100% { 
+                background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+            }
+            50% { 
+                background-position: 10% 10%, -10% -10%, 5% 5%, 0% 0%;
+            }
+        }
+
+        /* 夏季动态元素 - 萤火虫 */
+        .fireflies {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 5;
+        }
+
+        .firefly {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #FFF 0%, #FFD700 50%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 20px 5px rgba(255,215,0,0.8);
+            animation: fireflyFly 8s ease-in-out infinite;
+        }
+
+        @keyframes fireflyFly {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1); 
+                opacity: 0;
+            }
+            20% { opacity: 1; }
+            50% { 
+                transform: translate(100px, -50px) scale(1.2); 
+                opacity: 0.8;
+            }
+            80% { 
+                transform: translate(-50px, 30px) scale(0.8); 
+                opacity: 0.6;
+            }
+        }
+
+        /* 夏季太阳 */
+        .summer-sun {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,235,59,0.8) 0%, rgba(255,152,0,0.4) 30%, transparent 70%);
+            border-radius: 50%;
+            animation: sunPulse 4s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes sunPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 0.9; }
+        }
+
+        /* ========== 秋季 - 右下角 ========== */
+        .autumn {
+            background: linear-gradient(135deg, #d4a574 0%, #c4956a 30%, #b87333 70%, #8b4513 100%);
+        }
+
+        .autumn .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+            z-index: 0;
+        }
+
+        .autumn .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                rgba(212,165,116,0.25) 0%,
+                rgba(196,149,106,0.2) 30%,
+                rgba(184,115,51,0.25) 70%,
+                rgba(139,69,19,0.35) 100%
+            );
+            z-index: 1;
+        }
+
+        .autumn::before {
+            background: 
+                radial-gradient(ellipse 180px 120px at 70% 70%, rgba(218,165,32,0.5) 0%, transparent 70%),
+                radial-gradient(ellipse 120px 80px at 20% 40%, rgba(205,133,63,0.4) 0%, transparent 60%),
+                radial-gradient(ellipse 150px 100px at 50% 20%, rgba(139,69,19,0.3) 0%, transparent 60%),
+                linear-gradient(180deg, transparent 0%, rgba(139,69,19,0.2) 100%);
+            animation: autumnDrift 10s ease-in-out infinite;
+        }
+
+        @keyframes autumnDrift {
+            0%, 100% { transform: translateX(0) skewX(0deg); }
+            25% { transform: translateX(10px) skewX(1deg); }
+            75% { transform: translateX(-10px) skewX(-1deg); }
+        }
+
+        /* 秋季动态元素 - 飘落的枫叶 */
+        .falling-leaves {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .leaf {
+            position: absolute;
+            font-size: 2rem;
+            animation: leafFall linear infinite;
+            opacity: 0.9;
+        }
+
+        @keyframes leafFall {
+            0% {
+                transform: translateY(-10%) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.9; }
+            100% {
+                transform: translateY(110%) translateX(-80px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* 秋季涟漪 */
+        .autumn-ripple {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200%;
+            height: 200%;
+            background: repeating-radial-gradient(
+                circle at 50% 100%,
+                transparent 0,
+                transparent 20px,
+                rgba(139,69,19,0.05) 21px,
+                transparent 22px
+            );
+            animation: rippleExpand 8s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rippleExpand {
+            0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(-50%) scale(1.5); opacity: 0; }
+        }
+
+        /* ========== 冬季 - 左下角 ========== */
+        .winter {
+            background: linear-gradient(135deg, #a8c0ff 0%, #89a9e6 30%, #5c7cfa 70%, #4263eb 100%);
+        }
+
+        .winter .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+            z-index: 0;
+        }
+
+        .winter .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg,
+                rgba(168,192,255,0.25) 0%,
+                rgba(137,169,230,0.2) 30%,
+                rgba(92,124,250,0.25) 70%,
+                rgba(66,99,235,0.35) 100%
+            );
+            z-index: 1;
+        }
+
+        .winter::before {
+            background: 
+                radial-gradient(circle 100px at 80% 20%, rgba(255,255,255,0.8) 0%, transparent 70%),
+                radial-gradient(circle 80px at 20% 70%, rgba(176,224,230,0.5) 0%, transparent 60%),
+                radial-gradient(ellipse 150px 80px at 50% 50%, rgba(255,255,255,0.3) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(176,224,230,0.1) 100%);
+            animation: winterAurora 12s ease-in-out infinite;
+        }
+
+        @keyframes winterAurora {
+            0%, 100% { 
+                filter: hue-rotate(0deg) brightness(1);
+                background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+            }
+            33% { 
+                filter: hue-rotate(20deg) brightness(1.1);
+                background-position: 5% 5%, -5% -5%, 0% 0%, 0% 0%;
+            }
+            66% { 
+                filter: hue-rotate(-10deg) brightness(0.95);
+                background-position: -5% 5%, 5% -5%, 0% 0%, 0% 0%;
+            }
+        }
+
+        /* 冬季动态元素 - 雪花 */
+        .snowflakes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 5;
+        }
+
+        .snowflake {
+            position: absolute;
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0.9;
+            animation: snowFall linear infinite;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        @keyframes snowFall {
+            0% {
+                transform: translateY(-10px) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.9; }
+            100% {
+                transform: translateY(110vh) translateX(30px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 冬季冰晶 */
+        .ice-crystal {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            opacity: 0.3;
+            animation: crystalGlow 5s ease-in-out infinite;
+        }
+
+        .ice-crystal::before {
+            content: '❄';
+            font-size: 4rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes crystalGlow {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        /* ========== 连接过渡带 ========== */
+        .connector {
+            position: absolute;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        /* 春季到夏季 - 顶部过渡 */
+        .connector-top {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(90deg, 
+                rgba(60,179,113,0.5) 0%, 
+                rgba(168,230,207,0.4) 20%,
+                rgba(255,154,158,0.3) 80%,
+                rgba(220,20,60,0.5) 100%
+            );
+            transform: translateY(-50%);
+            filter: blur(30px);
+            opacity: 0.7;
+            animation: connectorPulse 6s ease-in-out infinite;
+        }
+
+        /* 夏季到秋季 - 右侧过渡 */
+        .connector-right {
+            top: 0;
+            right: 50%;
+            width: 80px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                rgba(220,20,60,0.5) 0%, 
+                rgba(255,107,107,0.4) 20%,
+                rgba(212,165,116,0.3) 80%,
+                rgba(139,69,19,0.5) 100%
+            );
+            transform: translateX(50%);
+            filter: blur(30px);
+            opacity: 0.7;
+            animation: connectorPulse 8s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+
+        /* 秋季到冬季 - 底部过渡 */
+        .connector-bottom {
+            bottom: 50%;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(90deg, 
+                rgba(139,69,19,0.5) 0%, 
+                rgba(212,165,116,0.4) 20%,
+                rgba(168,192,255,0.3) 80%,
+                rgba(70,130,180,0.5) 100%
+            );
+            transform: translateY(50%);
+            filter: blur(30px);
+            opacity: 0.7;
+            animation: connectorPulse 7s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        /* 冬季到春季 - 左侧过渡 */
+        .connector-left {
+            top: 0;
+            left: 50%;
+            width: 80px;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                rgba(70,130,180,0.5) 0%, 
+                rgba(224,255,255,0.4) 20%,
+                rgba(152,251,152,0.3) 80%,
+                rgba(60,179,113,0.5) 100%
+            );
+            transform: translateX(-50%);
+            filter: blur(30px);
+            opacity: 0.7;
+            animation: connectorPulse 9s ease-in-out infinite;
+            animation-delay: 3s;
+        }
+
+        @keyframes connectorPulse {
+            0%, 100% { opacity: 0.4; filter: blur(15px); }
+            50% { opacity: 0.7; filter: blur(25px); }
+        }
+
+        /* 中心交汇点 */
+        .center-point {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .center-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, 
+                rgba(255,255,255,0.9) 0%,
+                rgba(255,255,255,0.5) 30%,
+                transparent 70%
+            );
+            border-radius: 50%;
+            animation: orbPulse 4s ease-in-out infinite;
+            box-shadow: 
+                0 0 30px rgba(255,255,255,0.5),
+                0 0 60px rgba(168,230,207,0.3),
+                0 0 90px rgba(255,154,158,0.2),
+                0 0 120px rgba(212,165,116,0.1);
+        }
+
+        @keyframes orbPulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 
+                    0 0 30px rgba(255,255,255,0.5),
+                    0 0 60px rgba(168,230,207,0.3),
+                    0 0 90px rgba(255,154,158,0.2);
+            }
+            33% {
+                transform: translate(-50%, -50%) scale(1.1);
+                box-shadow: 
+                    0 0 40px rgba(255,255,255,0.7),
+                    0 0 80px rgba(168,230,207,0.4),
+                    0 0 100px rgba(255,154,158,0.3);
+            }
+            66% {
+                transform: translate(-50%, -50%) scale(0.95);
+                box-shadow: 
+                    0 0 25px rgba(255,255,255,0.4),
+                    0 0 50px rgba(212,165,116,0.3),
+                    0 0 80px rgba(139,69,19,0.2);
+            }
+        }
+
+        /* 环绕轨道 */
+        .orbit-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 50%;
+            animation: orbitRotate 30s linear infinite;
+        }
+
+        .orbit-ring:nth-child(1) { width: 80px; height: 80px; animation-duration: 20s; }
+        .orbit-ring:nth-child(2) { width: 120px; height: 120px; animation-duration: 30s; animation-direction: reverse; }
+        .orbit-ring:nth-child(3) { width: 160px; height: 160px; animation-duration: 40s; }
+
+        @keyframes orbitRotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* 悬浮粒子 */
+        .cosmic-dust {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+        }
+
+        .dust {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: dustFloat 15s ease-in-out infinite;
+        }
+
+        @keyframes dustFloat {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1); 
+                opacity: 0.3;
+            }
+            25% { 
+                transform: translate(30px, -20px) scale(1.5); 
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translate(-20px, 30px) scale(0.8); 
+                opacity: 0.5;
+            }
+            75% { 
+                transform: translate(40px, 10px) scale(1.2); 
+                opacity: 0.7;
+            }
+        }
+
+        /* ========== 交互效果 ========== */
+        .season-panel:hover {
+            z-index: 50;
+            transform: scale(1.02);
+            box-shadow: 0 0 50px rgba(255,255,255,0.3);
+        }
+
+        .season-panel:hover::after {
+            opacity: 0.1;
+        }
+
+        .season-panel:hover .season-content {
+            transform: scale(1.05);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .season-name {
+                font-size: 2rem;
+                letter-spacing: 0.08em;
+            }
+            
+            .season-tagline {
+                font-size: 1rem;
+            }
+            
+            .season-philosophy {
+                font-size: 0.9rem;
+                line-height: 1.8;
+            }
+            
+            .season-symbol {
+                font-size: 3rem;
+            }
+
+            .connector-top, .connector-bottom {
+                height: 30px;
+            }
+
+            .connector-left, .connector-right {
+                width: 30px;
+            }
+
+            .center-point {
+                width: 60px;
+                height: 60px;
+            }
+
+            .center-orb {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* 加载动画 */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0f;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-text {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            color: rgba(255,255,255,0.85);
+            letter-spacing: 0.12em;
+            text-align: center;
+            max-width: 90vw;
+            animation: loadingPulse 2s ease-in-out infinite;
+        }
+
+        .loading-cycle {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .loading-cycle span {
+            position: absolute;
+            font-size: 0.72rem;
+            font-style: italic;
+            white-space: nowrap;
+            animation: cycleRotate 4s linear infinite;
+        }
+
+        .loading-cycle span:nth-child(1) { color: var(--spring-deep); top: 0; left: 50%; transform: translateX(-50%); }
+        .loading-cycle span:nth-child(2) { color: var(--summer-deep); right: 0; top: 50%; transform: translateY(-50%); }
+        .loading-cycle span:nth-child(3) { color: var(--autumn-deep); bottom: 0; left: 50%; transform: translateX(-50%); }
+        .loading-cycle span:nth-child(4) { color: var(--winter-deep); left: 0; top: 50%; transform: translateY(-50%); }
+
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes cycleRotate {
+            0% { transform: translateX(-50%) translateY(0); }
+            25% { transform: translateX(0) translateY(-50%); }
+            50% { transform: translateX(-50%) translateY(0); }
+            75% { transform: translateX(-100%) translateY(-50%); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+
+        /* 四季文字动画 */
+        .season-enter {
+            animation: seasonEnter 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes seasonEnter {
+            0% { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.9);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .spring .season-enter { animation-delay: 0.2s; }
+        .summer .season-enter { animation-delay: 0.4s; }
+        .autumn .season-enter { animation-delay: 0.6s; }
+        .winter .season-enter { animation-delay: 0.8s; }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loading">
+        <div class="loading-cycle">
+            <span>Spring</span>
+            <span>Summer</span>
+            <span>Autumn</span>
+            <span>Winter</span>
+        </div>
+        <div class="loading-text">The story finds its light</div>
+    </div>
+
+    <div class="seasons-container">
+        <div class="connector connector-top"></div>
+        <div class="connector connector-right"></div>
+        <div class="connector connector-bottom"></div>
+        <div class="connector connector-left"></div>
+
+        <div class="center-point">
+            <div class="center-orb"></div>
+            <div class="orbit-ring"></div>
+            <div class="orbit-ring"></div>
+            <div class="orbit-ring"></div>
+            <div class="cosmic-dust">
+                <div class="dust" style="top: 20%; left: 30%; animation-delay: 0s;"></div>
+                <div class="dust" style="top: 60%; left: 70%; animation-delay: 2s;"></div>
+                <div class="dust" style="top: 40%; left: 80%; animation-delay: 4s;"></div>
+                <div class="dust" style="top: 80%; left: 20%; animation-delay: 6s;"></div>
+                <div class="dust" style="top: 30%; left: 60%; animation-delay: 8s;"></div>
+                <div class="dust" style="top: 70%; left: 40%; animation-delay: 10s;"></div>
+            </div>
+        </div>
+
+        <div class="season-panel spring">
+            <img class="bg-image" src="./微信图片_20260324195618_266_2.jpg" alt="Spring scene">
+            <div class="gradient-overlay"></div>
+            <div class="spring-particles" id="springParticles"></div>
+            <div class="sprout"></div>
+            <div class="season-content season-enter">
+                <span class="season-symbol">🌸</span>
+                <div class="season-name">Spring</div>
+                <div class="season-tagline">First Light</div>
+                <div class="season-philosophy">
+                    Through thaw and tender green, the promise under the soil holds:<br>
+                    no winter is the last word—only the opening<br>
+                    of what was always meant to blossom into a fulfilled end.
+                </div>
+            </div>
+        </div>
+
+        <div class="season-panel summer">
+            <img class="bg-image" src="./微信图片_20260324195619_267_2.jpg" alt="Summer scene">
+            <div class="gradient-overlay"></div>
+            <div class="summer-sun"></div>
+            <div class="fireflies" id="summerFireflies"></div>
+            <div class="season-content season-enter">
+                <span class="season-symbol">☀️</span>
+                <div class="season-name">Summer</div>
+                <div class="season-tagline">High Noon</div>
+                <div class="season-philosophy">
+                    In the long gold of day we learn that joy need not fear its closing;<br>
+                    every warmth we kindle here lights the way<br>
+                    to the homecoming written in the heart of the story.
+                </div>
+            </div>
+        </div>
+
+        <div class="season-panel autumn">
+            <img class="bg-image" src="./微信图片_20260324195619_268_2.jpg" alt="Autumn scene">
+            <div class="gradient-overlay"></div>
+            <div class="autumn-ripple"></div>
+            <div class="falling-leaves" id="autumnLeaves"></div>
+            <div class="season-content season-enter">
+                <span class="season-symbol">🍂</span>
+                <div class="season-name">Autumn</div>
+                <div class="season-tagline">Harvest</div>
+                <div class="season-philosophy">
+                    What the wind takes from the branch it sets in the open hand as gift;<br>
+                    we gather what we were given and walk, lightened,<br>
+                    into the final chapter we always deserved.
+                </div>
+            </div>
+        </div>
+
+        <div class="season-panel winter">
+            <img class="bg-image" src="./微信图片_20260324195620_269_2.jpg" alt="Winter scene">
+            <div class="gradient-overlay"></div>
+            <div class="snowflakes" id="winterSnow"></div>
+            <div class="ice-crystal" style="top: 15%; left: 20%;"></div>
+            <div class="ice-crystal" style="bottom: 20%; right: 15%; animation-delay: 2s;"></div>
+            <div class="season-content season-enter">
+                <span class="season-symbol">❄️</span>
+                <div class="season-name">Winter</div>
+                <div class="season-tagline">Stillness</div>
+                <div class="season-philosophy">
+                    Snow writes the hush we need to hear the faithful pulse beneath;<br>
+                    in the coldest breath the circle completes—<br>
+                    and the ending arrives, whole, gentle, and fulfilled.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loading').classList.add('hidden');
+            }, 2500);
+        });
+
+        function createSpringPetals() {
+            const container = document.getElementById('springParticles');
+            const colors = ['pink', 'white', 'yellow', 'blue'];
+            const petalCount = 25;
+
+            for (let i = 0; i < petalCount; i++) {
+                const petal = document.createElement('div');
+                petal.className = `petal ${colors[Math.floor(Math.random() * colors.length)]}`;
+                petal.style.left = Math.random() * 100 + '%';
+                petal.style.animationDuration = (8 + Math.random() * 8) + 's';
+                petal.style.animationDelay = Math.random() * 10 + 's';
+                petal.style.width = (10 + Math.random() * 10) + 'px';
+                petal.style.height = petal.style.width;
+                container.appendChild(petal);
+            }
+        }
+
+        function createFireflies() {
+            const container = document.getElementById('summerFireflies');
+            const fireflyCount = 20;
+
+            for (let i = 0; i < fireflyCount; i++) {
+                const firefly = document.createElement('div');
+                firefly.className = 'firefly';
+                firefly.style.left = Math.random() * 100 + '%';
+                firefly.style.top = Math.random() * 100 + '%';
+                firefly.style.animationDuration = (6 + Math.random() * 6) + 's';
+                firefly.style.animationDelay = Math.random() * 8 + 's';
+                container.appendChild(firefly);
+            }
+        }
+
+        function createFallingLeaves() {
+            const container = document.getElementById('autumnLeaves');
+            const leafTypes = ['🍂', '🍁', '🍃', '🌾'];
+            const leafCount = 18;
+
+            for (let i = 0; i < leafCount; i++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf';
+                leaf.textContent = leafTypes[Math.floor(Math.random() * leafTypes.length)];
+                leaf.style.left = Math.random() * 100 + '%';
+                leaf.style.animationDuration = (10 + Math.random() * 10) + 's';
+                leaf.style.animationDelay = Math.random() * 8 + 's';
+                leaf.style.fontSize = (1.5 + Math.random() * 1) + 'rem';
+                container.appendChild(leaf);
+            }
+        }
+
+        function createSnowflakes() {
+            const container = document.getElementById('winterSnow');
+            const snowflakeTypes = ['❄', '❅', '❆', '✻', '✼'];
+            const snowCount = 30;
+
+            for (let i = 0; i < snowCount; i++) {
+                const snow = document.createElement('div');
+                snow.className = 'snowflake';
+                snow.textContent = snowflakeTypes[Math.floor(Math.random() * snowflakeTypes.length)];
+                snow.style.left = Math.random() * 100 + '%';
+                snow.style.animationDuration = (8 + Math.random() * 8) + 's';
+                snow.style.animationDelay = Math.random() * 10 + 's';
+                snow.style.fontSize = (1 + Math.random() * 1.2) + 'rem';
+                snow.style.opacity = 0.6 + Math.random() * 0.4;
+                container.appendChild(snow);
+            }
+        }
+
+        document.addEventListener('mousemove', function(e) {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+
+            const orb = document.querySelector('.center-orb');
+            const moveX = (x - 0.5) * 20;
+            const moveY = (y - 0.5) * 20;
+            orb.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+        });
+
+        document.querySelectorAll('.season-panel').forEach(panel => {
+            panel.addEventListener('click', function() {
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 10px;
+                    height: 10px;
+                    background: rgba(255,255,255,0.5);
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    animation: clickRipple 1s ease-out forwards;
+                    z-index: 100;
+                    pointer-events: none;
+                `;
+                this.appendChild(ripple);
+                
+                setTimeout(() => ripple.remove(), 1000);
+            });
+        });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes clickRipple {
+                0% { width: 10px; height: 10px; opacity: 0.8; }
+                100% { width: 400px; height: 400px; opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        createSpringPetals();
+        createFireflies();
+        createFallingLeaves();
+        createSnowflakes();
+
+        console.log('%cFulfilled — The Four Seasons', 'font-size: 22px; font-style: italic; color: #E8DCC4;');
+        console.log('%cSpring through winter, one arc toward a gentle, whole ending.', 'font-size: 13px; font-style: italic; color: #98FB98;');
+        console.log('%cThe story finds its light.', 'font-size: 12px; font-style: italic; color: #87CEEB;');
+    </script>
+</body>
+</html>
