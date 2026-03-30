@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>哲学抽象</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-0: #07060c;
+      --bg-1: #130f20;
+      --champagne: rgba(244, 223, 195, 0.92);
+      --lavender-shadow: rgba(110, 90, 148, 0.65);
+      --deep-shadow: rgba(11, 8, 20, 0.85);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(95, 73, 142, 0.2), transparent 40%),
+        radial-gradient(circle at 84% 88%, rgba(73, 92, 152, 0.18), transparent 42%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      color: var(--champagne);
+      overflow: hidden;
+      font-family: "Noto Serif SC", Georgia, serif;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      grid-template-rows: 1fr 0.34fr;
+      gap: 0;
+      isolation: isolate;
+    }
+
+    .main-left {
+      grid-column: 1 / 2;
+      grid-row: 1 / 2;
+    }
+
+    .right-grid {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .bottom-strip {
+      grid-column: 1 / 3;
+      grid-row: 2 / 3;
+    }
+
+    .cell {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      border: 1px solid rgba(190, 171, 214, 0.15);
+      background:
+        linear-gradient(145deg, rgba(57, 43, 84, 0.45), rgba(30, 25, 44, 0.7)),
+        radial-gradient(circle at 22% 20%, rgba(218, 184, 255, 0.11), transparent 42%),
+        radial-gradient(circle at 78% 84%, rgba(117, 198, 255, 0.1), transparent 45%);
+    }
+
+    .art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      z-index: 0;
+      transform-origin: center center;
+      animation: imageFloat 12s ease-in-out infinite;
+    }
+
+    .fx {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    .verse {
+      position: absolute;
+      z-index: 50;
+      left: clamp(14px, 2.2vw, 36px);
+      right: clamp(14px, 2.2vw, 36px);
+      bottom: clamp(14px, 2.4vw, 36px);
+      color: var(--champagne);
+      text-shadow:
+        0 1px 0 rgba(255, 246, 231, 0.38),
+        0 0 20px var(--lavender-shadow),
+        0 0 38px var(--deep-shadow);
+    }
+
+    .verse h2 {
+      margin: 0 0 8px;
+      font-family: "Cinzel", "Noto Serif SC", serif;
+      font-size: clamp(1.02rem, 1.2vw, 1.55rem);
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    .verse p {
+      margin: 0;
+      font-size: clamp(0.73rem, 0.85vw, 1.02rem);
+      line-height: 1.45;
+      font-weight: 500;
+    }
+
+    .c1 .fx-vignette {
+      background: radial-gradient(circle, transparent 46%, rgba(7, 4, 14, 0.8) 100%);
+      animation: vignettePulse 8.5s ease-in-out infinite;
+      mix-blend-mode: multiply;
+    }
+
+    .c1 .fx-particles {
+      background-image:
+        radial-gradient(circle at 17% 18%, rgba(243, 194, 155, 0.48) 0 1.2px, transparent 2.2px),
+        radial-gradient(circle at 65% 42%, rgba(249, 232, 207, 0.38) 0 1px, transparent 2px),
+        radial-gradient(circle at 40% 76%, rgba(186, 144, 247, 0.34) 0 1.4px, transparent 2.3px);
+      animation: dustDrift 13s linear infinite;
+    }
+
+    .c2 .fx-radial {
+      background:
+        radial-gradient(circle at 30% 34%, rgba(218, 239, 255, 0.48), transparent 45%),
+        radial-gradient(circle at 73% 70%, rgba(175, 210, 255, 0.32), transparent 48%);
+      mix-blend-mode: screen;
+      animation: glowPulse 6.2s ease-in-out infinite alternate;
+    }
+
+    .c2 .fx-sweep {
+      background: linear-gradient(118deg, transparent 22%, rgba(255, 253, 241, 0.58) 50%, transparent 78%);
+      transform: translateX(-130%) rotate(-9deg);
+      animation: sweepAcross 5.8s cubic-bezier(0.32, 0.07, 0.32, 1) infinite;
+      mix-blend-mode: screen;
+    }
+
+    .c3 .fx-coldveil {
+      background:
+        linear-gradient(150deg, rgba(70, 109, 175, 0.36), rgba(151, 125, 196, 0.18)),
+        radial-gradient(circle at 68% 30%, rgba(181, 230, 255, 0.3), transparent 42%);
+      animation: colorPulse 7.4s ease-in-out infinite;
+      mix-blend-mode: soft-light;
+    }
+
+    .c3 .fx-scan {
+      background: linear-gradient(125deg, transparent 26%, rgba(214, 235, 255, 0.44) 52%, transparent 74%);
+      transform: translateX(-140%) rotate(-8deg);
+      animation: scanFast 4.9s ease-in-out infinite;
+      mix-blend-mode: screen;
+    }
+
+    .c4 .fx-goldthread {
+      background:
+        repeating-linear-gradient(
+          100deg,
+          transparent 0 6%,
+          rgba(224, 202, 161, 0.3) 7.2% 7.8%,
+          transparent 9.2% 15.2%
+        );
+      transform: translateX(-10%);
+      animation: threadMove 10.8s linear infinite;
+      mix-blend-mode: soft-light;
+    }
+
+    .c4 .fx-core {
+      background: radial-gradient(circle at 63% 34%, rgba(233, 213, 172, 0.26), transparent 52%);
+      animation: coreBreathe 5.3s ease-in-out infinite;
+      mix-blend-mode: screen;
+    }
+
+    .c5 .fx-noise {
+      background-image:
+        linear-gradient(0deg, rgba(255, 255, 255, 0.07) 50%, transparent 50%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 50%, transparent 50%);
+      background-size: 2px 2px, 3px 3px;
+      mix-blend-mode: overlay;
+      animation: noiseFlicker 0.26s steps(2) infinite;
+      opacity: 0.45;
+    }
+
+    .c5 .fx-motes {
+      background-image:
+        radial-gradient(circle at 24% 61%, rgba(252, 244, 229, 0.34) 0 1px, transparent 2px),
+        radial-gradient(circle at 57% 22%, rgba(217, 195, 255, 0.3) 0 1.3px, transparent 2.5px),
+        radial-gradient(circle at 81% 78%, rgba(194, 220, 255, 0.3) 0 1.1px, transparent 2.3px);
+      animation: dustDrift 9.8s linear infinite reverse;
+    }
+
+    .c6 .fx-seam {
+      background: linear-gradient(102deg, transparent 16%, rgba(236, 208, 167, 0.56) 50%, transparent 84%);
+      transform: translateX(-120%);
+      animation: sweepAcross 4.8s cubic-bezier(0.35, 0.14, 0.33, 1) infinite;
+      mix-blend-mode: screen;
+    }
+
+    .c6 .art {
+      animation-duration: 9.4s;
+    }
+
+    .c2 .art { animation-duration: 10.4s; animation-delay: -1.1s; }
+    .c3 .art { animation-duration: 11.7s; animation-delay: -2.5s; }
+    .c4 .art { animation-duration: 12.2s; animation-delay: -0.6s; }
+    .c5 .art { animation-duration: 10.1s; animation-delay: -1.9s; }
+
+    .cross-connector-v,
+    .cross-connector-h,
+    .core-focus {
+      position: absolute;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .cross-connector-v {
+      top: 0;
+      bottom: 34%;
+      left: 62.8%;
+      width: 10px;
+      background: linear-gradient(to bottom, rgba(198, 160, 250, 0.08), rgba(245, 220, 191, 0.22), rgba(145, 186, 255, 0.1));
+      filter: blur(7px);
+      animation: seamPulse 6.8s ease-in-out infinite;
+    }
+
+    .cross-connector-h {
+      left: 62.8%;
+      right: 0;
+      top: 33%;
+      height: 10px;
+      background: linear-gradient(to right, rgba(210, 181, 255, 0.09), rgba(255, 227, 186, 0.2), rgba(160, 219, 255, 0.1));
+      filter: blur(7px);
+      animation: seamPulse 7.5s ease-in-out infinite reverse;
+    }
+
+    .core-focus {
+      left: 62.8%;
+      top: 33%;
+      width: 70px;
+      height: 70px;
+      margin-left: -35px;
+      margin-top: -35px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, rgba(243, 220, 185, 0.56), rgba(195, 160, 245, 0.16) 45%, transparent 76%);
+      box-shadow: 0 0 35px rgba(210, 172, 250, 0.44);
+      animation: focusBreathe 5.6s ease-in-out infinite;
+    }
+
+    @keyframes imageFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-6px) scale(1.015); }
+    }
+
+    @keyframes vignettePulse {
+      0%, 100% { opacity: 0.52; }
+      50% { opacity: 0.82; }
+    }
+
+    @keyframes dustDrift {
+      0% { transform: translate3d(0, 0, 0); opacity: 0.5; }
+      50% { transform: translate3d(8px, -10px, 0); opacity: 0.9; }
+      100% { transform: translate3d(16px, -20px, 0); opacity: 0.55; }
+    }
+
+    @keyframes glowPulse {
+      from { opacity: 0.35; transform: scale(1); }
+      to { opacity: 0.9; transform: scale(1.05); }
+    }
+
+    @keyframes sweepAcross {
+      0% { transform: translateX(-130%) rotate(-9deg); opacity: 0; }
+      18% { opacity: 0.85; }
+      60% { opacity: 0.7; }
+      100% { transform: translateX(130%) rotate(-9deg); opacity: 0; }
+    }
+
+    @keyframes colorPulse {
+      0%, 100% { opacity: 0.35; }
+      40% { opacity: 0.76; }
+      75% { opacity: 0.54; }
+    }
+
+    @keyframes scanFast {
+      0% { transform: translateX(-140%) rotate(-8deg); opacity: 0; }
+      15% { opacity: 0.72; }
+      65% { opacity: 0.66; }
+      100% { transform: translateX(130%) rotate(-8deg); opacity: 0; }
+    }
+
+    @keyframes threadMove {
+      0% { transform: translateX(-12%); opacity: 0.34; }
+      50% { transform: translateX(10%); opacity: 0.64; }
+      100% { transform: translateX(24%); opacity: 0.38; }
+    }
+
+    @keyframes coreBreathe {
+      0%, 100% { opacity: 0.24; transform: scale(1); }
+      50% { opacity: 0.64; transform: scale(1.08); }
+    }
+
+    @keyframes noiseFlicker {
+      0% { opacity: 0.15; }
+      50% { opacity: 0.48; }
+      100% { opacity: 0.22; }
+    }
+
+    @keyframes seamPulse {
+      0%, 100% { opacity: 0.32; }
+      50% { opacity: 0.66; }
+    }
+
+    @keyframes focusBreathe {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.14); opacity: 1; }
+    }
+
+    @media (max-width: 980px) {
+      html,
+      body {
+        height: auto;
+        min-height: 100%;
+        overflow-y: auto;
+      }
+
+      .stage {
+        min-height: 100vh;
+        height: auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: 54vh auto auto;
+      }
+
+      .main-left {
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+      }
+
+      .right-grid {
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 38vh 38vh;
+      }
+
+      .bottom-strip {
+        grid-column: 1 / 2;
+        grid-row: 3 / 4;
+        min-height: 30vh;
+      }
+
+      .cross-connector-v,
+      .cross-connector-h,
+      .core-focus {
+        display: none;
+      }
+
+      .verse h2 {
+        font-size: clamp(1rem, 3.8vw, 1.36rem);
+      }
+
+      .verse p {
+        font-size: clamp(0.78rem, 2.8vw, 0.96rem);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .fx {
+        opacity: 0.3 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <figure class="cell main-left c1">
+      <img class="art" src="./微信图片_20260330201753_349_2.jpg" alt="哲学抽象主视觉一">
+      <div class="fx fx-vignette" aria-hidden="true"></div>
+      <div class="fx fx-particles" aria-hidden="true"></div>
+      <figcaption class="verse">
+        <h2>Mind Is A Fractal</h2>
+        <p>意识不是答案，而是追问自己的回声。</p>
+      </figcaption>
+    </figure>
+
+    <section class="right-grid">
+      <figure class="cell c2">
+        <img class="art" src="./微信图片_20260330202158_357_2.jpg" alt="哲学抽象图像二">
+        <div class="fx fx-radial" aria-hidden="true"></div>
+        <div class="fx fx-sweep" aria-hidden="true"></div>
+        <figcaption class="verse">
+          <h2>Reason In Mist</h2>
+          <p>理性像雾，不遮蔽世界，只揭示边缘。</p>
+        </figcaption>
+      </figure>
+
+      <figure class="cell c3">
+        <img class="art" src="./微信图片_20260330202209_372_2.jpg" alt="哲学抽象图像三">
+        <div class="fx fx-coldveil" aria-hidden="true"></div>
+        <div class="fx fx-scan" aria-hidden="true"></div>
+        <figcaption class="verse">
+          <h2>Being As Motion</h2>
+          <p>存在并不静止，它在每次犹疑中转向。</p>
+        </figcaption>
+      </figure>
+
+      <figure class="cell c4">
+        <img class="art" src="./微信图片_20260330202215_380_2.jpg" alt="哲学抽象图像四">
+        <div class="fx fx-goldthread" aria-hidden="true"></div>
+        <div class="fx fx-core" aria-hidden="true"></div>
+        <figcaption class="verse">
+          <h2>Order Of Silence</h2>
+          <p>沉默并非空白，它排列了思想的纹理。</p>
+        </figcaption>
+      </figure>
+
+      <figure class="cell c5">
+        <img class="art" src="./微信图片_20260330202220_387_2.jpg" alt="哲学抽象图像五">
+        <div class="fx fx-noise" aria-hidden="true"></div>
+        <div class="fx fx-motes" aria-hidden="true"></div>
+        <figcaption class="verse">
+          <h2>Self Is A Threshold</h2>
+          <p>自我不是房间，而是一道持续开启的门槛。</p>
+        </figcaption>
+      </figure>
+    </section>
+
+    <figure class="cell bottom-strip c6">
+      <img class="art" src="./微信图片_20260330202229_399_2.jpg" alt="哲学抽象图像六">
+      <div class="fx fx-seam" aria-hidden="true"></div>
+      <figcaption class="verse">
+        <h2>Abstractum Philosophia</h2>
+        <p>当形象退后，思想开始发光；当意义破碎，真实才显形。</p>
+      </figcaption>
+    </figure>
+
+    <div class="cross-connector-v" aria-hidden="true"></div>
+    <div class="cross-connector-h" aria-hidden="true"></div>
+    <div class="core-focus" aria-hidden="true"></div>
+  </main>
+</body>
+</html>

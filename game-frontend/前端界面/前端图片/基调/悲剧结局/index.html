@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>悲剧结局 · 油画基调页</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #100b08;
+      --bg-mid: #241712;
+      --gold-1: #d7b06a;
+      --gold-2: #b98e49;
+      --cool-gold: #c2ad88;
+      --shadow-deep: rgba(26, 14, 8, 0.92);
+      --shadow-soft: rgba(119, 83, 36, 0.42);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(90% 120% at 50% 50%, rgba(183, 128, 58, 0.2), transparent 58%),
+        linear-gradient(140deg, var(--bg-deep), #0b0908 50%, #1d130f);
+      color: #efe0c6;
+      font-family: "Cormorant Garamond", Georgia, serif;
+    }
+
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 0;
+      isolation: isolate;
+    }
+
+    .cell {
+      position: relative;
+      margin: 0;
+      overflow: hidden;
+      isolation: isolate;
+      background: #1b130f;
+    }
+
+    .cell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+      opacity: 0.65;
+    }
+
+    .cell img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      z-index: 0;
+      filter: saturate(0.94) contrast(1.04);
+      transform: scale(1.01);
+    }
+
+    .cell[data-cell="345"] {
+      background:
+        radial-gradient(circle at 22% 14%, rgba(178, 88, 44, 0.54), transparent 44%),
+        linear-gradient(165deg, #2b150d, #140d09 68%, #31170e);
+    }
+
+    .cell[data-cell="346"] {
+      background:
+        radial-gradient(circle at 70% 10%, rgba(98, 117, 102, 0.48), transparent 46%),
+        linear-gradient(160deg, #0f1410, #101211 58%, #1f221d);
+    }
+
+    .cell[data-cell="347"] {
+      background:
+        radial-gradient(circle at 82% 16%, rgba(237, 158, 65, 0.54), transparent 44%),
+        linear-gradient(145deg, #2c1506, #1b0f07 58%, #5b330d);
+    }
+
+    .cell[data-cell="348"] {
+      background:
+        radial-gradient(circle at 26% 12%, rgba(115, 105, 131, 0.54), transparent 44%),
+        linear-gradient(155deg, #17151d, #131117 62%, #2a2430);
+    }
+
+    .cell[data-cell="345"]::before {
+      background: linear-gradient(35deg, rgba(195, 125, 75, 0.42), transparent 52%);
+    }
+
+    .cell[data-cell="346"]::before {
+      background: linear-gradient(40deg, rgba(83, 103, 90, 0.36), rgba(130, 114, 85, 0.14));
+    }
+
+    .cell[data-cell="347"]::before {
+      background: linear-gradient(50deg, rgba(222, 163, 83, 0.4), transparent 54%);
+    }
+
+    .cell[data-cell="348"]::before {
+      background: linear-gradient(48deg, rgba(99, 92, 122, 0.44), rgba(144, 116, 81, 0.13));
+    }
+
+    .fx {
+      position: absolute;
+      inset: 0;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    .verse {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-start;
+      gap: 0.35rem;
+      padding: clamp(1rem, 2.8vw, 2.2rem);
+      text-shadow:
+        0 1px 1px var(--shadow-deep),
+        0 0 14px var(--shadow-soft),
+        0 0 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .verse h2 {
+      margin: 0;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: "Cinzel", Georgia, serif;
+      font-size: clamp(1.08rem, 1.1vw + 0.7rem, 1.66rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--gold-1);
+    }
+
+    .verse p {
+      margin: 0;
+      max-width: min(75%, 28rem);
+      font-size: clamp(0.95rem, 0.62vw + 0.68rem, 1.2rem);
+      line-height: 1.28;
+      font-style: italic;
+      color: rgba(236, 218, 182, 0.92);
+    }
+
+    .cell[data-cell="346"] .verse h2,
+    .cell[data-cell="348"] .verse h2 {
+      color: var(--cool-gold);
+    }
+
+    .cell[data-cell="348"] .verse p {
+      color: rgba(214, 206, 220, 0.9);
+    }
+
+    .fx-345-glow {
+      background:
+        radial-gradient(44% 38% at 25% 18%, rgba(225, 160, 90, 0.38), transparent 68%),
+        radial-gradient(32% 30% at 78% 73%, rgba(201, 123, 66, 0.25), transparent 66%);
+      mix-blend-mode: screen;
+      animation: glowPulse345 7.4s ease-in-out infinite alternate;
+    }
+
+    .fx-345-vignette {
+      box-shadow: inset 0 0 120px rgba(13, 9, 7, 0.52);
+      animation: vignetteBreath345 9.8s ease-in-out infinite;
+    }
+
+    .fx-346-duotone {
+      background:
+        linear-gradient(22deg, rgba(78, 94, 84, 0.32), rgba(165, 127, 84, 0.18)),
+        radial-gradient(60% 60% at 72% 20%, rgba(70, 85, 102, 0.26), transparent 70%);
+      mix-blend-mode: soft-light;
+      animation: duotoneShift346 11.3s ease-in-out infinite alternate;
+      animation-delay: -2.2s;
+    }
+
+    .fx-346-noise {
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px),
+        radial-gradient(circle at 72% 70%, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px),
+        radial-gradient(circle at 46% 56%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px);
+      background-size: 95px 95px, 73px 73px, 61px 61px;
+      opacity: 0.22;
+      animation: noiseFlicker346 3.8s steps(3, end) infinite;
+    }
+
+    .fx-347-gilded {
+      background:
+        linear-gradient(110deg,
+          transparent 5%,
+          rgba(226, 170, 79, 0.22) 28%,
+          transparent 44%,
+          rgba(242, 194, 108, 0.2) 61%,
+          transparent 76%);
+      mix-blend-mode: screen;
+      animation: gildedFlow347 6.2s linear infinite;
+    }
+
+    .fx-347-sweep {
+      background: linear-gradient(112deg, transparent 28%, rgba(255, 221, 161, 0.52) 50%, transparent 72%);
+      transform: translateX(-130%);
+      mix-blend-mode: screen;
+      animation: sweep347 8.6s ease-in-out infinite;
+      animation-delay: -2.4s;
+    }
+
+    .fx-348-pulse {
+      background:
+        radial-gradient(62% 55% at 62% 20%, rgba(102, 90, 128, 0.32), transparent 72%),
+        linear-gradient(25deg, rgba(93, 80, 119, 0.34), rgba(98, 112, 138, 0.18));
+      mix-blend-mode: soft-light;
+      animation: pulse348 7.8s ease-in-out infinite alternate;
+      animation-delay: -1.7s;
+    }
+
+    .fx-348-noise {
+      background-image:
+        radial-gradient(circle at 28% 26%, rgba(255, 255, 255, 0.09) 0 1px, transparent 1px),
+        radial-gradient(circle at 64% 52%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px),
+        radial-gradient(circle at 40% 76%, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px);
+      background-size: 82px 82px, 67px 67px, 54px 54px;
+      opacity: 0.2;
+      animation: noiseFlicker348 4.1s steps(4, end) infinite;
+    }
+
+    .seam {
+      position: absolute;
+      pointer-events: none;
+      z-index: 35;
+      opacity: 0.72;
+      filter: blur(7px);
+      mix-blend-mode: screen;
+    }
+
+    .seam-v {
+      top: 0;
+      bottom: 0;
+      left: calc(50% - 14px);
+      width: 28px;
+      background: linear-gradient(to right, transparent, rgba(198, 145, 74, 0.48), transparent);
+      animation: seamPulse 8.1s ease-in-out infinite alternate;
+    }
+
+    .seam-h {
+      left: 0;
+      right: 0;
+      top: calc(50% - 14px);
+      height: 28px;
+      background: linear-gradient(to bottom, transparent, rgba(166, 126, 83, 0.42), transparent);
+      animation: seamPulse 9.4s ease-in-out infinite alternate-reverse;
+      animation-delay: -1.4s;
+    }
+
+    .center-focus {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: clamp(72px, 11vw, 132px);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 40;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(249, 209, 140, 0.48), rgba(182, 119, 58, 0.16) 45%, transparent 68%);
+      box-shadow:
+        0 0 24px rgba(222, 159, 80, 0.55),
+        0 0 58px rgba(126, 79, 38, 0.36);
+      animation: centerBreath 6.8s ease-in-out infinite;
+    }
+
+    .center-focus::before {
+      content: "";
+      position: absolute;
+      inset: -22%;
+      border: 1px solid rgba(217, 176, 106, 0.35);
+      border-radius: 50%;
+      animation: ringSpin 11.2s linear infinite;
+    }
+
+    .center-focus::after {
+      content: "";
+      position: absolute;
+      inset: -38%;
+      border: 1px solid rgba(160, 130, 102, 0.22);
+      border-radius: 50%;
+      animation: ringSpin 15.4s linear infinite reverse;
+    }
+
+    @keyframes glowPulse345 {
+      from { opacity: 0.28; transform: scale(0.98); }
+      to { opacity: 0.5; transform: scale(1.05); }
+    }
+
+    @keyframes vignetteBreath345 {
+      0%, 100% { opacity: 0.66; }
+      50% { opacity: 0.43; }
+    }
+
+    @keyframes duotoneShift346 {
+      from { opacity: 0.34; filter: hue-rotate(0deg) saturate(1); }
+      to { opacity: 0.56; filter: hue-rotate(-8deg) saturate(1.08); }
+    }
+
+    @keyframes noiseFlicker346 {
+      0%, 100% { opacity: 0.15; }
+      50% { opacity: 0.26; }
+    }
+
+    @keyframes gildedFlow347 {
+      from { background-position: -120% 0; opacity: 0.24; }
+      to { background-position: 160% 0; opacity: 0.44; }
+    }
+
+    @keyframes sweep347 {
+      0% { transform: translateX(-135%); opacity: 0; }
+      38% { opacity: 0.32; }
+      58% { opacity: 0.48; }
+      100% { transform: translateX(125%); opacity: 0; }
+    }
+
+    @keyframes pulse348 {
+      from { opacity: 0.3; }
+      to { opacity: 0.58; }
+    }
+
+    @keyframes noiseFlicker348 {
+      0%, 100% { opacity: 0.14; }
+      35% { opacity: 0.22; }
+      70% { opacity: 0.18; }
+    }
+
+    @keyframes seamPulse {
+      from { opacity: 0.38; }
+      to { opacity: 0.78; }
+    }
+
+    @keyframes centerBreath {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.92); }
+      50% { transform: translate(-50%, -50%) scale(1.06); }
+    }
+
+    @keyframes ringSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 900px) {
+      .verse {
+        padding: clamp(0.8rem, 2.4vw, 1.4rem);
+      }
+
+      .verse p {
+        max-width: 84%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .seam {
+        opacity: 0.5;
+      }
+
+      .center-focus {
+        opacity: 0.62;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="悲剧结局油画基调页">
+    <figure class="cell" data-cell="345">
+      <img src="./微信图片_20260330195441_345_2.jpg" alt="暖棕油画场景">
+      <span class="fx fx-345-glow" aria-hidden="true"></span>
+      <span class="fx fx-345-vignette" aria-hidden="true"></span>
+      <figcaption class="verse">
+        <h2>Ruin Of Oath</h2>
+        <p>The promise burns first at the edge of light, then leaves only ash where warmth once stayed.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="cell" data-cell="346">
+      <img src="./微信图片_20260330195441_346_2.jpg" alt="灰绿油画场景">
+      <span class="fx fx-346-duotone" aria-hidden="true"></span>
+      <span class="fx fx-346-noise" aria-hidden="true"></span>
+      <figcaption class="verse">
+        <h2>Silent Witness</h2>
+        <p>A colder dusk collects each unfinished word and lets it sink without a name.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="cell" data-cell="347">
+      <img src="./微信图片_20260330195443_347_2.jpg" alt="金橙油画场景">
+      <span class="fx fx-347-gilded" aria-hidden="true"></span>
+      <span class="fx fx-347-sweep" aria-hidden="true"></span>
+      <figcaption class="verse">
+        <h2>Golden Collapse</h2>
+        <p>Even the brightest frame cannot hold a heart that chooses to fall before dawn.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="cell" data-cell="348">
+      <img src="./微信图片_20260330195444_348_2.jpg" alt="冷灰紫油画场景">
+      <span class="fx fx-348-pulse" aria-hidden="true"></span>
+      <span class="fx fx-348-noise" aria-hidden="true"></span>
+      <figcaption class="verse">
+        <h2>Violet Aftermath</h2>
+        <p>When the scene is over, sorrow lingers like smoke in corridors that never heal.</p>
+      </figcaption>
+    </figure>
+
+    <span class="seam seam-v" aria-hidden="true"></span>
+    <span class="seam seam-h" aria-hidden="true"></span>
+    <span class="center-focus" aria-hidden="true"></span>
+  </main>
+</body>
+</html>

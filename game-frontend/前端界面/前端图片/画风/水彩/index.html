@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watercolor Mood Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Noto+Serif+SC:wght@400;500;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink-cool: #e8f3ff;
+      --ink-cool-shadow: rgba(16, 36, 64, 0.75);
+      --ink-warm: #f4cb84;
+      --ink-warm-shadow: rgba(80, 44, 14, 0.6);
+      --paper: #070b13;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, #f3cd86 0%, #d7a252 32%, #3d71bb 70%, #12346a 100%);
+      color: var(--ink-cool);
+      font-family: "Noto Serif SC", serif;
+    }
+
+    body {
+      position: relative;
+      isolation: isolate;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -8%;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    body::before {
+      background:
+        radial-gradient(52% 46% at 18% 24%, rgba(122, 183, 255, 0.38), transparent 72%),
+        radial-gradient(44% 40% at 84% 26%, rgba(255, 203, 118, 0.34), transparent 74%),
+        radial-gradient(60% 52% at 64% 80%, rgba(64, 127, 223, 0.28), transparent 76%),
+        conic-gradient(from 210deg at 50% 56%, rgba(255, 203, 118, 0.12), rgba(88, 145, 255, 0.12), rgba(255, 218, 142, 0.1), rgba(82, 130, 236, 0.12), rgba(255, 203, 118, 0.12));
+      filter: blur(18px) saturate(112%);
+      opacity: 0.92;
+      animation: bgAuroraShift 22s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      background:
+        radial-gradient(circle at 14% 30%, rgba(255, 223, 158, 0.26) 0 2px, transparent 4px),
+        radial-gradient(circle at 32% 72%, rgba(161, 209, 255, 0.22) 0 1.8px, transparent 3.6px),
+        radial-gradient(circle at 78% 24%, rgba(255, 213, 135, 0.24) 0 2.1px, transparent 4px),
+        radial-gradient(circle at 68% 78%, rgba(160, 213, 255, 0.2) 0 1.8px, transparent 3.4px);
+      background-size: 320px 320px, 360px 360px, 340px 340px, 390px 390px;
+      mix-blend-mode: screen;
+      opacity: 0.38;
+      animation: bgDustFloat 30s linear infinite;
+    }
+
+    main.mood-grid {
+      height: 100%;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 0.9fr 1fr;
+      grid-template-areas: "left middle right";
+      gap: 0;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .middle-stack {
+      grid-area: middle;
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 0;
+      isolation: isolate;
+    }
+
+    .cell {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .cell-d { grid-area: left; }
+    .cell-c { grid-area: right; }
+    .cell-a { min-height: 0; }
+    .cell-b { min-height: 0; }
+
+    .wash {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .cell-a .wash {
+      background:
+        radial-gradient(100% 80% at 16% 18%, rgba(154, 227, 241, 0.38), transparent 66%),
+        radial-gradient(100% 85% at 80% 80%, rgba(120, 170, 212, 0.34), transparent 72%),
+        linear-gradient(165deg, #1a304b 0%, #95d6e5 55%, #d8f0ff 100%);
+    }
+
+    .cell-b .wash {
+      background:
+        radial-gradient(120% 70% at 60% 8%, rgba(255, 219, 164, 0.5), transparent 74%),
+        radial-gradient(95% 95% at 16% 84%, rgba(196, 157, 212, 0.34), transparent 70%),
+        linear-gradient(160deg, #f1d8b8 0%, #fdf3e5 48%, #d9c8d6 100%);
+    }
+
+    .cell-c .wash {
+      background:
+        radial-gradient(120% 110% at 35% 12%, rgba(192, 226, 252, 0.34), transparent 75%),
+        radial-gradient(95% 66% at 52% 90%, rgba(202, 183, 141, 0.42), transparent 70%),
+        linear-gradient(180deg, #87c0e8 0%, #4a97d2 52%, #d4bf9b 100%);
+    }
+
+    .cell-d .wash {
+      background:
+        radial-gradient(140% 100% at 78% 85%, rgba(255, 211, 170, 0.42), transparent 68%),
+        radial-gradient(85% 75% at 24% 22%, rgba(138, 154, 255, 0.32), transparent 72%),
+        linear-gradient(156deg, #2f3f89 0%, #4e6ec3 46%, #a18fd5 100%);
+    }
+
+    img.painting {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      transform: scale(1.01);
+      animation: paintingFloat 16s ease-in-out infinite;
+    }
+
+    .fx-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    .verse {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: clamp(0.6rem, 1.2vw, 1.6rem);
+      line-height: 1.35;
+      letter-spacing: 0.03em;
+    }
+
+    .verse p {
+      margin: 0;
+      max-width: min(92%, 28ch);
+      font-size: clamp(0.72rem, 1.3vw, 1.25rem);
+      color: var(--ink-cool);
+      text-shadow:
+        0 1px 1px var(--ink-cool-shadow),
+        0 0 8px rgba(163, 212, 255, 0.35),
+        0 0 20px rgba(10, 22, 42, 0.26);
+    }
+
+    .verse .en {
+      display: block;
+      font-family: "Cormorant Garamond", serif;
+      font-style: italic;
+      font-size: 1.25em;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    .verse .warm {
+      font-family: "Playfair Display", serif;
+      color: var(--ink-warm);
+      text-shadow:
+        0 0 5px var(--ink-warm-shadow),
+        0 0 14px rgba(243, 188, 113, 0.44);
+    }
+
+    .fx-a-shimmer {
+      background: linear-gradient(114deg, transparent 15%, rgba(198, 242, 255, 0.08) 40%, rgba(242, 255, 255, 0.55) 50%, rgba(134, 224, 255, 0.16) 58%, transparent 78%);
+      transform: translateX(-130%);
+      animation: iceSweep 8.2s linear infinite;
+      mix-blend-mode: screen;
+    }
+
+    .fx-a-particles {
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(216, 251, 255, 0.64) 0 1.2px, transparent 2px),
+        radial-gradient(circle at 70% 56%, rgba(143, 223, 255, 0.52) 0 1.5px, transparent 2.3px),
+        radial-gradient(circle at 40% 76%, rgba(214, 250, 255, 0.58) 0 1.2px, transparent 2px),
+        radial-gradient(circle at 84% 20%, rgba(169, 242, 255, 0.48) 0 1.4px, transparent 2.2px);
+      background-size: 190px 190px, 220px 220px, 240px 240px, 205px 205px;
+      animation: particleDriftA 15s ease-in-out infinite;
+      opacity: 0.72;
+    }
+
+    .fx-b-sheen {
+      background: linear-gradient(120deg, transparent 18%, rgba(255, 203, 147, 0.22) 45%, rgba(255, 236, 191, 0.58) 52%, rgba(255, 207, 138, 0.18) 62%, transparent 82%);
+      transform: translateX(-128%);
+      animation: warmSweep 9.4s linear infinite;
+      mix-blend-mode: soft-light;
+    }
+
+    .fx-b-noise {
+      background-image:
+        radial-gradient(circle at 15% 17%, rgba(255, 245, 221, 0.42) 0 0.8px, transparent 1.6px),
+        radial-gradient(circle at 72% 52%, rgba(255, 233, 203, 0.44) 0 0.8px, transparent 1.5px),
+        radial-gradient(circle at 45% 84%, rgba(255, 247, 227, 0.36) 0 0.7px, transparent 1.4px);
+      background-size: 118px 118px, 141px 141px, 127px 127px;
+      animation: grainPulseB 3.7s steps(5, end) infinite;
+      mix-blend-mode: screen;
+      opacity: 0.4;
+    }
+
+    .fx-c-mist {
+      background:
+        radial-gradient(120% 72% at 20% 20%, rgba(220, 242, 255, 0.37), transparent 65%),
+        radial-gradient(115% 78% at 74% 70%, rgba(178, 223, 249, 0.3), transparent 72%);
+      animation: mistDriftC 18s ease-in-out infinite;
+      mix-blend-mode: screen;
+      opacity: 0.6;
+    }
+
+    .fx-c-spark {
+      background-image:
+        radial-gradient(circle at 26% 26%, rgba(220, 249, 255, 0.65) 0 1.1px, transparent 2px),
+        radial-gradient(circle at 60% 48%, rgba(255, 255, 255, 0.72) 0 1.2px, transparent 2.3px),
+        radial-gradient(circle at 80% 72%, rgba(182, 235, 255, 0.66) 0 1.1px, transparent 2px);
+      background-size: 260px 260px, 290px 290px, 305px 305px;
+      animation: sparkBlinkC 7.6s ease-in-out infinite;
+      opacity: 0.46;
+    }
+
+    .fx-d-prism {
+      background:
+        radial-gradient(95% 65% at 84% 77%, rgba(255, 194, 178, 0.3), transparent 70%),
+        linear-gradient(126deg, rgba(104, 151, 255, 0.2) 10%, rgba(244, 194, 243, 0.18) 42%, rgba(255, 224, 172, 0.27) 68%, rgba(155, 222, 255, 0.15) 87%);
+      animation: prismPulseD 10.8s ease-in-out infinite;
+      mix-blend-mode: soft-light;
+      opacity: 0.64;
+    }
+
+    .fx-d-caustic {
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(255, 215, 133, 0.72) 0 2px, transparent 3.6px),
+        radial-gradient(circle at 35% 68%, rgba(255, 228, 176, 0.7) 0 1.8px, transparent 3px),
+        radial-gradient(circle at 66% 22%, rgba(239, 202, 119, 0.68) 0 1.8px, transparent 3px),
+        radial-gradient(circle at 82% 62%, rgba(255, 217, 146, 0.62) 0 1.8px, transparent 3px);
+      background-size: 210px 210px, 260px 260px, 280px 280px, 235px 235px;
+      animation: causticDriftD 9.6s linear infinite;
+      mix-blend-mode: screen;
+      opacity: 0.7;
+    }
+
+    .cross-seam {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      background:
+        linear-gradient(to right, transparent calc(50% - 1px), rgba(189, 225, 255, 0.24) 50%, transparent calc(50% + 1px)),
+        linear-gradient(to bottom, transparent calc(50% - 1px), rgba(247, 211, 154, 0.14) 50%, transparent calc(50% + 1px));
+      filter: blur(6px);
+      opacity: 0.72;
+      animation: seamPulse 9s ease-in-out infinite;
+    }
+
+    @keyframes paintingFloat {
+      0%, 100% { transform: translateY(0) scale(1.01); }
+      50% { transform: translateY(-0.75%) scale(1.016); }
+    }
+
+    @keyframes iceSweep {
+      0% { transform: translateX(-132%); }
+      100% { transform: translateX(130%); }
+    }
+
+    @keyframes particleDriftA {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; }
+      50% { transform: translateY(-3%) translateX(1.4%); opacity: 0.86; }
+    }
+
+    @keyframes warmSweep {
+      0% { transform: translateX(-130%); }
+      100% { transform: translateX(125%); }
+    }
+
+    @keyframes grainPulseB {
+      0%, 100% { opacity: 0.26; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes mistDriftC {
+      0%, 100% { transform: translateX(-1%) translateY(0); opacity: 0.44; }
+      50% { transform: translateX(1.4%) translateY(-1.4%); opacity: 0.68; }
+    }
+
+    @keyframes sparkBlinkC {
+      0%, 100% { opacity: 0.26; }
+      30% { opacity: 0.52; }
+      65% { opacity: 0.39; }
+    }
+
+    @keyframes prismPulseD {
+      0%, 100% { opacity: 0.45; filter: saturate(1) brightness(1); }
+      50% { opacity: 0.78; filter: saturate(1.2) brightness(1.07); }
+    }
+
+    @keyframes causticDriftD {
+      0% { transform: translateX(-2%) translateY(0); }
+      50% { transform: translateX(1.5%) translateY(-1%); }
+      100% { transform: translateX(-2%) translateY(0); }
+    }
+
+    @keyframes seamPulse {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 0.88; }
+    }
+
+    @keyframes bgAuroraShift {
+      0% {
+        transform: translate3d(-1.2%, 0.6%, 0) scale(1.02);
+        filter: blur(18px) saturate(108%);
+      }
+      50% {
+        transform: translate3d(1.4%, -0.9%, 0) scale(1.05);
+        filter: blur(22px) saturate(118%);
+      }
+      100% {
+        transform: translate3d(-0.6%, 1%, 0) scale(1.03);
+        filter: blur(20px) saturate(112%);
+      }
+    }
+
+    @keyframes bgDustFloat {
+      0% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(-1.2%, -1.8%, 0); }
+      100% { transform: translate3d(0, 0, 0); }
+    }
+
+    @media (max-width: 1100px) {
+      main.mood-grid {
+        grid-template-columns: 1fr 0.82fr 1fr;
+      }
+
+      .verse p {
+        font-size: clamp(0.66rem, 1.6vw, 1.05rem);
+      }
+    }
+
+    @media (max-width: 860px) {
+      main.mood-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        grid-template-areas:
+          "left"
+          "middle"
+          "right";
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="mood-grid" aria-label="Watercolor mood collage">
+    <figure class="cell cell-d">
+      <div class="wash" aria-hidden="true"></div>
+      <img class="painting" src="./微信图片_20260330164144_321_2.jpg" alt="金蓝色光影中的侧身少女，带有彩虹般反射">
+      <div class="fx-layer fx-d-prism" aria-hidden="true"></div>
+      <div class="fx-layer fx-d-caustic" aria-hidden="true"></div>
+      <figcaption class="verse">
+        <p><span class="en">Luminous Silence</span><span class="warm">Aurora</span> folds into her sleeves.</p>
+      </figcaption>
+    </figure>
+
+    <section class="middle-stack">
+      <figure class="cell cell-a">
+        <div class="wash" aria-hidden="true"></div>
+        <img class="painting" src="./微信图片_20260330164142_318_2.jpg" alt="黑发少女与碎冰交织在冷色水彩之中">
+        <div class="fx-layer fx-a-shimmer" aria-hidden="true"></div>
+        <div class="fx-layer fx-a-particles" aria-hidden="true"></div>
+        <figcaption class="verse">
+          <p><span class="en">Frozen Echo</span>A quiet heart keeps <span class="warm">starlight</span> under glass.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="cell cell-b">
+        <div class="wash" aria-hidden="true"></div>
+        <img class="painting" src="./微信图片_20260330164143_319_2.jpg" alt="闭眼精灵少女与落叶构成暖色水彩画面">
+        <div class="fx-layer fx-b-sheen" aria-hidden="true"></div>
+        <div class="fx-layer fx-b-noise" aria-hidden="true"></div>
+        <figcaption class="verse">
+          <p><span class="en">Autumn Breath</span>She listens where <span class="warm">golden leaves</span> dissolve.</p>
+        </figcaption>
+      </figure>
+    </section>
+
+    <figure class="cell cell-c">
+      <div class="wash" aria-hidden="true"></div>
+      <img class="painting" src="./微信图片_20260330164144_320_2.jpg" alt="海边背影少女在蓝色海天之间驻足">
+      <div class="fx-layer fx-c-mist" aria-hidden="true"></div>
+      <div class="fx-layer fx-c-spark" aria-hidden="true"></div>
+      <figcaption class="verse">
+        <p><span class="en">Blue Tide</span>Between foam and wind, she names the <span class="warm">dawn</span>.</p>
+      </figcaption>
+    </figure>
+
+    <div class="cross-seam" aria-hidden="true"></div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oil-Paint Mood Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:ital,wght@0,500;1,400;1,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg0: #120813;
+      --bg1: #2a1330;
+      --gold: #e8c98a;
+      --light: #f8e7cd;
+      --purple: #9f69d3;
+      --deepPurple: #31163e;
+      --seam: rgba(192, 125, 230, 0.32);
+      --card: rgba(43, 18, 54, 0.58);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--light);
+      background:
+        radial-gradient(circle at 50% -20%, rgba(189, 130, 255, 0.24), transparent 55%),
+        radial-gradient(circle at 5% 90%, rgba(255, 163, 89, 0.22), transparent 48%),
+        linear-gradient(150deg, var(--bg0), var(--bg1));
+      font-family: "Cormorant Garamond", Georgia, serif;
+      overflow-x: hidden;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: minmax(640px, 80vh) auto;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .mood-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 0;
+      border-radius: 22px;
+      overflow: hidden;
+      isolation: isolate;
+      box-shadow: 0 24px 90px rgba(0, 0, 0, 0.55);
+      background: radial-gradient(circle at center, rgba(160, 95, 194, 0.35), rgba(20, 6, 28, 0.95));
+    }
+
+    .cell {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      border: 1px solid rgba(219, 177, 255, 0.08);
+      background:
+        radial-gradient(circle at 70% 24%, rgba(216, 171, 255, 0.18), transparent 35%),
+        radial-gradient(circle at 16% 82%, rgba(255, 182, 126, 0.16), transparent 43%),
+        linear-gradient(155deg, rgba(22, 9, 27, 0.92), rgba(63, 32, 74, 0.86));
+    }
+
+    .cell img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      z-index: 0;
+      transform-origin: center center;
+      animation: imgFloat 9s ease-in-out infinite alternate;
+      filter: saturate(1.08) contrast(1.05);
+    }
+
+    .cell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at center, transparent 58%, rgba(10, 4, 16, 0.58) 100%),
+        linear-gradient(180deg, rgba(9, 4, 14, 0.18), rgba(21, 6, 28, 0.35));
+      z-index: 9;
+      pointer-events: none;
+      animation: vignettePulse 5.8s ease-in-out infinite alternate;
+    }
+
+    .fx {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 12;
+      mix-blend-mode: screen;
+    }
+
+    .fx-glow {
+      background:
+        radial-gradient(circle at 24% 28%, rgba(255, 220, 178, 0.56), transparent 44%),
+        radial-gradient(circle at 74% 74%, rgba(196, 111, 255, 0.38), transparent 48%);
+      animation: glowPulse 4.8s ease-in-out infinite alternate;
+      opacity: 0.72;
+    }
+
+    .fx-sweep {
+      background: linear-gradient(112deg, transparent 30%, rgba(255, 223, 171, 0.34) 50%, transparent 70%);
+      transform: translateX(-120%) rotate(-7deg);
+      animation: sweepMove 6.5s linear infinite;
+      opacity: 0.62;
+    }
+
+    .fx-dust {
+      background-image:
+        radial-gradient(circle, rgba(255, 240, 216, 0.86) 0 1px, transparent 1px),
+        radial-gradient(circle, rgba(227, 173, 255, 0.64) 0 1px, transparent 1px),
+        radial-gradient(circle, rgba(255, 212, 164, 0.58) 0 1px, transparent 1px);
+      background-size: 42px 42px, 57px 57px, 73px 73px;
+      animation: dustDrift 13s linear infinite;
+      opacity: 0.45;
+    }
+
+    .verse {
+      position: absolute;
+      inset: auto 6% 8% 6%;
+      z-index: 50;
+      padding: 1rem 1.15rem;
+      border: 1px solid rgba(224, 178, 255, 0.34);
+      border-radius: 12px;
+      background: linear-gradient(120deg, rgba(59, 24, 74, 0.54), rgba(24, 11, 35, 0.62));
+      backdrop-filter: blur(5px) saturate(116%);
+      box-shadow: inset 0 0 18px rgba(255, 208, 171, 0.2), 0 10px 28px rgba(6, 0, 10, 0.45);
+    }
+
+    .verse .line {
+      margin: 0;
+      font-style: italic;
+      font-size: clamp(1rem, 1.2vw, 1.35rem);
+      letter-spacing: 0.06em;
+      color: var(--gold);
+      text-shadow:
+        0 1px 0 rgba(33, 13, 41, 0.95),
+        0 0 10px rgba(255, 206, 132, 0.36),
+        0 0 18px rgba(136, 75, 180, 0.4);
+    }
+
+    .verse .sub {
+      margin: 0.35rem 0 0;
+      font-family: "Cinzel", serif;
+      font-size: clamp(0.72rem, 0.9vw, 0.9rem);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(250, 224, 188, 0.88);
+      text-shadow: 0 0 9px rgba(164, 108, 201, 0.52);
+    }
+
+    .seam-v,
+    .seam-h {
+      position: absolute;
+      z-index: 35;
+      pointer-events: none;
+      filter: blur(11px);
+      opacity: 0.85;
+      animation: seamPulse 3.8s ease-in-out infinite alternate;
+    }
+
+    .seam-v {
+      top: 0;
+      bottom: 0;
+      left: calc(50% - 6px);
+      width: 12px;
+      background: linear-gradient(180deg, transparent, var(--seam) 20%, rgba(255, 226, 176, 0.34), var(--seam), transparent);
+    }
+
+    .seam-h {
+      left: 0;
+      right: 0;
+      top: calc(50% - 6px);
+      height: 12px;
+      background: linear-gradient(90deg, transparent, var(--seam) 20%, rgba(255, 226, 176, 0.34), var(--seam), transparent);
+    }
+
+    .center-orb {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: clamp(56px, 6vw, 100px);
+      height: clamp(56px, 6vw, 100px);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 45;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 40% 34%, rgba(255, 236, 197, 0.95), rgba(242, 179, 127, 0.64) 36%, rgba(170, 84, 223, 0.44) 64%, transparent 100%);
+      box-shadow:
+        0 0 22px rgba(223, 160, 255, 0.56),
+        0 0 42px rgba(255, 194, 123, 0.3),
+        0 0 72px rgba(147, 72, 194, 0.28);
+      animation: orbBeat 3.2s ease-in-out infinite;
+    }
+
+    .center-orb::before {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      border: 1px solid rgba(234, 193, 255, 0.38);
+      border-radius: 50%;
+      animation: ringSpin 9.4s linear infinite;
+    }
+
+    .thumb-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+      gap: 0.75rem;
+      padding: 0.25rem;
+    }
+
+    .thumb {
+      border: 1px solid rgba(220, 170, 255, 0.28);
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--light);
+      cursor: pointer;
+      padding: 0.35rem;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    .thumb:hover,
+    .thumb:focus-visible {
+      transform: translateY(-2px) scale(1.015);
+      border-color: rgba(244, 203, 154, 0.84);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.34);
+      outline: none;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 95px;
+      object-fit: contain;
+      background: linear-gradient(145deg, rgba(36, 12, 42, 0.9), rgba(68, 31, 79, 0.76));
+      border-radius: 7px;
+      display: block;
+    }
+
+    .thumb p {
+      margin: 0.35rem 0 0;
+      text-align: center;
+      font-size: 0.86rem;
+      letter-spacing: 0.03em;
+      color: rgba(249, 226, 188, 0.93);
+    }
+
+    @keyframes imgFloat {
+      from { transform: translateY(0) scale(1.02); }
+      to { transform: translateY(-10px) scale(1.045); }
+    }
+    @keyframes glowPulse {
+      0% { opacity: 0.45; transform: scale(1); }
+      100% { opacity: 0.85; transform: scale(1.06); }
+    }
+    @keyframes sweepMove {
+      0% { transform: translateX(-130%) rotate(-7deg); }
+      100% { transform: translateX(130%) rotate(-7deg); }
+    }
+    @keyframes dustDrift {
+      from { background-position: 0 0, 0 0, 0 0; }
+      to { background-position: 130px -90px, -170px 110px, 95px -125px; }
+    }
+    @keyframes vignettePulse {
+      from { opacity: 0.68; }
+      to { opacity: 0.92; }
+    }
+    @keyframes seamPulse {
+      from { opacity: 0.5; }
+      to { opacity: 0.95; }
+    }
+    @keyframes orbBeat {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.95); }
+      50% { transform: translate(-50%, -50%) scale(1.08); }
+    }
+    @keyframes ringSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 960px) {
+      .page {
+        grid-template-rows: auto auto;
+      }
+      .mood-grid {
+        min-height: 76vh;
+      }
+      .verse {
+        inset: auto 4.5% 6% 4.5%;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .mood-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, minmax(240px, 1fr));
+        min-height: auto;
+      }
+      .seam-v { display: none; }
+      .seam-h { display: none; }
+      .center-orb { display: none; }
+      .cell img { animation-duration: 7.8s; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="mood-grid" aria-label="Oil painting anime mood grid">
+      <article class="cell" data-slot="0">
+        <img src="./微信图片_20260330192951_336_2.jpg" alt="Oil painting artwork 336" />
+        <div class="fx fx-glow"></div>
+        <div class="fx fx-sweep"></div>
+        <div class="fx fx-dust"></div>
+        <div class="verse">
+          <p class="line">When silence blooms, destiny begins to glow.</p>
+          <p class="sub">Arc 01</p>
+        </div>
+      </article>
+      <article class="cell" data-slot="1">
+        <img src="./微信图片_20260330192951_337_2.jpg" alt="Oil painting artwork 337" />
+        <div class="fx fx-glow"></div>
+        <div class="fx fx-sweep"></div>
+        <div class="fx fx-dust"></div>
+        <div class="verse">
+          <p class="line">Every ember carries a forgotten vow.</p>
+          <p class="sub">Arc 02</p>
+        </div>
+      </article>
+      <article class="cell" data-slot="2">
+        <img src="./微信图片_20260330192952_338_2.jpg" alt="Oil painting artwork 338" />
+        <div class="fx fx-glow"></div>
+        <div class="fx fx-sweep"></div>
+        <div class="fx fx-dust"></div>
+        <div class="verse">
+          <p class="line">Night sings in violet, brave hearts answer.</p>
+          <p class="sub">Arc 03</p>
+        </div>
+      </article>
+      <article class="cell" data-slot="3">
+        <img src="./微信图片_20260330192952_339_2.jpg" alt="Oil painting artwork 339" />
+        <div class="fx fx-glow"></div>
+        <div class="fx fx-sweep"></div>
+        <div class="fx fx-dust"></div>
+        <div class="verse">
+          <p class="line">The world heals where light and shadow meet.</p>
+          <p class="sub">Arc 04</p>
+        </div>
+      </article>
+
+      <div class="seam-v" aria-hidden="true"></div>
+      <div class="seam-h" aria-hidden="true"></div>
+      <div class="center-orb" aria-hidden="true"></div>
+    </section>
+
+    <section class="thumb-strip" aria-label="Reserve oil paintings">
+      <button class="thumb" data-src="./微信图片_20260330192953_340_2.jpg" data-label="Arc 05" type="button">
+        <img src="./微信图片_20260330192953_340_2.jpg" alt="Oil painting artwork 340 thumbnail" />
+        <p>Arc 05</p>
+      </button>
+      <button class="thumb" data-src="./微信图片_20260330192953_341_2.jpg" data-label="Arc 06" type="button">
+        <img src="./微信图片_20260330192953_341_2.jpg" alt="Oil painting artwork 341 thumbnail" />
+        <p>Arc 06</p>
+      </button>
+      <button class="thumb" data-src="./微信图片_20260330193025_342_2.jpg" data-label="Arc 07" type="button">
+        <img src="./微信图片_20260330193025_342_2.jpg" alt="Oil painting artwork 342 thumbnail" />
+        <p>Arc 07</p>
+      </button>
+      <button class="thumb" data-src="./微信图片_20260330193026_343_2.jpg" data-label="Arc 08" type="button">
+        <img src="./微信图片_20260330193026_343_2.jpg" alt="Oil painting artwork 343 thumbnail" />
+        <p>Arc 08</p>
+      </button>
+      <button class="thumb" data-src="./微信图片_20260330193046_344_2.jpg" data-label="Arc 09" type="button">
+        <img src="./微信图片_20260330193046_344_2.jpg" alt="Oil painting artwork 344 thumbnail" />
+        <p>Arc 09</p>
+      </button>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const cells = [...document.querySelectorAll(".cell img")];
+      const labels = [...document.querySelectorAll(".cell .sub")];
+      const thumbs = [...document.querySelectorAll(".thumb")];
+      let pointer = 0;
+
+      thumbs.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const src = btn.dataset.src;
+          const label = btn.dataset.label || "Arc";
+          cells[pointer].src = src;
+          cells[pointer].alt = `${label} main artwork`;
+          labels[pointer].textContent = label;
+          pointer = (pointer + 1) % cells.length;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

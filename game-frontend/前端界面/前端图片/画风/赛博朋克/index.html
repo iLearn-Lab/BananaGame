@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛博朋克 — Cyberpunk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Rajdhani:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void: #05060d;
+            --seam-cyan: rgba(0, 255, 240, 0.55);
+            --seam-magenta: rgba(255, 0, 180, 0.45);
+            --c312: #7eefff;
+            --c313: #ff6b9d;
+            --c314: #ffb347;
+            --c315: #e040fb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100%;
+            background: var(--void);
+            color: #e8f4ff;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        .cyber-shell {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .cyber-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+            min-height: 100vh;
+            height: 100vh;
+            width: 100%;
+            gap: 0;
+        }
+
+        .cell {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        .cell__media {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .cell__media img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            transform-origin: center center;
+        }
+
+        /* ---------- img float (per cell, staggered) ---------- */
+        .cell--312 .cell__media img { animation: imgFloat312 7.2s ease-in-out infinite; }
+        .cell--313 .cell__media img { animation: imgFloat313 8.1s ease-in-out infinite; animation-delay: -1.8s; }
+        .cell--314 .cell__media img { animation: imgFloat314 7.6s ease-in-out infinite; animation-delay: -0.9s; }
+        .cell--315 .cell__media img { animation: imgFloat315 8.4s ease-in-out infinite; animation-delay: -4.2s; }
+
+        @keyframes imgFloat312 {
+            0%, 100% { transform: translateY(0) scale(1.02); }
+            50% { transform: translateY(-10px) scale(1.04); }
+        }
+        @keyframes imgFloat313 {
+            0%, 100% { transform: translateY(0) scale(1.02); }
+            50% { transform: translateY(-11px) scale(1.038); }
+        }
+        @keyframes imgFloat314 {
+            0%, 100% { transform: translateY(0) scale(1.02); }
+            50% { transform: translateY(-9px) scale(1.035); }
+        }
+        @keyframes imgFloat315 {
+            0%, 100% { transform: translateY(0) scale(1.02); }
+            50% { transform: translateY(-12px) scale(1.04); }
+        }
+
+        /* ---------- 312: sweep + color pulse ---------- */
+        .fx-312-pulse {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            background:
+                linear-gradient(165deg, rgba(0, 255, 240, 0.22) 0%, transparent 45%),
+                linear-gradient(345deg, rgba(255, 0, 180, 0.18) 0%, transparent 50%);
+            mix-blend-mode: screen;
+            animation: fx312Pulse 5.5s ease-in-out infinite;
+        }
+
+        .fx-312-sweep {
+            position: absolute;
+            inset: -45% -55%;
+            z-index: 11;
+            pointer-events: none;
+            background: linear-gradient(
+                100deg,
+                transparent 40%,
+                rgba(255, 255, 255, 0.42) 49.5%,
+                rgba(180, 255, 255, 0.38) 50.5%,
+                transparent 60%
+            );
+            mix-blend-mode: screen;
+            animation: fx312Sweep 4.8s ease-in-out infinite;
+            animation-delay: -1.2s;
+        }
+
+        @keyframes fx312Pulse {
+            0%, 100% { opacity: 0.65; filter: hue-rotate(0deg); }
+            50% { opacity: 1; filter: hue-rotate(25deg); }
+        }
+
+        @keyframes fx312Sweep {
+            0%, 100% { transform: translate(-28%, 6%) rotate(-1.5deg); opacity: 0.2; }
+            45% { opacity: 0.95; }
+            55% { transform: translate(32%, -10%) rotate(1deg); opacity: 0.9; }
+        }
+
+        /* ---------- 313: particles + vignette breath ---------- */
+        .fx-313-vignette {
+            position: absolute;
+            inset: -6%;
+            z-index: 10;
+            pointer-events: none;
+            background: radial-gradient(ellipse 72% 68% at 50% 48%, transparent 30%, rgba(5, 2, 18, 0.78) 100%);
+            mix-blend-mode: multiply;
+            animation: fx313Vignette 6.8s ease-in-out infinite;
+        }
+
+        .fx-313-particles {
+            position: absolute;
+            inset: 0;
+            z-index: 11;
+            pointer-events: none;
+            opacity: 0.9;
+            mix-blend-mode: screen;
+            background-image:
+                radial-gradient(circle at 12% 22%, rgba(255, 200, 255, 0.95) 0, rgba(255, 200, 255, 0.95) 0.5px, transparent 1.2px),
+                radial-gradient(circle at 58% 14%, rgba(180, 240, 255, 0.85) 0, rgba(180, 240, 255, 0.85) 0.4px, transparent 1px),
+                radial-gradient(circle at 82% 38%, rgba(255, 150, 200, 0.9) 0, rgba(255, 150, 200, 0.9) 0.45px, transparent 1.1px),
+                radial-gradient(circle at 40% 55%, rgba(255, 255, 255, 0.75) 0, rgba(255, 255, 255, 0.75) 0.35px, transparent 0.95px),
+                radial-gradient(circle at 70% 72%, rgba(200, 255, 240, 0.8) 0, rgba(200, 255, 240, 0.8) 0.38px, transparent 1px);
+            background-size: 100% 100%;
+            animation: fx313Particles 5s ease-in-out infinite;
+            animation-delay: -2.4s;
+        }
+
+        @keyframes fx313Vignette {
+            0%, 100% { opacity: 0.75; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.08); }
+        }
+
+        @keyframes fx313Particles {
+            0%, 100% { opacity: 0.55; transform: translate(0, 0) scale(1); }
+            50% { opacity: 1; transform: translate(2.5%, -3%) scale(1.02); }
+        }
+
+        /* ---------- 314: road light trails ---------- */
+        .fx-314-trails {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                88deg,
+                transparent 0,
+                transparent 14px,
+                rgba(255, 140, 60, 0.35) 14px,
+                rgba(255, 140, 60, 0.35) 16px,
+                transparent 16px,
+                transparent 38px,
+                rgba(255, 60, 180, 0.28) 38px,
+                rgba(255, 60, 180, 0.28) 40px
+            );
+            mix-blend-mode: screen;
+            animation: fx314Trails 3.2s linear infinite;
+        }
+
+        .fx-314-trails2 {
+            position: absolute;
+            inset: -5%;
+            z-index: 11;
+            pointer-events: none;
+            opacity: 0.65;
+            background: repeating-linear-gradient(
+                -92deg,
+                transparent 0,
+                transparent 22px,
+                rgba(255, 220, 120, 0.22) 22px,
+                rgba(255, 220, 120, 0.22) 24px
+            );
+            mix-blend-mode: lighten;
+            animation: fx314Trails2 4.1s linear infinite;
+        }
+
+        @keyframes fx314Trails {
+            0% { transform: translateX(-12%) translateY(2%); }
+            100% { transform: translateX(12%) translateY(-2%); }
+        }
+
+        @keyframes fx314Trails2 {
+            0% { transform: translateX(10%) translateY(-3%); }
+            100% { transform: translateX(-10%) translateY(3%); }
+        }
+
+        /* ---------- 315: scanlines + glitch ---------- */
+        .fx-315-scan {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0) 0px,
+                rgba(0, 0, 0, 0) 2px,
+                rgba(0, 255, 240, 0.06) 2px,
+                rgba(0, 255, 240, 0.06) 3px
+            );
+            mix-blend-mode: overlay;
+            animation: fx315Scan 4s linear infinite;
+        }
+
+        .fx-315-glitch {
+            position: absolute;
+            inset: 0;
+            z-index: 11;
+            pointer-events: none;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 0, 255, 0.12) 0%,
+                transparent 8%,
+                transparent 92%,
+                rgba(0, 255, 255, 0.1) 100%
+            );
+            mix-blend-mode: screen;
+            animation: fx315Glitch 2.8s steps(2, end) infinite;
+        }
+
+        .fx-315-glitch::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            transform: translateX(3px);
+            opacity: 0.5;
+            mix-blend-mode: difference;
+            animation: fx315GlitchShift 3.5s steps(3, end) infinite;
+        }
+
+        @keyframes fx315Scan {
+            0% { opacity: 0.85; transform: translateY(0); }
+            100% { opacity: 0.95; transform: translateY(3px); }
+        }
+
+        @keyframes fx315Glitch {
+            0%, 100% { clip-path: inset(0 0 0 0); opacity: 0.7; }
+            10% { clip-path: inset(12% 0 78% 0); opacity: 0.9; }
+            20% { clip-path: inset(45% 0 40% 0); opacity: 0.55; }
+            35% { clip-path: inset(0 0 0 0); opacity: 0.75; }
+            50% { clip-path: inset(70% 0 8% 0); opacity: 0.88; }
+            65% { clip-path: inset(0 0 0 0); opacity: 0.7; }
+        }
+
+        @keyframes fx315GlitchShift {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-4px, 1px); }
+            50% { transform: translate(5px, -2px); }
+            75% { transform: translate(-2px, 2px); }
+        }
+
+        /* ---------- literary overlay ---------- */
+        .cell-verse {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: clamp(0.65rem, 2.2vw, 1.25rem);
+        }
+
+        .cell-verse__inner {
+            max-width: 100%;
+            width: 100%;
+            container-type: inline-size;
+            text-align: center;
+        }
+
+        .cell-verse__zh {
+            font-family: "Rajdhani", sans-serif;
+            font-weight: 600;
+            font-size: clamp(1.05rem, 4.2cqi + 0.5rem, 1.65rem);
+            line-height: 1.25;
+            letter-spacing: 0.06em;
+        }
+
+        .cell-verse__en {
+            font-family: "Rajdhani", sans-serif;
+            font-style: italic;
+            font-weight: 500;
+            font-size: clamp(0.82rem, 3.2cqi + 0.35rem, 1.15rem);
+            line-height: 1.35;
+            margin-top: 0.35em;
+            letter-spacing: 0.04em;
+            opacity: 0.95;
+        }
+
+        .cell-verse__title {
+            font-family: "Orbitron", sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.72rem, 2.4cqi + 0.45rem, 0.95rem);
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            margin-bottom: 0.45em;
+            opacity: 0.88;
+        }
+
+        .cell--312 .cell-verse__zh { color: var(--c312); text-shadow: 0 0 18px rgba(0, 40, 60, 0.9), 0 0 2px #000, 0 2px 8px rgba(255, 0, 180, 0.35); }
+        .cell--312 .cell-verse__en { color: #b8f7ff; text-shadow: 0 0 12px rgba(255, 80, 180, 0.4), 0 1px 3px #000; }
+        .cell--312 .cell-verse__title { color: #9ffff0; text-shadow: 0 0 14px rgba(255, 0, 200, 0.45); }
+
+        .cell--313 .cell-verse__zh { color: var(--c313); text-shadow: 0 0 20px rgba(80, 0, 40, 0.85), 0 0 2px #000, 0 2px 10px rgba(120, 200, 255, 0.25); }
+        .cell--313 .cell-verse__en { color: #ffd0e5; text-shadow: 0 0 10px rgba(100, 200, 255, 0.35), 0 1px 3px #000; }
+        .cell--313 .cell-verse__title { color: #ff8fb8; text-shadow: 0 0 16px rgba(255, 100, 160, 0.5); }
+
+        .cell--314 .cell-verse__zh { color: var(--c314); text-shadow: 0 0 18px rgba(42, 16, 16, 0.95), 0 0 2px #000, 0 2px 6px #2a1010; }
+        .cell--314 .cell-verse__en { color: #ffe4c4; text-shadow: 0 0 8px rgba(255, 160, 80, 0.45), 0 1px 3px #000; }
+        .cell--314 .cell-verse__title { color: #ffcc70; text-shadow: 0 0 14px rgba(255, 100, 0, 0.4); }
+
+        .cell--315 .cell-verse__zh { color: var(--c315); text-shadow: 0 0 22px rgba(40, 0, 60, 0.9), 0 0 2px #000, 0 0 12px rgba(200, 255, 255, 0.25); }
+        .cell--315 .cell-verse__en { color: #f5d0ff; text-shadow: 0 0 12px rgba(255, 100, 255, 0.35), 0 1px 3px #000; }
+        .cell--315 .cell-verse__title { color: #f48aff; text-shadow: 0 0 18px rgba(180, 100, 255, 0.55); }
+
+        /* ---------- 叠字全局层：压在十字缝之上、与四格对齐 ---------- */
+        .verse-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 0;
+            pointer-events: none;
+        }
+
+        .verse-overlay__cell {
+            position: relative;
+            min-width: 0;
+            min-height: 0;
+            isolation: isolate;
+        }
+
+        /* ---------- cross seams + core（低于叠字层） ---------- */
+        .seam-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 25;
+            pointer-events: none;
+            display: grid;
+            place-items: center;
+        }
+
+        .seam-h {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 3px;
+            transform: translateY(-50%);
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                var(--seam-cyan) 18%,
+                var(--seam-magenta) 50%,
+                var(--seam-cyan) 82%,
+                transparent 100%
+            );
+            box-shadow: 0 0 14px var(--seam-cyan), 0 0 28px rgba(255, 0, 200, 0.35);
+            opacity: 0.85;
+            animation: seamPulse 5s ease-in-out infinite;
+        }
+
+        .seam-v {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 3px;
+            transform: translateX(-50%);
+            background: linear-gradient(
+                180deg,
+                transparent 0%,
+                var(--seam-magenta) 22%,
+                var(--seam-cyan) 50%,
+                var(--seam-magenta) 78%,
+                transparent 100%
+            );
+            box-shadow: 0 0 14px var(--seam-magenta), 0 0 24px rgba(0, 255, 240, 0.3);
+            opacity: 0.82;
+            animation: seamPulse 5.4s ease-in-out infinite;
+            animation-delay: -1.6s;
+        }
+
+        .seam-core {
+            position: absolute;
+            width: clamp(48px, 8vmin, 88px);
+            height: clamp(48px, 8vmin, 88px);
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.55) 0%, transparent 42%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 240, 0.35) 0%, transparent 55%),
+                radial-gradient(circle at 60% 60%, rgba(255, 0, 200, 0.3) 0%, transparent 50%);
+            box-shadow:
+                0 0 20px rgba(0, 255, 240, 0.45),
+                0 0 40px rgba(255, 0, 180, 0.25),
+                inset 0 0 20px rgba(255, 255, 255, 0.15);
+            mix-blend-mode: screen;
+            animation: seamCore 6s ease-in-out infinite;
+        }
+
+        @keyframes seamPulse {
+            0%, 100% { opacity: 0.55; filter: brightness(1); }
+            50% { opacity: 1; filter: brightness(1.25); }
+        }
+
+        @keyframes seamCore {
+            0%, 100% { transform: scale(1); opacity: 0.75; }
+            50% { transform: scale(1.12); opacity: 1; }
+        }
+
+        /* ---------- mobile: single column, 16:9 strips ---------- */
+        @media (max-width: 768px) {
+            .cyber-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, auto);
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .cell {
+                aspect-ratio: 16 / 9;
+                min-height: unset;
+            }
+
+            .verse-overlay {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, auto);
+            }
+
+            .verse-overlay__cell {
+                aspect-ratio: 16 / 9;
+            }
+
+            /* 单列下十字缝无意义，避免错位叠层 */
+            .seam-layer {
+                display: none;
+            }
+        }
+
+        /* ---------- reduced motion ---------- */
+        @media (prefers-reduced-motion: reduce) {
+            .cell__media img {
+                animation: none !important;
+            }
+            .fx-312-pulse,
+            .fx-312-sweep,
+            .fx-313-vignette,
+            .fx-313-particles,
+            .fx-314-trails,
+            .fx-314-trails2,
+            .fx-315-scan,
+            .fx-315-glitch,
+            .seam-h,
+            .seam-v,
+            .seam-core {
+                animation: none !important;
+            }
+            .fx-312-pulse { opacity: 0.75; }
+            .fx-313-vignette { opacity: 0.88; transform: none; }
+            .fx-314-trails { opacity: 0.45; transform: none; }
+            .fx-314-trails2 { opacity: 0.35; transform: none; }
+            .fx-315-glitch { opacity: 0.5; clip-path: none !important; }
+            .fx-315-glitch::after { animation: none !important; transform: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-shell">
+        <main class="cyber-grid" role="main">
+            <figure class="cell cell--312" aria-label="左上：霓虹之城">
+                <div class="cell__media">
+                    <img src="微信图片_20260329230501_312_2.jpg" alt="赛博朋克都市夜景，霓虹与天际线">
+                </div>
+                <div class="fx-312-pulse" aria-hidden="true"></div>
+                <div class="fx-312-sweep" aria-hidden="true"></div>
+            </figure>
+
+            <figure class="cell cell--313" aria-label="右上：数据与灯河">
+                <div class="cell__media">
+                    <img src="微信图片_20260329230502_313_2.jpg" alt="雾中灯河与楼宇">
+                </div>
+                <div class="fx-313-vignette" aria-hidden="true"></div>
+                <div class="fx-313-particles" aria-hidden="true"></div>
+            </figure>
+
+            <figure class="cell cell--314" aria-label="左下：速度与路面">
+                <div class="cell__media">
+                    <img src="微信图片_20260329230502_314_2.jpg" alt="车流光轨与城市">
+                </div>
+                <div class="fx-314-trails" aria-hidden="true"></div>
+                <div class="fx-314-trails2" aria-hidden="true"></div>
+            </figure>
+
+            <figure class="cell cell--315" aria-label="右下：仰望">
+                <div class="cell__media">
+                    <img src="微信图片_20260329230503_315_2.jpg" alt="摩天楼与仰视视角">
+                </div>
+                <div class="fx-315-scan" aria-hidden="true"></div>
+                <div class="fx-315-glitch" aria-hidden="true"></div>
+            </figure>
+        </main>
+
+        <div class="seam-layer" aria-hidden="true">
+            <div class="seam-h"></div>
+            <div class="seam-v"></div>
+            <div class="seam-core"></div>
+        </div>
+
+        <div class="verse-overlay">
+            <div class="verse-overlay__cell cell--312">
+                <div class="cell-verse">
+                    <div class="cell-verse__inner">
+                        <div class="cell-verse__title">Sector 312</div>
+                        <div class="cell-verse__zh">霓虹浸没之城</div>
+                        <p class="cell-verse__en">Neon drowned grids</p>
+                    </div>
+                </div>
+            </div>
+            <div class="verse-overlay__cell cell--313">
+                <div class="cell-verse">
+                    <div class="cell-verse__inner">
+                        <div class="cell-verse__title">Sector 313</div>
+                        <div class="cell-verse__zh">数据如雾，灯河如血</div>
+                        <p class="cell-verse__en">Data like fog, rivers of light</p>
+                    </div>
+                </div>
+            </div>
+            <div class="verse-overlay__cell cell--314">
+                <div class="cell-verse">
+                    <div class="cell-verse__inner">
+                        <div class="cell-verse__title">Sector 314</div>
+                        <div class="cell-verse__zh">速度在路面结晶</div>
+                        <p class="cell-verse__en">Velocity crystallized on asphalt</p>
+                    </div>
+                </div>
+            </div>
+            <div class="verse-overlay__cell cell--315">
+                <div class="cell-verse">
+                    <div class="cell-verse__inner">
+                        <div class="cell-verse__title">Sector 315</div>
+                        <div class="cell-verse__zh">仰望即被看见</div>
+                        <p class="cell-verse__en">To look up is to be seen</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

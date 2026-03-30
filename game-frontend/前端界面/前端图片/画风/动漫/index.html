@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>动漫 · 沉浸基调页</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=EB+Garamond:wght@400;500&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0f1119;
+      --warm-text: #f4cd83;
+      --warm-shadow-a: rgba(41, 20, 10, 0.9);
+      --warm-shadow-b: rgba(255, 220, 150, 0.45);
+      --cool-text: #d9f1ff;
+      --cool-shadow-a: rgba(17, 35, 55, 0.9);
+      --cool-shadow-b: rgba(168, 232, 255, 0.42);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: radial-gradient(circle at 50% -20%, #29344b 0%, var(--bg-deep) 62%);
+      color: #f3f5f8;
+      overflow: hidden;
+    }
+
+    .mood-grid {
+      position: relative;
+      display: grid;
+      width: 100vw;
+      height: 100vh;
+      grid-template-columns: 3fr 2fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 0;
+      isolation: isolate;
+    }
+
+    .cell {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      background: linear-gradient(145deg, #1b2232 0%, #121827 100%);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .cell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      background: radial-gradient(circle at 70% 20%, rgba(255,255,255,0.17), transparent 46%);
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+
+    .cell--331 { grid-row: 1 / span 2; }
+    .right-grid {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      min-height: 0;
+    }
+
+    .bg-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .img-wrap {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      padding: clamp(10px, 1.5vw, 26px);
+    }
+
+    .img-wrap img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      filter: saturate(1.08) contrast(1.04);
+      animation: imgFloat 6.5s ease-in-out infinite alternate;
+    }
+
+    .fx {
+      position: absolute;
+      inset: 0;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    .verse {
+      position: absolute;
+      z-index: 50;
+      left: clamp(18px, 2vw, 34px);
+      right: clamp(18px, 2vw, 34px);
+      bottom: clamp(18px, 2.2vw, 38px);
+      font-size: clamp(1.05rem, 1.1vw, 1.35rem);
+      line-height: 1.45;
+      letter-spacing: 0.04em;
+      margin: 0;
+      text-wrap: balance;
+    }
+
+    .verse small {
+      display: block;
+      margin-top: 0.38em;
+      font-size: 0.76em;
+      letter-spacing: 0.18em;
+      opacity: 0.92;
+      text-transform: uppercase;
+    }
+
+    .warm .verse {
+      color: var(--warm-text);
+      font-family: "Playfair Display", "Cormorant Garamond", serif;
+      text-shadow:
+        0 0 1px var(--warm-shadow-a),
+        0 2px 7px var(--warm-shadow-a),
+        0 0 14px var(--warm-shadow-b),
+        0 0 24px rgba(252, 202, 120, 0.3);
+    }
+
+    .cool .verse {
+      color: var(--cool-text);
+      font-family: "Cormorant Garamond", "EB Garamond", serif;
+      text-shadow:
+        0 0 1px var(--cool-shadow-a),
+        0 2px 7px var(--cool-shadow-a),
+        0 0 14px var(--cool-shadow-b),
+        0 0 24px rgba(160, 236, 255, 0.3);
+    }
+
+    .seam-link {
+      position: absolute;
+      z-index: 30;
+      pointer-events: none;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 58.8%, rgba(248, 185, 118, 0.2) 60%, rgba(161, 227, 255, 0.22) 63.2%, transparent 66%),
+        linear-gradient(180deg, transparent 48.8%, rgba(255, 235, 210, 0.13) 50%, transparent 53%);
+      filter: blur(8px);
+      animation: seamPulse 3.8s ease-in-out infinite;
+    }
+
+    .center-glow {
+      position: absolute;
+      width: 22vw;
+      height: 22vw;
+      min-width: 200px;
+      min-height: 200px;
+      left: calc(60vw - 11vw);
+      top: calc(50vh - 11vw);
+      z-index: 32;
+      border-radius: 50%;
+      pointer-events: none;
+      background:
+        radial-gradient(circle, rgba(242, 227, 205, 0.36) 0%, rgba(130, 198, 245, 0.22) 32%, rgba(30, 45, 74, 0) 70%);
+      mix-blend-mode: screen;
+      animation: centerBreath 4.1s ease-in-out infinite;
+    }
+
+    /* 331: mist + water + particles */
+    .cell--331 .bg-canvas {
+      background:
+        radial-gradient(120% 70% at 50% 105%, rgba(90, 182, 196, 0.46), rgba(26, 44, 66, 0.08) 56%),
+        linear-gradient(120deg, #5f7a6a 0%, #9ec2a5 32%, #a2d1da 64%, #718ca6 100%);
+    }
+    .fx-mist {
+      background:
+        radial-gradient(60% 50% at 20% 70%, rgba(205, 255, 236, 0.26), transparent 66%),
+        radial-gradient(70% 55% at 82% 35%, rgba(168, 224, 255, 0.27), transparent 62%);
+      mix-blend-mode: screen;
+      animation: mistPulse 5s ease-in-out infinite;
+    }
+    .fx-water {
+      background:
+        repeating-linear-gradient(
+          176deg,
+          rgba(125, 198, 216, 0.28) 0 2px,
+          rgba(125, 198, 216, 0) 2px 10px
+        );
+      mix-blend-mode: soft-light;
+      animation: waveDrift 2.7s linear infinite;
+    }
+    .fx-dust {
+      background-image: radial-gradient(circle, rgba(255,255,255,0.85) 0 1px, transparent 1.5px);
+      background-size: 32px 32px;
+      opacity: 0.3;
+      animation: dustFloat 4.2s linear infinite;
+    }
+
+    /* 332: ribbon shimmer + purple haze */
+    .cell--332 .bg-canvas {
+      background: linear-gradient(145deg, #3a1333 0%, #682245 36%, #8d4d74 72%, #d3a1b2 100%);
+    }
+    .fx-ribbon {
+      background:
+        linear-gradient(118deg, transparent 30%, rgba(255, 180, 148, 0.44) 43%, rgba(255, 246, 232, 0.5) 51%, transparent 62%);
+      mix-blend-mode: screen;
+      transform: translateX(-62%);
+      animation: ribbonSweep 2.4s ease-in-out infinite;
+    }
+    .fx-purple {
+      background:
+        radial-gradient(50% 40% at 72% 22%, rgba(250, 182, 233, 0.3), transparent 65%),
+        radial-gradient(42% 52% at 24% 78%, rgba(165, 82, 190, 0.28), transparent 66%);
+      mix-blend-mode: soft-light;
+      animation: violetDrift 3.7s ease-in-out infinite;
+    }
+
+    /* 333: color pulse */
+    .cell--333 .bg-canvas {
+      background: linear-gradient(155deg, #ffd8da 0%, #feecc9 26%, #f2cee0 52%, #d7caf9 74%, #c7edff 100%);
+    }
+    .fx-color {
+      background:
+        conic-gradient(from 30deg, rgba(255,125,98,0.4), rgba(255,220,133,0.33), rgba(124,212,255,0.32), rgba(186,120,255,0.3), rgba(255,125,98,0.4));
+      mix-blend-mode: overlay;
+      animation: colorPulse 2.9s ease-in-out infinite;
+    }
+    .fx-color::before {
+      content: "";
+      position: absolute;
+      inset: -12%;
+      background:
+        radial-gradient(circle at 20% 32%, rgba(255, 79, 132, 0.42), transparent 30%),
+        radial-gradient(circle at 76% 66%, rgba(98, 210, 255, 0.36), transparent 35%);
+      animation: colorOrb 2.1s ease-in-out infinite alternate;
+    }
+
+    /* 334: cool halo */
+    .cell--334 .bg-canvas {
+      background: linear-gradient(145deg, #d9e3f1 0%, #c9d5e4 35%, #9ab2ce 70%, #5f7393 100%);
+    }
+    .fx-halo {
+      background:
+        radial-gradient(circle at 76% 18%, rgba(225, 246, 255, 0.6), transparent 46%),
+        radial-gradient(circle at 25% 72%, rgba(126, 176, 222, 0.33), transparent 54%);
+      mix-blend-mode: screen;
+      animation: coolHalo 3.2s ease-in-out infinite;
+    }
+    .fx-ice {
+      background-image: radial-gradient(circle, rgba(220, 248, 255, 0.82) 0 1px, transparent 1.4px);
+      background-size: 26px 26px;
+      opacity: 0.36;
+      animation: dustFloat 3s linear infinite reverse;
+    }
+
+    /* 335: glass glint */
+    .cell--335 .bg-canvas {
+      background: linear-gradient(150deg, #a4c0de 0%, #8eadcf 28%, #6d7ea2 64%, #404f73 100%);
+    }
+    .fx-glass {
+      background:
+        linear-gradient(128deg, transparent 24%, rgba(211, 242, 255, 0.4) 42%, rgba(255,255,255,0.6) 47%, transparent 61%),
+        linear-gradient(42deg, transparent 42%, rgba(168, 224, 255, 0.35) 50%, transparent 57%);
+      mix-blend-mode: screen;
+      transform: translateX(-80%);
+      animation: glassShine 2.5s ease-in-out infinite;
+    }
+    .fx-cool-breath {
+      background: radial-gradient(circle at 50% 55%, rgba(177, 235, 255, 0.32), transparent 61%);
+      mix-blend-mode: soft-light;
+      animation: centerBreath 2.6s ease-in-out infinite;
+    }
+
+    @keyframes imgFloat {
+      from { transform: translateY(-6px) scale(1.02); }
+      to { transform: translateY(7px) scale(1.04); }
+    }
+    @keyframes mistPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.82; } }
+    @keyframes waveDrift { from { transform: translateY(-4%) skewX(0deg); } to { transform: translateY(4%) skewX(3deg); } }
+    @keyframes dustFloat { from { transform: translateY(-8%) translateX(0); } to { transform: translateY(8%) translateX(4%); } }
+    @keyframes ribbonSweep { 0% { transform: translateX(-70%); opacity: 0.32; } 50% { opacity: 0.95; } 100% { transform: translateX(72%); opacity: 0.32; } }
+    @keyframes violetDrift { 0%,100% { opacity: 0.45; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.07); } }
+    @keyframes colorPulse { 0%,100% { opacity: 0.45; transform: scale(1); } 50% { opacity: 0.95; transform: scale(1.08); } }
+    @keyframes colorOrb { from { transform: translate(-2%, -2%) scale(1); } to { transform: translate(3%, 2%) scale(1.08); } }
+    @keyframes coolHalo { 0%,100% { opacity: 0.45; transform: scale(1); } 50% { opacity: 0.96; transform: scale(1.12); } }
+    @keyframes glassShine { 0% { transform: translateX(-86%); opacity: 0.28; } 48% { opacity: 0.92; } 100% { transform: translateX(80%); opacity: 0.32; } }
+    @keyframes seamPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+    @keyframes centerBreath { 0%,100% { transform: scale(0.9); opacity: 0.34; } 50% { transform: scale(1.14); opacity: 0.75; } }
+
+    @media (max-width: 980px) {
+      html, body { overflow-y: auto; }
+      .mood-grid {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .cell--331 { min-height: 82vh; }
+      .right-grid {
+        display: flex;
+        flex-direction: column;
+      }
+      .right-grid .cell {
+        min-height: 72vh;
+      }
+      .center-glow {
+        width: 58vw;
+        height: 58vw;
+        left: 50%;
+        top: 52%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      .seam-link, .center-glow, .fx { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <main class="mood-grid" aria-label="动漫主题沉浸页面">
+    <article class="cell cell--331 warm">
+      <div class="bg-canvas" aria-hidden="true"></div>
+      <div class="img-wrap">
+        <img src="./微信图片_20260330190026_331_2.jpg" alt="花园湖面与人像融合的动漫插画">
+      </div>
+      <div class="fx fx-mist" aria-hidden="true"></div>
+      <div class="fx fx-water" aria-hidden="true"></div>
+      <div class="fx fx-dust" aria-hidden="true"></div>
+      <p class="verse">在水光与草色之间，记忆像春天一样慢慢发亮。<small>spring-memory</small></p>
+    </article>
+
+    <section class="right-grid">
+      <article class="cell cell--334 cool">
+        <div class="bg-canvas" aria-hidden="true"></div>
+        <div class="img-wrap">
+          <img src="./微信图片_20260330190028_334_2.jpg" alt="冷色猫耳角色动漫立绘">
+        </div>
+        <div class="fx fx-halo" aria-hidden="true"></div>
+        <div class="fx fx-ice" aria-hidden="true"></div>
+        <p class="verse">冷银的风掠过镜片，孤独也有了温柔的折射。<small>silver-halo</small></p>
+      </article>
+
+      <article class="cell cell--335 cool">
+        <div class="bg-canvas" aria-hidden="true"></div>
+        <div class="img-wrap">
+          <img src="./微信图片_20260330190029_335_2.jpg" alt="玻璃碎片与人物的动漫肖像">
+        </div>
+        <div class="fx fx-glass" aria-hidden="true"></div>
+        <div class="fx fx-cool-breath" aria-hidden="true"></div>
+        <p class="verse">碎光在瞳孔里游走，像一句还没说完的誓言。<small>glass-oath</small></p>
+      </article>
+
+      <article class="cell cell--332 warm">
+        <div class="bg-canvas" aria-hidden="true"></div>
+        <div class="img-wrap">
+          <img src="./微信图片_20260330190027_332_2.jpg" alt="紫红色水彩风动漫角色">
+        </div>
+        <div class="fx fx-ribbon" aria-hidden="true"></div>
+        <div class="fx fx-purple" aria-hidden="true"></div>
+        <p class="verse">丝带划开暮色，心跳在紫红里悄悄升温。<small>violet-ribbon</small></p>
+      </article>
+
+      <article class="cell cell--333 warm">
+        <div class="bg-canvas" aria-hidden="true"></div>
+        <div class="img-wrap">
+          <img src="./微信图片_20260330190028_333_2.jpg" alt="高饱和抽象色彩动漫人物">
+        </div>
+        <div class="fx fx-color" aria-hidden="true"></div>
+        <p class="verse">色彩爆裂成诗，少年从想象的边界向你走来。<small>color-rise</small></p>
+      </article>
+    </section>
+
+    <div class="seam-link" aria-hidden="true"></div>
+    <div class="center-glow" aria-hidden="true"></div>
+  </main>
+</body>
+</html>
