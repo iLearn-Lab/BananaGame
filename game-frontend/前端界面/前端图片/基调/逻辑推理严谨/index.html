@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>油画基调页 - 逻辑推理严谨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink-0: #080b14;
+      --ink-1: #0f1525;
+      --ink-2: #15223a;
+      --ink-3: #1d2b45;
+      --mist-a: rgba(181, 199, 233, 0.76);
+      --mist-b: rgba(145, 167, 209, 0.64);
+      --stroke-a: rgba(8, 11, 18, 0.9);
+      --stroke-b: rgba(23, 34, 58, 0.76);
+      --glow-a: rgba(136, 165, 221, 0.5);
+      --line-a: rgba(134, 157, 212, 0.36);
+      --line-b: rgba(198, 215, 248, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      background:
+        radial-gradient(120% 120% at 70% -15%, rgba(105, 128, 182, 0.16), transparent 60%),
+        radial-gradient(90% 90% at 10% 120%, rgba(61, 79, 119, 0.26), transparent 68%),
+        linear-gradient(145deg, #06080f 0%, #0a0f1d 48%, #121a2d 100%);
+      color: var(--mist-a);
+      overflow-x: hidden;
+      font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      pointer-events: none;
+      z-index: 1;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(158, 179, 224, 0.07) 0, transparent 36%),
+        radial-gradient(circle at 78% 62%, rgba(130, 160, 212, 0.05) 0, transparent 32%),
+        radial-gradient(circle at 50% 50%, rgba(252, 255, 255, 0.02) 0, transparent 44%);
+      animation: bodyVeilDrift 24s ease-in-out infinite alternate;
+    }
+
+    .stage {
+      position: relative;
+      z-index: 2;
+      width: min(1600px, 100vw);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: clamp(14px, 1.8vw, 28px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.48fr) minmax(0, 1fr);
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .cell {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      background:
+        radial-gradient(92% 85% at 55% 42%, rgba(53, 77, 122, 0.36), rgba(13, 21, 37, 0.88)),
+        linear-gradient(130deg, #0d1220 0%, #182742 56%, #111729 100%);
+      border: 1px solid rgba(147, 166, 215, 0.24);
+      box-shadow:
+        inset 0 0 55px rgba(103, 129, 180, 0.11),
+        inset 0 -36px 62px rgba(0, 0, 0, 0.36);
+    }
+
+    .cell-main {
+      grid-column: 1;
+      grid-row: 1 / 4;
+    }
+
+    .cell-rt {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .cell-rm {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .cell-rb {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    .cell img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      z-index: 0;
+      filter: saturate(1.05) contrast(1.03);
+      transform-origin: center center;
+      animation: canvasBreath 11s ease-in-out infinite alternate;
+    }
+
+    .matte {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background:
+        radial-gradient(110% 90% at 50% 50%, transparent 58%, rgba(8, 12, 21, 0.72) 100%),
+        linear-gradient(180deg, rgba(152, 172, 216, 0.1), rgba(15, 25, 41, 0.26));
+      mix-blend-mode: screen;
+    }
+
+    .seam {
+      position: absolute;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0.78;
+      filter: blur(11px);
+      animation: seamPulse 9s ease-in-out infinite;
+    }
+
+    .seam-v {
+      top: clamp(14px, 1.8vw, 28px);
+      bottom: clamp(14px, 1.8vw, 28px);
+      left: calc(62.3% - 24px);
+      width: 48px;
+      background: linear-gradient(
+        90deg,
+        rgba(114, 135, 184, 0),
+        rgba(114, 135, 184, 0.45),
+        rgba(197, 214, 248, 0.4),
+        rgba(114, 135, 184, 0.45),
+        rgba(114, 135, 184, 0)
+      );
+    }
+
+    .seam-h {
+      right: clamp(14px, 1.8vw, 28px);
+      left: calc(62.3% + 8px);
+      height: 28px;
+      background: linear-gradient(
+        180deg,
+        rgba(125, 147, 197, 0),
+        rgba(125, 147, 197, 0.42),
+        rgba(196, 218, 255, 0.3),
+        rgba(125, 147, 197, 0)
+      );
+    }
+
+    .seam-h-1 {
+      top: calc(33.33% - 10px);
+    }
+
+    .seam-h-2 {
+      top: calc(66.66% - 10px);
+    }
+
+    .verse {
+      position: absolute;
+      z-index: 50;
+      left: clamp(14px, 2vw, 40px);
+      bottom: clamp(16px, 2.2vw, 42px);
+      max-width: min(74%, 40ch);
+      color: var(--mist-a);
+      text-shadow:
+        0 1px 2px var(--stroke-a),
+        0 0 12px var(--stroke-b),
+        0 0 24px var(--glow-a);
+      pointer-events: none;
+    }
+
+    .verse .line-cn {
+      margin: 0;
+      font-size: clamp(15px, 1.05vw, 20px);
+      line-height: 1.5;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    .verse .line-en {
+      margin: 0.38em 0 0;
+      font-family: "Cinzel", "Times New Roman", serif;
+      font-size: clamp(12px, 0.86vw, 17px);
+      line-height: 1.4;
+      font-style: italic;
+      letter-spacing: 0.12em;
+      color: var(--mist-b);
+    }
+
+    .cell-main .verse {
+      bottom: clamp(22px, 2.6vw, 56px);
+      max-width: min(68%, 48ch);
+    }
+
+    .cell-main .line-cn {
+      font-size: clamp(18px, 1.28vw, 28px);
+      letter-spacing: 0.1em;
+    }
+
+    .cell-main .line-en {
+      font-size: clamp(13px, 0.95vw, 18px);
+    }
+
+    .fx {
+      position: absolute;
+      inset: 0;
+      z-index: 14;
+      pointer-events: none;
+    }
+
+    /* Main: caustic highlights + drifting dust */
+    .fx-main-caustic {
+      background:
+        radial-gradient(24% 32% at 20% 20%, rgba(201, 222, 255, 0.22), transparent 68%),
+        radial-gradient(26% 30% at 74% 32%, rgba(173, 203, 248, 0.18), transparent 72%),
+        radial-gradient(20% 24% at 42% 72%, rgba(136, 170, 233, 0.15), transparent 78%);
+      mix-blend-mode: screen;
+      animation: causticDrift 8.8s ease-in-out infinite alternate;
+    }
+
+    .dust {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(218, 231, 255, 0.78);
+      box-shadow: 0 0 12px rgba(184, 205, 246, 0.56);
+      animation: dustFloat 12s linear infinite;
+      will-change: transform, opacity;
+    }
+
+    /* Right-top: diagonal shimmer + noise flicker */
+    .fx-rt-shimmer::before,
+    .fx-rt-shimmer::after {
+      content: "";
+      position: absolute;
+      inset: -28%;
+      pointer-events: none;
+    }
+
+    .fx-rt-shimmer::before {
+      background:
+        linear-gradient(
+          120deg,
+          transparent 34%,
+          rgba(216, 232, 255, 0.22) 42%,
+          rgba(118, 150, 210, 0.34) 52%,
+          transparent 62%
+        );
+      mix-blend-mode: screen;
+      animation: diagonalSweep 6.4s linear infinite;
+    }
+
+    .fx-rt-shimmer::after {
+      background-image:
+        radial-gradient(circle at 22% 34%, rgba(255, 255, 255, 0.18) 0 0.7px, transparent 1px),
+        radial-gradient(circle at 72% 64%, rgba(255, 255, 255, 0.16) 0 0.7px, transparent 1px),
+        radial-gradient(circle at 48% 80%, rgba(255, 255, 255, 0.14) 0 0.7px, transparent 1px);
+      background-size: 4px 4px, 5px 5px, 6px 6px;
+      opacity: 0.22;
+      mix-blend-mode: screen;
+      animation: grainFlicker 1.35s steps(5, end) infinite;
+    }
+
+    /* Right-mid: color pulse + border glow */
+    .fx-rm-pulse {
+      background:
+        radial-gradient(80% 100% at 70% 30%, rgba(136, 163, 218, 0.22), transparent 70%),
+        linear-gradient(140deg, rgba(65, 93, 146, 0.24), rgba(35, 53, 86, 0.08));
+      mix-blend-mode: soft-light;
+      animation: midColorPulse 7.8s ease-in-out infinite;
+    }
+
+    .fx-rm-border {
+      box-shadow:
+        inset 0 0 0 1px rgba(176, 197, 237, 0.36),
+        inset 0 0 32px rgba(154, 176, 228, 0.28);
+      animation: borderAura 6.2s ease-in-out infinite alternate;
+    }
+
+    /* Right-bottom: silk lines + low sweep */
+    .fx-rb-silk::before,
+    .fx-rb-silk::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      pointer-events: none;
+    }
+
+    .fx-rb-silk::before {
+      background:
+        repeating-linear-gradient(
+          112deg,
+          rgba(186, 201, 234, 0.08) 0 2px,
+          rgba(186, 201, 234, 0) 2px 10px
+        );
+      mix-blend-mode: screen;
+      animation: silkShift 13s linear infinite;
+    }
+
+    .fx-rb-silk::after {
+      background:
+        linear-gradient(
+          96deg,
+          transparent 36%,
+          rgba(176, 198, 244, 0.16) 52%,
+          transparent 68%
+        );
+      mix-blend-mode: screen;
+      animation: lowSweep 9.2s ease-in-out infinite;
+    }
+
+    @keyframes bodyVeilDrift {
+      0% { transform: translate3d(-1.4%, -0.8%, 0) scale(1); }
+      100% { transform: translate3d(1.2%, 1.3%, 0) scale(1.04); }
+    }
+
+    @keyframes canvasBreath {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.028) translateY(-0.5%); }
+      100% { transform: scale(1.012) translateY(0.4%); }
+    }
+
+    @keyframes seamPulse {
+      0%, 100% { opacity: 0.44; transform: scale(1); }
+      50% { opacity: 0.84; transform: scale(1.03); }
+    }
+
+    @keyframes causticDrift {
+      0% { transform: translate3d(-2%, 1%, 0) scale(1); opacity: 0.72; }
+      100% { transform: translate3d(3%, -2%, 0) scale(1.12); opacity: 0.94; }
+    }
+
+    @keyframes dustFloat {
+      0% { transform: translate3d(0, 0, 0) scale(0.72); opacity: 0; }
+      18% { opacity: 0.76; }
+      85% { opacity: 0.45; }
+      100% { transform: translate3d(var(--dx, 20px), var(--dy, -120px), 0) scale(1.12); opacity: 0; }
+    }
+
+    @keyframes diagonalSweep {
+      0% { transform: translate3d(-35%, 26%, 0) rotate(8deg); }
+      100% { transform: translate3d(38%, -32%, 0) rotate(8deg); }
+    }
+
+    @keyframes grainFlicker {
+      0%, 100% { opacity: 0.12; }
+      30% { opacity: 0.28; }
+      65% { opacity: 0.2; }
+    }
+
+    @keyframes midColorPulse {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.72; transform: scale(1.03); }
+    }
+
+    @keyframes borderAura {
+      0% { opacity: 0.35; }
+      100% { opacity: 0.74; }
+    }
+
+    @keyframes silkShift {
+      0% { transform: translate3d(-9%, 2%, 0) rotate(0deg); }
+      100% { transform: translate3d(9%, -3%, 0) rotate(0.5deg); }
+    }
+
+    @keyframes lowSweep {
+      0%, 100% { opacity: 0.18; transform: translateX(-14%); }
+      50% { opacity: 0.52; transform: translateX(11%); }
+    }
+
+    @media (max-width: 980px) {
+      .stage {
+        min-height: auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(42vh, 58vh) repeat(3, minmax(32vh, 40vh));
+      }
+
+      .cell-main,
+      .cell-rt,
+      .cell-rm,
+      .cell-rb {
+        grid-column: 1;
+        grid-row: auto;
+      }
+
+      .seam-v,
+      .seam-h {
+        display: none;
+      }
+
+      .verse {
+        max-width: min(80%, 44ch);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .fx,
+      .matte,
+      .seam {
+        opacity: 0.45;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="油画风沉浸式基调拼图">
+    <section class="cell cell-main">
+      <img src="./微信图片_20260330201918_351_2.jpg" alt="冷色油画风主视觉">
+      <div class="fx fx-main-caustic"></div>
+      <div class="fx fx-main-dust" data-dust-layer="dense"></div>
+      <div class="matte"></div>
+      <div class="verse">
+        <p class="line-cn">光并不昭示答案，它只让秩序在阴影里浮现。</p>
+        <p class="line-en">Light unveils no verdict, only the shape of order.</p>
+      </div>
+    </section>
+
+    <section class="cell cell-rt">
+      <img src="./微信图片_20260330202203_363_2.jpg" alt="冷调油画右上场景">
+      <div class="fx fx-rt-shimmer"></div>
+      <div class="matte"></div>
+      <div class="verse">
+        <p class="line-cn">斜光划过时，沉默的细节开始给出证词。</p>
+        <p class="line-en">When slanted gleam arrives, silence turns testimonial.</p>
+      </div>
+    </section>
+
+    <section class="cell cell-rm">
+      <img src="./微信图片_20260330202212_376_2.jpg" alt="冷调油画右中场景">
+      <div class="fx fx-rm-pulse"></div>
+      <div class="fx fx-rm-border"></div>
+      <div class="matte"></div>
+      <div class="verse">
+        <p class="line-cn">每一次明暗起伏，都在重排推理的重心。</p>
+        <p class="line-en">Each pulse of shade resets the center of reason.</p>
+      </div>
+    </section>
+
+    <section class="cell cell-rb">
+      <img src="./微信图片_20260330202218_384_2.jpg" alt="冷调油画右下场景">
+      <div class="fx fx-rb-silk"></div>
+      <div class="matte"></div>
+      <div class="verse">
+        <p class="line-cn">细线慢移，像未落定的结论在边缘回旋。</p>
+        <p class="line-en">Silk lines drift where unfinished conclusions circle.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="seam seam-v" aria-hidden="true"></div>
+  <div class="seam seam-h seam-h-1" aria-hidden="true"></div>
+  <div class="seam seam-h seam-h-2" aria-hidden="true"></div>
+
+  <script>
+    (function () {
+      const dustHost = document.querySelector("[data-dust-layer='dense']");
+      if (!dustHost) return;
+
+      const particleCount = 36;
+      for (let i = 0; i < particleCount; i += 1) {
+        const p = document.createElement("span");
+        p.className = "dust";
+        const x = Math.random() * 100;
+        const y = 66 + Math.random() * 34;
+        const dx = -30 + Math.random() * 62;
+        const dy = -58 - Math.random() * 152;
+        const size = 2 + Math.random() * 4.2;
+        const duration = 8 + Math.random() * 11;
+        const delay = -Math.random() * 16;
+        p.style.left = x + "%";
+        p.style.top = y + "%";
+        p.style.width = size + "px";
+        p.style.height = size + "px";
+        p.style.setProperty("--dx", dx.toFixed(2) + "px");
+        p.style.setProperty("--dy", dy.toFixed(2) + "px");
+        p.style.animationDuration = duration.toFixed(2) + "s";
+        p.style.animationDelay = delay.toFixed(2) + "s";
+        p.style.opacity = (0.32 + Math.random() * 0.46).toFixed(2);
+        dustHost.appendChild(p);
+      }
+    })();
+  </script>
+</body>
+</html>

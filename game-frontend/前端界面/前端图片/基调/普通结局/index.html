@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>哲学抽象 - 普通结局</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #0f0c16;
+      --ink-mist: #e6dcff;
+      --ink-shadow: rgba(55, 24, 90, 0.92);
+      --border-soft: rgba(206, 188, 255, 0.22);
+      --glass: rgba(24, 18, 41, 0.48);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(128, 89, 185, 0.2), transparent 55%),
+        radial-gradient(circle at 80% 80%, rgba(74, 111, 189, 0.2), transparent 50%),
+        linear-gradient(160deg, #08060d 0%, #1b1529 45%, #0b0a12 100%);
+      color: #f3ecff;
+      font-family: "Noto Serif SC", serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: clamp(10px, 1.5vw, 26px);
+      overflow-x: hidden;
+    }
+
+    .mood-page {
+      width: min(1500px, 100%);
+      min-height: calc(100vh - clamp(20px, 3vw, 52px));
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      grid-template-rows: repeat(3, minmax(0, 1fr));
+      grid-template-areas:
+        "hero side1"
+        "hero side2"
+        "hero side3";
+      gap: clamp(10px, 1vw, 18px);
+      isolation: isolate;
+    }
+
+    .cell {
+      position: relative;
+      margin: 0;
+      min-height: 220px;
+      overflow: hidden;
+      border: 1px solid var(--border-soft);
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(34, 22, 57, 0.75), rgba(16, 28, 49, 0.82));
+      box-shadow:
+        0 0 0 1px rgba(241, 232, 255, 0.08) inset,
+        0 22px 50px rgba(7, 5, 12, 0.55);
+      isolation: isolate;
+    }
+
+    .hero {
+      grid-area: hero;
+    }
+
+    .side1 {
+      grid-area: side1;
+      background: linear-gradient(140deg, rgba(63, 35, 17, 0.7), rgba(37, 24, 64, 0.8));
+    }
+
+    .side2 {
+      grid-area: side2;
+      background: linear-gradient(140deg, rgba(35, 55, 28, 0.7), rgba(37, 24, 64, 0.76));
+    }
+
+    .side3 {
+      grid-area: side3;
+      background: linear-gradient(140deg, rgba(20, 38, 77, 0.78), rgba(43, 28, 66, 0.72));
+    }
+
+    .cell img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      z-index: 0;
+      animation: imageFloat 17s ease-in-out infinite alternate;
+      transform-origin: center;
+      filter: saturate(1.05) contrast(1.02);
+    }
+
+    .side1 img {
+      animation-duration: 19s;
+      animation-delay: -3.4s;
+    }
+
+    .side2 img {
+      animation-duration: 21s;
+      animation-delay: -7.3s;
+    }
+
+    .side3 img {
+      animation-duration: 18s;
+      animation-delay: -5.8s;
+    }
+
+    .fx {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    .verse {
+      position: absolute;
+      z-index: 50;
+      left: clamp(16px, 2vw, 34px);
+      right: clamp(16px, 2vw, 34px);
+      bottom: clamp(14px, 2.2vw, 36px);
+      padding: clamp(8px, 0.9vw, 14px) clamp(10px, 1.3vw, 18px);
+      border-radius: 12px;
+      border: 1px solid rgba(233, 220, 255, 0.28);
+      background: linear-gradient(135deg, var(--glass), rgba(10, 8, 16, 0.36));
+      backdrop-filter: blur(6px);
+      color: var(--ink-mist);
+      font-family: "Cinzel", "Noto Serif SC", serif;
+      font-size: clamp(0.82rem, 0.82vw, 1rem);
+      letter-spacing: 0.08em;
+      line-height: 1.4;
+      text-align: center;
+      text-shadow:
+        0 1px 1px rgba(255, 245, 255, 0.32),
+        0 0 10px rgba(175, 120, 255, 0.32),
+        0 2px 16px var(--ink-shadow);
+    }
+
+    /* 图1: 径向光斑呼吸 + 轻微漂移（中强） */
+    .hero .fx-glow {
+      background:
+        radial-gradient(circle at 34% 20%, rgba(247, 217, 255, 0.48), transparent 54%),
+        radial-gradient(circle at 76% 82%, rgba(193, 142, 255, 0.34), transparent 57%);
+      mix-blend-mode: screen;
+      animation: heroPulse 6.8s ease-in-out infinite alternate,
+        driftOne 13.2s ease-in-out infinite alternate;
+    }
+
+    /* 图2: 金纹/丝缕微移 + 微粒（中） */
+    .side1 .fx-strand {
+      background:
+        linear-gradient(118deg, transparent 0 32%, rgba(247, 218, 162, 0.28) 43%, transparent 52%),
+        linear-gradient(132deg, transparent 0 62%, rgba(222, 175, 120, 0.24) 72%, transparent 82%);
+      mix-blend-mode: soft-light;
+      animation: strandShift 11.4s linear infinite;
+    }
+
+    .side1 .fx-dust::before {
+      content: "";
+      position: absolute;
+      inset: -18%;
+      background:
+        radial-gradient(circle, rgba(255, 235, 189, 0.44) 0 1.2px, transparent 1.2px) 18% 42% / 120px 120px,
+        radial-gradient(circle, rgba(255, 218, 155, 0.32) 0 1px, transparent 1px) 58% 62% / 92px 92px,
+        radial-gradient(circle, rgba(255, 239, 204, 0.26) 0 0.9px, transparent 0.9px) 35% 75% / 84px 84px;
+      animation: dustDrift 14.5s linear infinite;
+    }
+
+    /* 图3: 冷暖交替罩(低幅) + 暗角呼吸（中） */
+    .side2 .fx-temp {
+      background:
+        linear-gradient(120deg, rgba(242, 176, 114, 0.18), rgba(73, 116, 183, 0.2)),
+        radial-gradient(circle at 20% 18%, rgba(232, 190, 128, 0.24), transparent 52%);
+      mix-blend-mode: overlay;
+      animation: warmCoolShift 9.6s ease-in-out infinite alternate;
+    }
+
+    .side2 .fx-vignette {
+      box-shadow: inset 0 0 120px rgba(8, 10, 16, 0.64);
+      animation: vignetteBreath 7.6s ease-in-out infinite alternate;
+    }
+
+    /* 图4: 冷银雾青色罩脉动 + 边框微光（中） */
+    .side3 .fx-cool {
+      background:
+        radial-gradient(circle at 70% 25%, rgba(166, 212, 255, 0.2), transparent 54%),
+        linear-gradient(150deg, rgba(132, 165, 211, 0.18), rgba(137, 107, 183, 0.2));
+      mix-blend-mode: screen;
+      animation: coolPulse 8.7s ease-in-out infinite alternate;
+    }
+
+    .side3 .fx-rim {
+      border: 1px solid rgba(181, 220, 255, 0.36);
+      box-shadow:
+        inset 0 0 14px rgba(179, 206, 255, 0.36),
+        0 0 18px rgba(155, 197, 255, 0.3);
+      animation: rimGlow 6.6s ease-in-out infinite;
+    }
+
+    @keyframes imageFloat {
+      0% { transform: translateY(0) scale(1.01); }
+      100% { transform: translateY(-8px) scale(1.03); }
+    }
+
+    @keyframes heroPulse {
+      0% { opacity: 0.34; transform: scale(0.98); }
+      100% { opacity: 0.62; transform: scale(1.06); }
+    }
+
+    @keyframes driftOne {
+      0% { transform: translate(-1.6%, 1.2%); }
+      100% { transform: translate(1.4%, -1.4%); }
+    }
+
+    @keyframes strandShift {
+      0% { transform: translateX(-8%); opacity: 0.38; }
+      50% { opacity: 0.56; }
+      100% { transform: translateX(9%); opacity: 0.36; }
+    }
+
+    @keyframes dustDrift {
+      0% { transform: translateY(0) translateX(0); opacity: 0.35; }
+      100% { transform: translateY(-22px) translateX(14px); opacity: 0.6; }
+    }
+
+    @keyframes warmCoolShift {
+      0% { opacity: 0.33; filter: hue-rotate(-6deg) brightness(0.98); }
+      100% { opacity: 0.53; filter: hue-rotate(8deg) brightness(1.03); }
+    }
+
+    @keyframes vignetteBreath {
+      0% { opacity: 0.52; }
+      100% { opacity: 0.76; }
+    }
+
+    @keyframes coolPulse {
+      0% { opacity: 0.34; transform: scale(1); }
+      100% { opacity: 0.62; transform: scale(1.04); }
+    }
+
+    @keyframes rimGlow {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 0.78; }
+    }
+
+    @media (max-width: 980px) {
+      .mood-page {
+        min-height: auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1.1fr repeat(3, 0.86fr);
+        grid-template-areas:
+          "hero"
+          "side1"
+          "side2"
+          "side3";
+      }
+
+      .cell {
+        min-height: 42vh;
+      }
+
+      .verse {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cell img,
+      .fx,
+      .fx::before {
+        animation: none !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="mood-page" aria-label="哲学抽象基调页">
+    <figure class="cell hero">
+      <img src="./微信图片_20260330202214_378_2.jpg" alt="普通结局主视觉图">
+      <span class="fx fx-glow" aria-hidden="true"></span>
+      <figcaption class="verse">Meaning appears only after silence learns to breathe.</figcaption>
+    </figure>
+
+    <figure class="cell side1">
+      <img src="./微信图片_20260330202202_362_2.jpg" alt="普通结局辅图一">
+      <span class="fx fx-strand" aria-hidden="true"></span>
+      <span class="fx fx-dust" aria-hidden="true"></span>
+      <figcaption class="verse">The thought that survives is the one that yields.</figcaption>
+    </figure>
+
+    <figure class="cell side2">
+      <img src="./微信图片_20260330201929_352_2.jpg" alt="普通结局辅图二">
+      <span class="fx fx-temp" aria-hidden="true"></span>
+      <span class="fx fx-vignette" aria-hidden="true"></span>
+      <figcaption class="verse">Opposites do not cancel; they define a horizon.</figcaption>
+    </figure>
+
+    <figure class="cell side3">
+      <img src="./微信图片_20260330202227_396_2.jpg" alt="普通结局辅图三">
+      <span class="fx fx-cool" aria-hidden="true"></span>
+      <span class="fx fx-rim" aria-hidden="true"></span>
+      <figcaption class="verse">Perception is a border that keeps moving.</figcaption>
+    </figure>
+  </main>
+</body>
+</html>
