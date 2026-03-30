@@ -3,8 +3,11 @@ name: frontend-mood-pages
 description: >-
   Build ornate, animation-heavy, full-viewport HTML mood pages (game tone / art
   panels): CSS-only layered effects over imagery, literary overlay text, no
-  minimal UI. Use for immersive single-page collages, triptychs, grid panels,
-  唯美 or dark-gold literary layouts—not for slide decks (use frontend-slides).
+  minimal UI. Supports single-viewport collages or scrollable multi-row layouts,
+  full-image contain with painted letterboxing, optional glass cards and
+  container-query-scaled typography. Use for immersive collages, triptychs, grid
+  panels, 唯美 or dark-gold literary layouts—not for slide decks (use frontend-slides).
+  May use equal quad grids, cross-seam blur connectors, and center focal ornaments when the layout calls for it.
   TRIGGER KEYWORDS (CN): 基调页、氛围页、沉浸页、全屏沉浸、拼图格、联画、多格拼图、画意动效、
   叠层动效、叠字、画上文字、游戏基调页、唯美页、黑深残风、与 frontend-mood-pages 同类的单页氛围。
   TRIGGER KEYWORDS (EN): mood page, tone page, immersive full-screen HTML, triptych,
@@ -15,6 +18,8 @@ description: >-
   user-confirmed literary text colors (and Google Fonts choices); per-image
   overlay motion proposals user-confirmed per cell before keyframes/CSS bind; no
   implementation until user answers and confirms final font/color and per-image fx.
+  In Cursor Plan mode, ask the same Phase 0 questions as in agent mode; do not skip
+  or shorten the inquiry chain until the user confirms or waives in writing.
 ---
 
 # Frontend mood pages（沉浸基调页）
@@ -48,6 +53,12 @@ description: >-
 ## Phase 0（强制）：需求澄清与门禁
 
 **在用户对必问项作出回答，或明确确认你的汇总之前，不得编写或修改 HTML/CSS/JS，不得改图片资源**（含将 **未确认** 的文学层 `color` / `text-shadow` / `font-family`，以及 **未逐图确认** 的画意动效——格内 `fx-*` 定稿、`@keyframes` 绑定与时长——写入实现稿）。只能提问、归纳、等待。
+
+### Cursor Plan 模式与本 Skill（强制，须强调）
+
+- **无论当前对话是否处于 Cursor Plan 模式**，只要按本 Skill 产出基调页方案或实现，**必须执行与 Agent 模式同等完整度的询问链**：**主题 → 图片审查 → fit 态度 → 逐图色系 → 排版选项 → 字体与文学层色彩 → 逐图画意动效**。**禁止**因 Plan 模式而只做「纯架构不写追问」、或明显缩减 Phase 0 提问粒度。
+- **须向用户明确强调**：**Plan 模式也必须询问；询问点与 Agent 模式一致；用户未确认前不得进入实现**（含不得将未确认的 `color` / `font-family` / 格内 `fx-*` 定稿写进计划或代码）。
+- 若用户在**单条消息**中已一次性给出 Phase 0 全部要点并写明「确认」或等价表述，可先 **复述汇总** 并请其 **书面确认** 后再继续计划或编码；否则仍须按上列顺序 **补齐提问**。
 
 ### 图片审查（体积、像素与整张入画）— 有素材时必做
 
@@ -105,7 +116,7 @@ description: >-
 
 2. 用户 **选定一套或混搭**（如「套 B 的字体 + 我自己主色 #…」）后，**仍须**落实 **具体色值** 与 **是否每格不同**；若用户直接给出完整 CSS 颜色与字体列表，以用户为准。
 
-3. **禁止**：因「惯例」或图省事，把本文件 **代码片段** 内的 `rgba(...)` / `font-family` 直接抄入页面当作定稿，**除非**用户已确认采用该片段或等价数值。
+3. **禁止**：因「惯例」或图省事，把「叠字配方」中的演示 `rgba(...)` 或示例 `font-family` 直接抄入页面当作定稿，**除非**用户已确认采用或等价数值。
 
 ### 每图画意动效（用户拍板）
 
@@ -173,6 +184,11 @@ description: >-
 
 **无回答 = 不实现。** **串联**：未完成「图片审查」（含体积、像素比例或用户确认尺寸未知与裁切/全显态度）与「逐张色系」前，不得输出排版 A/B/C。**实现稿门禁**：未完成「字体与文学层色彩（用户拍板）」中对字体族、主字色、`text-shadow` 层次、是否按格变色的 **用户确认** 前，不得将最终 `color` / `text-shadow` / `font-family` 写入 HTML/CSS。**实现稿门禁**：未完成「每图画意动效（用户拍板）」中对 **每一张入页图** 的动效类型/组合、强度及汇总表的 **用户确认** 前，不得将格内画意 `fx-*` 与对应 `@keyframes` 定稿写入 HTML/CSS。用户已在首轮说全所有必问点时，用一句话复述并请其「确认」；收到确认后再进入实现。
 
+### 直接实现 / 仓库范例微调的务实处理
+
+- 若用户 **书面要求**加快节奏（例如「对齐某仓库范例只改文案/动效强度」），可 **合并提问** 或对 **非安全底线项** 做 **逐项书面豁免**。
+- **不得**跳过：**图片清单与体积/像素（或用户接受「尺寸未知 + 裁切/全显态度」的书面确认）、整张入画 vs `cover` 铺满格的态度**；其余项须在写入实现稿 CSS/HTML 前有 **用户确认** 或 **等价书面授权**。
+
 ---
 
 ## 何时用本 Skill vs frontend-slides
@@ -187,6 +203,8 @@ description: >-
 
 ## 审美原则（显式）
 
+**强制**：凡按本 Skill 产出的基调页，**必须**按下列审美取向建造；不得以「省事」「更通用」为由改成极简、静态或系统模板风。Phase 0 仅决定 **素材、布局、字色、逐图动效类型** 等变量，**不改变**本条所定的气质底线。
+
 - **华丽、富动态**：渐变、微粒高光、扫光、焦散、浮动、错频 `animation-delay`。
 - **每图上层明显辅助动效**：每个图片格内须有 **绑定该格**、**易感知的** 画意动效层（类型与参数以 Phase 0 **用户确认** 为准）；**不能**仅靠整页一层动效或仅 `img` 浮动敷衍。
 - **刻意不走极简**：避免大留白、无动效、Inter/Roboto/Arial 作主气质。
@@ -197,12 +215,18 @@ description: >-
 ## 技术约束
 
 - **单文件或少量 HTML**，样式以 **内联 `<style>`** 为主；**不强制** npm/打包。
+- **视口与滚动**：基调页可以是 **`min-height: 100vh` 单屏拼图**（内容锁在一屏内），也可以是 **`main` 随内容增高、`body` 纵向可滚动** 的多行拼图；由 Phase 0 与用户 **「铺满格 vs 全图可见」** 决定，须在方案中写清。
 - 图片 **相对路径**；默认格内 **`object-fit: cover`**，**若 Phase 0 约定全显**则对该图使用 **`object-fit: contain`**，letterbox 用 **渐变 / 噪点 / 微粒 / 与邻格同源色** 铺底，**不得**用大面积极简留白代替设计。`figure` / `.cell` 使用 `overflow: hidden`（`contain` 时衬底画在同一容器底色或伪元素上）。
+- **`img` 与叠层（两种合法模式，按 fit 选用）**  
+  - **铺满格**：`img` 常用 **`position: absolute; inset: 0`** + `width/height: 100%`，配合 **`object-fit: cover`**（或 **`contain` + 上条衬底**）。  
+  - **全图不裁、随内容增高**：`img` 可用 **流式** **`width: 100%; height: auto`** 撑高 `figure`，格内 **`fx-*` 与叠字** 仍为 **`position: absolute; inset: 0`** 相对于该格，盖满图画区域。  
+- **`z-index` 与堆叠**：`img` **垫底**（如 `z-index: 0`）；格内画意 **`fx-*` 建议 `z-index: 10+`**，确保在图之上、易被感知；**文学叠字**须 **明显高于** 画意层（如 **`z-index: 50`**）。`.cell` 可使用 **`isolation: isolate`** 稳定本格叠放上下文。
+- **`contain` / 自然高度 + `img` 浮动**：若图用 `contain` 或 `height: auto`，浮动动画中的 **`scale` 宜略收敛**，避免短暂露边；与 Phase 0 确认的动效强度一致。
 - 动效优先 **CSS**；装饰层 `pointer-events: none`，重要图保留 `alt`。
 - **画意动效作用域**：格内 `fx-*` 须 **`position: absolute; inset: 0` 相对于该 `figure.cell`（或等价容器）**，不得把本应逐格的画意动效只写在 `body` / `main` 全屏一层代替各格（除非用户 Phase 0 明确要求仅全局氛围）。
 - **画意动效定稿**：每格动效类型、层数、时长与 **用户确认的汇总表** 一致；本文件示例 `animation` / `@keyframes` **仅为模板**。
 - **字体**：常见骨架为 **Georgia** + 可选 **Google Fonts** 展示衬线；**具体族名、字重、是否混排** 须在 Phase 0 经 **用户确认** 后再写入实现稿。引入外链字体时使用 `preconnect` + `display=swap`。
-- **文学层色彩**：`color` 与 `text-shadow` 的 **最终数值** 以 **用户给定或确认的候选** 为准；本文件代码片段中的色值 **仅为演示模板**，不得默认当作项目定稿。
+- **文学层色彩**：`color` 与 `text-shadow` 的 **最终数值** 以 **用户给定或确认的候选** 为准；「叠字配方」中的示例色值 **仅为演示**，不得默认当作项目定稿。
 
 ---
 
@@ -210,7 +234,7 @@ description: >-
 
 ### 通用
 
-- 全屏基底：`min-height: 100vh`，Grid 用 `minmax(0, 1fr)` 防止撑破。
+- **基底高度**：单屏拼图可用 `min-height: 100vh`；可滚动长页则 **`main` 高度随内容**，Grid 行可用 **`auto`**，配合 **`body { overflow-y: auto }`**。Grid 用 `minmax(0, 1fr)` 防止撑破（单屏行轨仍适用）。
 - 典型结构：`main` 网格 + 多个 `figure.cell` 或 `section.panel`。
 - 无缝拼图：`gap: 0`；需要缝时用实色/渐变间隙，**避免**用 `backdrop-filter` 做模糊接缝（除非用户明确要求）。
 - **选型与审核联动**：布局类型须服务于 **图源宽高比** 与 **是否全显**；下列每条均可作为 Phase 0 的独立方案候选。
@@ -229,6 +253,8 @@ description: >-
 10. **文字主导区（字即画面）**：约 40%–50% 高（或宽）为排版区，图在余下区域或背后 blend。**比例**：图区可 **contain** + 华丽衬底。**移动端**：字区与图区上下互换亦可。
 11. **对称双飞**：左右对仗或镜像（镜像慎用语义与版权）。**比例**：两图宽高比宜接近。**移动端**：改为上下对仗。
 12. **底部舞台条**：上 75%–85% 为画面区，底条实色/渐变承托叠字。**比例**：上图区单独设 `aspect-ratio` 或 fr 以匹配主图。**移动端**：底条可加高以免叠字挡主视觉。
+13. **上通栏 + 下 2×2 四宫**：首行 **单列通栏跨两列**（常放横图），下 **两行 × 两列** 共四格。**行高**：可用 **`fr` 比例**（例如约 **38% / 31% / 31%** 对应「上约 38%、下块约 62% 且两等分」），或 **`grid-template-rows: auto auto auto`** 配合 **整页纵向滚动** 与「全图不裁」fit。**Fit**：通栏与横图比例接近时 `cover` 裁切较少；下方四格内竖图易 **上下裁**，须按「整张入画与 object-fit 策略」表与用户对齐 `cover` / `contain`+衬底。
+14. **等分四宫格（2×2 全屏）**：`grid` **两行两列均分**（如 `1fr 1fr` × `1fr 1fr`），常配合 **`html, body { height: 100%; overflow: hidden }`** 锁一屏。**适用**：多张图 **并列叙事、气质可相邻**；四格 **裁切量一致**（均为 `cover` 时），便于统一节奏。**可选「联画一体」装饰**：沿 **十字缝** 铺 **窄条模糊渐变**（`linear-gradient` + `filter: blur` + 低不透明度脉动），柔化邻格色差；**中心交汇** 可叠 **光球 / 细轨道 / 星尘微粒**（`pointer-events: none`），强化四象限向心感。**叠字**：格内常 **居中纵排**（符号装饰 + 标题 + 副标 + 段落），与 Phase 0 确认层级与字号。
 
 ---
 
@@ -236,9 +262,9 @@ description: >-
 
 ### 叠层顺序（约定）
 
-- **`img`**：`z-index: 0`（或 `position: relative; z-index: 0`），保证后续层叠在画面上。
-- **氛围层（格内画意）**：`position: absolute; inset: 0; z-index: 2+`，命名建议 `fx-*` 或语义化类名；**每个含图的格至少一层**，叠在 `img` 之上、文学叠字之下。
-- **文学叠字**：最高可读层，如 `z-index: 24`，高于常规 `fx-*`。
+- **`img`**：`z-index: 0`（**流式** `height: auto` 或 **绝对铺满** 均可），保证后续层叠在画面上。
+- **氛围层（格内画意）**：`position: absolute; inset: 0`，命名建议 `fx-*`；**建议 `z-index: 10+`**，**每个含图的格至少一层**，叠在 `img` 之上、文学叠字之下（避免与 `z-index: 2` 过低被感知为「在图下」）。
+- **文学叠字**：最高可读层，**建议 `z-index: 50` 左右**，高于全部常规 `fx-*`。
 
 ### 画意动效类型词典（选项池）
 
@@ -260,6 +286,12 @@ description: >-
 | 边框微光 / 缝光 | 沿格边缘或内缝扫光 | `inset` `box-shadow` 或伪元素贴边动画 |
 | 焦散感高光 | 多小块高光错频闪动 | 数个小 `radial-gradient` 伪元素 + 错频 `animation-delay` |
 | 图片轻浮动 | 图本体微升落与略放大 | `img` 上 `translateY` + `scale`（可与格内 `fx-*` **叠加**，**不能**单独替代格内画意层） |
+| 飘落轨迹（瓣/屑/字符） | 自上而下、带横移与旋转的循环 | 多子元素 `linear` + 各不相同的 `duration` / `delay` / 水平起点；可用 **少量 JS** 随机化参数以实现 **自然错频**（仍须 Phase 0 同意是否用脚本） |
+| 伪元素叠层光斑 | 格容器 `::before` 承载多层径向光 | 多层 `radial-gradient` + **`opacity` 脉动** 或 **`background-position` 微移**（与「径向光斑呼吸 / 光斑漂移」可合并选型） |
+| 色罩色相漂移 | 整体冷暖微摆 | 单层或伪元素上 **`filter: hue-rotate` + `brightness`** 慢变（**注意性能**；弱机或 Phase 0 要求「静」时慎用或降级为纯 `opacity`） |
+| 缝间模糊连接器 | 格与格交界处柔化拼缝 | **跨缝**细条 `linear-gradient`（取邻格色）+ **`blur` + `opacity` 脉动**；**整页级**装饰，**不是**替代各格 `fx-*` |
+| 中心交汇焦点 | 四宫或十字布局的向心装饰 | 绝对定位于视口中心：`radial-gradient` 光球 **`scale`/阴影脉动**、**细圆环**慢旋、中心微粒 **`dustFloat` 类漂移**；默认 `pointer-events: none` |
+| 格悬停强调 | 某一格短暂「浮起」 | `:hover` 略 **`scale`**、抬 **`z-index`**、**外发光**；若需可点进剧情须 Phase 0 确认，且 **移动端** 需等价反馈（如 `:focus-visible`）或降级 |
 
 **组合**：同一格可叠 **2 层弱效**（如微粒 + 暗角呼吸），须在 Phase 0 汇总表中写清，避免过载与用户未同意的闪烁。
 
@@ -267,7 +299,8 @@ description: >-
 
 - **绑定**：每格 `fx-*` 的包含块必须是 **该格容器**（`.cell` / `figure`），`inset: 0` 贴齐本格，**不得**用单层全屏元素替代多格独立画意。
 - **明显可感知**：动效应在静看数秒内可被察觉（用户要求「极柔」时除外，但须 **书面确认**）。
-- **错频**：各格 **不同** `animation-duration`、**负** `animation-delay`，优先 **不同 `@keyframes` 名称**，避免整页同相位复制粘贴。
+- **可见度（易被看见）**：除「能感知」外，静态一帧上也应能看出层次——**不透明度、`mix-blend-mode` 组合** 不得弱到「像没有层」。若用户反馈 **看不见画意**，优先 **提高层不透明度、调整 blend、略加大动画幅度或延长周期**，而不是撤掉格内 `fx-*`（除非用户书面要求）。
+- **错频**：各格 **不同** `animation-duration`、**负** `animation-delay`，优先 **不同 `@keyframes` 名称**，避免整页同相位复制粘贴。**同类粒子很多份**（如飘落物）时：除手写多组 `nth-child` delay 外，可用 **脚本为每份元素随机 `animation-duration` / `delay` / 起点**（仓库「等分四宫 + 飘落」类页常用），仍须 **Phase 0 确认**是否允许 JS 与粒子密度上限。
 - **禁止**：仅用 `body`/`main` 一层盖全页而 **各格内无** `fx-*`；或多数格静态、仅个别格有画意层（除非用户声明）。
 - **用户拍板**：见 Phase 0「每图画意动效（用户拍板）」；未确认不得实现定稿。
 
@@ -283,7 +316,8 @@ description: >-
 ### 节奏
 
 - 每区 **不同** `animation-duration` 与 **负** `animation-delay`，避免整页同相位；**优先**配合 **不同 keyframes** 以拉开气质。
-- 图片微动：`translateY` + `scale` 略大于 1，避免浮动露边；与格内 `fx-*` 时长 **错开** 更佳。
+- **入场**：多格可同时用 **同一 keyframes**（如上移 + 淡入），但 **`animation-delay` 按格递增**（如 0.2s、0.4s…）形成 **阶梯显现**；须在 Phase 0 确认是否要「首屏编排感」。
+- 图片微动：`translateY` + `scale` 略大于 1；**`contain` 或 `height: auto` 时 `scale` 宜更克制**，避免浮动露边；与格内 `fx-*` 时长 **错开** 更佳。
 
 ---
 
@@ -296,6 +330,12 @@ description: >-
 - **多层 `text-shadow`**：通常组合 **暗色描边 + 浅色高光/晕光 + 轻扩散**，保证叠在复杂画上可读；**层数与颜色** 随用户选定方案变化，不限于金褐色系。
 - **锚点**：用 flex `align-items` / `justify-content` + `clamp()` padding；可按格覆盖（左上 / 右下 / 正中）；**按格变色** 时每格单独 `color` / `text-shadow`。
 - **展示字体**：`Playfair Display`、`Cormorant Garamond`、`EB Garamond`、`Cinzel` 等 **仅为常见选项**，**以用户确认的族名为准**；与 Georgia 分工（标题/正文）亦须用户同意或指定。
+
+**可选实现范式（通用类名示例；仍须 Phase 0 字色气质确认）**
+
+- **玻璃卡容器**（如 `.cell-verse__glass`）：`backdrop-filter`、半透明底 + 渐变或细边框；**内边距建议用 `em`**，便于与字号联动。彩虹/玻璃感仅为 **候选风格**，不是默认定稿。
+- **渐变字**（如 `.cell-verse__text`）：`background-clip: text` + `-webkit-text-fill-color: transparent` + 多层 `linear-gradient`；**描边可用 `em`**（如 **`0.03em`～`0.05em`**）随字号缩放，可读性仍须用户确认。
+- **字号与玻璃同尺度**：在玻璃容器上设 **`container-type: inline-size`**，正文/标题可用 **`font-size: clamp(min, N·cqi + rem, max)`**（`N` 按面板宽度与可读性调），使字随 **面板宽度** 变化；**无容器查询时** 可用 **`clamp(rem, vw, rem)`** 等 fallback，仍须 Phase 0 确认上下限。
 
 **演示用色（禁止未确认照抄）**：如 `color: rgba(206, 163, 61, 0.78)` 仅代表「暖金系」量级，实现时必须替换为用户确认值。
 
@@ -315,7 +355,7 @@ description: >-
 - 与画意无关的强几何装饰（如大面积 conic 射线、与内容打架的 mask 条带）——除非用户要该语言。
 - 忽略 `reduced-motion`。
 - **极简模板风**（大留白、无动效、系统字体当主视觉）。
-- **未经用户确认**，将本 Skill **代码片段**或惯例中的 **暗金 / 单一路径色值** 直接用作全页文学层定稿色。
+- **未经用户确认**，将本 Skill **叠字配方示例**或惯例中的 **暗金 / 单一路径色值** 直接用作全页文学层定稿色。
 - **未经逐图确认** 即写入格内画意动效定稿；或 **仅用** 全屏单层 / 仅 `img` 浮动 **代替** 每格独立 `fx-*`（用户书面同意的除外）。
 - 从选项池 **机械复制同一套动效** 到每一格导致全页同质化——须按图系与用户选择 **多样组合**。
 
@@ -327,7 +367,8 @@ description: >-
 
 - [唯美/index.html](../../../前端图片/基调/唯美/index.html)：**布局**：多格拼图（类主从+联画）。**Fit**：实现以 **`cover` 满格** 为主；若某张必须全显可改为 **`contain` + 分区渐变衬底**。
 - [黑深残/index.html](../../../前端图片/基调/黑深残/index.html)：**布局**：暗底分屏 + 玻璃缝氛围。**Fit**：以 **`cover`** 为主强化压迫感；需全显时单区 `contain` + 近黑/紫金衬底。
-- [圆满/index.html](../../../前端图片/基调/圆满/index.html)：**布局**：四季/圆满向联画与文案节奏。**Fit**：联画 **`cover`** 常见；长竖图可拆段 **纵向卷轴** 或 **`contain`** 防裁主体。
+- [圆满/index.html](../../../前端图片/基调/圆满/index.html)：**布局**：**2×2 等分全屏**、可选 **十字缝模糊连接器 + 中心光球/轨道/星尘**。**Fit**：格内 **`img` 绝对铺满 + `object-fit: cover`**。**动效**：格内 **渐变叠层 + 伪元素径向光斑脉动**；**飘落类**（瓣/叶/雪等）**多实例 + 随机时长/延迟**；符号/装饰 **轻浮动**；可选 **首屏 loading**、**格入场阶梯 delay**、**悬停格 scale + z-index**、**中心随鼠标微偏移**（均属技术标签，非主题绑定）。
+- [神秘/index.html](../../../前端图片/基调/神秘/index.html)：**标签**：可滚动多行拼图、**全图不裁**（流式 `img`）、**玻璃质感叠字 + 渐变字**、**容器查询（`cqi`）字号**、**格内强画意 `fx-*`**（与文件夹名无关的通用技术组合参考）。
 
 （仓库内若有新基调页 HTML，应在此补链并标注 **布局标签** 与 **默认 fit**。）
 
@@ -335,107 +376,39 @@ description: >-
 
 ## 代码片段模板
 
+本节只固定 **六种常用结构范式**；具体数值、`@keyframes`、色与字体以 Phase 0 确认为准。**文学叠字**写法与可读性手法见上文「叠字配方」，此处不重复贴代码。
+
 ### 1. 图片垫底 + 浮动（唯美式）
 
-`img` 浮动可与格内 `fx-*` **叠加**，**不能**单独替代「每图独立画意层」；`animation` 参数以 Phase 0 **逐图动效确认** 为准（可与汇总表中「是否与 img 浮动并存」一致）。
-
-```css
-.cell img {
-    position: relative;
-    z-index: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform-origin: center center;
-    animation: imgFloat 7s ease-in-out infinite;
-}
-@keyframes imgFloat {
-    0%, 100% { transform: translateY(0) scale(1.07); }
-    50% { transform: translateY(-14px) scale(1.09); }
-}
-```
+- `img` 铺满格、`z-index` 垫底；可选轻量 `translateY` + `scale` 浮动。
+- **须配合**格内画意 `fx-*`，**不能**单靠浮动代替「每图独立画意层」；是否启用浮动与时长见 **逐图动效确认**。
 
 ### 2. 氛围层叠在图上（唯美式 bloom）
 
-以下类须放在 **对应 `.cell` 内**（与 `img` 同格），`inset: 0` 相对该格；渐变形状、颜色与 `animation` **名称/时长** 须符合 Phase 0 **该图已确认** 的方案，不得照搬为其他格的定稿。
-
-```css
-.fx-sunset-bloom {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-    background: radial-gradient(ellipse 120% 70% at 55% 18%, rgba(255, 95, 60, 0.5) 0%, transparent 52%);
-    mix-blend-mode: screen;
-    animation: sunsetBloom 7.5s ease-in-out infinite;
-}
-```
+- 在 **该 `.cell` 内** `position: absolute; inset: 0` 叠渐变层，`mix-blend-mode`（如 `screen`）+ `animation`。
+- 渐变形态与动效以 **该图已确认** 方案为准，勿默认定稿或照搬其他格。
 
 ### 3. 黑深残式前景 + blend
 
-`effects-foreground` 若覆盖整页，**仍须**保证 **每个含图格内** 有独立画意 `fx-*`（可嵌在格内而非仅最外层）；具体层结构与 blend 以 **逐图确认** 为准。
-
-```css
-.effects-foreground {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-    overflow: hidden;
-}
-.gold-ripple-field {
-    position: absolute;
-    inset: 0;
-    mix-blend-mode: soft-light;
-    opacity: 0.92;
-    pointer-events: none;
-}
-```
+- 前景容器（可整页或格内）包一层或多层场域（如金纹、涟漪），`soft-light` / `overlay` 等 blend。
+- 若存在整页前景，**每个含图格内仍须有**独立画意 `fx-*`；层序与 blend **逐图确认**。
 
 ### 4. `contain` + 画意衬底（同一 `.cell` 内）
 
-```css
-.cell {
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(145deg, rgba(28, 22, 18, 0.95), rgba(48, 36, 28, 0.88));
-}
-.cell img {
-    position: relative;
-    z-index: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center center;
-}
-/* 可在 img 下增加绝对定位的微粒/噪点层（fx-*），mix-blend-mode 与审美原则一致 */
-```
+- `.cell` 设相对定位与画意 `background`（渐变/纹理感）；`img` 使用 `object-fit: contain`、`object-position: center`。
+- letterbox 区即衬底；可按需在 `img` 与叠字之间加格内 `fx-*`。
 
-### 5. 叠字层（结构模板；色与字体须用户确认）
+### 5. 玻璃卡 + 渐变字 + `cqi` 字号
 
-以下 `font-family`、`color`、`text-shadow` **仅为语法示例**，实现前 **必须** 替换为 Phase 0「字体与文学层色彩」中 **用户确认** 的族名与色值。
+- 叠字外包一层 **玻璃卡**（`backdrop-filter`、半透明底/边）；卡上设 **`container-type: inline-size`**，内部标题/正文用 **`clamp(..., cqi, ...)`** 与 **`em` 内边距** 联动。
+- 渐变字用 **`background-clip: text`**；描边用 **`em`** 单位随字缩放。**z-index**：文学块高于本格 `fx-*`（见「技术约束」叠层区间）。
+- 色与渐变条带、是否采用该范式 **仍以 Phase 0 用户确认为准**；不可用仓库范例数值未确认照抄。
 
-```css
-.cell-verse {
-    position: absolute;
-    inset: 0;
-    z-index: 24;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(0.75rem, 3.5vw, 1.75rem);
-    font-family: Georgia, 'Times New Roman', serif; /* 或用户指定的 Google Fonts */
-    font-style: italic;
-    font-size: clamp(1.02rem, 2.85vw, 1.48rem);
-    color: rgba(122, 98, 40, 0.78); /* 示例：须替换为用户主字色 */
-    text-align: center;
-    text-shadow:
-        0 0 3px rgba(255, 243, 210, 0.42),
-        0 0 1px rgba(40, 32, 12, 0.65),
-        0 1px 12px rgba(0, 0, 0, 0.28); /* 示例：须按用户确认的层次重写 */
-}
-```
+### 6. 等分四宫 + 缝间连接 + 中心焦点（联画一体）
+
+- **每格**：`img` 垫底 → **半透明渐变罩** → **格内 `fx-*`**（径向光斑、飘落层等）→ **文学层**（常居中）；格间 **`z-index` 与 `isolation`** 按上文约定。
+- **整页装饰（可选）**：十字缝 **模糊渐变条**、视口中心 **光球 + 旋转细环 + 微粒**；层默认 **`pointer-events: none`**，避免挡操作。
+- **错频与脚本**：飘落物可用 **CSS 多元素** 或 **脚本批量设 `duration`/`delay`**；**悬停 / 点击涟漪 / 鼠标视差** 属增强项，须 Phase 0 确认是否需要及 **`prefers-reduced-motion` 下关闭或静态化**。
 
 ---
 
