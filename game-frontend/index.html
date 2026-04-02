@@ -501,15 +501,17 @@
         <!-- 选项列表区（合并文本和选项，占据除进度条外的所有空间） -->
         <div class="options-container h-[calc(100%-60px)] p-[40px] relative" role="region" aria-label="剧情选项">
             <!-- 文本显示区域 -->
-            <div class="text-display-area absolute inset-0 flex items-center justify-center p-[40px]" id="text-display-area">
-                <p 
-                    id="scene-text" 
-                    class="scene-text text-[25px] text-white leading-[1.6] w-full text-center"
-                    role="text" 
-                    aria-live="polite"
-                >
-                    加载中...
-                </p>
+            <div class="text-display-area absolute inset-0 flex items-end justify-center p-[40px]" id="text-display-area">
+                <div class="narrative-shell w-full max-w-[1100px]">
+                    <p 
+                        id="scene-text" 
+                        class="scene-text w-full"
+                        role="text" 
+                        aria-live="polite"
+                    >
+                        加载中...
+                    </p>
+                </div>
             </div>
             
             <!-- 选项列表区域（初始隐藏） -->

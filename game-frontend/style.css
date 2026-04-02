@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&display=swap');
+
 /* ========================================
    全局动画定义 (Enhanced)
    ======================================== */
@@ -1271,14 +1273,67 @@
     position: absolute;
     inset: 0;
     z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: rgba(26, 188, 156, 0.3) transparent;
-    /* 确保文本不会超出容器 */
     box-sizing: border-box;
-    word-wrap: break-word;
+    padding: 24px 34px 120px;
+}
+
+.narrative-shell {
+    width: min(1100px, 92vw);
+    min-height: 190px;
+    border-radius: 18px;
+    border: 1px solid rgba(244, 228, 166, 0.22);
+    background: linear-gradient(160deg, rgba(20, 16, 26, 0.58), rgba(12, 10, 18, 0.42));
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42), inset 0 0 18px rgba(255, 232, 176, 0.08);
+    backdrop-filter: blur(14px) saturate(115%);
+    -webkit-backdrop-filter: blur(14px) saturate(115%);
+    padding: 26px 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.narrative-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg, rgba(255, 255, 255, 0.1), transparent 45%);
+    opacity: 0.5;
+}
+
+/* 旁白文本 - gameplay叙事专用 */
+.scene-text,
+#scene-text,
+p#scene-text {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    width: 100%;
+    max-width: 68ch;
+    color: transparent !important;
+    font-family: "Ma Shan Zheng", "ZCOOL XiaoWei", "STKaiti", "KaiTi", serif;
+    font-size: clamp(19px, 1.35vw, 27px);
+    line-height: 1.88;
+    letter-spacing: 0.02em;
+    text-align: left;
+    text-wrap: pretty;
     word-break: break-word;
+    overflow-wrap: anywhere;
+    user-select: none;
+    box-sizing: border-box;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    background-image: linear-gradient(90deg, #ff7a7a 0%, #ffb86b 18%, #ffe66d 34%, #7df9a8 52%, #72d6ff 70%, #b18cff 86%, #ff7ad9 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: narrativeRainbowFlow 18s linear infinite;
 }
 
 .text-display-area.hidden {
@@ -1318,144 +1373,19 @@
     background: rgba(26, 188, 156, 0.5);
 }
 
-/* 旁白文本 - 现在在选项容器内显示 */
-.scene-text,
-.scene-text *,
-#scene-text,
-#scene-text *,
-p.scene-text,
-p#scene-text {
-    /* 定位样式 - 相对定位，在文本显示区域内 */
-    position: relative !important;
-    z-index: 1 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: auto !important;
-    max-height: none !important;
-    overflow-y: visible !important;
-    overflow-x: hidden !important;
-    
-    /* 字体大小 - 增大字体 */
-    font-size: 25px !important;
-    line-height: 1.6 !important;
-    
-    /* 确保文本不会超出容器 */
-    word-wrap: break-word !important;
-    word-break: break-word !important;
-    overflow-wrap: break-word !important;
-    box-sizing: border-box !important;
-    
-    /* 文本样式 */
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.6) !important;
-    
-    /* 字体过渡效果 - 允许字体平滑切换 */
-    transition: font-family 0.3s ease, font-weight 0.3s ease !important;
-    
-    /* ========== 强制完全透明背景 - 移除所有可能的背景样式 ========== */
-    background: none !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    background-clip: border-box !important;
-    background-origin: padding-box !important;
-    background-size: auto !important;
-    background-position: 0% 0% !important;
-    background-repeat: repeat !important;
-    background-attachment: scroll !important;
-    
-    /* 移除所有可能创建视觉层的样式 */
-    padding: 0 !important;
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    display: block !important;
-    margin: 0 !important;
-    
-    /* 重置浏览器默认样式 */
-    -webkit-margin-before: 0 !important;
-    -webkit-margin-after: 0 !important;
-    -webkit-margin-start: 0 !important;
-    -webkit-margin-end: 0 !important;
-    
-    /* 动画 */
-    animation: fadeInUpText 0.5s ease-out !important;
-    
-    /* 交互禁用 - 但允许滚动 */
-    user-select: none !important;
-    outline: none !important;
-    pointer-events: auto !important;
-    touch-action: pan-y !important;
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-    tap-highlight-color: transparent !important;
-    
-    /* 变换禁用 */
-    transform: none !important;
-    scale: 1 !important;
-    -webkit-transform: none !important;
-    -moz-transform: none !important;
-    -ms-transform: none !important;
-    -o-transform: none !important;
-    will-change: auto !important;
+.scene-text .narrative-highlight,
+#scene-text .narrative-highlight {
+    -webkit-text-fill-color: initial;
+    color: rgba(255, 245, 188, 0.98);
+    background: none;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(255, 235, 170, 0.28);
 }
 
-/* 修改动画，确保结束时transform为none */
-@keyframes fadeInUpText {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-        transform: none !important; /* 确保动画结束时transform为none */
-    }
-}
-
-/* 确保所有交互状态都没有缩放效果和背景 */
-.scene-text:active,
-.scene-text:hover,
-.scene-text:focus,
-.scene-text:focus-visible,
-.scene-text:focus-within,
-.scene-text:visited,
-.scene-text:link,
-#scene-text:active,
-#scene-text:hover,
-#scene-text:focus,
-#scene-text:focus-visible,
-#scene-text:focus-within,
-#scene-text:visited,
-#scene-text:link,
-p.scene-text:active,
-p.scene-text:hover,
-p.scene-text:focus,
-p#scene-text:active,
-p#scene-text:hover,
-p#scene-text:focus {
-    transform: none !important;
-    scale: 1 !important;
-    transition: none !important;
-    animation: none !important; /* 禁用动画 */
-    -webkit-transform: none !important;
-    -moz-transform: none !important;
-    -ms-transform: none !important;
-    -o-transform: none !important;
-    will-change: auto !important;
-    /* 确保所有状态下背景都是透明的 */
-    background: transparent !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-}
-
-/* 使用CSS变量确保scale始终为1 */
-.scene-text,
-#scene-text {
-    --tw-scale-x: 1 !important;
-    --tw-scale-y: 1 !important;
+@keyframes narrativeRainbowFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 /* 图片/视频加载动画 - 全屏显示 */
@@ -1526,12 +1456,22 @@ p#scene-text:focus {
 
 /* 响应式适配 - 视觉内容 */
 @media (max-width: 768px) {
+    .text-display-area {
+        padding: 16px 14px 112px;
+    }
+
+    .narrative-shell {
+        width: min(100%, 96vw);
+        border-radius: 14px;
+        min-height: 150px;
+        padding: 18px 18px;
+    }
+
     .scene-text,
     #scene-text {
-        font-size: 18px !important; /* 移动端也增大字体 */
-        line-height: 1.5 !important; /* 移动端行高 */
-        padding: 0 !important; /* 确保移动端也没有padding */
-        margin: 0 !important; /* 确保移动端也没有margin */
+        max-width: 92vw;
+        font-size: clamp(16px, 4.2vw, 22px);
+        line-height: 1.72;
     }
     
     #image-loading .loading-spinner {

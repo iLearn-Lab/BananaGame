@@ -2562,6 +2562,62 @@ const Game = (() => {
         
         return segments.length > 0 ? segments : [trimText];
     }
+
+    function renderHighlightedNarrative(rawText) {
+        return escapeHtml(rawText || '')
+            .replace(/迷雾森林/g, '<span class="narrative-highlight">迷雾森林</span>')
+            .replace(/上古神器/g, '<span class="narrative-highlight">上古神器</span>')
+            .replace(/古老神庙/g, '<span class="narrative-highlight">古老神庙</span>')
+            .replace(/怪异/g, '<span class="narrative-highlight">怪异</span>');
+    }
+
+    function computeCharDelay(char, index, totalLength) {
+        if (char === ' ' || char === '\n' || char === '\t') return 30;
+        if (/[，、；：]/.test(char)) return 90;
+        if (/[。！？.!?]/.test(char)) return 150;
+
+        // 长句保护：后半段略提速，避免等待过久
+        if (totalLength > 120 && index > Math.floor(totalLength * 0.55)) {
+            return 40;
+        }
+        return 46;
+    }
+
+    function clearActiveTypingTimer() {
+        if (!gameState.currentTypeInterval) return;
+        clearTimeout(gameState.currentTypeInterval);
+        clearInterval(gameState.currentTypeInterval);
+        gameState.currentTypeInterval = null;
+    }
+
+    function playNarrativeTyping(sceneTextElement, fullText, onDone) {
+        const safeText = fullText || '';
+        let index = 0;
+        sceneTextElement.classList.add('typewriter');
+        sceneTextElement.textContent = '';
+        sceneTextElement.innerHTML = '';
+
+        const typeNextChar = () => {
+            if (index < safeText.length) {
+                index += 1;
+                const partialText = safeText.slice(0, index);
+                sceneTextElement.innerHTML = renderHighlightedNarrative(partialText);
+                const delay = computeCharDelay(safeText.charAt(index - 1), index - 1, safeText.length);
+                gameState.currentTypeInterval = setTimeout(typeNextChar, delay);
+                return;
+            }
+
+            clearActiveTypingTimer();
+            sceneTextElement.classList.remove('typewriter');
+            playSound('typeend');
+            if (typeof onDone === 'function') {
+                onDone();
+            }
+        };
+
+        // 首句入场缓冲，先让视线落到玻璃叙事屏
+        gameState.currentTypeInterval = setTimeout(typeNextChar, 120);
+    }
     
     // 显示场景文本（支持图片和视频）
     // optionDataForArchive: 可选，当前选项完整数据；剧情图展示后用于通知后端做配角首次出场建档
@@ -2752,15 +2808,13 @@ const Game = (() => {
                 sceneTextElement.style.setProperty('transform', 'none', 'important');
                 sceneTextElement.style.setProperty('scale', '1', 'important');
                 sceneTextElement.style.setProperty('transition', 'none', 'important');
-                sceneTextElement.style.setProperty('animation', 'none', 'important');
-                sceneTextElement.style.setProperty('pointer-events', 'none', 'important');
                 sceneTextElement.style.setProperty('user-select', 'none', 'important');
                 sceneTextElement.style.setProperty('outline', 'none', 'important');
                 sceneTextElement.style.setProperty('-webkit-transform', 'none', 'important');
                 sceneTextElement.style.setProperty('-moz-transform', 'none', 'important');
                 sceneTextElement.style.setProperty('-ms-transform', 'none', 'important');
                 sceneTextElement.style.setProperty('-o-transform', 'none', 'important');
-                sceneTextElement.style.setProperty('touch-action', 'none', 'important'); // 禁用触摸缩放
+                sceneTextElement.style.setProperty('touch-action', 'pan-y', 'important');
                 sceneTextElement.style.setProperty('-webkit-touch-callout', 'none', 'important');
                 sceneTextElement.style.setProperty('-webkit-tap-highlight-color', 'transparent', 'important');
                 sceneTextElement.style.setProperty('tap-highlight-color', 'transparent', 'important');
@@ -2831,10 +2885,7 @@ const Game = (() => {
             sceneTextElement._noTransformInterval = checkInterval;
             
             // 修复：先清理旧的打字机动画，防止重复和重叠
-            if (gameState.currentTypeInterval) {
-                clearInterval(gameState.currentTypeInterval);
-                gameState.currentTypeInterval = null;
-            }
+            clearActiveTypingTimer();
             
             // 完全清理旧文本内容，防止重叠显示
             sceneTextElement.classList.remove('typewriter');
@@ -2858,68 +2909,22 @@ const Game = (() => {
             
             // 等待一帧确保DOM完全更新后再开始新动画
             requestAnimationFrame(() => {
-                // 预生成已由后端在 /generate-option 返回时统一触发，与首屏一致，此处不再调用
-                
-                // 再次强制设置样式，确保动画不会覆盖我们的设置
-                sceneTextElement.style.setProperty('transform', 'none', 'important');
-                sceneTextElement.style.setProperty('scale', '1', 'important');
-                sceneTextElement.style.setProperty('transition', 'none', 'important');
-                
-                sceneTextElement.classList.add('typewriter');
-                let index = 0;
-                
-                const typeInterval = setInterval(() => {
-                    if (index < segmentText.length) {
-                        sceneTextElement.textContent += segmentText.charAt(index);
-                        index++;
-                        // 关键信息高亮
-                        // 注意：先做HTML转义，避免原文中的 <、& 等字符导致渲染吞字/吞数字
-                        const highlightedText = escapeHtml(sceneTextElement.textContent)
-                            .replace(/迷雾森林/g, '<span class="text-[#3498DB] font-bold">迷雾森林</span>')
-                            .replace(/上古神器/g, '<span class="text-[#3498DB] font-bold">上古神器</span>')
-                            .replace(/古老神庙/g, '<span class="text-[#3498DB] font-bold">古老神庙</span>')
-                            .replace(/怪异/g, '<span class="text-[#3498DB] font-bold">怪异</span>');
-                        sceneTextElement.innerHTML = highlightedText;
+                playNarrativeTyping(sceneTextElement, segmentText, () => {
+                    if (gameState.isShowingSegments && gameState.currentTextSegmentIndex < segments.length - 1) {
+                        console.log('✅ 当前段落显示完成，显示"->"按钮等待用户点击');
+                        if (nextSegmentBtn) {
+                            nextSegmentBtn.classList.remove('hidden');
+                            nextSegmentBtn.dataset.showOptions = 'false';
+                        }
                     } else {
-                        clearInterval(typeInterval);
-                        gameState.currentTypeInterval = null; // 清理引用
-                        sceneTextElement.classList.remove('typewriter');
-                        
-                        // 动画结束后再次强制设置样式，确保没有任何缩放效果
-                        sceneTextElement.style.setProperty('transform', 'none', 'important');
-                        sceneTextElement.style.setProperty('scale', '1', 'important');
-                        sceneTextElement.style.setProperty('transition', 'none', 'important');
-                        sceneTextElement.style.setProperty('animation', 'none', 'important');
-                        
-                        playSound('typeend');
-                        
-                        // 判断是否还有更多段落需要显示
-                        if (gameState.isShowingSegments && gameState.currentTextSegmentIndex < segments.length - 1) {
-                            // 还有更多段落，显示"->"按钮（点击后显示下一段，非选项）
-                            console.log('✅ 当前段落显示完成，显示"->"按钮等待用户点击');
-                            if (nextSegmentBtn) {
-                                nextSegmentBtn.classList.remove('hidden');
-                                nextSegmentBtn.dataset.showOptions = 'false';
-                            }
-                        } else {
-                            // 所有段落都显示完了，显示"->"按钮等待用户点击后再显示选项
-                            console.log('✅ 所有段落显示完成，显示"->"按钮等待用户点击显示选项');
-                            
-                            // 保存待显示的选项
-                            gameState.pendingOptions = options;
-                            
-                            // 显示"->"按钮（点击后显示选项）
-                            if (nextSegmentBtn) {
-                                nextSegmentBtn.classList.remove('hidden');
-                                // 标记这是最后一段，点击后应该显示选项
-                                nextSegmentBtn.dataset.showOptions = 'true';
-                            }
+                        console.log('✅ 所有段落显示完成，显示"->"按钮等待用户点击显示选项');
+                        gameState.pendingOptions = options;
+                        if (nextSegmentBtn) {
+                            nextSegmentBtn.classList.remove('hidden');
+                            nextSegmentBtn.dataset.showOptions = 'true';
                         }
                     }
-                }, 30);
-                
-                // 保存当前interval引用，以便下次清理
-                gameState.currentTypeInterval = typeInterval;
+                });
             });
         } else {
             console.error('❌ 找不到sceneText元素，直接显示选项');
@@ -2967,75 +2972,31 @@ const Game = (() => {
         
         // 显示下一段文本（打字机效果）
         requestAnimationFrame(() => {
-            sceneTextElement.style.setProperty('transform', 'none', 'important');
-            sceneTextElement.style.setProperty('scale', '1', 'important');
-            sceneTextElement.style.setProperty('transition', 'none', 'important');
-            
-            sceneTextElement.classList.add('typewriter');
-            let index = 0;
-            
-            const typeInterval = setInterval(() => {
-                if (index < nextSegment.length) {
-                    sceneTextElement.textContent += nextSegment.charAt(index);
-                    index++;
-                    // 关键信息高亮
-                    // 注意：先做HTML转义，避免原文中的 <、& 等字符导致渲染吞字/吞数字
-                    const highlightedText = escapeHtml(sceneTextElement.textContent)
-                        .replace(/迷雾森林/g, '<span class="text-[#3498DB] font-bold">迷雾森林</span>')
-                        .replace(/上古神器/g, '<span class="text-[#3498DB] font-bold">上古神器</span>')
-                        .replace(/古老神庙/g, '<span class="text-[#3498DB] font-bold">古老神庙</span>')
-                        .replace(/怪异/g, '<span class="text-[#3498DB] font-bold">怪异</span>');
-                    sceneTextElement.innerHTML = highlightedText;
+            playNarrativeTyping(sceneTextElement, nextSegment, () => {
+                if (gameState.currentTextSegmentIndex < gameState.textSegments.length - 1) {
+                    console.log('✅ 当前段落显示完成，显示"->"按钮等待用户点击');
+                    if (nextSegmentBtn) {
+                        nextSegmentBtn.classList.remove('hidden');
+                        nextSegmentBtn.dataset.showOptions = 'false';
+                    }
+                    const prevBtn = document.getElementById('prev-segment-btn');
+                    if (prevBtn && gameState.currentTextSegmentIndex > 0) {
+                        prevBtn.classList.remove('hidden');
+                    }
                 } else {
-                    clearInterval(typeInterval);
-                    gameState.currentTypeInterval = null;
-                    sceneTextElement.classList.remove('typewriter');
-                    
-                    // 动画结束后再次强制设置样式
-                    sceneTextElement.style.setProperty('transform', 'none', 'important');
-                    sceneTextElement.style.setProperty('scale', '1', 'important');
-                    sceneTextElement.style.setProperty('transition', 'none', 'important');
-                    sceneTextElement.style.setProperty('animation', 'none', 'important');
-                    
-                    playSound('typeend');
-                    
-                    // 判断是否还有更多段落
-                    if (gameState.currentTextSegmentIndex < gameState.textSegments.length - 1) {
-                        // 还有更多段落，显示"->"按钮（点击后显示下一段，非选项）
-                        console.log('✅ 当前段落显示完成，显示"->"按钮等待用户点击');
-                        if (nextSegmentBtn) {
-                            nextSegmentBtn.classList.remove('hidden');
-                            nextSegmentBtn.dataset.showOptions = 'false';
-                        }
-                        // 当前不在第一段时，允许回到上一句
-                        const prevBtn = document.getElementById('prev-segment-btn');
-                        if (prevBtn && gameState.currentTextSegmentIndex > 0) {
-                            prevBtn.classList.remove('hidden');
-                        }
-                    } else {
-                        // 所有段落都显示完了，显示"->"按钮等待用户点击后再显示选项
-                        console.log('✅ 所有段落显示完成，显示"->"按钮等待用户点击显示选项');
-                        
-                        // 确保选项可用（与 displayScene 行为一致）
-                        gameState.pendingOptions = gameState.pendingOptions || gameState.currentOptions;
-                        
-                        // 显示"->"按钮（点击后显示选项）
-                        const btn = document.getElementById('next-segment-btn');
-                        if (btn) {
-                            btn.classList.remove('hidden');
-                            btn.dataset.showOptions = 'true';
-                        }
-                        // 最后一段时仍然允许回到上一句
-                        const prevBtn = document.getElementById('prev-segment-btn');
-                        if (prevBtn && gameState.currentTextSegmentIndex > 0) {
-                            prevBtn.classList.remove('hidden');
-                        }
+                    console.log('✅ 所有段落显示完成，显示"->"按钮等待用户点击显示选项');
+                    gameState.pendingOptions = gameState.pendingOptions || gameState.currentOptions;
+                    const btn = document.getElementById('next-segment-btn');
+                    if (btn) {
+                        btn.classList.remove('hidden');
+                        btn.dataset.showOptions = 'true';
+                    }
+                    const prevBtn = document.getElementById('prev-segment-btn');
+                    if (prevBtn && gameState.currentTextSegmentIndex > 0) {
+                        prevBtn.classList.remove('hidden');
                     }
                 }
-            }, 30);
-            
-            // 保存当前interval引用
-            gameState.currentTypeInterval = typeInterval;
+            });
         });
     }
     
@@ -3071,10 +3032,7 @@ const Game = (() => {
         }
         
         // 清理旧打字机动画
-        if (gameState.currentTypeInterval) {
-            clearInterval(gameState.currentTypeInterval);
-            gameState.currentTypeInterval = null;
-        }
+        clearActiveTypingTimer();
         
         // 清理旧文本
         sceneTextElement.classList.remove('typewriter');
@@ -3083,61 +3041,27 @@ const Game = (() => {
         
         // 重新以打字机效果显示上一段
         requestAnimationFrame(() => {
-            sceneTextElement.style.setProperty('transform', 'none', 'important');
-            sceneTextElement.style.setProperty('scale', '1', 'important');
-            sceneTextElement.style.setProperty('transition', 'none', 'important');
-            
-            sceneTextElement.classList.add('typewriter');
-            let index = 0;
-            
-            const typeInterval = setInterval(() => {
-                if (index < prevSegment.length) {
-                    sceneTextElement.textContent += prevSegment.charAt(index);
-                    index++;
-                    const highlightedText = escapeHtml(sceneTextElement.textContent)
-                        .replace(/迷雾森林/g, '<span class="text-[#3498DB] font-bold">迷雾森林</span>')
-                        .replace(/上古神器/g, '<span class="text-[#3498DB] font-bold">上古神器</span>')
-                        .replace(/古老神庙/g, '<span class="text-[#3498DB] font-bold">古老神庙</span>')
-                        .replace(/怪异/g, '<span class="text-[#3498DB] font-bold">怪异</span>');
-                    sceneTextElement.innerHTML = highlightedText;
-                } else {
-                    clearInterval(typeInterval);
-                    gameState.currentTypeInterval = null;
-                    sceneTextElement.classList.remove('typewriter');
-                    
-                    sceneTextElement.style.setProperty('transform', 'none', 'important');
-                    sceneTextElement.style.setProperty('scale', '1', 'important');
-                    sceneTextElement.style.setProperty('transition', 'none', 'important');
-                    sceneTextElement.style.setProperty('animation', 'none', 'important');
-                    
-                    playSound('typeend');
-                    
-                    // 第一段时不再显示回退按钮
-                    if (prevSegmentBtn) {
-                        if (gameState.currentTextSegmentIndex <= 0) {
-                            prevSegmentBtn.classList.add('hidden');
-                        } else {
-                            prevSegmentBtn.classList.remove('hidden');
-                        }
-                    }
-                    
-                    // 如果当前不是最后一段，仅允许继续向后
-                    if (gameState.currentTextSegmentIndex < gameState.textSegments.length - 1) {
-                        if (nextSegmentBtn) {
-                            nextSegmentBtn.classList.remove('hidden');
-                            nextSegmentBtn.dataset.showOptions = 'false';
-                        }
+            playNarrativeTyping(sceneTextElement, prevSegment, () => {
+                if (prevSegmentBtn) {
+                    if (gameState.currentTextSegmentIndex <= 0) {
+                        prevSegmentBtn.classList.add('hidden');
                     } else {
-                        // 当前已经是最后一段，点击"->"后应直接显示选项
-                        if (nextSegmentBtn) {
-                            nextSegmentBtn.classList.remove('hidden');
-                            nextSegmentBtn.dataset.showOptions = 'true';
-                        }
+                        prevSegmentBtn.classList.remove('hidden');
                     }
                 }
-            }, 30);
-            
-            gameState.currentTypeInterval = typeInterval;
+
+                if (gameState.currentTextSegmentIndex < gameState.textSegments.length - 1) {
+                    if (nextSegmentBtn) {
+                        nextSegmentBtn.classList.remove('hidden');
+                        nextSegmentBtn.dataset.showOptions = 'false';
+                    }
+                } else {
+                    if (nextSegmentBtn) {
+                        nextSegmentBtn.classList.remove('hidden');
+                        nextSegmentBtn.dataset.showOptions = 'true';
+                    }
+                }
+            });
         });
     }
     
@@ -5467,8 +5391,6 @@ function forceDisableSceneTextScale() {
                 sceneTextElement.style.setProperty('transform', 'none', 'important');
                 sceneTextElement.style.setProperty('scale', '1', 'important');
                 sceneTextElement.style.setProperty('transition', 'none', 'important');
-                sceneTextElement.style.setProperty('animation', 'none', 'important');
-                sceneTextElement.style.setProperty('pointer-events', 'none', 'important');
                 sceneTextElement.style.setProperty('user-select', 'none', 'important');
                 sceneTextElement.style.setProperty('outline', 'none', 'important');
                 sceneTextElement.style.setProperty('-webkit-transform', 'none', 'important');
@@ -5476,13 +5398,7 @@ function forceDisableSceneTextScale() {
                 sceneTextElement.style.setProperty('-ms-transform', 'none', 'important');
                 sceneTextElement.style.setProperty('-o-transform', 'none', 'important');
                 sceneTextElement.style.setProperty('will-change', 'auto', 'important');
-                // 强制移除所有背景样式，确保完全透明
-                sceneTextElement.style.setProperty('background', 'transparent', 'important');
-                sceneTextElement.style.setProperty('background-color', 'transparent', 'important');
-                sceneTextElement.style.setProperty('background-image', 'none', 'important');
-                sceneTextElement.style.setProperty('box-shadow', 'none', 'important');
-                sceneTextElement.style.setProperty('backdrop-filter', 'none', 'important');
-                sceneTextElement.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+                sceneTextElement.style.setProperty('touch-action', 'pan-y', 'important');
             };
         
         forceNoTransform();
@@ -5491,8 +5407,6 @@ function forceDisableSceneTextScale() {
         // 注意：移除 touchstart/touchend，允许滚动
         ['click', 'mousedown', 'mouseup', 'focus', 'blur', 'keydown', 'keyup'].forEach(eventType => {
             sceneTextElement.addEventListener(eventType, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
                 forceNoTransform();
             }, true);
         });
