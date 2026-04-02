@@ -421,6 +421,34 @@
         opacity: 0.45;
       }
     }
+
+    .tone-nav-actions {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 9999;
+      display: flex;
+      gap: 12px;
+    }
+
+    .tone-nav-btn {
+      border: 1px solid rgba(176, 197, 237, 0.5);
+      background: rgba(10, 18, 35, 0.76);
+      color: #d8e5ff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: "Noto Serif SC", serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+      backdrop-filter: blur(4px);
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .tone-nav-btn:hover {
+      transform: translateY(-1px);
+      opacity: 0.92;
+    }
   </style>
 </head>
 <body>
@@ -499,6 +527,26 @@
         p.style.opacity = (0.32 + Math.random() * 0.46).toFixed(2);
         dustHost.appendChild(p);
       }
+    })();
+  </script>
+  <div class="tone-nav-actions">
+    <button id="confirm-tone-choice" class="tone-nav-btn">确认选择</button>
+    <button id="back-tone-selection" class="tone-nav-btn">返回原界面</button>
+  </div>
+  <script>
+    (function () {
+      const tone = new URLSearchParams(window.location.search).get('tone') || 'logical';
+      const basePath = '../../../../index.html';
+      function goBack(confirmed) {
+        const backUrl = new URL(basePath, window.location.href);
+        backUrl.searchParams.set('previewTone', tone);
+        if (confirmed) {
+          backUrl.searchParams.set('previewToneConfirmed', '1');
+        }
+        window.location.href = backUrl.toString();
+      }
+      document.getElementById('confirm-tone-choice').addEventListener('click', () => goBack(true));
+      document.getElementById('back-tone-selection').addEventListener('click', () => goBack(false));
     })();
   </script>
 </body>

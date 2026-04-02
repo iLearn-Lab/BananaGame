@@ -791,6 +791,34 @@
                 opacity: 0.25;
             }
         }
+
+        .tone-nav-actions {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 9999;
+            display: flex;
+            gap: 12px;
+        }
+
+        .tone-nav-btn {
+            border: 1px solid rgba(255, 245, 220, 0.62);
+            background: rgba(255, 255, 255, 0.45);
+            color: #4f4538;
+            padding: 10px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.04em;
+            backdrop-filter: blur(4px);
+            transition: transform 180ms ease, opacity 180ms ease;
+        }
+
+        .tone-nav-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -836,5 +864,25 @@
             <p class="cell-verse" lang="en">We are the shape water takes for a moment—then releases, unchanged in essence.</p>
         </figure>
     </main>
+    <div class="tone-nav-actions">
+        <button id="confirm-tone-choice" class="tone-nav-btn">确认选择</button>
+        <button id="back-tone-selection" class="tone-nav-btn">返回原界面</button>
+    </div>
+    <script>
+        (function () {
+            const tone = new URLSearchParams(window.location.search).get('tone') || 'aesthetic';
+            const basePath = '../../../../index.html';
+            function goBack(confirmed) {
+                const backUrl = new URL(basePath, window.location.href);
+                backUrl.searchParams.set('previewTone', tone);
+                if (confirmed) {
+                    backUrl.searchParams.set('previewToneConfirmed', '1');
+                }
+                window.location.href = backUrl.toString();
+            }
+            document.getElementById('confirm-tone-choice').addEventListener('click', () => goBack(true));
+            document.getElementById('back-tone-selection').addEventListener('click', () => goBack(false));
+        })();
+    </script>
 </body>
 </html>

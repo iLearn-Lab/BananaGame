@@ -61,7 +61,31 @@ const Game = (() => {
     let selectedStyle = null;
     let selectedSubStyle = null;
     let customStyleText = '';
+    let skipNextImageStyleReset = false;
     const PENDING_MODAL_THRESHOLD_MS = 1000;
+    const TONE_SELECTION_STORAGE_KEY = 'dn:selectedTone';
+    const GAME_THEME_STORAGE_KEY = 'dn:gameTheme';
+    const STYLE_SELECTION_STORAGE_KEY = 'dn:selectedStyle';
+    const STYLE_SUBTYPE_STORAGE_KEY = 'dn:selectedStyleSubtype';
+    const TONE_PREVIEW_PATHS = {
+        happy_ending: './前端界面/前端图片/基调/圆满/index.html',
+        bad_ending: './前端界面/前端图片/基调/悲剧结局/index.html',
+        normal_ending: './前端界面/前端图片/基调/普通结局/index.html',
+        dark_depressing: './前端界面/前端图片/基调/黑深残/index.html',
+        humorous: './前端界面/前端图片/基调/幽默/index.html',
+        abstract: './前端界面/前端图片/基调/抽象/index.html',
+        aesthetic: './前端界面/前端图片/基调/唯美/index.html',
+        logical: './前端界面/前端图片/基调/逻辑推理严谨/index.html',
+        mysterious: './前端界面/前端图片/基调/神秘/index.html'
+    };
+    const STYLE_PREVIEW_PATHS = {
+        realistic: './前端界面/前端图片/画风/写实/index.html',
+        anime: './前端界面/前端图片/画风/动漫/index.html',
+        ink_painting: './前端界面/前端图片/画风/水墨/index.html',
+        watercolor: './前端界面/前端图片/画风/水彩/index.html',
+        oil_painting: './前端界面/前端图片/画风/油画/index.html',
+        cyberpunk: './前端界面/前端图片/画风/赛博朋克/index.html'
+    };
     
     // 初始化函数
     function init() {
@@ -76,6 +100,13 @@ const Game = (() => {
         
         // 初始化事件监听
         initEventListeners();
+
+        // 处理从基调预览页返回的状态
+        restoreToneStateFromReturn();
+        // 恢复已输入的游戏主题，避免预览页往返导致丢失
+        restorePersistedGameTheme();
+        // 处理从画风预览页返回的状态
+        restoreStyleStateFromReturn();
     }
     
     // 音效管理模块
@@ -1005,34 +1036,38 @@ const Game = (() => {
             
             // 特殊处理：图片风格选择屏重置状态
             if (screenName === 'imageStyleSelection') {
-                // 重置所有选择状态
-                selectedStyle = null;
-                selectedSubStyle = null;
-                customStyleText = '';
-                
-                // 重置按钮状态
-                document.querySelectorAll('.style-btn').forEach(b => {
-                    b.classList.remove('ring-4', 'ring-white');
-                });
-                document.querySelectorAll('.submenu-btn').forEach(b => {
-                    b.classList.remove('ring-4', 'ring-white');
-                });
-                
-                // 隐藏子菜单
-                document.getElementById('oil-painting-submenu').classList.add('hidden');
-                document.getElementById('custom-style-input').classList.add('hidden');
-                
-                // 重置显示和按钮
-                document.getElementById('selected-style-display').textContent = '请选择一个风格';
-                if (elements.buttons.confirmStyle) {
-                    elements.buttons.confirmStyle.disabled = true;
-                    elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
-                    elements.buttons.confirmStyle.classList.remove('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
-                }
-                
-                // 清空自定义输入框
-                if (elements.inputs && elements.inputs.customStyle) {
-                    elements.inputs.customStyle.value = '';
+                if (skipNextImageStyleReset) {
+                    skipNextImageStyleReset = false;
+                } else {
+                    // 重置所有选择状态
+                    selectedStyle = null;
+                    selectedSubStyle = null;
+                    customStyleText = '';
+                    
+                    // 重置按钮状态
+                    document.querySelectorAll('.style-btn').forEach(b => {
+                        b.classList.remove('ring-4', 'ring-white');
+                    });
+                    document.querySelectorAll('.submenu-btn').forEach(b => {
+                        b.classList.remove('ring-4', 'ring-white');
+                    });
+                    
+                    // 隐藏子菜单
+                    document.getElementById('oil-painting-submenu').classList.add('hidden');
+                    document.getElementById('custom-style-input').classList.add('hidden');
+                    
+                    // 重置显示和按钮
+                    document.getElementById('selected-style-display').textContent = '请选择一个风格';
+                    if (elements.buttons.confirmStyle) {
+                        elements.buttons.confirmStyle.disabled = true;
+                        elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
+                        elements.buttons.confirmStyle.classList.remove('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+                    }
+                    
+                    // 清空自定义输入框
+                    if (elements.inputs && elements.inputs.customStyle) {
+                        elements.inputs.customStyle.value = '';
+                    }
                 }
             }
             
@@ -1070,6 +1105,257 @@ const Game = (() => {
         } else {
             elements.content.wordCount.className = 'word-count text-[14px] text-white';
         }
+    }
+
+    function persistSelectedTone(tone) {
+        if (!tone) return;
+        gameState.selectedTone = tone;
+        gameState.currentTone = tone;
+        localStorage.setItem(TONE_SELECTION_STORAGE_KEY, tone);
+    }
+
+    function applyToneVisualByTone(tone) {
+        let gradient = '';
+        switch (tone) {
+            case 'happy_ending': gradient = 'linear-gradient(135deg, rgba(46,204,113,0.3), rgba(26,188,156,0.3))'; break;
+            case 'bad_ending': gradient = 'linear-gradient(135deg, rgba(155,89,182,0.3), rgba(142,68,173,0.3))'; break;
+            case 'normal_ending': gradient = 'linear-gradient(135deg, rgba(52,152,219,0.3), rgba(41,128,185,0.3))'; break;
+            case 'dark_depressing': gradient = 'linear-gradient(135deg, rgba(52,73,94,0.5), rgba(44,62,80,0.5))'; break;
+            case 'humorous': gradient = 'linear-gradient(135deg, rgba(241,196,15,0.3), rgba(243,156,18,0.3))'; break;
+            case 'abstract': gradient = 'linear-gradient(135deg, rgba(155,89,182,0.3), rgba(142,68,173,0.3))'; break;
+            case 'aesthetic': gradient = 'linear-gradient(135deg, rgba(233,30,99,0.3), rgba(211,47,47,0.3))'; break;
+            case 'logical': gradient = 'linear-gradient(135deg, rgba(76,175,80,0.3), rgba(67,160,71,0.3))'; break;
+            case 'mysterious': gradient = 'linear-gradient(135deg, rgba(255,152,0,0.3), rgba(251,140,0,0.3))'; break;
+            case 'stream_of_consciousness': gradient = 'linear-gradient(135deg, rgba(103,58,183,0.3), rgba(93,58,183,0.3))'; break;
+            default: gradient = '';
+        }
+        if (gradient && elements.globalBg) {
+            elements.globalBg.style.background = gradient;
+            elements.globalBg.style.transition = 'background 500ms ease';
+        }
+    }
+
+    function syncToneSelectionUI(tone) {
+        document.querySelectorAll('.tone-card').forEach(card => {
+            card.classList.toggle('selected', card.dataset.tone === tone);
+        });
+        applyToneVisualByTone(tone);
+    }
+
+    function goToTonePreview(tone) {
+        const previewPath = TONE_PREVIEW_PATHS[tone];
+        if (!previewPath) {
+            showModal('提示', '该基调暂未配置预览页，请先选择其他基调', () => {});
+            return;
+        }
+        const targetUrl = `${previewPath}?tone=${encodeURIComponent(tone)}`;
+        window.location.href = targetUrl;
+    }
+
+    function restoreToneStateFromReturn() {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+        const previewTone = params.get('previewTone');
+        const toneFromStorage = localStorage.getItem(TONE_SELECTION_STORAGE_KEY);
+        const restoredTone = previewTone || toneFromStorage;
+        const isConfirmed = params.get('previewToneConfirmed') === '1';
+        const fromPreview = Boolean(previewTone) || isConfirmed;
+
+        if (!restoredTone) return;
+
+        persistSelectedTone(restoredTone);
+        syncToneSelectionUI(restoredTone);
+        if (fromPreview) {
+            switchScreen('toneSelection');
+            if (isConfirmed) {
+                switchScreen('themeInput');
+            }
+        }
+
+        // 一次性消费返回参数，避免刷新后重复触发自动跳转
+        params.delete('previewTone');
+        params.delete('previewToneConfirmed');
+        const nextQuery = params.toString();
+        const nextUrl = `${url.pathname}${nextQuery ? `?${nextQuery}` : ''}${url.hash}`;
+        window.history.replaceState({}, document.title, nextUrl);
+    }
+
+    function setConfirmStyleButtonState(enabled) {
+        if (!elements || !elements.buttons || !elements.buttons.confirmStyle) return;
+        elements.buttons.confirmStyle.disabled = !enabled;
+        if (enabled) {
+            elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
+            elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+        } else {
+            elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
+            elements.buttons.confirmStyle.classList.remove('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+        }
+    }
+
+    function persistGameTheme(theme) {
+        const normalized = escapeHtml((theme || '').trim());
+        gameState.gameTheme = normalized;
+        if (normalized) {
+            localStorage.setItem(GAME_THEME_STORAGE_KEY, normalized);
+        } else {
+            localStorage.removeItem(GAME_THEME_STORAGE_KEY);
+        }
+    }
+
+    function restorePersistedGameTheme() {
+        const persistedTheme = localStorage.getItem(GAME_THEME_STORAGE_KEY);
+        if (!persistedTheme) return;
+        gameState.gameTheme = persistedTheme;
+        if (elements && elements.inputs && elements.inputs.theme) {
+            elements.inputs.theme.value = persistedTheme;
+            if (typeof updateWordCount === 'function') {
+                updateWordCount();
+            }
+        }
+    }
+
+    function persistStyleSelection(style, subtype = '') {
+        if (!style) return;
+        selectedStyle = style;
+        selectedSubStyle = subtype || null;
+        localStorage.setItem(STYLE_SELECTION_STORAGE_KEY, style);
+        if (subtype) {
+            localStorage.setItem(STYLE_SUBTYPE_STORAGE_KEY, subtype);
+        } else {
+            localStorage.removeItem(STYLE_SUBTYPE_STORAGE_KEY);
+        }
+    }
+
+    function getStyleDisplayName(style) {
+        const styleBtn = document.querySelector(`.style-btn[data-style="${style}"]`);
+        return styleBtn ? styleBtn.dataset.styleName : style;
+    }
+
+    function getSubStyleDisplayName(substyle) {
+        const subBtn = document.querySelector(`.submenu-btn[data-substyle="${substyle}"]`);
+        return subBtn ? subBtn.dataset.substyleName : substyle;
+    }
+
+    function applyStyleSelectionUI(style, subtype = '') {
+        document.querySelectorAll('.style-btn').forEach(btn => {
+            btn.classList.toggle('ring-4', btn.dataset.style === style);
+            btn.classList.toggle('ring-white', btn.dataset.style === style);
+        });
+        document.querySelectorAll('.submenu-btn').forEach(btn => {
+            const isMatched = Boolean(subtype) && btn.dataset.substyle === subtype;
+            btn.classList.toggle('ring-4', isMatched);
+            btn.classList.toggle('ring-white', isMatched);
+        });
+
+        document.getElementById('oil-painting-submenu').classList.toggle('hidden', style !== 'oil_painting');
+        document.getElementById('custom-style-input').classList.toggle('hidden', style !== 'custom');
+
+        if (style === 'oil_painting') {
+            if (subtype) {
+                document.getElementById('selected-style-display').textContent = `已选择：油画风格 - ${getSubStyleDisplayName(subtype)}`;
+                setConfirmStyleButtonState(true);
+            } else {
+                document.getElementById('selected-style-display').textContent = '已选择：油画风格（请选择具体类型）';
+                setConfirmStyleButtonState(false);
+            }
+            return;
+        }
+
+        if (style === 'custom') {
+            document.getElementById('selected-style-display').textContent = customStyleText ? `已选择：自定义 - ${customStyleText}` : '已选择：自定义（请输入风格）';
+            setConfirmStyleButtonState(Boolean(customStyleText));
+            return;
+        }
+
+        document.getElementById('selected-style-display').textContent = `已选择：${getStyleDisplayName(style)}`;
+        setConfirmStyleButtonState(Boolean(style));
+    }
+
+    function goToStylePreview(style) {
+        const previewPath = STYLE_PREVIEW_PATHS[style];
+        if (!previewPath) return;
+        const targetUrl = `${previewPath}?style=${encodeURIComponent(style)}`;
+        window.location.href = targetUrl;
+    }
+
+    function applySelectedStyleToGameState() {
+        if (selectedStyle === 'oil_painting' && selectedSubStyle) {
+            gameState.imageStyle = {
+                type: 'oil_painting',
+                subtype: selectedSubStyle
+            };
+            return true;
+        }
+        if (selectedStyle === 'custom' && customStyleText) {
+            gameState.imageStyle = {
+                type: 'custom',
+                value: customStyleText
+            };
+            return true;
+        }
+        if (selectedStyle) {
+            gameState.imageStyle = {
+                type: selectedStyle
+            };
+            return true;
+        }
+        return false;
+    }
+
+    async function confirmStyleAndContinueFlow() {
+        if (!gameState.gameTheme || !String(gameState.gameTheme).trim()) {
+            switchScreen('themeInput');
+            if (elements && elements.inputs && elements.inputs.theme) {
+                const persistedTheme = localStorage.getItem(GAME_THEME_STORAGE_KEY) || '';
+                elements.inputs.theme.value = persistedTheme;
+                if (typeof updateWordCount === 'function') {
+                    updateWordCount();
+                }
+            }
+            showModal('提示', '游戏主题不能为空，请先输入游戏主题', () => {});
+            return;
+        }
+        if (!applySelectedStyleToGameState()) {
+            showModal('提示', '请先选择一个图片风格', () => {});
+            return;
+        }
+        console.log('✅ 图片风格已选择:', gameState.imageStyle);
+        FontManager.applyFontToGame(gameState.imageStyle, gameState.tone);
+        switchScreen('loading');
+        simulateLoading();
+        await generateGameWorldview();
+    }
+
+    async function restoreStyleStateFromReturn() {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+        const previewStyle = params.get('previewStyle');
+        const previewSubtype = params.get('previewStyleSubtype') || '';
+        const isConfirmed = params.get('previewStyleConfirmed') === '1';
+        const fromPreview = Boolean(previewStyle) || isConfirmed;
+        if (!fromPreview) return;
+
+        const styleFromStorage = localStorage.getItem(STYLE_SELECTION_STORAGE_KEY);
+        const subtypeFromStorage = localStorage.getItem(STYLE_SUBTYPE_STORAGE_KEY) || '';
+        const restoredStyle = previewStyle || styleFromStorage;
+        const restoredSubtype = previewSubtype || subtypeFromStorage;
+        if (!restoredStyle) return;
+
+        persistStyleSelection(restoredStyle, restoredSubtype);
+        skipNextImageStyleReset = true;
+        switchScreen('imageStyleSelection');
+        applyStyleSelectionUI(restoredStyle, restoredSubtype);
+
+        if (isConfirmed) {
+            await confirmStyleAndContinueFlow();
+        }
+
+        params.delete('previewStyle');
+        params.delete('previewStyleSubtype');
+        params.delete('previewStyleConfirmed');
+        const nextQuery = params.toString();
+        const nextUrl = `${url.pathname}${nextQuery ? `?${nextQuery}` : ''}${url.hash}`;
+        window.history.replaceState({}, document.title, nextUrl);
     }
     
     // 重置属性
@@ -4694,35 +4980,16 @@ const Game = (() => {
         // 基调选择卡片
         document.querySelectorAll('.tone-card').forEach(card => {
             card.addEventListener('click', () => {
-                document.querySelectorAll('.tone-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-                gameState.selectedTone = card.dataset.tone;
-                gameState.currentTone = card.dataset.tone;
-                
-                // 背景渐变切换
-                let gradient = '';
-                switch(card.dataset.tone) {
-                    case 'happy_ending': gradient = 'linear-gradient(135deg, rgba(46,204,113,0.3), rgba(26,188,156,0.3))'; break;
-                    case 'bad_ending': gradient = 'linear-gradient(135deg, rgba(155,89,182,0.3), rgba(142,68,173,0.3))'; break;
-                    case 'normal_ending': gradient = 'linear-gradient(135deg, rgba(52,152,219,0.3), rgba(41,128,185,0.3))'; break;
-                    case 'dark_depressing': gradient = 'linear-gradient(135deg, rgba(52,73,94,0.5), rgba(44,62,80,0.5))'; break;
-                    case 'humorous': gradient = 'linear-gradient(135deg, rgba(241,196,15,0.3), rgba(243,156,18,0.3))'; break;
-                    case 'abstract': gradient = 'linear-gradient(135deg, rgba(155,89,182,0.3), rgba(142,68,173,0.3))'; break;
-                    case 'aesthetic': gradient = 'linear-gradient(135deg, rgba(233,30,99,0.3), rgba(211,47,47,0.3))'; break;
-                    case 'logical': gradient = 'linear-gradient(135deg, rgba(76,175,80,0.3), rgba(67,160,71,0.3))'; break;
-                    case 'mysterious': gradient = 'linear-gradient(135deg, rgba(255,152,0,0.3), rgba(251,140,0,0.3))'; break;
-                    case 'stream_of_consciousness': gradient = 'linear-gradient(135deg, rgba(103,58,183,0.3), rgba(93,58,183,0.3))'; break;
-                }
-                elements.globalBg.style.background = gradient;
-                elements.globalBg.style.transition = 'background 500ms ease';
+                const tone = card.dataset.tone;
+                persistSelectedTone(tone);
+                syncToneSelectionUI(tone);
                 playSound('select');
+                goToTonePreview(tone);
             });
         });
         elements.buttons.confirmTone.addEventListener('click', () => {
             if (gameState.selectedTone) {
-                showModal('提示', '基调已确定，剧情将按此风格生成', () => {
-                    switchScreen('themeInput');
-                }, false);
+                showModal('提示', '请选择基调卡片进入预览页，在预览页中点击“确认选择”继续', () => {}, false);
             } else {
                 showModal('提示', '请选择故事基调', () => {});
             }
@@ -4734,7 +5001,7 @@ const Game = (() => {
             const theme = elements.inputs.theme.value;
             const validation = inputValidator.validateTheme(theme);
             if (validation.valid) {
-                gameState.gameTheme = escapeHtml(theme.trim());
+                persistGameTheme(theme);
                 // 跳转到图片风格选择界面
                 switchScreen('imageStyleSelection');
             } else {
@@ -4763,44 +5030,16 @@ const Game = (() => {
         // 风格按钮点击事件
         document.querySelectorAll('.style-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                // 重置所有按钮状态
-                document.querySelectorAll('.style-btn').forEach(b => {
-                    b.classList.remove('ring-4', 'ring-white');
-                });
-                
-                // 选中当前按钮
-                btn.classList.add('ring-4', 'ring-white');
-                selectedStyle = btn.dataset.style;
-                selectedSubStyle = null; // 重置子风格
-                customStyleText = ''; // 重置自定义文本
-                
-                // 隐藏所有子菜单
-                document.getElementById('oil-painting-submenu').classList.add('hidden');
-                document.getElementById('custom-style-input').classList.add('hidden');
-                
-                // 根据选择的风格显示相应的子菜单
-                if (selectedStyle === 'oil_painting') {
-                    // 显示油画风格子选项
-                    document.getElementById('oil-painting-submenu').classList.remove('hidden');
-                    document.getElementById('selected-style-display').textContent = '已选择：油画风格（请选择具体类型）';
-                    elements.buttons.confirmStyle.disabled = true;
-                    elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
-                } else if (selectedStyle === 'custom') {
-                    // 显示自定义输入框
-                    document.getElementById('custom-style-input').classList.remove('hidden');
-                    document.getElementById('selected-style-display').textContent = '已选择：自定义（请输入风格）';
-                    elements.buttons.confirmStyle.disabled = true;
-                    elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
-                } else {
-                    // 其他风格直接显示选择
-                    const styleName = btn.dataset.styleName;
-                    document.getElementById('selected-style-display').textContent = `已选择：${styleName}`;
-                    elements.buttons.confirmStyle.disabled = false;
-                    elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
-                    elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
-                }
-                
+                const style = btn.dataset.style;
+                selectedStyle = style;
+                selectedSubStyle = null;
+                customStyleText = '';
+                persistStyleSelection(style, '');
+                applyStyleSelectionUI(style, '');
                 playSound('click');
+                if (style !== 'custom') {
+                    goToStylePreview(style);
+                }
             });
         });
         
@@ -4815,11 +5054,10 @@ const Game = (() => {
                 // 选中当前子选项
                 btn.classList.add('ring-4', 'ring-white');
                 selectedSubStyle = btn.dataset.substyle;
+                persistStyleSelection('oil_painting', selectedSubStyle);
                 const subStyleName = btn.dataset.substyleName;
                 document.getElementById('selected-style-display').textContent = `已选择：油画风格 - ${subStyleName}`;
-                elements.buttons.confirmStyle.disabled = false;
-                elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
-                elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+                setConfirmStyleButtonState(true);
                 
                 playSound('click');
             });
@@ -4831,13 +5069,10 @@ const Game = (() => {
                 customStyleText = elements.inputs.customStyle.value.trim();
                 if (customStyleText.length > 0) {
                     document.getElementById('selected-style-display').textContent = `已选择：自定义 - ${customStyleText}`;
-                    elements.buttons.confirmStyle.disabled = false;
-                    elements.buttons.confirmStyle.classList.remove('cursor-not-allowed');
-                    elements.buttons.confirmStyle.classList.add('bg-[#1ABC9C]', 'hover:bg-[#16A085]');
+                    setConfirmStyleButtonState(true);
                 } else {
                     document.getElementById('selected-style-display').textContent = '已选择：自定义（请输入风格）';
-                    elements.buttons.confirmStyle.disabled = true;
-                    elements.buttons.confirmStyle.classList.add('cursor-not-allowed');
+                    setConfirmStyleButtonState(false);
                 }
             });
         }
@@ -4847,39 +5082,7 @@ const Game = (() => {
             if (elements.buttons.confirmStyle.disabled) {
                 return;
             }
-            
-            // 根据选择的风格保存到gameState
-            if (selectedStyle === 'oil_painting' && selectedSubStyle) {
-                // 油画风格需要保存子风格
-                gameState.imageStyle = {
-                    type: 'oil_painting',
-                    subtype: selectedSubStyle
-                };
-            } else if (selectedStyle === 'custom' && customStyleText) {
-                // 自定义风格
-                gameState.imageStyle = {
-                    type: 'custom',
-                    value: customStyleText
-                };
-            } else if (selectedStyle) {
-                // 其他风格
-                gameState.imageStyle = {
-                    type: selectedStyle
-                };
-            } else {
-                showModal('提示', '请先选择一个图片风格', () => {});
-                return;
-            }
-            
-            console.log('✅ 图片风格已选择:', gameState.imageStyle);
-            
-            // 应用字体（根据风格和基调）
-            FontManager.applyFontToGame(gameState.imageStyle, gameState.tone);
-            
-            // 跳转到加载界面，开始生成世界观
-            switchScreen('loading');
-            simulateLoading();
-            await generateGameWorldview();
+            await confirmStyleAndContinueFlow();
         });
         
         // 开始游戏
