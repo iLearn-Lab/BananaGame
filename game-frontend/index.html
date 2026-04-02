@@ -24,9 +24,35 @@
 <body class="bg-black text-white overflow-hidden font-sans">
     <!-- 全局背景（各阶段动态切换） -->
     <div id="global-bg" class="fixed inset-0 bg-contain bg-center opacity-60 z-0"></div>
+    <!-- ultra-luxury参考背景层（按screen启停） -->
+    <div id="luxury-bg" class="hidden fixed inset-0 z-[9] pointer-events-none" aria-hidden="true">
+        <div class="luxury-bg-gradient absolute inset-0"></div>
+        <div class="luxury-bg-velvet absolute inset-0"></div>
+        <div class="luxury-bg-fluid-curtain absolute inset-0"></div>
+        <div class="luxury-bg-gold-wave absolute inset-0"></div>
+        <div class="luxury-bg-sweep absolute inset-0"></div>
+        <div class="luxury-bg-radial luxury-bg-radial-a absolute inset-0"></div>
+        <div class="luxury-bg-radial luxury-bg-radial-b absolute inset-0"></div>
+        <div class="luxury-bg-sparkles absolute inset-0"></div>
+        <div class="luxury-bg-philosophy absolute inset-0">
+            <span class="luxury-philosophy-line lp-line-1">AMOR FATI</span>
+            <span class="luxury-philosophy-line lp-line-2">MEMENTO MORI</span>
+            <span class="luxury-philosophy-line lp-line-3">GNOTHI SEAUTON</span>
+            <span class="luxury-philosophy-line lp-line-4">ALETHEIA</span>
+            <span class="luxury-philosophy-line lp-line-5">ETERNAL RETURN</span>
+            <span class="luxury-philosophy-line lp-line-6">VITA CONTEMPLATIVA</span>
+            <span class="luxury-philosophy-line lp-line-7">TABULA RASA</span>
+            <span class="luxury-philosophy-line lp-line-8">SUB SPECIE AETERNITATIS</span>
+            <span class="luxury-philosophy-line lp-line-9">THEORIA PRAXIS POIESIS</span>
+            <span class="luxury-philosophy-line lp-line-10">ESSENTIA ET EXISTENTIA</span>
+            <span class="luxury-philosophy-line lp-line-11">THE UNEXAMINED LIFE</span>
+            <span class="luxury-philosophy-line lp-line-12">LUMEN IN TENEBRIS</span>
+        </div>
+        <div class="luxury-bg-noise absolute inset-0"></div>
+    </div>
     
     <!-- 主菜单界面（默认显示） -->
-    <div id="menu-screen" class="screen flex flex-col items-center justify-center h-screen relative z-10" role="main" aria-labelledby="game-logo">
+    <div id="menu-screen" class="screen luxury-target flex flex-col items-center justify-center h-screen relative z-10" role="main" aria-labelledby="game-logo">
         <div id="game-logo" class="game-logo w-[200px] h-[80px] bg-white/10 rounded-lg flex items-center justify-center mb-16" aria-hidden="true">
             <span class="text-2xl font-bold">文本冒险游戏</span>
         </div>
@@ -44,11 +70,25 @@
                 退出游戏
             </button>
         </div>
+        <div class="visual-mode-panel mt-8 w-full max-w-[560px] rounded-xl border border-white/10 bg-black/30 px-5 py-4">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
+                <div>
+                    <h3 class="text-[16px] font-bold text-[#F4E4A6]">视觉性能模式</h3>
+                    <p class="text-[12px] text-white/80 mt-1">默认性能模式，可手动切换到自动或华丽。</p>
+                </div>
+                <div id="visual-mode-group" class="flex items-center gap-2">
+                    <button type="button" class="visual-mode-btn px-4 py-2 rounded-lg text-[13px] font-bold border border-[#D4AF37]/35 bg-[#2C3E50]/50 text-white transition-all" data-visual-mode="auto">自动（推荐）</button>
+                    <button type="button" class="visual-mode-btn px-4 py-2 rounded-lg text-[13px] font-bold border border-[#D4AF37]/35 bg-[#2C3E50]/50 text-white transition-all" data-visual-mode="luxury">华丽</button>
+                    <button type="button" class="visual-mode-btn px-4 py-2 rounded-lg text-[13px] font-bold border border-[#D4AF37]/35 bg-[#2C3E50]/50 text-white transition-all" data-visual-mode="performance">性能</button>
+                </div>
+            </div>
+            <p id="visual-mode-status" class="text-[12px] text-[#ECF0F1]/80 mt-3">当前：性能（默认）</p>
+        </div>
         <div class="version text-[12px] text-[#999999] absolute bottom-6" aria-hidden="true">v1.0.0 © 2026 文本冒险游戏版权所有</div>
     </div>
 
     <!-- 主角属性选择界面 -->
-    <div id="attr-selection-screen" class="screen hidden flex flex-col items-center justify-start h-screen relative z-10 p-8">
+    <div id="attr-selection-screen" class="screen luxury-target hidden flex flex-col items-center justify-start h-screen relative z-10 p-8">
         <div class="title text-[24px] font-bold text-[#ECF0F1] mb-8">塑造你的主角</div>
         <div class="attr-container flex w-full max-w-5xl gap-8">
             <!-- 左侧属性说明区 -->
@@ -133,7 +173,7 @@
     </div>
 
     <!-- 游戏难度选择界面 -->
-    <div id="difficulty-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
+    <div id="difficulty-selection-screen" class="screen luxury-target hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
         <div class="title text-[24px] font-bold text-[#ECF0F1] mb-12">选择游戏难度</div>
         <div class="difficulty-cards flex gap-[40px] justify-center">
             <!-- 简单难度 -->
@@ -174,7 +214,7 @@
     </div>
 
     <!-- 故事基调选择界面 -->
-    <div id="tone-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
+    <div id="tone-selection-screen" class="screen luxury-target hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
         <div class="title text-[24px] font-bold text-[#ECF0F1] mb-12">选择故事基调</div>
         <div class="tone-scroll-container w-full max-w-5xl overflow-x-auto pb-8">
             <div class="tone-cards flex gap-[30px]">
@@ -294,7 +334,7 @@
     </div>
 
     <!-- 游戏主题输入界面 -->
-    <div id="theme-input-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" role="region" aria-labelledby="theme-title" aria-describedby="theme-examples">
+    <div id="theme-input-screen" class="screen luxury-target hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" role="region" aria-labelledby="theme-title" aria-describedby="theme-examples">
         <div id="theme-title" class="title text-[24px] font-bold text-[#ECF0F1] mb-12">输入游戏主题</div>
         <div class="theme-input-container flex flex-col items-center gap-6">
             <input type="text" id="theme-input" class="theme-input w-[400px] h-[60px] bg-[rgba(255,255,255,0.1)] border-2 border-[#3498DB] rounded-[8px] text-[18px] text-white px-[20px] outline-none transition-all duration-300 hover:border-[#2980B9]" placeholder="请输入游戏主题，如'古风权谋'、'科幻救赎'" aria-label="游戏主题输入" aria-required="true" aria-describedby="word-count">
@@ -305,7 +345,7 @@
     </div>
 
     <!-- 图片风格选择界面 -->
-    <div id="image-style-selection-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" role="region" aria-labelledby="image-style-title">
+    <div id="image-style-selection-screen" class="screen luxury-target hidden flex flex-col items-center justify-center h-screen relative z-10 p-8" role="region" aria-labelledby="image-style-title">
         <div id="image-style-title" class="title text-[24px] font-bold text-[#ECF0F1] mb-12">选择图片风格</div>
         <div class="image-style-container flex flex-col items-center gap-6 w-full max-w-4xl">
             <!-- 风格选项按钮组 -->
@@ -373,7 +413,7 @@
     </div>
 
     <!-- 核心设定告知界面 -->
-    <div id="setting-screen" class="screen hidden flex flex-col h-screen relative z-10">
+    <div id="setting-screen" class="screen luxury-target hidden flex flex-col h-screen relative z-10">
         <div class="title text-[24px] font-bold text-white text-center py-6 bg-black/30">游戏核心设定</div>
         <div class="setting-container flex h-[calc(100%-120px)]">
             <!-- 左侧导航 -->
@@ -415,7 +455,7 @@
     </div>
 
     <!-- 剧情加载界面 -->
-    <div id="loading-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10">
+    <div id="loading-screen" class="screen luxury-target hidden flex flex-col items-center justify-center h-screen relative z-10">
         <div class="loading-spinner w-[80px] h-[80px] rounded-full border-[8px] border-[#1ABC9C] border-t-transparent animate-spin mb-6"></div>
         <div class="loading-text text-[18px] text-white mb-2" id="loading-status">生成世界观...</div>
         <div class="loading-percent text-[20px] font-bold text-white" id="loading-percent">0%</div>
@@ -546,7 +586,7 @@
     </div>
 
     <!-- 存档管理界面 -->
-    <div id="save-management-screen" class="screen hidden flex flex-col h-screen relative z-10 p-8 overflow-hidden">
+    <div id="save-management-screen" class="screen luxury-target hidden flex flex-col h-screen relative z-10 p-8 overflow-hidden">
         <div class="title text-[24px] font-bold text-[#ECF0F1] mb-8 flex-shrink-0">存档管理</div>
         <div class="save-cards-container flex-1 overflow-y-auto mb-4">
             <div class="save-cards grid grid-cols-2 gap-[30px] w-full max-w-4xl mx-auto">
@@ -561,7 +601,7 @@
     </div>
 
     <!-- 结局界面 -->
-    <div id="ending-screen" class="screen hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
+    <div id="ending-screen" class="screen luxury-target hidden flex flex-col items-center justify-center h-screen relative z-10 p-8">
         <div class="ending-container w-full max-w-3xl bg-black/30 rounded-[16px] p-[60px] text-center">
             <h2 id="ending-title" class="text-[48px] font-bold text-white mb-12">圆满结局</h2>
             <div class="ending-content-container h-[300px] overflow-y-auto mb-8">

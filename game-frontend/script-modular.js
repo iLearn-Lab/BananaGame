@@ -67,6 +67,14 @@ const Game = (() => {
     const GAME_THEME_STORAGE_KEY = 'dn:gameTheme';
     const STYLE_SELECTION_STORAGE_KEY = 'dn:selectedStyle';
     const STYLE_SUBTYPE_STORAGE_KEY = 'dn:selectedStyleSubtype';
+    const VISUAL_MODE_STORAGE_KEY = 'dn:visualMode';
+    const VISUAL_MODE_CHOICES = new Set(['auto', 'luxury', 'performance']);
+    let visualMode = 'performance';
+    let autoResolvedVisualMode = 'luxury';
+    let frameMonitorRafId = null;
+    let consecutiveSlowFrames = 0;
+    let consecutiveStableFrames = 0;
+    let autoFallbackNotified = false;
     const TONE_PREVIEW_PATHS = {
         happy_ending: './前端界面/前端图片/基调/圆满/index.html',
         bad_ending: './前端界面/前端图片/基调/悲剧结局/index.html',
@@ -86,6 +94,18 @@ const Game = (() => {
         oil_painting: './前端界面/前端图片/画风/油画/index.html',
         cyberpunk: './前端界面/前端图片/画风/赛博朋克/index.html'
     };
+    const LUXURY_TARGET_SCREENS = new Set([
+        'menu',
+        'attrSelection',
+        'difficultySelection',
+        'toneSelection',
+        'themeInput',
+        'imageStyleSelection',
+        'setting',
+        'loading',
+        'saveManagement',
+        'ending'
+    ]);
     
     // 初始化函数
     function init() {
@@ -97,6 +117,9 @@ const Game = (() => {
         
         // 初始化DOM元素
         initElements();
+
+        // 初始化视觉性能模式（自动/华丽/性能）
+        initVisualModeSystem();
         
         // 初始化事件监听
         initEventListeners();
@@ -107,6 +130,8 @@ const Game = (() => {
         restorePersistedGameTheme();
         // 处理从画风预览页返回的状态
         restoreStyleStateFromReturn();
+        // 初始化 ultra-luxury 视觉作用域
+        updateLuxuryVisualMode(gameState.currentScreen || 'menu');
     }
     
     // 音效管理模块
@@ -970,6 +995,8 @@ const Game = (() => {
                 wordCount: document.querySelector('.word-count'),
                 settingTabs: document.querySelectorAll('.nav-item'),
                 settingTabContents: document.querySelectorAll('.content-tab'),
+                visualModeButtons: document.querySelectorAll('.visual-mode-btn'),
+                visualModeStatus: document.getElementById('visual-mode-status'),
                 gameStyle: document.getElementById('game-style-content'),
                 worldview: document.getElementById('worldview-content'),
                 protagonistAbility: document.getElementById('protagonist-ability-content'),
@@ -999,6 +1026,142 @@ const Game = (() => {
             globalBg: document.getElementById('global-bg')
         };
     }
+
+    function getEffectiveVisualMode() {
+        return visualMode === 'auto' ? autoResolvedVisualMode : visualMode;
+    }
+
+    function chooseAutoVisualMode() {
+        let score = 0;
+        const cpuCores = navigator.hardwareConcurrency || 4;
+        const memory = navigator.deviceMemory || 8;
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            score += 4;
+        }
+        if (cpuCores <= 4) {
+            score += 3;
+        } else if (cpuCores <= 6) {
+            score += 1;
+        }
+        if (memory <= 4) {
+            score += 3;
+        } else if (memory <= 8) {
+            score += 1;
+        }
+        return score >= 4 ? 'performance' : 'luxury';
+    }
+
+    function updateVisualModeStatus(reason = '') {
+        const statusEl = elements?.content?.visualModeStatus;
+        if (!statusEl) return;
+
+        const effectiveMode = getEffectiveVisualMode();
+        const labels = {
+            auto: '自动（推荐）',
+            luxury: '华丽',
+            performance: '性能'
+        };
+
+        if (visualMode === 'auto') {
+            let detail = effectiveMode === 'performance' ? '当前自动降级到性能以提升稳定性' : '当前自动使用华丽模式';
+            if (reason === 'runtime-fallback') {
+                detail = '检测到连续掉帧，已自动切换为性能模式';
+            } else if (reason === 'runtime-recover') {
+                detail = '帧率恢复稳定，已自动恢复华丽模式';
+            }
+            statusEl.textContent = `当前：${labels.auto}（实际生效：${labels[effectiveMode]}） · ${detail}`;
+        } else {
+            statusEl.textContent = `当前：${labels[visualMode]}（手动）`;
+        }
+    }
+
+    function updateVisualModeButtons() {
+        const buttons = elements?.content?.visualModeButtons;
+        if (!buttons || !buttons.length) return;
+
+        buttons.forEach((btn) => {
+            const isActive = btn.dataset.visualMode === visualMode;
+            btn.classList.toggle('is-active', isActive);
+        });
+    }
+
+    function applyVisualMode(nextMode, reason = 'manual') {
+        if (!VISUAL_MODE_CHOICES.has(nextMode)) return;
+        visualMode = nextMode;
+        localStorage.setItem(VISUAL_MODE_STORAGE_KEY, nextMode);
+
+        if (visualMode === 'auto') {
+            autoResolvedVisualMode = chooseAutoVisualMode();
+            consecutiveSlowFrames = 0;
+            consecutiveStableFrames = 0;
+        } else {
+            autoResolvedVisualMode = visualMode;
+        }
+
+        updateVisualModeButtons();
+        updateLuxuryVisualMode(gameState?.currentScreen || 'menu');
+        updateVisualModeStatus(reason);
+    }
+
+    function setAutoResolvedVisualMode(nextMode, reason = '') {
+        if (visualMode !== 'auto') return;
+        if (autoResolvedVisualMode === nextMode) return;
+        autoResolvedVisualMode = nextMode;
+        updateLuxuryVisualMode(gameState?.currentScreen || 'menu');
+        updateVisualModeStatus(reason);
+    }
+
+    function startFrameDropMonitor() {
+        if (frameMonitorRafId) {
+            cancelAnimationFrame(frameMonitorRafId);
+            frameMonitorRafId = null;
+        }
+
+        let lastFrameTs = performance.now();
+        const tick = (now) => {
+            const delta = now - lastFrameTs;
+            lastFrameTs = now;
+
+            if (visualMode === 'auto') {
+                if (delta > 34) {
+                    consecutiveSlowFrames += 1;
+                    consecutiveStableFrames = 0;
+                } else {
+                    consecutiveStableFrames += 1;
+                    if (consecutiveSlowFrames > 0) {
+                        consecutiveSlowFrames -= 1;
+                    }
+                }
+
+                if (consecutiveSlowFrames >= 8) {
+                    setAutoResolvedVisualMode('performance', 'runtime-fallback');
+                    consecutiveSlowFrames = 0;
+                    consecutiveStableFrames = 0;
+                    if (!autoFallbackNotified) {
+                        autoFallbackNotified = true;
+                        console.warn('⚠️ [视觉模式] 检测到连续掉帧，已自动切换到性能模式');
+                    }
+                } else if (consecutiveStableFrames >= 240 && chooseAutoVisualMode() === 'luxury') {
+                    setAutoResolvedVisualMode('luxury', 'runtime-recover');
+                    consecutiveStableFrames = 0;
+                }
+            }
+
+            frameMonitorRafId = requestAnimationFrame(tick);
+        };
+
+        frameMonitorRafId = requestAnimationFrame(tick);
+    }
+
+    function initVisualModeSystem() {
+        const persistedMode = localStorage.getItem(VISUAL_MODE_STORAGE_KEY);
+        visualMode = VISUAL_MODE_CHOICES.has(persistedMode) ? persistedMode : 'performance';
+        autoResolvedVisualMode = chooseAutoVisualMode();
+        updateVisualModeButtons();
+        updateVisualModeStatus('init');
+        startFrameDropMonitor();
+    }
     
     // 屏幕切换函数（带淡入淡出动画300ms）
     function switchScreen(screenName) {
@@ -1008,22 +1171,33 @@ const Game = (() => {
             return;
         }
         
-        // 隐藏所有屏幕（淡出）
-        Object.values(elements.screens).forEach(screen => {
-            if (screen && screen.classList) {
-                screen.classList.add('hidden');
-                screen.style.opacity = '0';
-                screen.style.transition = 'opacity 300ms ease';
-            }
-        });
-        
+        // 先切换背景作用域，避免切屏过程出现黑底空帧
+        updateLuxuryVisualMode(screenName);
+
         // 显示目标屏幕（淡入）
         const targetScreen = elements.screens[screenName];
         if (targetScreen && targetScreen.classList) {
+            const transitionMs = getEffectiveVisualMode() === 'performance' ? 110 : 180;
+            targetScreen.style.transition = `opacity ${transitionMs}ms ease`;
             targetScreen.classList.remove('hidden');
-            setTimeout(() => {
-                targetScreen.style.opacity = '1';
-            }, 50);
+
+            // 在隐藏其它屏幕之前先挂载目标屏幕，避免闪黑
+            targetScreen.style.opacity = '0.01';
+
+            // 隐藏其它屏幕
+            Object.entries(elements.screens).forEach(([name, screen]) => {
+                if (!screen || !screen.classList || screen === targetScreen) return;
+                screen.classList.add('hidden');
+                screen.style.opacity = '0';
+            });
+
+            // 双 RAF 比 setTimeout 更稳定，减少随机跳闪
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    targetScreen.style.opacity = '1';
+                });
+            });
+
             gameState.currentScreen = screenName;
             
             // 特殊处理：主题输入屏清空输入
@@ -1087,6 +1261,20 @@ const Game = (() => {
         
         // 播放音效
         playSound('switch');
+    }
+
+    function updateLuxuryVisualMode(screenName) {
+        const shell = document.getElementById('luxury-bg');
+        if (!shell) return;
+        const effectiveMode = getEffectiveVisualMode();
+        const enableLuxury = LUXURY_TARGET_SCREENS.has(screenName);
+        shell.classList.toggle('hidden', !enableLuxury);
+        document.body.classList.toggle('luxury-mode', enableLuxury);
+        document.body.classList.toggle('visual-auto', visualMode === 'auto');
+        document.body.classList.toggle('visual-luxury', enableLuxury && effectiveMode === 'luxury');
+        document.body.classList.toggle('visual-performance', enableLuxury && effectiveMode === 'performance');
+        shell.dataset.visualMode = effectiveMode;
+        document.body.dataset.activeScreen = screenName || '';
     }
     
     // 字数统计更新
@@ -5025,6 +5213,16 @@ const Game = (() => {
                 playSound('click');
             });
         });
+
+        if (elements.content.visualModeButtons && elements.content.visualModeButtons.length) {
+            elements.content.visualModeButtons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const selectedMode = btn.dataset.visualMode;
+                    applyVisualMode(selectedMode, 'manual-select');
+                    playSound('click');
+                });
+            });
+        }
         
         // 图片风格选择逻辑
         // 风格按钮点击事件

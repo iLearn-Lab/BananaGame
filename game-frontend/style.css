@@ -612,12 +612,7 @@
    ======================================== */
 .screen {
     animation: fadeIn 0.3s ease-in-out;
-}
-
-/* 屏幕切换动效增强 */
-.screen {
-    opacity: 0;
-    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 1;
 }
 
 /* 主菜单按钮入场动画 */
@@ -1895,4 +1890,753 @@ p#scene-text:focus {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
                 0 0 40px rgba(26, 188, 156, 0.1);
+}
+
+/* ========================================
+   Ultra Luxury Visual Scope (High Dynamic)
+   ======================================== */
+
+:root {
+    --lux-gold: #d4af37;
+    --lux-gold-light: #f4e4a6;
+    --lux-gold-dark: #aa8c2c;
+    --lux-amber: #e7a645;
+    --lux-bronze: #8b4e2c;
+    --lux-plum: #6f2a68;
+    --lux-royal-purple: #4a245f;
+    --lux-wine: #6b1c23;
+    --lux-surface: rgba(36, 18, 34, 0.45);
+    --lux-border: rgba(212, 175, 55, 0.35);
+    --lux-shadow: 0 18px 48px rgba(0, 0, 0, 0.5), inset 0 0 26px rgba(212, 175, 55, 0.1);
+}
+
+#luxury-bg {
+    opacity: 1;
+    filter: saturate(1.24) contrast(1.12) brightness(1.04);
+    overflow: hidden;
+    transform: translateZ(0);
+    will-change: opacity, transform, filter;
+}
+
+#luxury-bg::before,
+#luxury-bg::after {
+    content: "";
+    position: absolute;
+    inset: -12%;
+    pointer-events: none;
+    z-index: 0;
+    transform: translateZ(0);
+    will-change: transform, opacity, filter;
+}
+
+#luxury-bg::before {
+    background:
+        conic-gradient(from 0deg at 52% 50%, rgba(255, 229, 168, 0.16), transparent 28%, rgba(255, 206, 120, 0.12) 54%, transparent 74%, rgba(255, 224, 162, 0.14)),
+        radial-gradient(circle at 52% 50%, rgba(255, 235, 176, 0.2), transparent 62%);
+    mix-blend-mode: screen;
+    filter: blur(18px);
+    animation: luxHaloSpin 28s linear infinite;
+}
+
+#luxury-bg::after {
+    background:
+        repeating-radial-gradient(circle at 50% 50%, rgba(255, 226, 156, 0.14) 0 2px, transparent 2px 18px),
+        radial-gradient(circle at 30% 70%, rgba(255, 205, 126, 0.22), transparent 55%);
+    mix-blend-mode: screen;
+    opacity: 0.42;
+    filter: blur(1px);
+    animation: luxGlyphPulse 9.5s ease-in-out infinite;
+}
+
+#luxury-bg .luxury-bg-gradient {
+    background:
+        radial-gradient(circle at 10% 16%, rgba(255, 220, 132, 0.36) 0%, transparent 54%),
+        radial-gradient(circle at 86% 80%, rgba(161, 86, 38, 0.36) 0%, transparent 58%),
+        radial-gradient(circle at 68% 26%, rgba(122, 57, 124, 0.3) 0%, transparent 52%),
+        radial-gradient(circle at 26% 74%, rgba(84, 40, 109, 0.28) 0%, transparent 56%),
+        linear-gradient(132deg, #1a0a13 0%, #34172a 34%, #2d1420 58%, #231017 100%);
+    background-size: 120% 120%, 130% 130%, 135% 135%, 145% 145%, 100% 100%;
+    animation: luxuryChromaticShift 24s ease-in-out infinite alternate;
+    will-change: background-position, filter;
+}
+
+#luxury-bg .luxury-bg-velvet {
+    background:
+        radial-gradient(120% 85% at 8% 20%, rgba(255, 216, 140, 0.34) 0%, rgba(255, 216, 140, 0.08) 38%, transparent 68%),
+        radial-gradient(95% 70% at 78% 18%, rgba(214, 132, 74, 0.3) 0%, rgba(214, 132, 74, 0.07) 42%, transparent 70%),
+        radial-gradient(110% 76% at 72% 64%, rgba(122, 57, 124, 0.24) 0%, rgba(122, 57, 124, 0.06) 42%, transparent 72%),
+        radial-gradient(96% 66% at 22% 56%, rgba(74, 36, 95, 0.2) 0%, rgba(74, 36, 95, 0.04) 40%, transparent 70%),
+        radial-gradient(125% 92% at 52% 84%, rgba(255, 196, 122, 0.24) 0%, rgba(255, 196, 122, 0.04) 45%, transparent 72%),
+        linear-gradient(122deg, rgba(40, 12, 28, 0.32), transparent 46%),
+        linear-gradient(300deg, rgba(18, 6, 16, 0.44), transparent 58%);
+    mix-blend-mode: screen;
+    filter: blur(8px) saturate(1.15);
+    animation: luxuryVelvetDrift 20s ease-in-out infinite alternate, luxuryHueRoll 32s ease-in-out infinite alternate;
+    transform: translateZ(0);
+    will-change: transform, opacity, filter;
+}
+
+#luxury-bg .luxury-bg-fluid-curtain {
+    background:
+        radial-gradient(115% 82% at 16% 32%, rgba(123, 52, 126, 0.34) 0%, rgba(123, 52, 126, 0.07) 42%, transparent 72%),
+        radial-gradient(108% 78% at 78% 26%, rgba(234, 178, 96, 0.28) 0%, rgba(234, 178, 96, 0.06) 40%, transparent 74%),
+        radial-gradient(122% 90% at 56% 78%, rgba(78, 35, 104, 0.3) 0%, rgba(78, 35, 104, 0.06) 46%, transparent 76%),
+        linear-gradient(132deg, rgba(72, 31, 84, 0.2), rgba(160, 98, 51, 0.18), rgba(61, 24, 68, 0.2));
+    mix-blend-mode: screen;
+    opacity: 0.72;
+    filter: blur(14px) saturate(1.2);
+    animation: luxuryFluidCurtainDrift 26s ease-in-out infinite alternate, luxuryFluidChromatic 34s ease-in-out infinite alternate;
+    transform: translateZ(0);
+    will-change: transform, opacity, filter;
+}
+
+#luxury-bg .luxury-bg-gold-wave {
+    background:
+        repeating-linear-gradient(
+            172deg,
+            rgba(255, 236, 178, 0) 0px,
+            rgba(255, 236, 178, 0) 34px,
+            rgba(255, 226, 152, 0.4) 34px,
+            rgba(255, 226, 152, 0.58) 78px,
+            rgba(198, 133, 58, 0.46) 118px,
+            rgba(255, 236, 178, 0) 176px
+        ),
+        repeating-linear-gradient(
+            168deg,
+            rgba(115, 61, 25, 0) 0px,
+            rgba(115, 61, 25, 0) 58px,
+            rgba(255, 214, 126, 0.22) 58px,
+            rgba(255, 214, 126, 0.36) 108px,
+            rgba(115, 61, 25, 0) 180px
+        );
+    background-size: 230% 165%, 260% 180%;
+    background-position: 0% 12%, 8% 62%;
+    opacity: 0.9;
+    mix-blend-mode: screen;
+    filter: blur(5px) saturate(1.08);
+    animation: goldWaveFlow 16s linear infinite;
+    transform: translateZ(0);
+    will-change: transform, opacity, background-position;
+}
+
+#luxury-bg .luxury-bg-gold-wave::before,
+#luxury-bg .luxury-bg-gold-wave::after {
+    content: "";
+    position: absolute;
+    inset: -8%;
+    pointer-events: none;
+}
+
+#luxury-bg .luxury-bg-gold-wave::before {
+    background:
+        repeating-linear-gradient(
+            176deg,
+            rgba(255, 241, 196, 0) 0px,
+            rgba(255, 241, 196, 0) 38px,
+            rgba(255, 236, 190, 0.32) 38px,
+            rgba(255, 215, 142, 0.62) 92px,
+            rgba(170, 98, 36, 0.38) 130px,
+            rgba(255, 241, 196, 0) 190px
+        );
+    background-size: 240% 185%;
+    background-position: 12% 26%;
+    mix-blend-mode: screen;
+    filter: blur(6px);
+    opacity: 0.86;
+    animation: goldWaveFlowAlt 20s ease-in-out infinite;
+}
+
+#luxury-bg .luxury-bg-gold-wave::after {
+    background: linear-gradient(
+        94deg,
+        transparent 18%,
+        rgba(255, 247, 214, 0.3) 36%,
+        rgba(255, 220, 136, 0.5) 48%,
+        rgba(126, 70, 132, 0.34) 56%,
+        rgba(142, 82, 35, 0.34) 58%,
+        transparent 76%
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0.9;
+    filter: blur(12px);
+    animation: goldenVeilSweep 14s ease-in-out infinite;
+}
+
+#luxury-bg .luxury-bg-sweep {
+    background: linear-gradient(
+        104deg,
+        transparent 36%,
+        rgba(255, 243, 201, 0.5) 49%,
+        rgba(212, 175, 55, 0.34) 52%,
+        transparent 64%
+    );
+    transform: translateX(-130%);
+    mix-blend-mode: screen;
+    animation: luxSweep 7.8s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+
+#luxury-bg .luxury-bg-radial {
+    mix-blend-mode: screen;
+    filter: blur(30px);
+    animation: luxPulse 10s ease-in-out infinite;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+}
+
+#luxury-bg .luxury-bg-radial-a {
+    background: radial-gradient(circle at 28% 36%, rgba(255, 228, 166, 0.36), rgba(122, 57, 124, 0.14) 42%, transparent 64%);
+}
+
+#luxury-bg .luxury-bg-radial-b {
+    background: radial-gradient(circle at 72% 64%, rgba(212, 175, 55, 0.36), rgba(139, 78, 44, 0.18) 44%, transparent 62%);
+    animation-delay: -5s;
+}
+
+#luxury-bg .luxury-bg-sparkles {
+    opacity: 0.84;
+    mix-blend-mode: screen;
+    background-image:
+        radial-gradient(circle at 12% 24%, rgba(255, 245, 220, 0.95) 0, rgba(255, 245, 220, 0.95) 0.5px, transparent 1.2px),
+        radial-gradient(circle at 31% 72%, rgba(212, 175, 55, 0.88) 0, rgba(212, 175, 55, 0.88) 0.45px, transparent 1px),
+        radial-gradient(circle at 58% 18%, rgba(255, 235, 190, 0.9) 0, rgba(255, 235, 190, 0.9) 0.42px, transparent 1px),
+        radial-gradient(circle at 81% 62%, rgba(212, 175, 55, 0.82) 0, rgba(212, 175, 55, 0.82) 0.4px, transparent 0.95px),
+        radial-gradient(circle at 67% 88%, rgba(255, 250, 235, 0.8) 0, rgba(255, 250, 235, 0.8) 0.38px, transparent 0.9px);
+    background-size: 100% 100%;
+    animation: sparkleDrift 12s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+
+#luxury-bg .luxury-bg-sparkles::before,
+#luxury-bg .luxury-bg-sparkles::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+#luxury-bg .luxury-bg-sparkles::before {
+    background-image:
+        radial-gradient(circle at 16% 26%, rgba(255, 248, 221, 0.95) 0, rgba(255, 248, 221, 0.95) 0.8px, transparent 2px),
+        radial-gradient(circle at 26% 68%, rgba(255, 221, 138, 0.9) 0, rgba(255, 221, 138, 0.9) 0.7px, transparent 1.8px),
+        radial-gradient(circle at 64% 34%, rgba(255, 238, 187, 0.95) 0, rgba(255, 238, 187, 0.95) 0.75px, transparent 1.9px),
+        radial-gradient(circle at 84% 74%, rgba(255, 215, 122, 0.9) 0, rgba(255, 215, 122, 0.9) 0.72px, transparent 1.7px);
+    opacity: 0.55;
+    mix-blend-mode: screen;
+    animation: sparkleTwinkleA 6.6s steps(2, end) infinite;
+}
+
+#luxury-bg .luxury-bg-sparkles::after {
+    background-image:
+        radial-gradient(circle at 10% 78%, rgba(255, 238, 194, 0.9) 0, rgba(255, 238, 194, 0.9) 0.65px, transparent 1.7px),
+        radial-gradient(circle at 42% 22%, rgba(255, 210, 118, 0.9) 0, rgba(255, 210, 118, 0.9) 0.6px, transparent 1.5px),
+        radial-gradient(circle at 74% 44%, rgba(255, 247, 220, 0.9) 0, rgba(255, 247, 220, 0.9) 0.64px, transparent 1.6px),
+        radial-gradient(circle at 90% 20%, rgba(255, 224, 156, 0.9) 0, rgba(255, 224, 156, 0.9) 0.62px, transparent 1.5px);
+    opacity: 0.4;
+    mix-blend-mode: screen;
+    animation: sparkleTwinkleB 8.1s steps(3, end) infinite;
+}
+
+#luxury-bg .luxury-bg-philosophy {
+    overflow: hidden;
+    mix-blend-mode: screen;
+    opacity: 0.42;
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.95) 10%, rgba(0, 0, 0, 0.95) 90%, transparent 100%);
+}
+
+#luxury-bg .luxury-philosophy-line {
+    position: absolute;
+    font-family: 'Cinzel', serif;
+    font-weight: 500;
+    letter-spacing: 0.36em;
+    white-space: nowrap;
+    text-transform: uppercase;
+    user-select: none;
+    text-shadow: 0 0 10px rgba(255, 212, 132, 0.14);
+    background: linear-gradient(92deg, rgba(238, 192, 114, 0.72), rgba(189, 128, 198, 0.58), rgba(240, 216, 164, 0.68));
+    background-size: 280% 280%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: luxuryPhilosophyFloat 24s ease-in-out infinite, luxuryPhilosophyGradient 19s linear infinite;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-1 {
+    top: 6%;
+    left: 4%;
+    font-size: clamp(13px, 1.6vw, 22px);
+    opacity: 0.28;
+    animation-delay: -0.3s, -1.8s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-2 {
+    top: 14%;
+    right: 7%;
+    font-size: clamp(12px, 1.45vw, 20px);
+    opacity: 0.24;
+    animation-delay: -2.7s, -3.2s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-3 {
+    top: 21%;
+    left: 22%;
+    font-size: clamp(11px, 1.35vw, 18px);
+    opacity: 0.2;
+    animation-delay: -4.1s, -5.4s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-4 {
+    top: 30%;
+    right: 16%;
+    font-size: clamp(13px, 1.58vw, 21px);
+    opacity: 0.22;
+    animation-delay: -6.8s, -2.7s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-5 {
+    top: 38%;
+    left: 6%;
+    font-size: clamp(10px, 1.2vw, 16px);
+    opacity: 0.16;
+    animation-delay: -5.5s, -6.8s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-6 {
+    top: 47%;
+    right: 6%;
+    font-size: clamp(11px, 1.3vw, 17px);
+    opacity: 0.18;
+    animation-delay: -8.2s, -4.1s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-7 {
+    top: 56%;
+    left: 14%;
+    font-size: clamp(12px, 1.42vw, 19px);
+    opacity: 0.2;
+    animation-delay: -9.4s, -6.1s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-8 {
+    top: 63%;
+    right: 18%;
+    font-size: clamp(10px, 1.18vw, 16px);
+    opacity: 0.15;
+    animation-delay: -10.1s, -8.3s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-9 {
+    top: 71%;
+    left: 30%;
+    font-size: clamp(11px, 1.35vw, 18px);
+    opacity: 0.18;
+    animation-delay: -11.3s, -9.8s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-10 {
+    top: 78%;
+    right: 4%;
+    font-size: clamp(10px, 1.12vw, 15px);
+    opacity: 0.14;
+    animation-delay: -12.6s, -7.4s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-11 {
+    top: 86%;
+    left: 10%;
+    font-size: clamp(12px, 1.46vw, 19px);
+    opacity: 0.2;
+    animation-delay: -13.5s, -10.9s;
+}
+
+#luxury-bg .luxury-philosophy-line.lp-line-12 {
+    top: 92%;
+    right: 24%;
+    font-size: clamp(10px, 1.08vw, 14px);
+    opacity: 0.13;
+    animation-delay: -14.2s, -12.3s;
+}
+
+#luxury-bg .luxury-bg-noise {
+    opacity: 0.08;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0 1px, transparent 1px);
+    background-size: 3px 3px;
+}
+
+@keyframes luxuryVelvetDrift {
+    0%, 100% { opacity: 0.66; transform: translate(-1.2%, 0.8%) scale(1.02) rotate(-0.2deg); }
+    50% { opacity: 0.96; transform: translate(2.4%, -1.6%) scale(1.09) rotate(0.25deg); }
+}
+
+@keyframes goldWaveFlow {
+    0% {
+        background-position: 0% 10%, 4% 62%;
+        transform: translate3d(0, 0, 0) scale(1.02);
+        opacity: 0.82;
+    }
+    50% {
+        background-position: 52% 32%, 62% 72%;
+        transform: translate3d(-1.5%, -1.8%, 0) scale(1.08);
+        opacity: 1;
+    }
+    100% {
+        background-position: 106% 50%, 124% 86%;
+        transform: translate3d(-3.2%, -3.5%, 0) scale(1.03);
+        opacity: 0.86;
+    }
+}
+
+@keyframes goldWaveFlowAlt {
+    0% {
+        background-position: 8% 12%;
+        transform: translate3d(0, 0, 0) scale(1.01);
+        opacity: 0.7;
+    }
+    50% {
+        background-position: 68% 48%;
+        transform: translate3d(-2.2%, -1.3%, 0) scale(1.1);
+        opacity: 0.96;
+    }
+    100% {
+        background-position: 132% 88%;
+        transform: translate3d(-4.2%, -3.8%, 0) scale(1.03);
+        opacity: 0.76;
+    }
+}
+
+@keyframes luxSweep {
+    0%, 100% { transform: translateX(-130%); opacity: 0; }
+    28% { opacity: 0.95; }
+    52% { transform: translateX(22%); opacity: 0.72; }
+    75% { transform: translateX(140%); opacity: 0; }
+}
+
+@keyframes goldenVeilSweep {
+    0%, 100% {
+        transform: translateX(-56%) skewX(-8deg);
+        opacity: 0.26;
+    }
+    45% {
+        transform: translateX(6%) skewX(-3deg);
+        opacity: 0.7;
+    }
+    70% {
+        transform: translateX(42%) skewX(2deg);
+        opacity: 0.36;
+    }
+}
+
+@keyframes luxPulse {
+    0%, 100% { opacity: 0.75; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.12); }
+}
+
+@keyframes sparkleDrift {
+    0%, 100% { opacity: 0.45; transform: translate(0, 0); }
+    50% { opacity: 0.95; transform: translate(1.5%, -2.5%); }
+}
+
+@keyframes sparkleTwinkleA {
+    0%, 100% { opacity: 0.25; transform: scale(0.98); }
+    50% { opacity: 0.75; transform: scale(1.04); }
+}
+
+@keyframes sparkleTwinkleB {
+    0%, 100% { opacity: 0.2; transform: translate(0, 0); }
+    40% { opacity: 0.52; transform: translate(-0.5%, -0.8%); }
+    75% { opacity: 0.34; transform: translate(0.8%, 0.5%); }
+}
+
+@keyframes luxHaloSpin {
+    0% { transform: rotate(0deg) scale(1); opacity: 0.38; }
+    50% { transform: rotate(180deg) scale(1.06); opacity: 0.62; }
+    100% { transform: rotate(360deg) scale(1); opacity: 0.42; }
+}
+
+@keyframes luxGlyphPulse {
+    0%, 100% { opacity: 0.22; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(1.07); }
+}
+
+@keyframes luxuryFluidCurtainDrift {
+    0% {
+        transform: translate3d(-1.2%, -0.6%, 0) scale(1.02) rotate(-0.35deg);
+        opacity: 0.58;
+    }
+    50% {
+        transform: translate3d(2.8%, -2.2%, 0) scale(1.1) rotate(0.5deg);
+        opacity: 0.86;
+    }
+    100% {
+        transform: translate3d(-2.4%, 1.8%, 0) scale(1.05) rotate(-0.2deg);
+        opacity: 0.62;
+    }
+}
+
+@keyframes luxuryFluidChromatic {
+    0% { filter: blur(14px) saturate(1.08) hue-rotate(0deg); }
+    50% { filter: blur(16px) saturate(1.32) hue-rotate(12deg); }
+    100% { filter: blur(14px) saturate(1.14) hue-rotate(20deg); }
+}
+
+@keyframes luxuryChromaticShift {
+    0% {
+        background-position: 0% 0%, 100% 100%, 70% 22%, 24% 76%, 50% 50%;
+        filter: hue-rotate(0deg) saturate(1.05);
+    }
+    50% {
+        background-position: 12% 8%, 88% 92%, 58% 36%, 34% 64%, 46% 56%;
+        filter: hue-rotate(8deg) saturate(1.18);
+    }
+    100% {
+        background-position: 20% 14%, 82% 86%, 46% 44%, 42% 58%, 42% 62%;
+        filter: hue-rotate(14deg) saturate(1.12);
+    }
+}
+
+@keyframes luxuryHueRoll {
+    0%, 100% { filter: blur(8px) saturate(1.12) hue-rotate(0deg); }
+    50% { filter: blur(10px) saturate(1.3) hue-rotate(18deg); }
+}
+
+@keyframes luxuryPhilosophyFloat {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    25% { transform: translate3d(1.2%, -1.6%, 0); }
+    50% { transform: translate3d(-1.1%, 1.4%, 0); }
+    75% { transform: translate3d(0.8%, -0.9%, 0); }
+}
+
+@keyframes luxuryPhilosophyGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+body.luxury-mode .screen.luxury-target .title,
+body.luxury-mode #menu-screen #game-logo span {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.09em;
+    background: linear-gradient(135deg, #fff 0%, var(--lux-gold-light) 30%, var(--lux-gold) 65%, var(--lux-gold-dark) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.25));
+}
+
+.visual-mode-btn {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.visual-mode-btn:hover {
+    border-color: rgba(244, 228, 166, 0.7);
+    box-shadow: 0 0 18px rgba(212, 175, 55, 0.24);
+    transform: translateY(-1px);
+}
+
+.visual-mode-btn.is-active {
+    color: #fff4d8;
+    border-color: rgba(244, 228, 166, 0.9);
+    background: linear-gradient(135deg, rgba(122, 57, 124, 0.42), rgba(212, 175, 55, 0.34), rgba(139, 78, 44, 0.36));
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3), inset 0 0 12px rgba(255, 235, 190, 0.16);
+}
+
+body.luxury-mode {
+    background: #15050e !important;
+}
+
+body.luxury-mode .screen.luxury-target {
+    background: transparent !important;
+}
+
+body.luxury-mode #menu-screen #game-logo {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--lux-border);
+    background: linear-gradient(145deg, rgba(36, 18, 34, 0.58), rgba(12, 6, 14, 0.78));
+    box-shadow: var(--lux-shadow);
+    backdrop-filter: blur(10px);
+}
+
+body.luxury-mode #menu-screen #game-logo::after {
+    content: "";
+    position: absolute;
+    inset: -40% -55%;
+    background: linear-gradient(105deg, transparent 42%, rgba(255, 236, 184, 0.28) 50%, transparent 58%);
+    animation: luxSweep 8.4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+body.luxury-mode #menu-screen .btn-main,
+body.luxury-mode #difficulty-selection-screen #confirm-difficulty-btn,
+body.luxury-mode #theme-input-screen #submit-theme-btn,
+body.luxury-mode #setting-screen #start-game-btn,
+body.luxury-mode #save-management-screen .btn-save,
+body.luxury-mode #ending-screen .btn-ending {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--lux-border);
+    background: linear-gradient(145deg, rgba(54, 26, 47, 0.74), rgba(22, 9, 26, 0.88)) !important;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.42), inset 0 0 18px rgba(212, 175, 55, 0.14);
+}
+
+body.luxury-mode #menu-screen .btn-main::after,
+body.luxury-mode #difficulty-selection-screen #confirm-difficulty-btn::after,
+body.luxury-mode #theme-input-screen #submit-theme-btn::after,
+body.luxury-mode #setting-screen #start-game-btn::after,
+body.luxury-mode #save-management-screen .btn-save::after,
+body.luxury-mode #ending-screen .btn-ending::after {
+    content: "";
+    position: absolute;
+    inset: -35% -55%;
+    background: linear-gradient(100deg, transparent 42%, rgba(255, 236, 184, 0.32) 50%, transparent 58%);
+    animation: luxSweep 6.8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+body.luxury-mode #menu-screen .btn-main:hover,
+body.luxury-mode #difficulty-selection-screen #confirm-difficulty-btn:hover,
+body.luxury-mode #theme-input-screen #submit-theme-btn:hover,
+body.luxury-mode #setting-screen #start-game-btn:hover,
+body.luxury-mode #save-management-screen .btn-save:hover,
+body.luxury-mode #ending-screen .btn-ending:hover {
+    box-shadow: 0 0 24px rgba(212, 175, 55, 0.45), 0 12px 34px rgba(0, 0, 0, 0.46);
+}
+
+body.luxury-mode #difficulty-selection-screen .difficulty-card,
+body.luxury-mode #attr-selection-screen .attr-container,
+body.luxury-mode #theme-input-screen .theme-input-container,
+body.luxury-mode #setting-screen .setting-container,
+body.luxury-mode #save-management-screen .save-cards-container,
+body.luxury-mode #tone-selection-screen .tone-scroll-container,
+body.luxury-mode #image-style-selection-screen .image-style-container,
+body.luxury-mode #ending-screen .ending-container,
+body.luxury-mode #loading-screen .loading-spinner {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--lux-border);
+    background: linear-gradient(145deg, rgba(44, 19, 38, 0.6), rgba(14, 8, 18, 0.78));
+    box-shadow: var(--lux-shadow);
+    backdrop-filter: blur(9px);
+}
+
+body.luxury-mode #difficulty-selection-screen .difficulty-card::after,
+body.luxury-mode #tone-selection-screen .tone-card::after,
+body.luxury-mode #image-style-selection-screen .style-btn::after {
+    content: "";
+    position: absolute;
+    inset: -30% -48%;
+    background: linear-gradient(112deg, transparent 40%, rgba(255, 233, 176, 0.24) 50%, transparent 60%);
+    animation: luxSweep 9s ease-in-out infinite;
+    pointer-events: none;
+}
+
+body.luxury-mode #theme-input-screen #theme-input {
+    border-color: rgba(212, 175, 55, 0.65) !important;
+    background: rgba(20, 12, 25, 0.58);
+    box-shadow: inset 0 0 22px rgba(212, 175, 55, 0.16), 0 0 12px rgba(212, 175, 55, 0.12);
+}
+
+body.luxury-mode #loading-screen {
+    background: transparent !important;
+}
+
+body.luxury-mode #setting-screen .setting-nav {
+    background: linear-gradient(180deg, rgba(45, 18, 38, 0.9), rgba(17, 8, 21, 0.95));
+    border-right: 1px solid var(--lux-border);
+}
+
+body.luxury-mode #setting-screen .nav-item:hover,
+body.luxury-mode #setting-screen .nav-item.bg-\[\#1ABC9C\] {
+    background: rgba(212, 175, 55, 0.22) !important;
+}
+
+body.luxury-mode #ending-screen #ending-title {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 22px rgba(212, 175, 55, 0.45);
+}
+
+/* ========================================
+   Performance Visual Profile
+   ======================================== */
+body.visual-performance .screen {
+    animation: none !important;
+}
+
+body.visual-performance #luxury-bg::before,
+body.visual-performance #luxury-bg::after,
+body.visual-performance #luxury-bg .luxury-bg-fluid-curtain,
+body.visual-performance #luxury-bg .luxury-bg-sparkles::before,
+body.visual-performance #luxury-bg .luxury-bg-sparkles::after {
+    display: none !important;
+}
+
+body.visual-performance #luxury-bg .luxury-bg-gradient {
+    animation-duration: 36s !important;
+}
+
+body.visual-performance #luxury-bg .luxury-bg-gold-wave {
+    filter: blur(2.5px) saturate(1.02);
+    opacity: 0.7;
+    animation-duration: 24s !important;
+}
+
+body.visual-performance #luxury-bg .luxury-bg-gold-wave::before {
+    opacity: 0.5;
+    filter: blur(3px);
+    animation-duration: 28s !important;
+}
+
+body.visual-performance #luxury-bg .luxury-bg-gold-wave::after {
+    opacity: 0.52;
+    filter: blur(7px);
+    animation-duration: 18s !important;
+}
+
+body.visual-performance #luxury-bg .luxury-bg-radial {
+    filter: blur(22px);
+    opacity: 0.72;
+    animation-duration: 14s !important;
+}
+
+body.visual-performance #luxury-bg .luxury-bg-sweep {
+    opacity: 0.56;
+    animation-duration: 11s !important;
+}
+
+body.visual-performance #luxury-bg .luxury-bg-sparkles {
+    opacity: 0.35;
+    animation-duration: 18s !important;
+}
+
+body.visual-performance #luxury-bg .luxury-philosophy-line {
+    opacity: 0.08 !important;
+    animation-duration: 32s, 24s !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #luxury-bg::before,
+    #luxury-bg::after,
+    #luxury-bg .luxury-bg-gradient,
+    #luxury-bg .luxury-bg-velvet,
+    #luxury-bg .luxury-bg-fluid-curtain,
+    #luxury-bg .luxury-bg-gold-wave,
+    #luxury-bg .luxury-bg-gold-wave::before,
+    #luxury-bg .luxury-bg-gold-wave::after,
+    #luxury-bg .luxury-bg-sweep,
+    #luxury-bg .luxury-bg-radial,
+    #luxury-bg .luxury-bg-sparkles,
+    #luxury-bg .luxury-bg-sparkles::before,
+    #luxury-bg .luxury-bg-sparkles::after,
+    #luxury-bg .luxury-philosophy-line,
+    body.luxury-mode #menu-screen #game-logo::after,
+    body.luxury-mode #menu-screen .btn-main::after,
+    body.luxury-mode #difficulty-selection-screen #confirm-difficulty-btn::after,
+    body.luxury-mode #theme-input-screen #submit-theme-btn::after,
+    body.luxury-mode #setting-screen #start-game-btn::after,
+    body.luxury-mode #save-management-screen .btn-save::after,
+    body.luxury-mode #ending-screen .btn-ending::after {
+        animation: none !important;
+    }
 }
