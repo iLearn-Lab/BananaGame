@@ -2,6 +2,8 @@
 
 # 可视化冒险类游戏 · 内容生产引擎
 
+
+
 <p>
   <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.12+">
   <img src="https://img.shields.io/badge/Flask-Web%20%E6%9C%8D%E5%8A%A1-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask">
@@ -40,6 +42,8 @@
 
 > 🚀 **本地预览**  
 > 启动 `game_server.py` 后，在浏览器打开 **`http://127.0.0.1:5001`** 进入主界面（地址须带 `http://`）。
+>
+> 如果你觉得本 README 的展示不够直观，可查看 `marketing-site` 目录中的前端 HTML，里面有更清晰的项目展示。
 
 <h2 id="内容概览">内容概览（Overview）🌟</h2>
 
