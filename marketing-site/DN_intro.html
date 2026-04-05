@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>叙事纪元 - AI沉浸式文本冒险游戏引擎</title>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--v:#050508;--d:#0a0a12;--c:rgba(13,13,26,0.88);--g:#c9a84c;--gd:#8b6914;--cy:#00e5ff;--p:#b388ff;--r:#ff4757;--gr:#2ed573;--t:#f0ece0;--t2:#8a8a9a;--td:#44445a;--b:rgba(201,168,76,0.22);--glow:0 0 40px rgba(201,168,76,0.25);--tr:cubic-bezier(0.4,0,0.2,1)}
+html{scroll-behavior:smooth}
+body{background:var(--v);color:var(--t);font-family:"Noto Serif SC",serif;overflow-x:hidden;line-height:1.8}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--d)}
+::-webkit-scrollbar-thumb{background:var(--gd);border-radius:3px}
+.c{max-width:1280px;margin:0 auto;padding:0 40px}
+.s{padding:120px 0;position:relative}
+.tc{text-align:center}
+.gl{display:block;width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);margin:20px auto}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;transition:all .4s var(--tr);background:transparent}
+nav.scrolled{background:rgba(5,5,8,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--b);padding:12px 40px}
+.nl{font-family:"Orbitron",sans-serif;font-size:17px;font-weight:700;color:var(--g);letter-spacing:3px;text-decoration:none}
+.nu{display:flex;gap:28px;list-style:none}
+.nu a{color:var(--t2);text-decoration:none;font-size:12px;font-family:"Rajdhani",sans-serif;font-weight:600;letter-spacing:1px;text-transform:uppercase;transition:color .3s;position:relative}
+.nu a::after{content:"";position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--g);transition:width .3s}
+.nu a:hover{color:var(--g)}
+.nu a:hover::after{width:100%}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.hbg{position:absolute;inset:0;z-index:0}
+.hero-star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d) ease-in-out infinite;animation-delay:var(--dl)}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:1;transform:scale(1.6)}}
+.neb{position:absolute;width:700px;height:700px;border-radius:50%;filter:blur(120px);opacity:.12;animation:drift 25s ease-in-out infinite}
+.n1{background:radial-gradient(circle,var(--p),transparent);top:-20%;left:-15%}
+.n2{background:radial-gradient(circle,var(--cy),transparent);bottom:-15%;right:-10%;animation-delay:-12s}
+.n3{background:radial-gradient(circle,var(--g),transparent);top:35%;left:38%;animation-delay:-6s;opacity:.07}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(50px,-30px) scale(1.1)}66%{transform:translate(-20px,25px) scale(.95)}}
+.hgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.025) 1px,transparent 1px);background-size:80px 80px;animation:gridMove 40s linear infinite}
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:80px 80px}}
+.hc{position:relative;z-index:10;text-align:center;max-width:900px;padding:0 20px}
+.badg{display:inline-flex;align-items:center;gap:8px;padding:7px 22px;border:1px solid var(--b);border-radius:50px;background:rgba(201,168,76,0.04);font-family:"Orbitron",sans-serif;font-size:10px;letter-spacing:3px;color:var(--g);text-transform:uppercase;margin-bottom:40px;animation:fadeUp 1s var(--tr) .2s both}
+.tcn{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(52px,9vw,100px);font-weight:400;color:var(--g);text-shadow:0 0 80px rgba(201,168,76,0.35);line-height:1.1;margin-bottom:8px;animation:fadeUp 1s var(--tr) .4s both;letter-spacing:14px}
+.ten{font-family:"Orbitron",sans-serif;font-size:clamp(11px,1.8vw,15px);font-weight:400;color:var(--t2);letter-spacing:10px;text-transform:uppercase;margin-bottom:28px;animation:fadeUp 1s var(--tr) .6s both}
+.ts{font-size:17px;color:var(--t2);margin-bottom:50px;line-height:2.2;animation:fadeUp 1s var(--tr) .8s both;font-weight:300}
+.ts em{color:var(--cy);font-style:normal}
+.ha{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;animation:fadeUp 1s var(--tr) 1s both}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 38px;border-radius:4px;font-family:"Rajdhani",sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all .4s var(--tr);cursor:pointer;border:none}
+.bp{background:linear-gradient(135deg,var(--gd),var(--g));color:var(--v);box-shadow:0 4px 30px rgba(201,168,76,0.3)}
+.bp:hover{transform:translateY(-3px);box-shadow:0 10px 50px rgba(201,168,76,0.5)}
+.bo{background:transparent;color:var(--g);border:1px solid var(--g)}
+.bo:hover{background:rgba(201,168,76,0.07);transform:translateY(-3px)}
+.st{display:flex;justify-content:center;gap:60px;margin-top:80px;animation:fadeUp 1s var(--tr) 1.3s both}
+.sv{text-align:center}
+.sn{font-family:"Orbitron",sans-serif;font-size:26px;font-weight:700;color:var(--g);display:block}
+.sl{font-size:10px;color:var(--td);text-transform:uppercase;letter-spacing:2px;font-family:"Rajdhani",sans-serif;margin-top:4px;display:block}
+.sd{width:1px;height:36px;background:var(--b);align-self:center}
+.sc{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--td);font-size:9px;letter-spacing:3px;text-transform:uppercase;font-family:"Rajdhani",sans-serif;animation:fadeUp 1s var(--tr) 1.6s both}
+.sc-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--g),transparent);animation:scrollLine 2s ease-in-out infinite}
+@keyframes scrollLine{0%{opacity:0;transform:scaleY(0);transform-origin:top}50%{opacity:1;transform:scaleY(1)}100%{opacity:0;transform:scaleY(1);transform-origin:bottom}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.se{font-family:"Orbitron",sans-serif;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--cy);margin-bottom:14px}
+.stitle{font-family:"ZCOOL XiaoWei",serif;font-size:clamp(34px,5vw,54px);color:var(--t);line-height:1.2;margin-bottom:18px}
+.sdesc{font-size:15px;color:var(--t2);max-width:700px;margin:0 auto;line-height:2;font-weight:300}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:80px}
+.at p{color:var(--t2);margin-bottom:22px;font-size:14px;line-height:2.3;font-weight:300}
+.at p strong{color:var(--g);font-weight:600}
+.av{position:relative;height:520px;display:flex;align-items:center;justify-content:center}
+.or{position:absolute;border:1px solid var(--b);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.or1{width:280px;height:280px;animation:rotate 18s linear infinite}
+.or2{width:420px;height:420px;animation:rotate 30s linear infinite reverse}
+.or3{width:540px;height:540px;animation:rotate 45s linear infinite}
+@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.oc{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,var(--g),var(--gd));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:var(--glow),inset 0 0 20px rgba(201,168,76,0.3);position:relative;z-index:2}
+.oc span{font-size:10px;font-family:"Orbitron",sans-serif;color:var(--v);font-weight:700;letter-spacing:1px}
+.od{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g)}
+.on{position:absolute;display:flex;flex-direction:column;align-items:center;gap:5px}
+.oi{width:46px;height:46px;border-radius:12px;background:var(--c);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--g);backdrop-filter:blur(10px)}
+.ol{font-size:9px;color:var(--td);font-family:"Rajdhani",sans-serif;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;background:rgba(10,10,18,0.85);padding:2px 8px;border-radius:3px}
+.n1p{top:-23px;left:50%;transform:translateX(-50%)}.n2p{right:-23px;top:50%;transform:translateY(-50%)}.n3p{bottom:-23px;left:50%;transform:translateX(-50%)}.n4p{left:-23px;top:50%;transform:translateY(-50%)}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:80px}
+.fc{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:36px 28px;position:relative;overflow:hidden;transition:all .5s var(--tr);backdrop-filter:blur(12px)}
+.fc::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:0;transition:opacity .4s}
+.fc:hover{transform:translateY(-8px);border-color:rgba(201,168,76,0.45);box-shadow:0 20px 60px rgba(0,0,0,0.5),var(--glow)}
+.fc:hover::before{opacity:1}
+.fi{width:54px;height:54px;border-radius:14px;background:rgba(201,168,76,0.07);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:22px;transition:all .4s;color:var(--g)}
+.fc:hover .fi{background:rgba(201,168,76,0.14);box-shadow:0 0 30px rgba(201,168,76,0.18)}
+.ft{font-family:"ZCOOL XiaoWei",serif;font-size:21px;color:var(--t);margin-bottom:10px}
+.fp{font-size:13px;color:var(--t2);line-height:2;font-weight:300}
+.ftag{position:absolute;top:14px;right:14px;font-size:9px;padding:3px 10px;border-radius:3px;font-family:"Rajdhani",sans-serif;text-transform:uppercase;letter-spacing:1px;border:1px solid}
+.ta{color:var(--cy);border-color:rgba(0,229,255,0.3);background:rgba(0,229,255,0.05)}
+.tc2{color:var(--p);border-color:rgba(179,136,255,0.3);background:rgba(179,136,255,0.05)}
+.ts2{color:var(--gr);border-color:rgba(46,213,115,0.3);background:rgba(46,213,115,0.05)}
+.as{background:var(--d)}
+.aflow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:70px;margin-bottom:70px}
+.an{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:20px 28px;text-align:center;min-width:150px;position:relative;backdrop-filter:blur(10px);transition:all .4s var(--tr)}
+.an:hover{transform:translateY(-4px);box-shadow:var(--glow);border-color:var(--g)}
+.an i{font-size:18px;margin-bottom:9px;display:block;color:var(--g)}
+.anm{font-family:"Rajdhani",sans-serif;font-size:12px;font-weight:700;color:var(--g);text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
+.and{font-size:11px;color:var(--td);line-height:1.5}
+.alayers{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:50px}
+.al{background:rgba(201,168,76,0.025);border:1px solid rgba(201,168,76,0.08);border-radius:8px;padding:28px 22px;transition:all .4s}
+.al:hover{background:rgba(201,168,76,0.05);border-color:rgba(201,168,76,0.2)}
+.alt{font-family:"Orbitron",sans-serif;font-size:10px;color:var(--g);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--b)}
+.ali{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--t2);font-family:"Rajdhani",sans-serif;margin-bottom:9px;line-height:1.6;transition:color .3s}
+.ali:hover{color:var(--g)}
+.ali i{color:var(--gd);font-size:9px;margin-top:5px;flex-shrink:0}
+.nbg{position:absolute;inset:0;opacity:0.03;background-image:repeating-linear-gradient(45deg,var(--g) 0,var(--g) 1px,transparent 0,transparent 50%);background-size:40px 40px}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:80px}
+.tcard{background:var(--c);border:1px solid var(--b);border-radius:8px;overflow:hidden;transition:all .5s var(--tr);backdrop-filter:blur(10px)}
+.tcard:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.tbanner{height:3px;width:100%}
+.bhe{background:linear-gradient(90deg,#2ed573,#7bed9f)}.bbe{background:linear-gradient(90deg,#ff4757,#ff6b81)}.bne{background:linear-gradient(90deg,#70a1ff,#5352ed)}.bdark{background:linear-gradient(90deg,#2d3436,#636e72)}.bhumor{background:linear-gradient(90deg,#ffa502,#ff6348)}.babstract{background:linear-gradient(90deg,#a29bfe,#6c5ce7)}
+.tbody{padding:28px}
+.tn{font-family:"ZCOOL XiaoWei",serif;font-size:19px;color:var(--t);margin-bottom:10px}
+.td{font-size:12px;color:var(--t2);line-height:2;font-weight:300;margin-bottom:16px}
+.tr{list-style:none;display:flex;flex-direction:column;gap:5px}
+.tr li{font-size:11px;color:var(--td);display:flex;align-items:flex-start;gap:7px;line-height:1.7}
+.tr li::before{content:"\u25C6";color:var(--gd);font-size:7px;margin-top:4px;flex-shrink:0}
+.cshow{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;margin-top:80px}
+.cp{background:var(--c);border:1px solid var(--b);border-radius:12px;overflow:hidden;backdrop-filter:blur(10px)}
+.cph{padding:20px 28px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:14px}
+.cph i{font-size:22px;color:var(--g)}
+.cpt{font-family:"ZCOOL XiaoWei",serif;font-size:19px;color:var(--t)}
+.cpb{padding:28px}
+.ci{margin-bottom:24px}
+.ci:last-child{margin-bottom:0}
+.cit{font-size:11px;color:var(--g);font-family:"Rajdhani",sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.citx{font-size:13px;color:var(--t2);line-height:2;font-weight:300}
+.cflow{margin-top:50px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.cf{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:14px 22px;display:flex;align-items:center;gap:10px;transition:all .3s}
+.cf:hover{border-color:var(--g);transform:translateY(-2px)}
+.cf i{color:var(--g);font-size:16px}
+.cf span{font-size:12px;color:var(--t2);font-family:"Rajdhani",sans-serif}
+.cfa{color:var(--td);font-size:16px}
+.aigrid{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:80px;align-items:start}
+.aip{background:var(--c);border:1px solid var(--b);border-radius:12px;overflow:hidden;backdrop-filter:blur(10px)}
+.aiph{padding:22px 28px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:14px}
+.aiph i{font-size:22px}
+.aiph-llm i{color:var(--cy)}
+.aiph-img i{color:var(--p)}
+.ait{font-family:"ZCOOL XiaoWei",serif;font-size:19px;color:var(--t)}
+.ais{font-size:10px;color:var(--td);font-family:"Rajdhani",sans-serif;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.aipb{padding:28px}
+.am{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid rgba(201,168,76,0.07)}
+.am:last-child{border-bottom:none}
+.aml{font-size:12px;color:var(--t2);font-family:"Rajdhani",sans-serif}
+.amv{font-family:"Orbitron",sans-serif;font-size:13px;color:var(--g);font-weight:700}
+.ps{display:flex;margin-bottom:10px}
+.pn{width:30px;height:30px;border-radius:50%;background:rgba(201,168,76,0.1);border:1px solid var(--g);display:flex;align-items:center;justify-content:center;font-family:"Orbitron",sans-serif;font-size:10px;color:var(--g);flex-shrink:0}
+.pc{flex:1;background:rgba(201,168,76,0.03);border:1px solid var(--b);border-left:none;padding:10px 16px;border-radius:0 4px 4px 0}
+.pt{font-size:12px;color:var(--g);font-weight:600;margin-bottom:3px}
+.pds{font-size:11px;color:var(--td);line-height:1.6}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-top:80px}
+.mc{background:var(--c);border:1px solid var(--b);border-radius:12px;overflow:hidden;position:relative;transition:all .5s var(--tr);backdrop-filter:blur(10px)}
+.mc:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.mc::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.cli::before{background:linear-gradient(90deg,#2ed573,#7bed9f)}
+.web::before{background:linear-gradient(90deg,var(--cy),#00e5ff)}
+.mch{padding:36px 36px 28px;border-bottom:1px solid var(--b)}
+.mi{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px}
+.cli .mi{background:rgba(46,213,115,0.08);border:1px solid rgba(46,213,115,0.18);color:#2ed573}
+.web .mi{background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.18);color:var(--cy)}
+.mct{font-family:"ZCOOL XiaoWei",serif;font-size:26px;color:var(--t);margin-bottom:10px}
+.mcs{font-size:13px;color:var(--t2);font-weight:300}
+.mcb{padding:28px 36px}
+.mcf{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.mcf li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--t2);line-height:1.8}
+.mcf li i{color:var(--g);margin-top:4px;font-size:11px}
+.cbk{background:rgba(0,0,0,0.4);border:1px solid rgba(201,168,76,0.08);border-radius:6px;padding:14px 18px;font-family:"Courier New",monospace;font-size:12px;color:var(--g);line-height:2}
+.cbk .cm{color:var(--td)}
+.ptl{position:relative;padding:0 0 0 50px;margin-top:60px}
+.ptl::before{content:"";position:absolute;left:18px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--g),var(--cy),transparent)}
+.pi{position:relative;margin-bottom:36px;background:var(--c);border:1px solid var(--b);border-radius:8px;padding:24px 28px;backdrop-filter:blur(10px)}
+.pi::before{content:"";position:absolute;left:-40px;top:28px;width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 10px var(--g)}
+.pti{font-family:"Orbitron",sans-serif;font-size:9px;color:var(--cy);letter-spacing:3px;text-transform:uppercase;margin-bottom:7px}
+.pit{font-family:"ZCOOL XiaoWei",serif;font-size:19px;color:var(--t);margin-bottom:7px}
+.pid{font-size:13px;color:var(--t2);line-height:2;font-weight:300}
+.pbadge{display:inline-block;margin-top:10px;padding:3px 12px;border-radius:3px;font-size:9px;font-family:"Rajdhani",sans-serif;text-transform:uppercase;letter-spacing:1px;border:1px solid;margin-right:6px}
+.bcache{color:var(--cy);border-color:rgba(0,229,255,0.3);background:rgba(0,229,255,0.05)}
+.basync{color:var(--p);border-color:rgba(179,136,255,0.3);background:rgba(179,136,255,0.05)}
+.buser{color:var(--g);border-color:rgba(201,168,76,0.3);background:rgba(201,168,76,0.05)}
+.tgrid2{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:80px}
+.tcard2{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:28px 20px;text-align:center;transition:all .4s var(--tr);backdrop-filter:blur(10px)}
+.tcard2:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(0,0,0,0.4);border-color:var(--g)}
+.ticon{font-size:34px;margin-bottom:14px;display:block}
+.tname{font-family:"Rajdhani",sans-serif;font-size:14px;font-weight:700;color:var(--g);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.tdesc{font-size:11px;color:var(--td);line-height:1.8}
+.igrid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:80px}
+.ic{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:32px;backdrop-filter:blur(10px);position:relative;overflow:hidden;transition:all .5s var(--tr)}
+.ic:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 40px rgba(179,136,255,0.2);border-color:rgba(179,136,255,0.3)}
+.ic::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(to bottom,var(--p),var(--cy))}
+.inum{font-family:"Orbitron",sans-serif;font-size:34px;font-weight:900;color:rgba(179,136,255,0.12);position:absolute;top:14px;right:22px}
+.ititle{font-family:"ZCOOL XiaoWei",serif;font-size:19px;color:var(--t);margin-bottom:10px}
+.idesc{font-size:13px;color:var(--t2);line-height:2;font-weight:300}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:80px;align-items:start}
+.sstep{display:flex;gap:20px;padding:24px 0;border-bottom:1px solid var(--b);transition:all .3s}
+.sstep:last-child{border-bottom:none}
+.sstep:hover{padding-left:10px}
+.ssnum{width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,0.1);border:1px solid var(--g);display:flex;align-items:center;justify-content:center;font-family:"Orbitron",sans-serif;font-size:13px;color:var(--g);flex-shrink:0}
+.sst{font-size:15px;color:var(--t);margin-bottom:5px;font-weight:600}
+.ssd{font-size:12px;color:var(--t2);line-height:1.8;font-weight:300}
+.scode{margin-top:8px;background:rgba(0,0,0,0.4);border:1px solid rgba(201,168,76,0.08);border-radius:4px;padding:8px 14px;font-family:"Courier New",monospace;font-size:12px;color:var(--g)}
+.senv{background:var(--c);border:1px solid var(--b);border-radius:12px;overflow:hidden;backdrop-filter:blur(10px)}
+.senvh{padding:18px 26px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px}
+.senvh i{color:var(--g);font-size:16px}
+.senvt{font-family:"Rajdhani",sans-serif;font-size:13px;font-weight:700;color:var(--t);letter-spacing:1px;text-transform:uppercase}
+.senvb{padding:26px}
+.sei{margin-bottom:18px}
+.sei:last-child{margin-bottom:0}
+.sek{font-size:10px;color:var(--cy);font-family:"Courier New",monospace;margin-bottom:3px;letter-spacing:0.5px}
+.sev{font-size:11px;color:var(--td);font-family:"Courier New",monospace;background:rgba(0,0,0,0.3);padding:5px 10px;border-radius:4px;border:1px solid rgba(201,168,76,0.05)}
+.sen{font-size:10px;color:var(--td);margin-top:3px;font-style:italic}
+footer{background:var(--d);border-top:1px solid var(--b);padding:80px 0 40px}
+.fgrid2{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:60px}
+.fbrand-name{font-family:"ZCOOL XiaoWei",serif;font-size:26px;color:var(--g);margin-bottom:14px}
+.fbrand-desc{font-size:13px;color:var(--td);line-height:2;font-weight:300}
+.fcol-title{font-family:"Rajdhani",sans-serif;font-size:11px;color:var(--g);letter-spacing:3px;text-transform:uppercase;margin-bottom:18px}
+.flinks{list-style:none;display:flex;flex-direction:column;gap:9px}
+.flinks a{color:var(--td);text-decoration:none;font-size:13px;transition:color .3s;font-weight:300}
+.flinks a:hover{color:var(--g)}
+.fbottom{border-top:1px solid var(--b);padding-top:28px;text-align:center;font-size:11px;color:var(--td);font-family:"Rajdhani",sans-serif}
+@media(max-width:1024px){.fgrid{grid-template-columns:repeat(2,1fr)}.alayers{grid-template-columns:repeat(2,1fr)}.tgrid{grid-template-columns:repeat(2,1fr)}.cshow{grid-template-columns:1fr;gap:40px}.aigrid{grid-template-columns:1fr}.mgrid{grid-template-columns:1fr}.tgrid2{grid-template-columns:repeat(2,1fr)}.agrid{grid-template-columns:1fr}.av{height:400px}.fgrid2{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.c{padding:0 20px}.s{padding:80px 0}.fgrid{grid-template-columns:1fr}.tgrid{grid-template-columns:1fr}.tgrid2{grid-template-columns:repeat(2,1fr)}.fgrid2{grid-template-columns:1fr;gap:40px}.alayers{grid-template-columns:1fr}.nu{display:none}}
+</style>
+</head>
+<body>
+<nav id="nav">
+  <a href="#hero" class="nl">叙事纪元</a>
+  <ul class="nu">
+    <li><a href="#overview">概览</a></li>
+    <li><a href="#features">特性</a></li>
+    <li><a href="#architecture">架构</a></li>
+    <li><a href="#narrative">叙事系统</a></li>
+    <li><a href="#character">角色系统</a></li>
+    <li><a href="#ai">AI引擎</a></li>
+    <li><a href="#modes">运行模式</a></li>
+    <li><a href="#start">快速开始</a></li>
+  </ul>
+</nav>
+
+<section class="hero s" id="hero">
+  <div class="hbg">
+    <div class="neb n1"></div>
+    <div class="neb n2"></div>
+    <div class="neb n3"></div>
+    <div class="hgrid"></div>
+    <div class="hero-star" style="left:44.59%;top:10.17%;width:2.4px;height:2.4px;--d:4.7s;--dl:1.7s"></div>
+<div class="hero-star" style="left:76.69%;top:69.94%;width:1.0px;height:1.0px;--d:3.5s;--dl:1.3s"></div>
+<div class="hero-star" style="left:59.91%;top:16.25%;width:2.3px;height:2.3px;--d:6.0s;--dl:3.8s"></div>
+<div class="hero-star" style="left:45.21%;top:65.81%;width:1.1px;height:1.1px;--d:3.1s;--dl:1.7s"></div>
+<div class="hero-star" style="left:64.1%;top:1.12%;width:2.1px;height:2.1px;--d:3.1s;--dl:1.3s"></div>
+<div class="hero-star" style="left:95.31%;top:39.96%;width:2.7px;height:2.7px;--d:5.8s;--dl:1.3s"></div>
+<div class="hero-star" style="left:33.26%;top:42.98%;width:1.6px;height:1.6px;--d:4.3s;--dl:1.3s"></div>
+<div class="hero-star" style="left:29.59%;top:41.59%;width:1.1px;height:1.1px;--d:2.0s;--dl:4.8s"></div>
+<div class="hero-star" style="left:10.65%;top:17.6%;width:2.2px;height:2.2px;--d:3.8s;--dl:4.9s"></div>
+<div class="hero-star" style="left:21.39%;top:98.21%;width:2.2px;height:2.2px;--d:3.6s;--dl:0.3s"></div>
+<div class="hero-star" style="left:23.51%;top:77.61%;width:2.0px;height:2.0px;--d:6.0s;--dl:4.1s"></div>
+<div class="hero-star" style="left:59.76%;top:41.55%;width:1.7px;height:1.7px;--d:4.4s;--dl:3.6s"></div>
+<div class="hero-star" style="left:22.07%;top:6.07%;width:2.6px;height:2.6px;--d:5.3s;--dl:0.4s"></div>
+<div class="hero-star" style="left:74.68%;top:97.11%;width:1.1px;height:1.1px;--d:6.0s;--dl:1.7s"></div>
+<div class="hero-star" style="left:18.87%;top:11.04%;width:2.8px;height:2.8px;--d:5.5s;--dl:0.7s"></div>
+<div class="hero-star" style="left:66.89%;top:33.56%;width:2.5px;height:2.5px;--d:2.9s;--dl:4.4s"></div>
+<div class="hero-star" style="left:27.55%;top:71.4%;width:1.0px;height:1.0px;--d:5.2s;--dl:0.4s"></div>
+<div class="hero-star" style="left:72.25%;top:38.76%;width:1.6px;height:1.6px;--d:4.9s;--dl:2.2s"></div>
+<div class="hero-star" style="left:1.8%;top:28.22%;width:2.3px;height:2.3px;--d:2.1s;--dl:0.3s"></div>
+<div class="hero-star" style="left:72.48%;top:77.23%;width:1.5px;height:1.5px;--d:3.6s;--dl:3.1s"></div>
+<div class="hero-star" style="left:69.15%;top:68.78%;width:2.2px;height:2.2px;--d:2.2s;--dl:4.8s"></div>
+<div class="hero-star" style="left:17.32%;top:24.26%;width:1.4px;height:1.4px;--d:2.3s;--dl:3.7s"></div>
+<div class="hero-star" style="left:70.67%;top:64.12%;width:1.9px;height:1.9px;--d:4.3s;--dl:1.0s"></div>
+<div class="hero-star" style="left:71.03%;top:16.83%;width:1.1px;height:1.1px;--d:2.8s;--dl:3.5s"></div>
+<div class="hero-star" style="left:13.38%;top:9.84%;width:1.1px;height:1.1px;--d:2.9s;--dl:3.8s"></div>
+<div class="hero-star" style="left:2.38%;top:45.77%;width:1.1px;height:1.1px;--d:3.0s;--dl:2.8s"></div>
+<div class="hero-star" style="left:48.8%;top:30.31%;width:1.1px;height:1.1px;--d:2.9s;--dl:4.2s"></div>
+<div class="hero-star" style="left:29.53%;top:46.61%;width:2.1px;height:2.1px;--d:4.1s;--dl:4.1s"></div>
+<div class="hero-star" style="left:11.65%;top:19.19%;width:1.8px;height:1.8px;--d:5.8s;--dl:1.6s"></div>
+<div class="hero-star" style="left:6.46%;top:63.12%;width:2.5px;height:2.5px;--d:2.8s;--dl:0.3s"></div>
+<div class="hero-star" style="left:46.71%;top:24.1%;width:2.0px;height:2.0px;--d:2.9s;--dl:2.5s"></div>
+<div class="hero-star" style="left:24.41%;top:34.18%;width:1.3px;height:1.3px;--d:4.8s;--dl:1.0s"></div>
+<div class="hero-star" style="left:18.7%;top:95.25%;width:1.3px;height:1.3px;--d:3.5s;--dl:1.2s"></div>
+<div class="hero-star" style="left:53.02%;top:50.61%;width:2.3px;height:2.3px;--d:6.0s;--dl:2.9s"></div>
+<div class="hero-star" style="left:72.19%;top:55.64%;width:2.2px;height:2.2px;--d:2.8s;--dl:1.1s"></div>
+<div class="hero-star" style="left:22.39%;top:37.74%;width:2.5px;height:2.5px;--d:2.9s;--dl:2.8s"></div>
+<div class="hero-star" style="left:58.29%;top:70.05%;width:1.3px;height:1.3px;--d:4.5s;--dl:4.6s"></div>
+<div class="hero-star" style="left:48.13%;top:28.53%;width:2.5px;height:2.5px;--d:5.3s;--dl:3.9s"></div>
+<div class="hero-star" style="left:11.85%;top:84.04%;width:2.5px;height:2.5px;--d:2.2s;--dl:3.3s"></div>
+<div class="hero-star" style="left:84.54%;top:50.2%;width:1.1px;height:1.1px;--d:3.9s;--dl:3.4s"></div>
+<div class="hero-star" style="left:96.87%;top:22.3%;width:1.5px;height:1.5px;--d:2.9s;--dl:3.7s"></div>
+<div class="hero-star" style="left:3.36%;top:58.26%;width:2.5px;height:2.5px;--d:2.2s;--dl:1.5s"></div>
+<div class="hero-star" style="left:49.07%;top:13.4%;width:2.5px;height:2.5px;--d:3.2s;--dl:0.5s"></div>
+<div class="hero-star" style="left:80.29%;top:70.17%;width:1.5px;height:1.5px;--d:2.8s;--dl:3.1s"></div>
+<div class="hero-star" style="left:38.89%;top:31.03%;width:1.7px;height:1.7px;--d:5.3s;--dl:3.2s"></div>
+<div class="hero-star" style="left:22.82%;top:2.24%;width:2.3px;height:2.3px;--d:4.1s;--dl:0.3s"></div>
+<div class="hero-star" style="left:9.03%;top:22.4%;width:1.2px;height:1.2px;--d:3.4s;--dl:3.1s"></div>
+<div class="hero-star" style="left:11.91%;top:12.66%;width:2.8px;height:2.8px;--d:2.6s;--dl:0.6s"></div>
+<div class="hero-star" style="left:66.68%;top:31.98%;width:1.7px;height:1.7px;--d:2.5s;--dl:0.6s"></div>
+<div class="hero-star" style="left:46.06%;top:78.18%;width:2.5px;height:2.5px;--d:2.1s;--dl:3.5s"></div>
+<div class="hero-star" style="left:54.37%;top:34.03%;width:1.5px;height:1.5px;--d:3.2s;--dl:4.7s"></div>
+<div class="hero-star" style="left:0.36%;top:76.52%;width:1.8px;height:1.8px;--d:3.2s;--dl:4.4s"></div>
+<div class="hero-star" style="left:35.81%;top:13.56%;width:2.0px;height:2.0px;--d:5.7s;--dl:1.5s"></div>
+<div class="hero-star" style="left:62.23%;top:67.3%;width:2.2px;height:2.2px;--d:3.7s;--dl:2.4s"></div>
+<div class="hero-star" style="left:13.2%;top:2.2%;width:1.3px;height:1.3px;--d:5.5s;--dl:1.6s"></div>
+<div class="hero-star" style="left:39.53%;top:3.12%;width:2.4px;height:2.4px;--d:3.2s;--dl:0.0s"></div>
+<div class="hero-star" style="left:46.55%;top:66.79%;width:3.0px;height:3.0px;--d:2.5s;--dl:0.6s"></div>
+<div class="hero-star" style="left:50.21%;top:50.5%;width:1.2px;height:1.2px;--d:4.9s;--dl:2.5s"></div>
+<div class="hero-star" style="left:2.28%;top:91.72%;width:1.9px;height:1.9px;--d:3.2s;--dl:0.2s"></div>
+<div class="hero-star" style="left:14.38%;top:91.99%;width:2.4px;height:2.4px;--d:5.8s;--dl:4.3s"></div>
+<div class="hero-star" style="left:79.33%;top:75.2%;width:2.8px;height:2.8px;--d:4.2s;--dl:2.1s"></div>
+<div class="hero-star" style="left:46.1%;top:98.91%;width:1.5px;height:1.5px;--d:2.1s;--dl:2.1s"></div>
+<div class="hero-star" style="left:37.52%;top:49.15%;width:1.0px;height:1.0px;--d:3.1s;--dl:2.6s"></div>
+<div class="hero-star" style="left:49.83%;top:23.81%;width:1.5px;height:1.5px;--d:3.8s;--dl:1.2s"></div>
+<div class="hero-star" style="left:47.32%;top:12.12%;width:1.9px;height:1.9px;--d:3.9s;--dl:0.6s"></div>
+<div class="hero-star" style="left:0.59%;top:39.74%;width:1.1px;height:1.1px;--d:4.8s;--dl:3.6s"></div>
+<div class="hero-star" style="left:38.83%;top:15.83%;width:2.6px;height:2.6px;--d:4.1s;--dl:2.5s"></div>
+<div class="hero-star" style="left:8.65%;top:43.62%;width:1.6px;height:1.6px;--d:6.0s;--dl:4.5s"></div>
+<div class="hero-star" style="left:39.61%;top:7.19%;width:2.2px;height:2.2px;--d:3.5s;--dl:2.1s"></div>
+<div class="hero-star" style="left:88.03%;top:6.45%;width:2.2px;height:2.2px;--d:4.2s;--dl:4.9s"></div>
+<div class="hero-star" style="left:86.56%;top:33.03%;width:2.1px;height:2.1px;--d:2.3s;--dl:2.6s"></div>
+<div class="hero-star" style="left:68.07%;top:36.53%;width:1.5px;height:1.5px;--d:4.7s;--dl:1.5s"></div>
+<div class="hero-star" style="left:81.27%;top:76.2%;width:2.9px;height:2.9px;--d:4.5s;--dl:1.2s"></div>
+<div class="hero-star" style="left:43.61%;top:40.19%;width:2.5px;height:2.5px;--d:2.9s;--dl:2.9s"></div>
+<div class="hero-star" style="left:44.7%;top:93.57%;width:1.6px;height:1.6px;--d:5.7s;--dl:2.3s"></div>
+<div class="hero-star" style="left:79.22%;top:7.9%;width:2.0px;height:2.0px;--d:2.1s;--dl:4.6s"></div>
+<div class="hero-star" style="left:54.39%;top:68.95%;width:2.8px;height:2.8px;--d:5.3s;--dl:1.8s"></div>
+<div class="hero-star" style="left:14.88%;top:99.82%;width:2.6px;height:2.6px;--d:4.8s;--dl:5.0s"></div>
+<div class="hero-star" style="left:6.81%;top:89.69%;width:2.6px;height:2.6px;--d:3.1s;--dl:4.7s"></div>
+<div class="hero-star" style="left:30.49%;top:57.42%;width:2.9px;height:2.9px;--d:2.0s;--dl:1.0s"></div>
+<div class="hero-star" style="left:67.98%;top:30.86%;width:1.6px;height:1.6px;--d:3.2s;--dl:3.2s"></div>
+<div class="hero-star" style="left:7.06%;top:58.82%;width:1.1px;height:1.1px;--d:3.6s;--dl:1.6s"></div>
+<div class="hero-star" style="left:82.62%;top:72.17%;width:1.6px;height:1.6px;--d:4.2s;--dl:1.3s"></div>
+<div class="hero-star" style="left:23.54%;top:64.09%;width:1.5px;height:1.5px;--d:3.8s;--dl:0.6s"></div>
+<div class="hero-star" style="left:12.44%;top:44.3%;width:1.9px;height:1.9px;--d:2.8s;--dl:0.4s"></div>
+<div class="hero-star" style="left:96.62%;top:42.77%;width:2.0px;height:2.0px;--d:2.4s;--dl:1.4s"></div>
+<div class="hero-star" style="left:30.69%;top:80.39%;width:1.5px;height:1.5px;--d:2.4s;--dl:4.6s"></div>
+<div class="hero-star" style="left:71.42%;top:68.23%;width:2.2px;height:2.2px;--d:4.1s;--dl:0.2s"></div>
+<div class="hero-star" style="left:84.96%;top:1.16%;width:2.3px;height:2.3px;--d:3.1s;--dl:4.2s"></div>
+<div class="hero-star" style="left:79.65%;top:40.35%;width:1.5px;height:1.5px;--d:2.1s;--dl:1.2s"></div>
+  </div>
+  <div class="hc">
+    <div class="badg"><i class="fas fa-circle"></i> AI驱动 · 沉浸式叙事引擎 · 开源免费</div>
+    <h1 class="tcn">叙事纪元</h1>
+    <p class="ten">NARRATIVE EPOCH · AI STORY ENGINE</p>
+    <p class="ts">一款以<em>大语言模型</em>为核心驱动力的沉浸式文本冒险游戏引擎。<br>从世界观生成、章节矛盾、剧情分支到结局预测——全部由 AI 自动生成，<br>配合多模态图像引擎，打造前所未有的叙事体验。</p>
+    <div class="ha">
+      <a href="#start" class="btn bp"><i class="fas faocket</div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="overview">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 项目概览</p>
+      <h2 class="stitle">重新定义叙事游戏的内容生产</h2>
+      <span class="gl"></span>
+      <p class="sdesc">这不是一个简单的聊天脚本，而是一套完整的、可落地的工程化内容管线——将「写设定 → 拆章节 → 生成剧情 → 出立绘/场景」从手工拼 prompt，收束成由 AI 驱动的全自动化内容工作流。</p>
+    </div>
+    <div class="agrid">
+      <div class="at">
+        <p><strong>叙事纪元</strong>的核心是一套 <strong>AI 叙事闭环</strong>：用户输入主题与偏好，引擎自动生成<strong>结构化世界观</strong>、<strong>章节矛盾</strong>、<strong>分支剧情</strong>与<strong>选项</strong>，配合 <strong>LLM 驱动的图像生成</strong>（主角立绘、场景插图），最终根据用户选择动态调整<strong>结局基调</strong>——整个过程无需人工干预，完全由 AI 驱动。</p>
+        <p>项目支持 <strong>命令行（CLI）</strong> 与 <strong>Web 前端</strong> 两种运行模式，共用同一套 <code>src/</code> 核心逻辑，存档互通。Web 端还实现了<strong>两层预生成</strong>技术，显著降低玩家等待感，让沉浸体验更加流畅。</p>
+        <p>无论你是想开发一款 <strong>互动叙事游戏</strong>、<strong>AVG</strong>、<strong>跑团式文字冒险</strong>，还是构建 <strong>AI 原生游戏原型</strong>，这套引擎都能提供坚实的内容基础与工程支撑。</p>
+      </div>
+      <div class="av">
+        <div class="or or1">
+          <div class="oc"><span>AI</span></div>
+          <div class="od" style="top:50%;left:-3.5px;transform:translateY(-50%)"></div>
+          <div class="od" style="bottom:15%;right:8%"></div>
+          <div class="od" style="top:15%;left:8%"></div>
+          <div class="on n1p"><div class="oi"><i class="fas fa-brain"></i></div><span class="ol">LLM叙事</span></div>
+          <div class="on n2p"><div class="oi"><i class="fas fa-palette"></i></div><span class="ol">图像生成</span></div>
+          <div class="on n3p"><div class="oi"><i class="fas fa-book"></i></div><span class="ol">世界观</span></div>
+          <div class="on n4p"><div class="oi"><i class="fas fa-users"></i></div><span class="ol">角色系统</span></div>
+        </div>
+        <div class="or or2"></div>
+        <div class="or or3"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="features" style="background:var(--d)">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 核心能力</p>
+      <h2 class="stitle">功能特性全景</h2>
+      <span class="gl"></span>
+      <p class="sdesc">从叙事到视觉，从单轮到批量，从文本到多模态——每一项能力都经过精心设计，服务于同一个目标：<strong>让 AI 叙事游戏的内容生产变得可工程化、可重复、可扩展。</strong></p>
+    </div>
+    <div class="fgrid">
+      <div class="fc">
+        <span class="ftag ta">AI 驱动</span>
+        <div class="fi"><i class="fas fa-brain"></i></div>
+        <h3 class="ft">LLM 叙事引擎</h3>
+        <p class="fp">基于大语言模型的全自动世界观与剧情生成。支持 Claude Opus 4.6 等顶级模型，通过结构化 prompt 与解析引擎，保证生成内容的可维护性与一致性。</p>
+      </div>
+      <div class="fc">
+        <span class="ftag tc2">核心</span>
+        <div class="fi"><i class="fas fa-layer-group"></i></div>
+        <h3 class="ft">流动世界线</h3>
+        <p class="fp">独创的 flow_worldline 状态系统，实时追踪当前章节、矛盾解决状态与信息差记录，让剧情随玩家选择动态演变，而非线性预设。</p>
+      </div>
+      <div class="fc">
+        <span class="ftag ta">AI 驱动</span>
+        <div class="fi"><i class="fas fa-image"></i></div>
+        <h3 class="ft">多模态图像引擎</h3>
+        <p class="fp">支持云雾（yunwu）、Replicate、OpenAI DALL·E、Stable Diffusion、ComfyUI 等六大图像供应商，主角立绘与场景图均由 LLM 优化提示词后生成。</p>
+      </div>
+      <div class="fc">
+        <span class="ftag ts2">系统</span>
+        <div class="fi"><i class="fas fa-sitemap"></i></div>
+        <h3 class="ft">多层预生成管线</h3>
+        <p class="fp">Web 端独有的两层预生成技术：在玩家阅读当前剧情时，后台已预先生成下两层选项，选择后即时命中缓存，极大降低等待感。</p>
+      </div>
+      <div class="fc">
+        <span class="ftag tc2">核心</span>
+        <div class="fi"><i class="fas fa-user-friends"></i></div>
+        <h3 class="ft">配角动态建档</h3>
+        <p class="fp">从剧情中自动识别、提取配角信息，首次出场时触发建档，支持别名演化（如"黑衣人"→"艾玛"），维护完整的配角身份图谱。</p>
+      </div>
+      <div class="fc">
+        <span class="ftag ta">AI 驱动</span>
+        <div class="fi"><i class="fas fa-gem"></i></div>
+        <h3 class="ft">深层背景系统</h3>
+        <p class="fp">角色拥有隐藏设定（深层背景），选项可关联并解锁这些秘密。解锁后剧情自动围绕已揭示内容展开，避免一次性信息轰炸。</p>
+      </div>
+      <div class="fc">
+        <span class="ftag tc2">核心</span>
+        <div class="fi"><i class="fas fa-chart-line"></i></div>
+        <h3 class="ft">结局预测与基调修改</h3>
+        <p class="fp">开局即生成隐藏的结局预测，在深层背景节点触发时动态修改 HE/BE/NE 等结局基调，让玩家选择真正影响最终走向。</p>
+      </div>
+      <div class="fc">
+        <span class="ftag ta">AI 驱动</span>
+        <div class="fi"><i class="fas fa-search"></i></div>
+        <h3 class="ft">Wikipedia 增强</h3>
+        <p class="fp">对现实题材与 IP 内容，自动调用 Wikipedia 中英文 API 检索资料，将检索结果注入 LLM 与图像提示词，增强真实性与代入感。</p>
+      </div>
+      <div class="fc">
+        <span class="ftag ts2">系统</span>
+        <div class="fi"><i class="fas fa-tachometer-alt"></i></div>
+        <h3 class="ft">信息差驱动剧情深化</h3>
+        <p class="fp">当未发现的信息差达到阈值（如 5 条），自动触发隐藏剧情深化（揭秘/反转），将"隐藏信息→爽点释放"做成可配置的机制。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s as" id="architecture">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 技术架构</p>
+      <h2 class="stitle">三层模块化架构</h2>
+      <span class="gl"></span>
+      <p class="sdesc">核心逻辑严格分层，CLI 与 Web 共用底层逻辑，架构清晰，易于维护、扩展与团队协作。</p>
+    </div>
+    <div class="aflow">
+      <div class="an"><i class="fas fa-terminal"></i><div class="anm">main.py</div><div class="and">CLI 入口</div></div>
+      <div class="an"><i class="fas fa-chevron-right" style="opacity:.4"></i></div>
+      <div class="an"><i class="fas fa-cogs"></i><div class="anm">main2.py</div><div class="and">逻辑聚合层</div></div>
+      <div class="an"><i class="fas fa-chevron-right" style="opacity:.4"></i></div>
+      <div class="an"><i class="fas fa-puzzle-piece"></i><div class="anm">src/</div><div class="and">核心模块包</div></div>
+      <div class="an"><i class="fas fa-chevron-right" style="opacity:.4"></i></div>
+      <div class="an"><i class="fas fa-server"></i><div class="anm">game_server.py</div><div class="and">Web 服务层</div></div>
+      <div class="an"><i class="fas fa-chevron-right" style="opacity:.4"></i></div>
+      <div class="an"><i class="fas fa-desktop"></i><div class="anm">game-frontend/</div><div class="and">Web 前端</div></div>
+    </div>
+    <div class="alayers">
+      <div class="al">
+        <h4 class="alt"><i class="fas fa-cube" style="margin-right:6px;font-size:9px"></i>配置与工具层</h4>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/config.py — .env 配置读取</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/constants.py — 难度/基调常量</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/utils/io_utils.py — 安全输入/输出</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/utils/text_utils.py — 文本处理</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/wiki/lookup.py — Wikipedia API</div>
+      </div>
+      <div class="al">
+        <h4 class="alt"><i class="fas fa-brain" style="margin-right:6px;font-size:9px"></i>LLM 生成层</h4>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/llm/api.py — 通用 LLM 调用</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/llm/global_gen.py — 全局世界观生成</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/llm/local_gen.py — 单步剧情生成</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/worldview/ — 缓存与模板</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/characters/ — 角色识别与建档</div>
+      </div>
+      <div class="al">
+        <h4 class="alt"><i class="fas fa-image" style="margin-right:6px;font-size:9px"></i>图像与剧情层</h4>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/image/api_providers.py — 多供应商</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/image/prompt_optimize.py — 提示词优化</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/story/options.py — 选项与剧情生成</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/story/ending.py — 结局预测/修改</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>src/game/adventure.py — 游戏主循环</div>
+      </div>
+      <div class="al">
+        <h4 class="alt"><i class="fas fa-server" style="margin-right:6px;font-size:9px"></i>服务与前端层</h4>
+        <div class="ali"><i class="fas fa-caret-right"></i>game_server.py — Flask 路由与接口</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>server/pregeneration.py — 两层预生成</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>server/config.py — 服务配置</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>game-frontend/index.html — 单页应用</div>
+        <div class="ali"><i class="fas fa-caret-right"></i>game-frontend/style.css — 全局样式</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="narrative">
+  <div class="nbg"></div>
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 叙事系统</p>
+      <h2 class="stitle">七种故事基调 · 精细化叙事规则</h2>
+      <span class="gl"></span>
+      <p class="sdesc">每种基调不仅是一句描述，而是<strong>叙事逻辑、文风、角色规则、关系处理、冲突解决、主题取向、细节要求、禁忌</strong>等多维规则，直接参与世界观与剧情 prompt 的构建。</p>
+    </div>
+    <div class="tgrid">
+      <div class="tcard">
+        <div class="tbanner bhe"></div>
+        <div class="tbody">
+          <h3 class="tn">深度圆满结局 HE</h3>
+          <p class="td">苦尽甘来型正向结局。主角历经真实挫折与痛苦完成蜕变，所有矛盾逻辑自洽地解决，导向释然与希望。</p>
+          <ul class="tr">
+            <li>先抑后扬，磨难真实有逻辑</li>
+            <li>主角靠自身成长与合理助力达成</li>
+            <li>所有伏笔人物动机全部回收</li>
+            <li>禁止核心主角死亡、机械降神</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tcard">
+        <div class="tbanner bbe"></div>
+        <div class="tbody">
+          <h3 class="tn">高级悲剧结局 BE</h3>
+          <p class="td">宿命式悲剧。故事前期构建温暖与希望，最终因宿命枷锁或现实碾压，所有珍视的事物尽数崩塌。</p>
+          <ul class="tr">
+            <li>先扬后抑，阶段性胜利铺垫</li>
+            <li>悲剧伏笔深埋，非突然崩盘</li>
+            <li>结局不可逆，无任何挽回可能</li>
+            <li>禁止伪BE、留余地、机械降神</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tcard">
+        <div class="tbanner bne"></div>
+        <div class="tbody">
+          <h3 class="tn">现实向普通结局 NE</h3>
+          <p class="td">缺憾圆满式。主角达成部分核心目标，收获踏实的小圆满，同时留下合理且不可逆的遗憾。</p>
+          <ul class="tr">
+            <li>有起有落，得失均衡</li>
+            <li>现实伏笔深埋，非刻意失衡</li>
+            <li>落脚于释然与平凡</li>
+            <li>禁止无脑圆满、无意义悲剧</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tcard">
+        <div class="tbanner bdark"></div>
+        <div class="tbody">
+          <h3 class="tn">黑暗宿命式结局</h3>
+          <p class="td">三体式黑暗。规则至上、宿命难违。主角奋力挣扎却始终无法挣脱规则束缚，终局开放式留白。</p>
+          <ul class="tr">
+            <li>规则立基，黑暗源于规则本身</li>
+            <li>挣扎有迹，希望易碎</li>
+            <li>沉思导向，拒绝宣泄</li>
+            <li>禁止为黑而黑、暴力渲染</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tcard">
+        <div class="tbanner bhumor"></div>
+        <div class="tbody">
+          <h3 class="tn">自然幽默风格</h3>
+          <p class="td">幽默统筹全局。人物自带幽默特质，笑点藏于日常与互动，轻松松弛，适配所有主题。</p>
+          <ul class="tr">
+            <li>幽默融于情节，不脱节</li>
+            <li>笑点张弛有度，不密集</li>
+            <li>人物幽默有边界，贴合人设</li>
+            <li>禁止强行尬笑、低俗恶搞</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tcard">
+        <div class="tbanner babstract"></div>
+        <div class="tbody">
+          <h3 class="tn">思想超脱式抽象风格</h3>
+          <p class="td">哲学寄托型。思想跳跃与超脱，将存在与虚无、自由与束缚等哲学命题自然寄托于文字与情节之中。</p>
+          <ul class="tr">
+            <li>思想为核，不拘于线性逻辑</li>
+            <li>碎片化情节与意识流思考</li>
+            <li>多元视角切换</li>
+            <li>拒绝行文晦涩、结构松散</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="character" style="background:var(--d)">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 角色系统</p>
+      <h2 class="stitle">配角动态建档 · 深层背景解锁</h2>
+      <span class="gl"></span>
+      <p class="sdesc">角色不是一次性抛出的设定，而是一个随剧情推进逐步揭示、层层深化的动态体系。</p>
+    </div>
+    <div class="cshow">
+      <div class="cp">
+        <div class="cph"><i class="fas fa-user"></i><h3 class="cpt">主角设定</h3></div>
+        <div class="cpb">
+          <div class="ci">
+            <div class="cit">属性选择</div>
+            <div class="citx">用户在开局选择主角属性（性别、年龄、性格等），系统基于此生成主角规范信息（protagonist_canonical），供 LLM 剧情生成与图像提示词优化共同使用，保证叙事与视觉的一致性。</div>
+          </div>
+          <div class="ci">
+            <div class="cit">三视图立绘</div>
+            <div class="citx">依赖世界观异步生成主角正面/侧面/背面三视图，存入 initial/main_character/&lt;game_id&gt;/ 目录，由 LLM 优化主角形象提示词后调用图像 API 生成。</div>
+          </div>
+          <div class="ci">
+            <div class="cit">深层背景</div>
+            <div class="citx">主角拥有隐藏设定（深层背景），选择关联选项后解锁，后续剧情自动围绕已揭示深层背景展开，形成完整的角色弧光。</div>
+          </div>
+        </div>
+      </div>
+      <div class="cp">
+        <div class="cph"><i class="fas fa-users"></i><h3 class="cpt">配角系统</h3></div>
+        <div class="cpb">
+          <div class="ci">
+            <div class="cit">动态识别与建档</div>
+            <div class="citx">从剧情中自动识别出场/提及配角（extract_supporting_characters_in_scene），首次展示后触发建档（archive_supporting_role_first_appearance），避免凭空生成。</div>
+          </div>
+          <div class="ci">
+            <div class="cit">身份揭示</div>
+            <div class="citx">从剧情中提取身份揭示（如"黑衣人就是艾玛"），自动更新配角别名与档案（update_supporting_role_aliases_from_plot），支持别名演化链。</div>
+          </div>
+          <div class="ci">
+            <div class="cit">深层背景关联</div>
+            <div class="citx">配角同样拥有深层背景，选项可关联并解锁。选择后记录信息差并触发结局基调修改，使配角成为影响故事走向的关键变量。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cflow">
+      <div class="cf"><i class="fas fa-1"></i><span>剧情生成</span></div>
+      <div class="cfa"><i class="fas fa-arrow-right"></i></div>
+      <div class="cf"><i class="fas fa-2"></i><span>配角识别</span></div>
+      <div class="cfa"><i class="fas fa-arrow-right"></i></div>
+      <div class="cf"><i class="fas fa-3"></i><span>首次展示建档</span></div>
+      <div class="cfa"><i class="fas fa-arrow-right"></i></div>
+      <div class="cf"><i class="fas fa-4"></i><span>可选生成参考图</span></div>
+      <div class="cfa"><i class="fas fa-arrow-right"></i></div>
+      <div class="cf"><i class="fas fa-5"></i><span>身份揭示更新别名</span></div>
+      <div class="cfa"><i class="fas fa-arrow-right"></i></div>
+      <div class="cf"><i class="fas fa-6"></i><span>深层背景解锁</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="ai">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// AI 引擎</p>
+      <h2 class="stitle">双模型协同 · 多供应商图像</h2>
+      <span class="gl"></span>
+      <p class="sdesc">项目使用<strong>两套 AI 系统</strong>协同工作：主剧情由顶级 LLM 驱动，图像由多供应商图像模型生成，全程通过 .env 配置切换。</p>
+    </div>
+    <div class="aigrid">
+      <div class="aip">
+        <div class="aiph aiph-llm"><i class="fas fa-brain"></i><div><div class="ait">LLM 文本生成</div><div class="ais">Camera_Analyst_MODEL · 当前 Claude Opus 4.6</div></div></div>
+        <div class="aipb">
+          <div class="am"><div class="aml">世界观全局生成</div><div class="amv">llm_generate_global</div></div>
+          <div class="am"><div class="aml">单步剧情生成</div><div class="amv">llm_generate_local</div></div>
+          <div class="am"><div class="aml">选项剧情生成</div><div class="amv">_generate_single_option</div></div>
+          <div class="am"><div class="aml">结局预测与修改</div><div class="amv">generate_ending_prediction</div></div>
+          <div class="am"><div class="aml">场景提示词优化</div><div class="amv">optimize_image_prompt_with_llm</div></div>
+          <div class="am"><div class="aml">主角提示词优化</div><div class="amv">optimize_main_character_prompt</div></div>
+          <div class="am"><div class="aml">配角身份揭示</div><div class="amv">update_supporting_role_aliases</div></div>
+          <div class="am"><div class="aml">信息差剧情深化</div><div class="amv">隐藏剧情揭秘/反转</div></div>
+          <div class="am"><div class="aml">章节角色深化</div><div class="amv">深层背景多级深化</div></div>
+        </div>
+      </div>
+      <div class="aip">
+        <div class="aiph aiph-img"><i class="fas fa-image"></i><div><div class="ait">图像生成引擎</div><div class="ais">Image_Generation_MODEL · 当前 Gemini 3 Pro Image</div></div></div>
+        <div class="aipb">
+          <div class="am"><div class="aml">云雾 yunwu</div><div class="amv">默认 · 顶模</div></div>
+          <div class="am"><div class="aml">OpenAI DALL·E</div><div class="amv">可配置</div></div>
+          <div class="am"><div class="aml">Stable Diffusion</div><div class="amv">本地/远程</div></div>
+          <div class="am"><div class="aml">Replicate</div><div class="amv">可配置</div></div>
+          <div class="am"><div class="aml">ComfyUI</div><div class="amv">vimaxai.com:58188</div></div>
+          <div class="am"><div class="aml">图生图 img2img</div><div class="amv">主角侧/背视图</div></div>
+          <div class="am"><div class="aml">主角三视图</div><div class="amv">正面+侧+背</div></div>
+          <div class="am"><div class="aml">场景插图</div><div class="amv">按需生成</div></div>
+          <div class="am"><div class="aml">配角参考图</div><div class="amv">首次出场可选</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="modes" style="background:var(--d)">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 运行模式</p>
+      <h2 class="stitle">双端一致 · 体验无损</h2>
+      <span class="gl"></span>
+      <p class="sdesc">CLI 与 Web 共用同一套 <code>src/</code> 与 <code>main2</code> 逻辑，存档互通。Web 端通过预生成技术进一步提升体验。</p>
+    </div>
+    <div class="mgrid">
+      <div class="mc cli">
+        <div class="mch">
+          <div class="mi"><i class="fas fa-terminal"></i></div>
+          <h3 class="mct">命令行模式 CLI</h3>
+          <p class="mcs">在终端里直接进行文字冒险，适合快速体验与调试</p>
+        </div>
+        <div class="mcb">
+          <ul class="mcf">
+            <li><i class="fas fa-check"></i>执行 <code>python main.py</code> 或 <code>python main2.py</code> 即可启动</li>
+            <li><i class="fas fa-check"></i>Windows 下已处理 UTF-8 编码，中文正常显示</li>
+            <li><i class="fas fa-check"></i>共用 <code>src/</code> 与 <code>main2.py</code> 的完整逻辑</li>
+            <li><i class="fas fa-check"></i>存档写入 <code>saves/</code> 目录，与 Web 端互通</li>
+            <li><i class="fas fa-check"></i>剧情与选项通过 <code>safe_input()</code> 交互</li>
+            <li><i class="fas fa-check"></i>支持新游戏、加载、存档管理</li>
+          </ul>
+          <div class="cbk">python main.py<span class="cm">  # 启动命令行版</span></div>
+        </div>
+      </div>
+      <div class="mc web">
+        <div class="mch">
+          <div class="mi"><i class="fas fa-globe"></i></div>
+          <h3 class="mct">网页模式 Web</h3>
+          <p class="mcs">浏览器内游玩，配合图像与预生成提供沉浸体验</p>
+        </div>
+        <div class="mcb">
+          <ul class="mcf">
+            <li><i class="fas fa-check"></i>执行 <code>python game_server.py</code>，浏览器打开 <code>http://127.0.0.1:5001</code></li>
+            <li><i class="fas fa-check"></i>Flask 提供 RESTful API，前端单页应用 <code>game-frontend/</code></li>
+            <li><i class="fas fa-check"></i>两层预生成：用户阅读时后台已生成下两层，选择即命中缓存</li>
+            <li><i class="fas fa-check"></i>剧情图可选生成，失败时有纯文本兜底</li>
+            <li><i class="fas fa-check"></i>主角属性 + 难度 + 基调 + 主题 + 图片风格完整引导流程</li>
+            <li><i class="fas fa-check"></i>Web 存档与 CLI 共用同一目录，跨端读取</li>
+          </ul>
+          <div class="cbk">python game_server.py<span class="cm">  # 启动 Web 版</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="pregen">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 预生成管线</p>
+      <h2 class="stitle">两层预生成 · 即选即得</h2>
+      <span class="gl"></span>
+      <p class="sdesc">Web 端的核心体验优化技术：在用户阅读当前剧情时，后台已经预先生成好了接下来两层的内容，选择后即时命中，无需等待。</p>
+    </div>
+    <div class="ptl">
+      <div class="pi">
+        <div class="pti">T+0 · 用户阅读中</div>
+        <div class="pit">当前层剧情展示</div>
+        <p class="pid">前端展示当前场景描述 + 2个选项（及可选场景图）。同时，前端请求 <code>/pregenerate-next-layers</code>，通知后端开始预生成。</p>
+        <span class="pbadge buser">用户感知</span>
+      </div>
+      <div class="pi">
+        <div class="pti">T+1 · 后台异步执行</div>
+        <div class="pit">预生成两层选项与剧情</div>
+        <p class="pid">后端为当前 2 个选项分别调用 <code>generate_all_options</code>，生成第一层 + 第二层的剧情与选项。选项可带场景图，并行生成后写入 <code>pregeneration_cache</code>。</p>
+        <span class="pbadge basync">异步处理</span>
+        <span class="pbadge bcache">写入缓存</span>
+      </div>
+      <div class="pi">
+        <div class="pti">T+2 · 用户做出选择</div>
+        <div class="pit">命中预生成缓存</div>
+        <p class="pid">用户点击第一层选项，前端调用 <code>/get-pregenerated-layer2</code>，后端从缓存直接返回第二层数据（无需 LLM 调用），显著降低等待感。同时清理旧缓存与已用选项。</p>
+        <span class="pbadge buser">即时响应</span>
+        <span class="pbadge bcache">缓存命中</span>
+      </div>
+      <div class="pi">
+        <div class="pti">T+3 · 循环迭代</div>
+        <div class="pit">新场景 + 新预生成</div>
+        <p class="pid">展示第二层剧情后，前端再次请求 <code>/pregenerate-next-layers</code>，为新的选项层预生成后续两层内容。循环往复，始终保持"已生成两层"的状态。</p>
+        <span class="pbadge basync">持续异步</span>
+        <span class="pbadge bcache">循环缓存</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="tech" style="background:var(--d)">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 技术栈</p>
+      <h2 class="stitle">工程化设计 · 生产就绪</h2>
+      <span class="gl"></span>
+    </div>
+    <div class="tgrid2">
+      <div class="tcard2"><span class="ticon">🐍</span><div class="tname">Python 3.12+</div><p class="tdesc">核心语言，支持 uv 与 pip 两种依赖管理，含完整 pyproject.toml</p></div>
+      <div class="tcard2"><span class="ticon">🌶️</span><div class="tname">Flask</div><p class="tdesc">轻量 Web 框架，提供 RESTful API 与静态文件服务</p></div>
+      <div class="tcard2"><span class="ticon">🤖</span><div class="tname">Claude Opus 4.6</div><p class="tdesc">主剧情 LLM，通过云雾 yunwu.ai API 调用，支持自定义 BASE_URL</p></div>
+      <div class="tcard2"><span class="ticon">🎨</span><div class="tname">Gemini 3 Pro Image</div><p class="tdesc">图像生成模型，文生图 + 图生图，支持主角立绘与场景插图</p></div>
+      <div class="tcard2"><span class="ticon">📐</span><div class="tname">Tailwind CSS</div><p class="tdesc">Web 前端工具类 CSS 框架，响应式设计</p></div>
+      <div class="tcard2"><span class="ticon">📚</span><div class="tname">Wikipedia API</div><p class="tdesc">现实题材增强，中英文双语检索，结果注入 LLM 与图像提示词</p></div>
+      <div class="tcard2"><span class="ticon">🔐</span><div class="tname">python-dotenv</div><p class="tdesc">环境变量管理，所有密钥与配置通过 .env 文件注入，无需硬编码</p></div>
+      <div class="tcard2"><span class="ticon">💾</span><div class="tname">JSON存档</div><p class="tdesc">saves/ 目录存储存档 JSON，CLI 与 Web 端共用</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="innovation">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 创新亮点</p>
+      <h2 class="stitle">七大创新点</h2>
+      <span class="gl"></span>
+      <p class="sdesc">这些创新不是噱头，而是经过工程验证的、能够真正提升 AI 叙事游戏质量与体验的设计。</p>
+    </div>
+    <div class="igrid">
+      <div class="ic">
+        <span class="inum">01</span>
+        <h3 class="ititle">流动世界线 + 章节矛盾 + 结局预测联动</h3>
+        <p class="idesc">将「当前章节、矛盾是否解决、信息差记录」显式纳入状态（flow_worldline），每一步剧情由 LLM 输出 flow_update；开局预先生成隐藏结局预测，深层背景节点触发时动态修改 HE/BE/NE 基调，使结局既有伏笔又具备动态调整空间。</p>
+      </div>
+      <div class="ic">
+        <span class="inum">02</span>
+        <h3 class="ititle">信息差驱动的隐藏剧情深化</h3>
+        <p class="idesc">用「未发现的信息差条数」达到阈值（如 5 条）触发一次性的隐藏剧情深化（揭秘、反转），约束「自然嵌入常规剧情、不直接抛设定」，把「隐藏信息 → 爽点释放」做成可重复、可配置的机制。</p>
+      </div>
+      <div class="ic">
+        <span class="inum">03</span>
+        <h3 class="ititle">选项与深层背景的显式绑定</h3>
+        <p class="idesc">在 prompt 中要求「部分选项必须关联角色深层背景」并在输出中带【深层背景关联】标记；选择后解锁角色深层背景，强制后续剧情围绕已解锁内容展开，形成可解析、可执行的闭环。</p>
+      </div>
+      <div class="ic">
+        <span class="inum">04</span>
+        <h3 class="ititle">配角「展示后建档」+ 身份揭示</h3>
+        <p class="idesc">配角档案在展示后触发建档，避免未出场角色凭空生成；同时用 LLM 从剧情中抽取身份揭示（如「黑衣人就是艾玛」）更新配角别名与档案，使配角体系既动态又与剧情强绑定。</p>
+      </div>
+      <div class="ic">
+        <span class="inum">05</span>
+        <h3 class="ititle">预生成两层 + 预生成图片的 Web 体验</h3>
+        <p class="idesc">在用户看到当前层时后台预生成「下一层 + 再下一层」的选项与剧情（并可带图），选择后直接命中缓存返回，把「等生成」转化为「选完即出」，且与缓存清理、线程安全一起设计。</p>
+      </div>
+      <div class="ic">
+        <span class="inum">06</span>
+        <h3 class="ititle">多基调的细粒度叙事规则</h3>
+        <p class="idesc">每种基调（HE/BE/NE、黑暗宿命、幽默、唯美、逻辑推理、克苏鲁式等）不仅是一句描述，而是叙事逻辑、文风、角色规则、关系处理、冲突解决、主题取向、细节要求、禁忌等多维规则，直接参与 prompt 构建。</p>
+      </div>
+      <div class="ic">
+        <span class="inum">07</span>
+        <h3 class="ititle">现实题材的 Wikipedia 注入</h3>
+        <p class="idesc">将 Wikipedia 主题与人物检索结果作为证据块注入 LLM 与图像提示词，在保持通用剧情生成的前提下，对现实/IP 题材做定向增强，兼顾通用框架与领域深度。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="start" style="background:var(--d)">
+  <div class="c">
+    <div class="tc">
+      <p class="se">// 快速开始</p>
+      <h2 class="stitle">本地立即体验</h2>
+      <span class="gl"></span>
+      <p class="sdesc">只需几步，即可启动游戏开始体验。</p>
+    </div>
+    <div class="sgrid">
+      <div>
+        <div class="sstep">
+          <div class="ssnum">1</div>
+          <div>
+            <div class="sst">安装依赖</div>
+            <div class="ssd">使用 uv（推荐）或 pip 安装项目依赖</div>
+            <div class="scode">uv sync  # 或 pip install -r requirements.txt</div>
+          </div>
+        </div>
+        <div class="sstep">
+          <div class="ssnum">2</div>
+          <div>
+            <div class="sst">配置 .env</div>
+            <div class="ssd">在项目根目录创建 .env 文件，填入 API 密钥与模型配置</div>
+            <div class="scode">Camera_Analyst_API_KEY=your_key<br>Camera_Analyst_BASE_URL=https://api.yunwu.ai/v1<br>Camera_Analyst_MODEL=claude-opus-4-6<br>Image_Generation_PROVIDER=yunwu<br>Image_Generation_API_KEY=your_key<br>Image_Generation_BASE_URL=https://yunwu.ai/v1<br>Image_Generation_MODEL=gemini-3-pro-image</div>
+          </div>
+        </div>
+        <div class="sstep">
+          <div class="ssnum">3</div>
+          <div>
+            <div class="sst">启动 Web 版（推荐）</div>
+            <div class="ssd">执行 game_server.py，在浏览器打开游戏界面</div>
+            <div class="scode">python game_server.py<br># 浏览器打开 http://127.0.0.1:5001</div>
+          </div>
+        </div>
+        <div class="sstep">
+          <div class="ssnum">4</div>
+          <div>
+            <div class="sst">或启动 CLI 版</div>
+            <div class="ssd">执行 main.py，直接在终端进行文字冒险</div>
+            <div class="scode">python main.py</div>
+          </div>
+        </div>
+      </div>
+      <div class="senv">
+        <div class="senvh"><i class="fas fa-key"></i><div class="senvt">.env 完整配置项</div></div>
+        <div class="senvb">
+          <div class="sei">
+            <div class="sek">Camera_Analyst_API_KEY</div>
+            <div class="sev">your_api_key</div>
+            <div class="sen">LLM API 密钥（必填）</div>
+          </div>
+          <div class="sei">
+            <div class="sek">Camera_Analyst_MODEL</div>
+            <div class="sev">claude-opus-4-6</div>
+            <div class="sen">主剧情 LLM 模型（默认 claude-opus-4-6）</div>
+          </div>
+          <div class="sei">
+            <div class="sek">IMAGE_GENERATION_PROVIDER</div>
+            <div class="sev">yunwu</div>
+            <div class="sen">图像供应商：yunwu/replicate/openai/sd/comfyui</div>
+          </div>
+          <div class="sei">
+            <div class="sek">Image_Generation_MODEL</div>
+            <div class="sev">gemini-3-pro-image-preview</div>
+            <div class="sen">云雾图像生成模型</div>
+          </div>
+          <div class="sei">
+            <div class="sek">WIKI_LOOKUP_ENABLED</div>
+            <div class="sev">true</div>
+            <div class="sen">是否启用 Wikipedia 检索增强</div>
+          </div>
+          <div class="sei">
+            <div class="sek">COUNCIL_MODELS</div>
+            <div class="sev">gpt-4o,gpt-4.1,gpt-4o-mini</div>
+            <div class="sen">多模型 Council 讨论（逗号分隔）</div>
+          </div>
+          <div class="sei">
+            <div class="sek">COMFYUI_HOST</div>
+            <div class="sev">http://vimaxai.com:58188</div>
+            <div class="sen">ComfyUI 图像生成服务地址</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="c">
+    <div class="fgrid2">
+      <div>
+        <div class="fbrand-name">叙事纪元</div>
+        <p class="fbrand-desc">一款以大语言模型为核心驱动力的沉浸式文本冒险游戏引擎。<br>从世界观生成、章节矛盾、剧情分支到结局预测——全部由 AI 自动生成，配合多模态图像引擎，打造前所未有的叙事体验。</p>
+      </div>
+      <div>
+        <div class="fcol-title">核心模块</div>
+        <ul class="flinks">
+          <li><a href="#overview">项目概览</a></li>
+          <li><a href="#features">功能特性</a></li>
+          <li><a href="#architecture">技术架构</a></li>
+          <li><a href="#narrative">叙事系统</a></li>
+          <li><a href="#character">角色系统</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fcol-title">资源链接</div>
+        <ul class="flinks">
+          <li><a href="#ai">AI 引擎</a></li>
+          <li><a href="#modes">运行模式</a></li>
+          <li><a href="#pregen">预生成管线</a></li>
+          <li><a href="#innovation">创新亮点</a></li>
+          <li><a href="#start">快速开始</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="fbottom">叙事纪元 · Narrative Epoch · AI Story Engine · 基于 Claude Opus 4.6 + Gemini 3 Pro Image</div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll effect
+window.addEventListener('scroll', function() {
+  var nav = document.getElementById('nav');
+  if (window.scrollY > 80) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+</body>
+</html>
