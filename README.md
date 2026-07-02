@@ -217,3 +217,6 @@ python game_server.py
 ```
 
 在浏览器打开：`http://127.0.0.1:5001`（须带 `http://`）。
+
+## 🙇‍ Thanks
+[Linux.do](https://linux.do/)
